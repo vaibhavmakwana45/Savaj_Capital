@@ -26,33 +26,34 @@ router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
-
 router.post("/login", async (req, res) => {
   try {
-
     const bankUser = await BankUser.findOne({ email: req.body.email });
-    const superAdmin = await SuperAdminSignup.findOne({ email: req.body.email });
-    
+    const superAdmin = await SuperAdminSignup.findOne({
+      email: req.body.email,
+    });
+
     if (!bankUser && !superAdmin) {
-      return res.status(201).json({ message: "User doesn't exist" });
+      return res
+        .status(201)
+        .send({ statusCode: 201, message: "User doesn't exist" });
     }
 
     let token, expiresIn, userForToken, role;
     if (bankUser) {
       const decryptedPassword = decrypt(bankUser.password);
       if (req.body.password !== decryptedPassword) {
-        return res.status(422).json({ message: "Password is incorrect." });
+        return res
+          .status(201)
+          .send({ statusCode: 202, message: "Password is incorrect." });
       }
       userForToken = bankUser;
       role = "bankuser";
-      ({ token, expiresIn } = await bankUserToken(userForToken,));
-
-    } else if(superAdmin) {
+      ({ token, expiresIn } = await bankUserToken(userForToken));
+    } else if (superAdmin) {
       userForToken = superAdmin;
       role = "superadmin";
       ({ token, expiresIn } = await superAdminToken(userForToken));
-
-
     }
 
     res.json({
@@ -70,6 +71,5 @@ router.post("/login", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

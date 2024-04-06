@@ -15,18 +15,18 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import axios from "axios";
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from "react-router-dom";
 
 function AddBank(props) {
   const location = useLocation();
   const data = location.state;
-  console.log(data, "data")
+  console.log(data, "data");
   const textColor = useColorModeValue("gray.700", "white");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const statesOfIndia = State.getStatesOfCountry("IN");
@@ -75,13 +75,13 @@ function AddBank(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     if (formData?.c_password !== formData?.password) {
-      toast.error("Password and Confirm Password does not match..!");
+      toast.error("Password and Confirm Password do not match..!");
       setLoading(false);
       return;
     }
-
+  
     const submissionData = {
       bankDetails: {
         bank_name: formData.bank_name,
@@ -94,35 +94,27 @@ function AddBank(props) {
         password: formData.password,
       },
     };
-
-    toast
-      .promise(
-        axios.post(
-          "http://localhost:4000/api/addbankuser/addbankuser",
-          submissionData
-        ),
-        {
-          loading: "Sending...",
-          success: "Bank and User added successfully!",
-          error: "Failed to add. Please try again.",
-        },
-        {
-          style: {
-            minWidth: "250px",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response.data);
-        history.push('/superadmin/bank');
-        setLoading(false)
-      })
-      
-      .catch((error) => {
-        console.error("Submission error", error);
-        setLoading(false)
-      });
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/addbankuser/addbankuser",
+        submissionData
+      );
+  
+      if (response.data.statusCode === 201) {
+        toast.error("Email already in use");
+      } else if (response.data.success) {
+        toast.success("Bank and User added successfully!");
+        history.push("/superadmin/bank");
+      }
+    } catch (error) {
+      console.error("Submission error", error);
+      toast.error("Failed to add. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false regardless of success or failure
+    }
   };
+  
 
   return (
     <>
@@ -201,8 +193,13 @@ function AddBank(props) {
                   onChange={handleChange}
                 />
               </FormControl>
-              <Button mt={4} colorScheme="blue" type="submit" disabled={loading}>
-                Add Bank
+              <Button
+                mt={4}
+                colorScheme="blue"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Loading..." : "Add Bank"}
               </Button>
             </form>
           </CardBody>

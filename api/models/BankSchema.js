@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const BankSchema = new mongoose.Schema({
-  bank_id: { type: String, required: true, unique: true },
-  bank_name: { type: String, required: true },
-  state: { type: String, required: true },
-  city: { type: String, required: true },
-  branch_name: { type: String, required: true },
+  bank_id: { type: String },
+  bank_name: { type: String },
+  state: { type: String },
+  city: { type: String },
+  branch_name: { type: String },
   createdAt: { type: String },
   updatedAt: { type: String },
 });

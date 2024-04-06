@@ -7,20 +7,20 @@ const SuperAdminSignup = require("../models/SuperAdminSignupSchema");
 //   hashCompare,
 //   createToken,
 // } = require("../utils/authhelper");
-const { superAdminToken } = require('../utils/authhelper');
-const crypto = require('crypto');
+const { superAdminToken } = require("../utils/authhelper");
+const crypto = require("crypto");
 
 const encrypt = (text) => {
-  const cipher = crypto.createCipher('aes-256-cbc', 'vaibhav');
-  let encrypted = cipher.update(text, 'utf-8', 'hex');
-  encrypted += cipher.final('hex');
+  const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
+  let encrypted = cipher.update(text, "utf-8", "hex");
+  encrypted += cipher.final("hex");
   return encrypted;
 };
 
 const decrypt = (text) => {
-  const decipher = crypto.createDecipher('aes-256-cbc', 'vaibhav');
-  let decrypted = decipher.update(text, 'hex', 'utf-8');
-  decrypted += decipher.final('utf-8');
+  const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+  let decrypted = decipher.update(text, "hex", "utf-8");
+  decrypted += decipher.final("utf-8");
   return decrypted;
 };
 
@@ -68,8 +68,7 @@ router.post("/superadminsignup", async (req, res) => {
   }
 });
 
-
-router.post('/superadminlogin', async (req, res) => {
+router.post("/superadminlogin", async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
@@ -81,7 +80,7 @@ router.post('/superadminlogin', async (req, res) => {
       return res.status(404).json({
         success: false,
         message: `User with ${
-          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier) ? 'email' : 'username'
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier) ? "email" : "username"
         } '${identifier}' does not exist`,
       });
     }
@@ -89,7 +88,7 @@ router.post('/superadminlogin', async (req, res) => {
     const decryptedPassword = decrypt(user.password);
 
     if (password !== decryptedPassword) {
-      return res.status(422).json({ message: 'Old password is incorrect.' });
+      return res.status(422).json({ message: "Old password is incorrect." });
     }
 
     const { token, expiresIn } = await superAdminToken(user);
@@ -104,7 +103,7 @@ router.post('/superadminlogin', async (req, res) => {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Internal Server Error',
+      message: error.message || "Internal Server Error",
     });
   }
 });

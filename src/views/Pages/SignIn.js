@@ -38,9 +38,8 @@ function SignIn() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     if (localStorage.getItem("decodedToken")) {
-      const data = JSON.parse(localStorage.getItem("decodedToken"))
+      const data = JSON.parse(localStorage.getItem("decodedToken"));
       switch (data.role) {
         case "bankuser":
           history.push("/bank/dashboard");
@@ -52,8 +51,8 @@ function SignIn() {
         default:
           break;
       }
-    } 
-  }, [])
+    }
+  }, []);
 
   const decodeToken = (token) => {
     try {
@@ -79,39 +78,46 @@ function SignIn() {
   };
 
   const handleSubmit = async (event) => {
-    setLoading(true)
+    setLoading(true);
     event.preventDefault();
     try {
-      const response = await axios.post(
-        "http://192.168.1.23:4000/api/login",
-        { email, password }
-      );
-      console.log(response.data);
-      const { token, role } = response.data;
-      if (token) {
-        handleTokenDecoding(token);
-        switch (role) {
-          case "bankuser":
-            history.push("/bank/dashboard");
-            break;
-          case "superadmin":
-            history.push("/superadmin/dashboard");
-            break;
+      const response = await axios.post("http://localhost:4000/api/login", {
+        email,
+        password,
+      });
+      console.log(response.data, "shivam");
+      if (response.data.statusCode === 201) {
+        toast.error("user not exists");
+      } else if (response.data.statuscode === 202) {
+        setTimeout(() => {
+          toast.error("user not exists");
+        }, 1000);
+      } else if (response.data.success) {
+        const { token, role } = response.data;
+        if (token) {
+          handleTokenDecoding(token);
+          switch (role) {
+            case "bankuser":
+              history.push("/bank/dashboard");
+              break;
+            case "superadmin":
+              history.push("/superadmin/dashboard");
+              break;
 
-          default:
-            break;
+            default:
+              break;
+          }
+        } else {
+          console.error("No token received");
+          toast.error("No token received");
         }
-      } else {
-        console.error("No token received");
-        toast.error("No token received");
       }
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
       console.error("Login error", error.response ? error.response : error);
       toast.error("Login failed. Please try again.");
-      setLoading(false)
+      setLoading(false);
     }
-
   };
   return (
     <>
@@ -129,8 +135,8 @@ function SignIn() {
             h="100%"
             alignItems="center"
             justifyContent="center"
-          // mb="60px"
-          // mt={{ base: "50px", md: "20px" }}
+            // mb="60px"
+            // mt={{ base: "50px", md: "20px" }}
           >
             <Flex
               zIndex="2"

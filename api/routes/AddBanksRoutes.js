@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const Bank = require("../models/BankSchema");
-const User = require("../models/BankUserSchema");
+const BankUser = require("../models/BankUserSchema");
+const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 
@@ -25,23 +26,25 @@ const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 router.post("/addbankuser", async (req, res) => {
   try {
     const { bankDetails, userDetails } = req.body;
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substr(2, 9);
-    const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
-      .toString()
-      .padStart(10, "0");
-    const bankId = `${timestamp}${randomString}${randomNumber}`;
 
-    const existingUser = await User.findOne({ email: userDetails.email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already in use",
-      });
+    const bankUser = await BankUser.findOne({ email: userDetails.email });
+    const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
+
+    if (bankUser || superAdmin) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "Email all ready in use" });
     }
 
     let bank = await Bank.findOne({ branch_name: bankDetails.branch_name });
     if (!bank) {
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substr(2, 9);
+      const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
+        .toString()
+        .padStart(10, "0");
+      const bankId = `${timestamp}${randomString}${randomNumber}`;
+
       bank = new Bank({
         ...bankDetails,
         bank_id: bankId,
@@ -51,10 +54,16 @@ router.post("/addbankuser", async (req, res) => {
       await bank.save();
     }
     const hashedPassword = encrypt(userDetails.password);
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substr(2, 9);
+    const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
+      .toString()
+      .padStart(10, "0");
+    const bankUserId = `${timestamp}${randomString}${randomNumber}`;
 
-    const newUser = new User({
+    const newUser = new BankUser({
       ...userDetails,
-      bankuser_id: `${timestamp}${randomString}${randomNumber}`,
+      bankuser_id: bankUserId,
       bank_id: bank.bank_id,
       createdAt: currentDate,
       updatedAt: currentDate,
@@ -81,7 +90,7 @@ router.post("/bankuserlogin", async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
-    const user = await User.findOne({
+    const user = await BankUser.findOne({
       $or: [{ email: identifier }, { username: identifier }],
     });
 
@@ -122,7 +131,7 @@ router.get("/banks", async (req, res) => {
     const banks = await Bank.find();
 
     const bankUsersPromises = banks.map(async (bank) => {
-      const users = await User.find({ bank_id: bank.bank_id });
+      const users = await BankUser.find({ bank_id: bank.bank_id });
       return { ...bank._doc, users };
     });
 
