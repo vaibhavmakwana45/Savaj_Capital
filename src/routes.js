@@ -77,13 +77,6 @@ var dashRoutes = [
         layout: "/auth",
       },
       {
-        path: "/:bank/signin",
-        name: "Sign In",
-        icon: <DocumentIcon color="inherit" />,
-        component: SignIn,
-        layout: "/auth",
-      },
-      {
         path: "/signup",
         name: "Sign Up",
         icon: <RocketIcon color="inherit" />,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 // Add these imports
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
@@ -35,6 +35,26 @@ function SignIn() {
   const bgIconsHover = useColorModeValue("gray.50", "whiteAlpha.100");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+
+    if (localStorage.getItem("decodedToken")) {
+      const data = JSON.parse(localStorage.getItem("decodedToken"))
+      switch (data.role) {
+        case "bankuser":
+          history.push("/bank/dashboard");
+          break;
+        case "superadmin":
+          history.push("/superadmin/dashboard");
+          break;
+
+        default:
+          break;
+      }
+    } 
+  }, [])
+
   const decodeToken = (token) => {
     try {
       const decoded = jwtDecode(token);
@@ -59,47 +79,39 @@ function SignIn() {
   };
 
   const handleSubmit = async (event) => {
-    if (bank) {
-      event.preventDefault();
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/addbankuser/bankuserlogin",
-          { email, password }
-        );
-        console.log(response.data);
-        const { token } = response.data;
-        if (token) {
-          handleTokenDecoding(token);
-          history.push("/bank/dashboard");
-        } else {
-          console.error("No token received");
-          toast.error("No token received");
+    setLoading(true)
+    event.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://192.168.1.23:4000/api/login",
+        { email, password }
+      );
+      console.log(response.data);
+      const { token, role } = response.data;
+      if (token) {
+        handleTokenDecoding(token);
+        switch (role) {
+          case "bankuser":
+            history.push("/bank/dashboard");
+            break;
+          case "superadmin":
+            history.push("/superadmin/dashboard");
+            break;
+
+          default:
+            break;
         }
-      } catch (error) {
-        console.error("Login error", error.response ? error.response : error);
-        toast.error("Login failed. Please try again.");
+      } else {
+        console.error("No token received");
+        toast.error("No token received");
       }
-    } else {
-      event.preventDefault();
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/superadminsignup/superadminlogin",
-          { email, password }
-        );
-        console.log(response.data);
-        const { token } = response.data;
-        if (token) {
-          handleTokenDecoding(token);
-          history.push("/superadmin/dashboard");
-        } else {
-          console.error("No token received");
-          toast.error("No token received");
-        }
-      } catch (error) {
-        console.error("Login error", error.response ? error.response : error);
-        toast.error("Login failed. Please try again.");
-      }
+      setLoading(false)
+    } catch (error) {
+      console.error("Login error", error.response ? error.response : error);
+      toast.error("Login failed. Please try again.");
+      setLoading(false)
     }
+
   };
   return (
     <>
@@ -117,8 +129,8 @@ function SignIn() {
             h="100%"
             alignItems="center"
             justifyContent="center"
-            // mb="60px"
-            // mt={{ base: "50px", md: "20px" }}
+          // mb="60px"
+          // mt={{ base: "50px", md: "20px" }}
           >
             <Flex
               zIndex="2"
@@ -255,6 +267,7 @@ function SignIn() {
                   w="100%"
                   h="45"
                   mb="24px"
+                  disabled={loading}
                 >
                   SIGN IN
                 </Button>

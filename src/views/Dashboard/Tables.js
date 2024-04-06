@@ -18,6 +18,7 @@ import Card from 'components/Card/Card.js';
 import CardBody from 'components/Card/CardBody.js';
 import CardHeader from 'components/Card/CardHeader.js';
 import TablesTableRow from 'components/Tables/TablesTableRow';
+import {RocketIcon} from "components/Icons/Icons"
 
 function Tables() {
   const [banks, setBanks] = useState([]); // State to store fetched banks
@@ -42,6 +43,11 @@ function Tables() {
   const navigateToAnotherPage = () => {
     history.push('/superadmin/addbank');
   };
+
+  const handleRowClick = (data) => {
+    // history.push('/superadmin/addbank', { update: true });
+    history.push({ pathname: "/superadmin/addbank", state: data });
+  }
 
   return (
     <Flex direction="column" pt={{ base: '120px', md: '75px' }}>
@@ -72,6 +78,9 @@ function Tables() {
                 <Th borderColor={borderColor} color="gray.400">
                   Users
                 </Th>
+                {/* <Th borderColor={borderColor} color="gray.400">
+                  Action
+                </Th> */}
               </Tr>
             </Thead>
             <Tbody>
@@ -81,6 +90,7 @@ function Tables() {
                   <Td>{bank.city}</Td>
                   <Td>{bank.state}</Td>
                   <Td>{bank.users.map(user => user.email).join(', ')}</Td>
+                  {/* <Td style={{cursor:'pointer'}} onClick={()=>{handleRowClick(bank)}}><RocketIcon color="inherit" /></Td> */}
                 </Tr>
               ))}
             </Tbody>

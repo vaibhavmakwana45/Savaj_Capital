@@ -15,14 +15,19 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import axios from "axios";
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
-function AddBank() {
+function AddBank(props) {
+  const location = useLocation();
+  const data = location.state;
+  console.log(data, "data")
   const textColor = useColorModeValue("gray.700", "white");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     const statesOfIndia = State.getStatesOfCountry("IN");
     setStates(statesOfIndia);
@@ -56,6 +61,7 @@ function AddBank() {
     branch_name: "",
     email: "",
     password: "",
+    c_password: "",
   });
 
   const handleChange = (e) => {
@@ -68,6 +74,14 @@ function AddBank() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    if (formData?.c_password !== formData?.password) {
+      toast.error("Password and Confirm Password does not match..!");
+      setLoading(false);
+      return;
+    }
+
     const submissionData = {
       bankDetails: {
         bank_name: formData.bank_name,
@@ -101,10 +115,12 @@ function AddBank() {
       .then((response) => {
         console.log(response.data);
         history.push('/superadmin/bank');
+        setLoading(false)
       })
       
       .catch((error) => {
         console.error("Submission error", error);
+        setLoading(false)
       });
   };
 
@@ -177,7 +193,15 @@ function AddBank() {
                   onChange={handleChange}
                 />
               </FormControl>
-              <Button mt={4} colorScheme="blue" type="submit">
+              <FormControl id="c_password" mt={4} isRequired>
+                <FormLabel>Confirm Password</FormLabel>
+                <Input
+                  name="c_password"
+                  type="c_password"
+                  onChange={handleChange}
+                />
+              </FormControl>
+              <Button mt={4} colorScheme="blue" type="submit" disabled={loading}>
                 Add Bank
               </Button>
             </form>
