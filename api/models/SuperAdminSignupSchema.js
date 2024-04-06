@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const SuperAdminSignupSchema = new mongoose.Schema({
-  user_id: {
+  superadmin_id: {
     type: String,
     unique: true
   },

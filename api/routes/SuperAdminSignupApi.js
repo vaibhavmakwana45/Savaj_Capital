@@ -7,7 +7,7 @@ const SuperAdminSignup = require("../models/SuperAdminSignupSchema");
 //   hashCompare,
 //   createToken,
 // } = require("../utils/authhelper");
-const { createToken } = require('../utils/authhelper');
+const { superAdminToken } = require('../utils/authhelper');
 const crypto = require('crypto');
 
 const encrypt = (text) => {
@@ -32,7 +32,8 @@ router.post("/superadminsignup", async (req, res) => {
       .toString()
       .padStart(10, "0");
     const uniqueId = `${timestamp}${randomString}${randomNumber}`;
-    const userUniqueId = (req.body["user_id"] = uniqueId);
+
+    const superAdminUniqueId = (req.body["superadmin_id"] = uniqueId);
     const createTime = (req.body["createAt"] = moment().format(
       "YYYY-MM-DD HH:mm:ss"
     ));
@@ -49,7 +50,7 @@ router.post("/superadminsignup", async (req, res) => {
       password: hashedPassword,
       createAt: createTime,
       updateAt: updateTime,
-      user_id: userUniqueId,
+      superadmin_id: superAdminUniqueId,
     });
 
     await newUser.save();
@@ -91,7 +92,7 @@ router.post('/superadminlogin', async (req, res) => {
       return res.status(422).json({ message: 'Old password is incorrect.' });
     }
 
-    const { token, expiresIn } = await createToken(user);
+    const { token, expiresIn } = await superAdminToken(user);
 
     res.json({
       success: true,
@@ -107,6 +108,7 @@ router.post('/superadminlogin', async (req, res) => {
     });
   }
 });
+
 router.put("/superadminchangepassword/:user_id", async (req, res) => {
   try {
     const { user_id } = req.params;

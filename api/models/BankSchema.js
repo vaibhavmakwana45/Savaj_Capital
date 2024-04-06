@@ -6,8 +6,8 @@ const BankSchema = new mongoose.Schema({
   state: { type: String, required: true },
   city: { type: String, required: true },
   branch_name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  createdAt: { type: String },
+  updatedAt: { type: String },
 });
 
 module.exports = mongoose.model("Bank", BankSchema);

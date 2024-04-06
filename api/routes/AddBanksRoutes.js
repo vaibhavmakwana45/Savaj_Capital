@@ -20,6 +20,8 @@ const decrypt = (text) => {
   return decrypted;
 };
 
+const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+
 router.post("/addbankuser", async (req, res) => {
   try {
     const { bankDetails, userDetails } = req.body;
@@ -38,13 +40,13 @@ router.post("/addbankuser", async (req, res) => {
       });
     }
 
-    let bank = await Bank.findOne({ bank_name: bankDetails.bank_name });
+    let bank = await Bank.findOne({ branch_name: bankDetails.branch_name });
     if (!bank) {
       bank = new Bank({
         ...bankDetails,
         bank_id: bankId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: currentDate,
+        updatedAt: currentDate,
       });
       await bank.save();
     }
@@ -52,10 +54,10 @@ router.post("/addbankuser", async (req, res) => {
 
     const newUser = new User({
       ...userDetails,
-      user_id: `${timestamp}${randomString}${randomNumber}`,
+      bankuser_id: `${timestamp}${randomString}${randomNumber}`,
       bank_id: bank.bank_id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: currentDate,
+      updatedAt: currentDate,
       password: hashedPassword,
     });
 

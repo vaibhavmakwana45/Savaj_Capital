@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
 const BankUserSchema = new mongoose.Schema({
-  user_id: { type: String, required: true, unique: true },
+  bankuser_id: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  bank_id: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  bank_id: { type: String },
+  createdAt: { type: Date },
+  updatedAt: { type: Date },
 });
 
-module.exports = mongoose.model("User", BankUserSchema);
+module.exports = mongoose.model("bank_users", BankUserSchema);
