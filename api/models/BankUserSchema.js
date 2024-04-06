@@ -9,4 +9,4 @@ const BankUserSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("User", BankUserSchema);
+module.exports = mongoose.model("Bank_User", BankUserSchema);

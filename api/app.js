@@ -23,6 +23,7 @@ const NotificationRouter = require('./routes/Notification');
 const AdminProjectRouter = require('./routes/AdminProject');
 const AdminNotificationRouter = require('./routes/AdminNotification');
 const BankRouter = require('./routes/AddBanksRoutes');
+const SavajCapitalBranchRoutes = require('./routes/AddSavajCapitalBranchRoutes');
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -48,6 +49,7 @@ app.use('/api/notification', NotificationRouter);
 app.use('/api/adminprojects', AdminProjectRouter);
 app.use('/api/adminnotification', AdminNotificationRouter);
 app.use('/api/addbankuser', BankRouter);
+app.use('/api/addsavajbapitalbranch', SavajCapitalBranchRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

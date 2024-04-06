@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import Dashboard from "views/Dashboard/Dashboard.js";
 import Tables from "views/Dashboard/Tables.js";
-import Billing from "views/Dashboard/Billing.js";
+import SavajCapitalBranchTable from "views/Dashboard/SavajCapitalBranchTable";
 import Profile from "views/Dashboard/Profile.js";
 import SignIn from "views/Pages/SignIn.js";
 import SignUp from "views/Pages/SignUp.js";
@@ -16,6 +16,8 @@ import {
   RocketIcon,
   SupportIcon,
 } from "components/Icons/Icons";
+import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
+import EditSavajCapitalBranch from "addsavajcapitalbranch/EditSavajCapitalBranch";
 
 var dashRoutes = [
   {
@@ -34,18 +36,19 @@ var dashRoutes = [
   },
   {
     path: "/bank",
-    name: "Bank",
+    name: "Bank Branch",
     icon: <StatsIcon color="inherit" />,
     component: Tables,
     layout: "/superadmin",
   },
   {
-    path: "/billing",
-    name: "Billing",
+    path: "/savajcapitalbranch",
+    name: "Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,
-    component: Billing,
+    component: SavajCapitalBranchTable,
     layout: "/superadmin",
   },
+  
   {
     path: "/addbank",
     name: "Add Bank",
@@ -54,7 +57,22 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
   },
-
+  {
+    path: "/addsavajcapitalbranch",
+    name: "Add Savaj Capital Branch",
+    icon: <CreditIcon color="inherit" />,
+    component: AddSavajCapitalBranch,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/editsavajcapitalbranch/:id",
+    name: "Add Savaj Capital Branch",
+    icon: <CreditIcon color="inherit" />,
+    component: EditSavajCapitalBranch,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
   {
     name: "ACCOUNT PAGES",
     category: "account",
