@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const Bank = require("../models/BankSchema");
-const User = require("../models/BankUserSchema");
+const AddUser = require("../models/AddUser");
+const BankUser = require("../models/BankUserSchema");
+const SuperAdmin = require("../models/SuperAdminSignupSchema");
+const SavajCapitalUser = require("../models/SavajCapitalUser");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 
@@ -20,42 +23,56 @@ const decrypt = (text) => {
   return decrypted;
 };
 
+const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+
 router.post("/addbankuser", async (req, res) => {
   try {
     const { bankDetails, userDetails } = req.body;
+
+    const user = await AddUser.findOne({ email: userDetails.email });
+    const bankUser = await BankUser.findOne({ email: userDetails.email });
+    const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
+    const savajCapitalUser = await SavajCapitalUser.findOne({
+      email: userDetails.email,
+    });
+
+    if (bankUser || superAdmin || user || savajCapitalUser) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "Email all ready in use" });
+    }
+
+    let bank = await Bank.findOne({ branch_name: bankDetails.branch_name });
+    if (!bank) {
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substr(2, 9);
+      const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
+        .toString()
+        .padStart(10, "0");
+      const bankId = `${timestamp}${randomString}${randomNumber}`;
+
+      bank = new Bank({
+        ...bankDetails,
+        bank_id: bankId,
+        createdAt: currentDate,
+        updatedAt: currentDate,
+      });
+      await bank.save();
+    }
+    const hashedPassword = encrypt(userDetails.password);
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
     const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
       .toString()
       .padStart(10, "0");
-    const bankId = `${timestamp}${randomString}${randomNumber}`;
+    const bankUserId = `${timestamp}${randomString}${randomNumber}`;
 
-    const existingUser = await User.findOne({ email: userDetails.email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already in use",
-      });
-    }
-
-    let bank = await Bank.findOne({ bank_name: bankDetails.bank_name });
-    if (!bank) {
-      bank = new Bank({
-        ...bankDetails,
-        bank_id: bankId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      await bank.save();
-    }
-    const hashedPassword = encrypt(userDetails.password);
-
-    const newUser = new User({
+    const newUser = new BankUser({
       ...userDetails,
-      user_id: `${timestamp}${randomString}${randomNumber}`,
+      bankuser_id: bankUserId,
       bank_id: bank.bank_id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: currentDate,
+      updatedAt: currentDate,
       password: hashedPassword,
     });
 
@@ -79,7 +96,7 @@ router.post("/bankuserlogin", async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
-    const user = await User.findOne({
+    const user = await BankUser.findOne({
       $or: [{ email: identifier }, { username: identifier }],
     });
 
@@ -120,7 +137,7 @@ router.get("/banks", async (req, res) => {
     const banks = await Bank.find();
 
     const bankUsersPromises = banks.map(async (bank) => {
-      const users = await User.find({ bank_id: bank.bank_id });
+      const users = await BankUser.find({ bank_id: bank.bank_id });
       return { ...bank._doc, users };
     });
 
@@ -129,6 +146,35 @@ router.get("/banks", async (req, res) => {
     res.json({
       success: true,
       data: banksWithUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.delete("/deletebanks/:bank_id", async (req, res) => {
+  try {
+    const bankId = req.params.bank_id;
+    const bank = await Bank.findOne({ bank_id: bankId });
+
+    if (!bank) {
+      return res.status(404).json({
+        success: false,
+        message: "Bank not found",
+      });
+    }
+
+    await Bank.deleteOne({ bank_id: bankId });
+
+    await BankUser.deleteOne({ bank_id: bankId });
+
+    res.json({
+      success: true,
+      message: "Bank and associated users deleted successfully",
     });
   } catch (error) {
     console.error(error);

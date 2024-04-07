@@ -5,8 +5,8 @@ const SavajCapitalSchema = new mongoose.Schema({
   savajcapitalbranch_name: { type: String, required: true },
   state: { type: String, required: true },
   city: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  createdAt: { type: String, },
+  updatedAt: { type: String, },
 });
 
 module.exports = mongoose.model("Savaj_Capital_Branch", SavajCapitalSchema);

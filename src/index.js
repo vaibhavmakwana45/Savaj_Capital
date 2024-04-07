@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme"; // Adjust the import path as needed
-
 import AuthLayout from "./layouts/Auth"; // Adjust import paths as needed
 import AdminLayout from "./layouts/Superadmin"; // Adjust import paths as needed
 
@@ -19,10 +18,26 @@ ReactDOM.render(
       <Switch>
         <Route path="/auth" component={AuthLayout} />
         <Route
-          path="/bank"
+          path="/bankuser"
           render={() => (
             <AuthGuard>
-              <AdminLayout name={"/bank"} />
+              <AdminLayout name={"/bankuser"} />
+            </AuthGuard>
+          )}
+        />
+        <Route
+          path="/savajcapitaluser"
+          render={() => (
+            <AuthGuard>
+              <AdminLayout name={"/savajcapitaluser"} />
+            </AuthGuard>
+          )}
+        />
+        <Route
+          path="/user"
+          render={() => (
+            <AuthGuard>
+              <AdminLayout name={"/user"} />
             </AuthGuard>
           )}
         />

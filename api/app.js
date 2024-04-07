@@ -13,15 +13,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 const SuperAdminSignupRouter = require('./routes/SuperAdminSignupApi');
-const AddAdminRouter = require('./routes/AddAdmin');
-const AddProjectRouter = require('./routes/AddProject');
 const AddUserRouter = require('./routes/AddUser');
-const AddReportingFormRouter = require('./routes/AddReportingForm');
-const AddTaskRouter = require('./routes/AddTask');
-const CountRouter = require('./routes/Count');
-const NotificationRouter = require('./routes/Notification');
-const AdminProjectRouter = require('./routes/AdminProject');
-const AdminNotificationRouter = require('./routes/AdminNotification');
 const BankRouter = require('./routes/AddBanksRoutes');
 const SavajCapitalBranchRoutes = require('./routes/AddSavajCapitalBranchRoutes');
 
@@ -39,15 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/superadminsignup', SuperAdminSignupRouter);
-app.use('/api/addadmins', AddAdminRouter);
-app.use('/api/addprojects', AddProjectRouter);
 app.use('/api/addusers', AddUserRouter);
-app.use('/api/addreportingfrom', AddReportingFormRouter);
-app.use('/api/addtasks', AddTaskRouter);
-app.use('/api/counts', CountRouter);
-app.use('/api/notification', NotificationRouter);
-app.use('/api/adminprojects', AdminProjectRouter);
-app.use('/api/adminnotification', AdminNotificationRouter);
 app.use('/api/addbankuser', BankRouter);
 app.use('/api/addsavajbapitalbranch', SavajCapitalBranchRoutes);
 

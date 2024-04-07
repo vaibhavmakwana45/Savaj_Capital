@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 // Add these imports
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
@@ -17,16 +17,20 @@ import {
   Switch,
   Text,
   useColorModeValue,
+  InputGroup,
+  InputRightElement,
 } from "@chakra-ui/react";
-// Assets
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import signInImage from "assets/img/signInImage.png";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+import AxiosInstance from "config/AxiosInstance";
 
 function SignIn() {
   const history = useHistory();
   const { bank } = useParams();
+  const [showPassword, setShowPassword] = useState(false);
   const textColor = useColorModeValue("gray.700", "white");
   const bgForm = useColorModeValue("white", "navy.800");
   const titleColor = useColorModeValue("gray.700", "blue.500");
@@ -35,6 +39,30 @@ function SignIn() {
   const bgIconsHover = useColorModeValue("gray.50", "whiteAlpha.100");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("decodedToken")) {
+      const data = JSON.parse(localStorage.getItem("decodedToken"));
+      switch (data.role) {
+        case "bankuser":
+          history.push("/bankuser/dashboard");
+          break;
+        case "superadmin":
+          history.push("/superadmin/dashboard");
+          break;
+        case "savajcapitaluser":
+          history.push("/savajcapitaluser/dashboard");
+          break;
+        case "user":
+          history.push("/user/dashboard");
+          break;
+        default:
+          break;
+      }
+    }
+  }, []);
+
   const decodeToken = (token) => {
     try {
       const decoded = jwtDecode(token);
@@ -59,46 +87,50 @@ function SignIn() {
   };
 
   const handleSubmit = async (event) => {
-    if (bank) {
-      event.preventDefault();
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/addbankuser/bankuserlogin",
-          { email, password }
-        );
-        console.log(response.data);
-        const { token } = response.data;
+    setLoading(true);
+    event.preventDefault();
+    try {
+      const response = await AxiosInstance.post("/login", {
+        email,
+        password,
+      });
+      console.log(response.data, "shivam");
+      if (response.data.statusCode === 201) {
+        toast.error("user not exists");
+      } else if (response.data.statuscode === 202) {
+        setTimeout(() => {
+          toast.error("user not exists");
+        }, 1000);
+      } else if (response.data.success) {
+        const { token, role } = response.data;
         if (token) {
           handleTokenDecoding(token);
-          history.push("/bank/dashboard");
+          switch (role) {
+            case "bankuser":
+              history.push("/bankuser/dashboard");
+              break;
+            case "superadmin":
+              history.push("/superadmin/dashboard");
+              break;
+            case "savajcapitaluser":
+              history.push("/savajcapitaluser/dashboard");
+              break;
+            case "user":
+              history.push("/user/dashboard");
+              break;
+            default:
+              break;
+          }
         } else {
           console.error("No token received");
           toast.error("No token received");
         }
-      } catch (error) {
-        console.error("Login error", error.response ? error.response : error);
-        toast.error("Login failed. Please try again.");
       }
-    } else {
-      event.preventDefault();
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/superadminsignup/superadminlogin",
-          { email, password }
-        );
-        console.log(response.data);
-        const { token } = response.data;
-        if (token) {
-          handleTokenDecoding(token);
-          history.push("/superadmin/dashboard");
-        } else {
-          console.error("No token received");
-          toast.error("No token received");
-        }
-      } catch (error) {
-        console.error("Login error", error.response ? error.response : error);
-        toast.error("Login failed. Please try again.");
-      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Login error", error.response ? error.response : error);
+      toast.error("Login failed. Please try again.");
+      setLoading(false);
     }
   };
   return (
@@ -231,30 +263,42 @@ function SignIn() {
                   mb="24px"
                   size="lg"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)} // Update state on change
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
                   Password
                 </FormLabel>
-                <Input
-                  fontSize="sm"
-                  ms="4px"
-                  type="password"
-                  placeholder="Your password"
-                  mb="24px"
-                  size="lg"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)} // Update state on change
-                />
-                {/* Existing elements */}
+                <InputGroup size="md">
+                  <Input
+                    pr="4.5rem"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Your password"
+                    mb="24px"
+                    size="lg"
+                    fontSize="sm"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <InputRightElement width="3.5rem">
+                    <Button
+                      h="1.75rem"
+                      size="sm"
+                      mt="10px"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
                 <Button
-                  type="submit" // Add this line to specify the button type
+                  type="submit"
                   fontSize="10px"
                   variant="dark"
                   fontWeight="bold"
                   w="100%"
                   h="45"
                   mb="24px"
+                  disabled={loading}
                 >
                   SIGN IN
                 </Button>

@@ -1,8 +1,12 @@
 // import
 import React, { Component } from "react";
 import Dashboard from "views/Dashboard/Dashboard.js";
-import Tables from "views/Dashboard/Tables.js";
-import SavajCapitalBranchTable from "views/Dashboard/SavajCapitalBranchTable";
+import BankDashboard from "banksdashboard/BankDashboard";
+import UserDashboard from "userdashboard/UserDashboard";
+import SavajCapitalBranchDashboard from "savajcapitaldashboard/SavajCapitalDashboard";
+import BankTable from "addbank/BankTable";
+import SavajCapitalBranchTable from "addsavajcapitalbranch/SavajCapitalBranchTable";
+import UserTable from "adduser/UserTable";
 import Profile from "views/Dashboard/Profile.js";
 import SignIn from "views/Pages/SignIn.js";
 import SignUp from "views/Pages/SignUp.js";
@@ -17,8 +21,10 @@ import {
   SupportIcon,
 } from "components/Icons/Icons";
 import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
+import AddUser from "adduser/AddUser";
 
 var dashRoutes = [
+  //superadmin
   {
     path: "/dashboard",
     name: "Dashboard",
@@ -27,27 +33,26 @@ var dashRoutes = [
     layout: "/superadmin",
   },
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: <HomeIcon color="inherit" />,
-    component: Dashboard,
-    layout: "/bank",
-  },
-  {
     path: "/bank",
     name: "Bank Branch",
-    icon: <StatsIcon color="inherit" />,
-    component: Tables,
+    icon: <CreditIcon color="inherit" />,
+    component: BankTable,
     layout: "/superadmin",
   },
   {
     path: "/savajcapitalbranch",
     name: "Savaj Capital Branch",
-    icon: <CreditIcon color="inherit" />,
+    icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
   },
-  
+  {
+    path: "/alluser",
+    name: "All User",
+    icon: <PersonIcon color="inherit" />,
+    component: UserTable,
+    layout: "/superadmin",
+  },
   {
     path: "/addbank",
     name: "Add Bank",
@@ -64,11 +69,18 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
   },
- 
+  {
+    path: "/adduser",
+    name: "Add User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  //auth
   {
     name: "ACCOUNT PAGES",
     category: "account",
-
     state: "pageCollapse",
     views: [
       {
@@ -87,13 +99,6 @@ var dashRoutes = [
         layout: "/auth",
       },
       {
-        path: "/:bank/signin",
-        name: "Sign In",
-        icon: <DocumentIcon color="inherit" />,
-        component: SignIn,
-        layout: "/auth",
-      },
-      {
         path: "/signup",
         name: "Sign Up",
         icon: <RocketIcon color="inherit" />,
@@ -101,6 +106,30 @@ var dashRoutes = [
         layout: "/auth",
       },
     ],
+  },
+  //bankuser
+  {
+    path: "/dashboard",
+    name: "Bank Dashboard",
+    icon: <HomeIcon color="inherit" />,
+    component: BankDashboard,
+    layout: "/bankuser",
+  },
+  //surajcapitaluser
+  {
+    path: "/dashboard",
+    name: "SC User Dashboard",
+    icon: <HomeIcon color="inherit" />,
+    component: SavajCapitalBranchDashboard,
+    layout: "/savajcapitaluser",
+  },
+  //user
+  {
+    path: "/dashboard",
+    name: "User Dashboard",
+    icon: <HomeIcon color="inherit" />,
+    component: UserDashboard,
+    layout: "/user",
   },
 ];
 export default dashRoutes;

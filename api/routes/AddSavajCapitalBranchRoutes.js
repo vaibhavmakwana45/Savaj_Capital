@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const SavajCapitalBranch = require("../models/SavajCapitalBranch");
+const AddUser = require("../models/AddUser");
+const BankUser = require("../models/BankUserSchema");
+const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapitalUser = require("../models/SavajCapitalUser");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
@@ -30,11 +33,20 @@ router.post("/addsavajcapitalbranch", async (req, res) => {
       .padStart(10, "0");
     const savajCapitalBranchId = `${timestamp}${randomString}${randomNumber}`;
 
-    const existingUser = await SavajCapitalUser.findOne({
+    const user = await AddUser.findOne({
+      email: savajCapitalUserDetails.email,
+    });
+    const bankUser = await BankUser.findOne({
+      email: savajCapitalUserDetails.email,
+    });
+    const superAdmin = await SuperAdmin.findOne({
+      email: savajCapitalUserDetails.email,
+    });
+    const savajCapitalUser = await SavajCapitalUser.findOne({
       email: savajCapitalUserDetails.email,
     });
 
-    if (existingUser) {
+    if (bankUser || superAdmin || user || savajCapitalUser) {
       return res.status(400).json({
         success: false,
         message: "Email already in use",
@@ -149,30 +161,25 @@ router.get("/allsavajcapitalbranch", async (req, res) => {
   }
 });
 
-router.get("/savajcapitalbranch/:id", async (req, res) => {
+router.delete("/deletebranch/:savajcapitalbranch_id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const branchId = req.params.savajcapitalbranch_id;
+    const branch = await SavajCapitalBranch.findOne({ savajcapitalbranch_id : branchId });
 
-    const savajcapitalbranch = await SavajCapitalBranch.findOne({
-      savajcapitalbranch_id: id,
-    });
-
-    if (!savajcapitalbranch) {
+    if (!branch) {
       return res.status(404).json({
         success: false,
-        message: "Savaj Capital Branch not found",
+        message: "Bank not found",
       });
     }
 
-    const users = await SavajCapitalUser.find({
-      savajcapitalbranch_id: id,
-    });
+    await SavajCapitalBranch.deleteOne({ savajcapitalbranch_id: branchId });
 
-    const savajcapitalbranchWithUsers = { ...savajcapitalbranch._doc, users };
+    await SavajCapitalUser.deleteOne({ savajcapitalbranch_id: branchId });
 
     res.json({
       success: true,
-      data: savajcapitalbranchWithUsers,
+      message: "Branch and associated users deleted successfully",
     });
   } catch (error) {
     console.error(error);
@@ -182,51 +189,4 @@ router.get("/savajcapitalbranch/:id", async (req, res) => {
     });
   }
 });
-
-router.put("/savajcapitalbranch/:id", async (req, res) => {
-  console.log(req.body);
-  const { id } = req.params;
-  const { branchData, userData } = req.body;
-
-  try {
-    const updatedBranch = await SavajCapitalBranch.findOneAndUpdate(
-      { savajcapitalbranch_id: id },
-      { $set: branchData },
-      { new: true }
-    );
-
-    if (!updatedBranch) {
-      return res.status(404).json({
-        success: false,
-        message: "Savaj Capital Branch not found",
-      });
-    }
-
-    const userUpdates = userData.map((user) => {
-      return SavajCapitalUser.findOneAndUpdate(
-        { email: user.email, savajcapitalbranch_id: id },
-        { $set: user },
-        { new: true }
-      );
-    });
-
-    const updatedUsers = await Promise.all(userUpdates);
-
-    res.json({
-      success: true,
-      message: "Branch and Users updated successfully",
-      data: {
-        updatedBranch,
-        updatedUsers, // Note that this is now an array of updated users
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-});
-
 module.exports = router;

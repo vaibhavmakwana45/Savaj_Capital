@@ -7,6 +7,8 @@ import {
   Input,
   Select,
   useColorModeValue,
+  InputGroup,
+  InputRightElement,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -15,25 +17,48 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import axios from "axios";
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from "react-router-dom";
+import AxiosInstance from "config/AxiosInstance";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-function AddBank() {
+function AddBank(props) {
+  const location = useLocation();
+  const data = location.state;
+  console.log(data, "data");
   const textColor = useColorModeValue("gray.700", "white");
+  const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("IN");
   const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
-    const statesOfIndia = State.getStatesOfCountry("IN");
-    setStates(statesOfIndia);
+    setCountries(Country.getAllCountries());
+    setStates(State.getStatesOfCountry("IN"));
   }, []);
 
   useEffect(() => {
-    if (selectedState) {
-      const citiesOfState = City.getCitiesOfState("IN", selectedState);
-      setCities(citiesOfState);
+    if (selectedCountry) {
+      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
+      setStates(statesOfSelectedCountry);
+      setSelectedState(""); // Reset selected state when country changes
     }
-  }, [selectedState]);
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState) {
+      const citiesOfState = City.getCitiesOfState(
+        selectedCountry,
+        selectedState
+      );
+      setCities(citiesOfState);
+    } else {
+      setCities([]); // Clear cities if no state is selected
+    }
+  }, [selectedState, selectedCountry]);
 
   const handleStateChange = (event) => {
     const stateCode = event.target.value;
@@ -47,10 +72,15 @@ function AddBank() {
     }));
   };
 
+  const handleCountryChange = (event) => {
+    setSelectedCountry(event.target.value);
+  };
+
   const [formData, setFormData] = useState({
     bank_id: "",
     user_id: "",
     bank_name: "",
+    country: "India", // Default to India
     state: "",
     city: "",
     branch_name: "",
@@ -68,9 +98,12 @@ function AddBank() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const submissionData = {
       bankDetails: {
         bank_name: formData.bank_name,
+        country: formData.country,
         state: formData.state,
         city: formData.city,
         branch_name: formData.branch_name,
@@ -81,31 +114,24 @@ function AddBank() {
       },
     };
 
-    toast
-      .promise(
-        axios.post(
-          "http://localhost:4000/api/addbankuser/addbankuser",
-          submissionData
-        ),
-        {
-          loading: "Sending...",
-          success: "Bank and User added successfully!",
-          error: "Failed to add. Please try again.",
-        },
-        {
-          style: {
-            minWidth: "250px",
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response.data);
-        history.push('/superadmin/bank');
-      })
-      
-      .catch((error) => {
-        console.error("Submission error", error);
-      });
+    try {
+      const response = await AxiosInstance.post(
+        "/addbankuser/addbankuser",
+        submissionData
+      );
+
+      if (response.data.statusCode === 201) {
+        toast.error("Email already in use");
+      } else if (response.data.success) {
+        toast.success("Bank and User added successfully!");
+        history.push("/superadmin/bank");
+      }
+    } catch (error) {
+      console.error("Submission error", error);
+      toast.error("Failed to add. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,20 +151,42 @@ function AddBank() {
                 <FormLabel>Bank Name</FormLabel>
                 <Input name="bank_name" onChange={handleChange} />
               </FormControl>
+
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
               <FormControl id="state" mt={4} isRequired>
                 <FormLabel>State</FormLabel>
                 <Select
                   name="state"
                   placeholder="Select state"
                   onChange={handleStateChange}
+                  disabled={!selectedCountry}
                 >
-                  {states.map((state) => (
-                    <option key={state.isoCode} value={state.isoCode}>
-                      {state.name}
-                    </option>
-                  ))}
+                  {states.length ? (
+                    states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a country first</option>
+                  )}
                 </Select>
               </FormControl>
+
               <FormControl id="city" mt={4} isRequired>
                 <FormLabel>City</FormLabel>
                 <Select
@@ -147,12 +195,17 @@ function AddBank() {
                   onChange={(e) =>
                     setFormData({ ...formData, city: e.target.value })
                   }
+                  disabled={!selectedState}
                 >
-                  {cities.map((city) => (
-                    <option key={city.name} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
+                  {cities.length ? (
+                    cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a state first</option>
+                  )}
                 </Select>
               </FormControl>
 
@@ -161,9 +214,8 @@ function AddBank() {
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl>
 
-              {/* User Details */}
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
-                Login Credential
+                Login Credentials
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
@@ -171,14 +223,33 @@ function AddBank() {
               </FormControl>
               <FormControl id="password" mt={4} isRequired>
                 <FormLabel>Password</FormLabel>
-                <Input
-                  name="password"
-                  type="password"
-                  onChange={handleChange}
-                />
+                <InputGroup size="md">
+                  <Input
+                    pr="4.5rem" // ensures that text doesn't go under the icon
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    onChange={handleChange}
+                  />
+                  <InputRightElement width="4.5rem">
+                    <Button
+                      h="1.75rem"
+                      size="sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
               </FormControl>
-              <Button mt={4} colorScheme="blue" type="submit">
-                Add Bank
+
+              <Button
+                mt={4}
+                colorScheme="teal"
+                type="submit"
+                isLoading={loading}
+                loadingText="Submitting"
+              >
+                Submit
               </Button>
             </form>
           </CardBody>

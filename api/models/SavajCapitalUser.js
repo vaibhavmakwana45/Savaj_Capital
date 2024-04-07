@@ -5,8 +5,8 @@ const SavajCapitalUserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   savajcapitalbranch_id: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  createdAt: { type: String, },
+  updatedAt: { type: String, },
 });
 
 module.exports = mongoose.model("Savaj_Capital_User", SavajCapitalUserSchema);
