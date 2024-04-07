@@ -142,7 +142,7 @@ function SignIn() {
                 textAlign="center"
                 mb="22px"
               >
-                Login
+                Login With
               </Text>
               {/* <HStack spacing="15px" justify="center" mb="22px">
               <Flex
@@ -267,16 +267,18 @@ function SignIn() {
                 mt="0px"
               >
                 <Text color={textColor} fontWeight="medium">
-                  Already have an account?
-                  <Link
-                    color={titleColor}
+                  Dont't have an account?
+                  <Text
                     as="span"
                     ms="5px"
-                    href="#"
+                    color={titleColor}
                     fontWeight="bold"
+                    cursor="pointer"
+                    onClick={() => history.push("/auth/signup")}
+                    style={{ textDecoration: "underline" }}
                   >
-                    Sign In
-                  </Link>
+                    Sign Up
+                  </Text>
                 </Text>
               </Flex>
             </Flex>

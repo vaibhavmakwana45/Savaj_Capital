@@ -45,9 +45,7 @@ function SavajCapitalBranchTable() {
     history.push("/superadmin/addsavajcapitalbranch");
   };
 
-  const navigateToEditPage = (branchId) => {
-    history.push(`/superadmin/editsavajcapitalbranch/${branchId}`);
-  };
+ 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
       <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
@@ -77,9 +75,7 @@ function SavajCapitalBranchTable() {
                 <Th borderColor={borderColor} color="gray.400">
                   Users
                 </Th>
-                <Th borderColor={borderColor} color="gray.400">
-                  Action
-                </Th>
+            
               </Tr>
             </Thead>
             <Tbody>
@@ -93,16 +89,7 @@ function SavajCapitalBranchTable() {
                       .map((user) => user.email)
                       .join(", ")}
                   </Td>
-                  <Td>
-                    <Button
-                      onClick={() =>
-                        navigateToEditPage(savajcapitalbranch.savajcapitalbranch_id)
-                      }
-                      variant="ghost"
-                    >
-                      <EditIcon color="blue.500" />
-                    </Button>
-                  </Td>
+                
                 </Tr>
               ))}
             </Tbody>

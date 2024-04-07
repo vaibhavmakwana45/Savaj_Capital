@@ -18,8 +18,10 @@ import {
 import BgSignUp from "assets/img/BgSignUp.png";
 import React from "react";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
 
 function SignUp() {
+  const history = useHistory();
   const bgForm = useColorModeValue("white", "navy.800");
   const titleColor = useColorModeValue("gray.700", "blue.500");
   const textColor = useColorModeValue("gray.700", "white");
@@ -74,11 +76,11 @@ function SignUp() {
           for free.
         </Text>
       </Flex> */}
-      <Flex alignItems="center" justifyContent="center" mb="60px" mt="20px">
+      <Flex alignItems="center" justifyContent="center" mb="60px" mt="0px">
         <Flex
           direction="column"
           w="445px"
-          mt="80px"
+          mt="40px"
           background="transparent"
           borderRadius="15px"
           p="40px"
@@ -182,6 +184,18 @@ function SignUp() {
               size="lg"
             />
             <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
+              Number
+            </FormLabel>
+            <Input
+              variant="auth"
+              fontSize="sm"
+              ms="4px"
+              type="number"
+              placeholder="Your mobile number address"
+              mb="24px"
+              size="lg"
+            />
+            <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
               Email
             </FormLabel>
             <Input
@@ -205,12 +219,12 @@ function SignUp() {
               mb="24px"
               size="lg"
             />
-            <FormControl display="flex" alignItems="center" mb="24px">
+            {/* <FormControl display="flex" alignItems="center" mb="24px">
               <Switch id="remember-login" colorScheme="blue" me="10px" />
               <FormLabel htmlFor="remember-login" mb="0" fontWeight="normal">
                 Remember me
               </FormLabel>
-            </FormControl>
+            </FormControl> */}
             <Button
               fontSize="10px"
               variant="dark"
@@ -231,15 +245,17 @@ function SignUp() {
           >
             <Text color={textColor} fontWeight="medium">
               Already have an account?
-              <Link
-                color={titleColor}
+              <Text
                 as="span"
                 ms="5px"
-                href="#"
+                color={titleColor}
                 fontWeight="bold"
+                cursor="pointer"
+                onClick={() => history.push("/auth/signin")}
+                style={{ textDecoration: "underline" }}
               >
                 Sign In
-              </Link>
+              </Text>
             </Text>
           </Flex>
         </Flex>

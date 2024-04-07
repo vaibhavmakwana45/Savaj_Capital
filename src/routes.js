@@ -17,7 +17,6 @@ import {
   SupportIcon,
 } from "components/Icons/Icons";
 import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
-import EditSavajCapitalBranch from "addsavajcapitalbranch/EditSavajCapitalBranch";
 
 var dashRoutes = [
   {
@@ -65,14 +64,7 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
   },
-  {
-    path: "/editsavajcapitalbranch/:id",
-    name: "Add Savaj Capital Branch",
-    icon: <CreditIcon color="inherit" />,
-    component: EditSavajCapitalBranch,
-    layout: "/superadmin",
-    hideInSidebar: true,
-  },
+ 
   {
     name: "ACCOUNT PAGES",
     category: "account",
