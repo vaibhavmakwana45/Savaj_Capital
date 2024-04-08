@@ -117,13 +117,14 @@ function UserTable() {
                           setSelectedUserId(user.user_id);
                           setIsDeleteDialogOpen(true);
                         }}
+                        style={{marginRight: 15}}
                       />
                       <IconButton
                         aria-label="Edit user"
                         icon={<EditIcon />}
                         onClick={() => {
                           history.push(
-                            "/superadmin/edituser/17124967227232c9dfhzbu5753680842"
+                            "/superadmin/adduser?id="+user.user_id
                           );
                           // setSelectedUserId(user.user_id);
                           // setIsDeleteDialogOpen(true);
