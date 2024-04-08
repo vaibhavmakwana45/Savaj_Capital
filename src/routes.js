@@ -79,6 +79,14 @@ var dashRoutes = [
     hideInSidebar: true,
   },
   {
+    path: "/edituser/:user_id",
+    name: "Edit User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
     path: "/editsavajcapitalbranch/:id",
     name: "Add Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,

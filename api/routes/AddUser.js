@@ -3,6 +3,7 @@ const router = express.Router();
 const moment = require("moment");
 const AddUser = require("../models/AddUser");
 const BankUser = require("../models/BankUserSchema");
+const BankSchema = require("../models/BankSchema");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapitalUser = require("../models/SavajCapitalUser");
 const { createToken } = require("../utils/authhelper");
@@ -88,6 +89,30 @@ router.get("/getusers", async (req, res) => {
   }
 });
 
+router.get("/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+    const user = await AddUser.findOne({ user_id });
+
+    if (!user) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 router.delete("/deleteuser/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -115,14 +140,15 @@ router.delete("/deleteuser/:userId", async (req, res) => {
   }
 });
 
+// User Edit Api
 router.put("/edituser/:userId", async (req, res) => {
   const { userId } = req.params;
   const updates = req.body;
 
   try {
-    if (updates.password) {
-      updates.password = await hashPassword(updates.password);
-    }
+    // if (updates.password) {
+    //   updates.password = await hashPassword(updates.password);
+    // }
 
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
@@ -140,7 +166,75 @@ router.put("/edituser/:userId", async (req, res) => {
     res.json({
       success: true,
       message: "User data updated successfully",
-      admin: updatedUser,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/bankuser/:bank_id", async (req, res) => {
+  try {
+    const bank_id = req.params.bank_id;
+    const bankUser = await BankUser.findOne({ bank_id });
+    const bankData = await BankSchema.findOne({ bank_id });
+
+    if (!bankUser) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "User not found" });
+    }
+
+    const bankDetails = {
+      bank_name: bankData.bank_name,
+      country: bankData.country,
+      state_code: bankData.state_code,
+      country_code: bankData.country_code,
+      state: bankData.state,
+      city: bankData.city,
+      branch_name: bankData.branch_name,
+      bank_id: bankData.bank_id,
+    };
+
+    const userDetails = {
+      email: bankUser.email,
+      password: bankUser.password,
+      bankuser_id: bankUser.bankuser_id,
+      bank_id: bankUser.bank_id,
+    };
+
+    res.json({
+      success: true,
+      bankDetails,
+      userDetails,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/user/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+    const user = await AddUser.findOne({ user_id });
+
+    if (!user) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      user,
     });
   } catch (error) {
     console.error(error);

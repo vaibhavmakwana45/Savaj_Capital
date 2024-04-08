@@ -185,4 +185,55 @@ router.delete("/deletebanks/:bank_id", async (req, res) => {
   }
 });
 
+router.put("/:bank_id", async (req, res) => {
+  const { bank_id } = req.params;
+  const updates = req.body;
+
+  try {
+    // Update password if provided
+    if (updates.password) {
+      updates.password = await encrypt(updates.password);
+    }
+
+    // Extract bankDetails and userDetails from updates object
+    const { bankDetails, userDetails, ...otherUpdates } = updates;
+
+    // Update bankDetails data in Bank collection
+    const updatedBank = await Bank.findOneAndUpdate(
+      { bank_id: bank_id },
+      bankDetails,
+      { new: true, runValidators: true }
+    );
+
+    // Update userDetails data in BankUser collection
+    const updatedUser = await BankUser.findOneAndUpdate(
+      { bank_id: bank_id },
+      userDetails,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    // Check if user and bank data are updated successfully
+    if (!updatedUser || !updatedBank) {
+      return res.status(404).json({
+        success: false,
+        message: "User or bank not found",
+      });
+    }
+
+    // Send response with updated user and bank data
+    res.json({
+      success: true,
+      message: "User and bank data updated successfully",
+      updatedUser,
+      updatedBank,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;

@@ -34,6 +34,9 @@ function AddUser(props) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get('id');
+
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
@@ -41,6 +44,32 @@ function AddUser(props) {
     email: "",
     password: "",
   });
+
+  const getData = async () => {
+
+    try {
+      const response = await AxiosInstance.get(
+        "/addusers/user/" + id
+      );
+
+      if (response.data.success) {
+        const { user } = response.data;
+
+        setFormData(user);
+
+      } else {
+        alert("Please try again later...!")
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    if (id) {
+      getData()
+    }
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,27 +83,51 @@ function AddUser(props) {
     e.preventDefault();
     setLoading(true);
 
-    const submissionData = {
-      userDetails: {
-        username: formData.username,
-        number: formData.number,
-        email: formData.email,
-        password: formData.password,
-      },
-    };
 
     try {
-      const response = await AxiosInstance.post(
-        "/addusers/adduser",
-        submissionData
-      );
 
-      if (response.data.statusCode === 201) {
-        toast.error("Email already in use");
-      } else if (response.data.success) {
-        toast.success("User added successfully!");
-        history.push("/superadmin/alluser");
+      if (!id) {
+
+
+        const submissionData = {
+          userDetails: {
+            username: formData.username,
+            number: formData.number,
+            email: formData.email,
+            password: formData.password,
+          },
+        };
+
+        const response = await AxiosInstance.post(
+          "/addusers/adduser",
+          submissionData
+        );
+
+        if (response.data.statusCode === 201) {
+          toast.error("Email already in use");
+        } else if (response.data.success) {
+          toast.success("User added successfully!");
+          history.push("/superadmin/alluser");
+        }
+
       }
+      else {
+        const response = await AxiosInstance.put(
+          "/addusers/edituser/" + id,
+          formData
+        );
+
+        console.log(formData, "formData")
+
+        if (response.data.success) {
+          toast.success("User Updated successfully!");
+          history.push("/superadmin/alluser");
+        } else {
+          toast.error("Please try again later!")
+        }
+
+      }
+
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -98,12 +151,12 @@ function AddUser(props) {
             <form onSubmit={handleSubmit}>
               <FormControl id="username" isRequired>
                 <FormLabel>User Name</FormLabel>
-                <Input name="username" onChange={handleChange} />
+                <Input name="username" onChange={handleChange} value={formData.username} />
               </FormControl>
 
               <FormControl id="number" mt={4} isRequired>
                 <FormLabel>Mobile Number</FormLabel>
-                <Input name="number" onChange={handleChange} />
+                <Input name="number" onChange={handleChange} value={formData.number} />
               </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
@@ -111,28 +164,32 @@ function AddUser(props) {
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} />
+                <Input name="email" type="email" onChange={handleChange} value={formData.email} />
               </FormControl>
-              <FormControl id="password" mt={4} isRequired>
-                <FormLabel>Password</FormLabel>
-                <InputGroup size="md">
-                  <Input
-                    pr="4.5rem"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    onChange={handleChange}
-                  />
-                  <InputRightElement width="4.5rem">
-                    <Button
-                      h="1.75rem"
-                      size="sm"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+
+              {
+                !id &&
+                <FormControl id="password" mt={4} isRequired>
+                  <FormLabel>Password</FormLabel>
+                  <InputGroup size="md">
+                    <Input
+                      pr="4.5rem"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      onChange={handleChange}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
+              }
 
               <Button
                 mt={4}
@@ -140,6 +197,7 @@ function AddUser(props) {
                 type="submit"
                 isLoading={loading}
                 loadingText="Submitting"
+                style={{ marginTop: 20 }}
               >
                 Submit
               </Button>

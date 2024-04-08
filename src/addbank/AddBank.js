@@ -21,10 +21,11 @@ import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-function AddBank(props) {
+
+
+
+function AddBank() {
   const location = useLocation();
-  const data = location.state;
-  console.log(data, "data");
   const textColor = useColorModeValue("gray.700", "white");
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -35,7 +36,62 @@ function AddBank(props) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get('id');
+
+
+  const [formData, setFormData] = useState({
+    bank_id: "",
+    user_id: "",
+    bank_name: "",
+    country: "India", // Default to India
+    state: "",
+    city: "",
+    branch_name: "",
+    email: "",
+    password: "",
+  });
+
+  const getData = async () => {
+
+    try {
+      const response = await AxiosInstance.get(
+        "/addusers/bankuser/" + id
+      );
+
+      if (response.data.success) {
+
+        const { bankDetails, userDetails } = response.data;
+
+        const submissionData = {
+          bank_id: id,
+          user_id: "",
+          bank_name: bankDetails.bank_name,
+          country: bankDetails.country, // Default to India
+          state: bankDetails.state,
+          city: bankDetails.city,
+          branch_name: bankDetails.branch_name,
+          email: userDetails.email,
+          password: "",
+          country_code: bankDetails.country_code,
+          state_code: bankDetails.state_code
+        };
+
+        setSelectedState(bankDetails.state_code);
+        setSelectedCountry(bankDetails.country_code);
+        setFormData(submissionData)
+      } else {
+        alert("Please try again later...!")
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
+    if (id) {
+      getData();
+    }
     setCountries(Country.getAllCountries());
     setStates(State.getStatesOfCountry("IN"));
   }, []);
@@ -76,17 +132,6 @@ function AddBank(props) {
     setSelectedCountry(event.target.value);
   };
 
-  const [formData, setFormData] = useState({
-    bank_id: "",
-    user_id: "",
-    bank_name: "",
-    country: "India", // Default to India
-    state: "",
-    city: "",
-    branch_name: "",
-    email: "",
-    password: "",
-  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,6 +152,8 @@ function AddBank(props) {
         state: formData.state,
         city: formData.city,
         branch_name: formData.branch_name,
+        state_code: selectedState,
+        country_code: selectedCountry,
       },
       userDetails: {
         email: formData.email,
@@ -115,17 +162,38 @@ function AddBank(props) {
     };
 
     try {
-      const response = await AxiosInstance.post(
-        "/addbankuser/addbankuser",
-        submissionData
-      );
 
-      if (response.data.statusCode === 201) {
-        toast.error("Email already in use");
-      } else if (response.data.success) {
-        toast.success("Bank and User added successfully!");
-        history.push("/superadmin/bank");
+
+      if (id) {
+
+        const response = await AxiosInstance.put(`/addbankuser/${id}`, submissionData);
+        if (response.data.success) {
+          const msg = "Bank and User updated Successfully!"
+          toast.success(msg);
+          history.push("/superadmin/bank");
+        } else {
+          toast.error("Please try again later!");
+        }
+
+        console.log(submissionData)
+
       }
+      else {
+
+        const response = await AxiosInstance.post("/addbankuser/addbankuser", submissionData);
+
+        if (response.data?.statusCode === 201) {
+          toast.error("Email already in use");
+        } else if (response.data.success) {
+          const msg = "Bank and User added successfully"
+          toast.success(msg);
+          history.push("/superadmin/bank");
+        }
+
+
+      }
+
+
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -149,11 +217,12 @@ function AddBank(props) {
             <form onSubmit={handleSubmit}>
               <FormControl id="bank_name" isRequired>
                 <FormLabel>Bank Name</FormLabel>
-                <Input name="bank_name" onChange={handleChange} />
+                <Input name="bank_name" value={formData.bank_name} onChange={handleChange} />
               </FormControl>
 
               <FormControl id="country" mt={4} isRequired>
                 <FormLabel>Country</FormLabel>
+
                 <Select
                   name="country"
                   value={selectedCountry}
@@ -174,6 +243,7 @@ function AddBank(props) {
                   placeholder="Select state"
                   onChange={handleStateChange}
                   disabled={!selectedCountry}
+                  value={selectedState}
                 >
                   {states.length ? (
                     states.map((state) => (
@@ -196,6 +266,7 @@ function AddBank(props) {
                     setFormData({ ...formData, city: e.target.value })
                   }
                   disabled={!selectedState}
+                  value={formData.city}
                 >
                   {cities.length ? (
                     cities.map((city) => (
@@ -211,7 +282,7 @@ function AddBank(props) {
 
               <FormControl id="branch_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
-                <Input name="branch_name" onChange={handleChange} />
+                <Input name="branch_name" onChange={handleChange} value={formData.branch_name} />
               </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
@@ -219,28 +290,32 @@ function AddBank(props) {
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} />
+                <Input name="email" type="email" onChange={handleChange} value={formData.email} />
               </FormControl>
-              <FormControl id="password" mt={4} isRequired>
-                <FormLabel>Password</FormLabel>
-                <InputGroup size="md">
-                  <Input
-                    pr="4.5rem" // ensures that text doesn't go under the icon
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    onChange={handleChange}
-                  />
-                  <InputRightElement width="4.5rem">
-                    <Button
-                      h="1.75rem"
-                      size="sm"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+
+              {
+                !id &&
+                <FormControl id="password" mt={4} isRequired>
+                  <FormLabel>Password</FormLabel>
+                  <InputGroup size="md">
+                    <Input
+                      pr="4.5rem" // ensures that text doesn't go under the icon
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      onChange={handleChange}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
+              }
 
               <Button
                 mt={4}
@@ -248,6 +323,7 @@ function AddBank(props) {
                 type="submit"
                 isLoading={loading}
                 loadingText="Submitting"
+                style={{ marginTop: 40 }}
               >
                 Submit
               </Button>

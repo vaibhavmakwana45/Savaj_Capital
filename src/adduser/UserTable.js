@@ -22,7 +22,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
@@ -116,6 +116,18 @@ function UserTable() {
                         onClick={() => {
                           setSelectedUserId(user.user_id);
                           setIsDeleteDialogOpen(true);
+                        }}
+                        style={{marginRight: 15}}
+                      />
+                      <IconButton
+                        aria-label="Edit user"
+                        icon={<EditIcon />}
+                        onClick={() => {
+                          history.push(
+                            "/superadmin/adduser?id="+user.user_id
+                          );
+                          // setSelectedUserId(user.user_id);
+                          // setIsDeleteDialogOpen(true);
                         }}
                       />
                     </Td>
