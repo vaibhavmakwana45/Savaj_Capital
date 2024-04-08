@@ -30,12 +30,35 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import { EditIcon } from "@chakra-ui/icons";
 import AxiosInstance from "config/AxiosInstance";
+import TableComponent from "TableComponent";
 
 function SavajCapitalBranchTable() {
   const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
+  const [loading, setLoading] = useState(true)
+
+  const allHeaders = ["Savaj Capital Branch", "City", "State", "Users", "Action"];
+
+  const formattedData = savajcapitalbranch.map(item => ([
+    item.savajcapitalbranch_id,
+    item.savajcapitalbranch_name,
+    item.city,
+    item.state,
+    item.users.map((user) => user.email).join(", ")
+  ]));
+
+  const handleDelete = (id) => {
+    setSelectedBranchId(
+      id
+    );
+    setIsDeleteDialogOpen(true);
+  }
+
+  const handleEdit = (id) => {
+    navigateToEditPage(id)
+  }
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -43,6 +66,7 @@ function SavajCapitalBranchTable() {
         const response = await AxiosInstance.get(
           "/addsavajbapitalbranch/allsavajcapitalbranch"
         );
+        setLoading(false)
         setSavajcapitalbranch(response.data.data);
         console.log("first", response.data.data);
       } catch (error) {
@@ -96,65 +120,15 @@ function SavajCapitalBranchTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <Table variant="simple" color={textColor}>
-              <Thead>
-                <Tr my=".8rem" pl="0px" color="gray.400">
-                  <Th pl="0px" borderColor={borderColor} color="gray.400">
-                    Savaj Capital Branch
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    City
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    State
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    Users
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    Action
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {savajcapitalbranch.map((savajcapitalbranch) => (
-                  <Tr key={savajcapitalbranch.savajcapitalbranch_id}>
-                    <Td pl="0px">
-                      {savajcapitalbranch.savajcapitalbranch_name}
-                    </Td>
-                    <Td>{savajcapitalbranch.city}</Td>
-                    <Td>{savajcapitalbranch.state}</Td>
-                    <Td>
-                      {savajcapitalbranch.users
-                        .map((user) => user.email)
-                        .join(", ")}
-                    </Td>
-                    <Td>
-                      <IconButton
-                        aria-label="Delete branch"
-                        icon={<DeleteIcon />}
-                        onClick={() => {
-                          setSelectedBranchId(
-                            savajcapitalbranch.savajcapitalbranch_id
-                          );
-                          setIsDeleteDialogOpen(true);
-                        }}
-                        style={{ marginRight: 15 }}
-                      />
-                      <IconButton
-                        aria-label="Edit branch"
-                        icon={<EditIcon />}
-                        onClick={() =>
-                          navigateToEditPage(
-                            savajcapitalbranch.savajcapitalbranch_id
-                          )
-                        }
-                      />
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+
+          <TableComponent
+                data={formattedData}
+                loading={loading}
+                allHeaders={allHeaders}
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+              />
+
           </CardBody>
         </Card>
         <AlertDialog
