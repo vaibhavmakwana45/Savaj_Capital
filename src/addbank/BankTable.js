@@ -22,7 +22,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
@@ -51,7 +51,11 @@ function Tables() {
     fetchBanks();
   }, []);
 
-  const navigateToAnotherPage = () => {
+  const navigateToAnotherPage = (id) => {
+    if (id) {
+      history.push("/superadmin/addbank?id=" + id);
+      return;
+    }
     history.push("/superadmin/addbank");
   };
 
@@ -117,14 +121,24 @@ function Tables() {
                     <Td>{bank.state}</Td>
                     <Td>{bank.users.map((user) => user.email).join(", ")}</Td>
                     <Td>
-                      <IconButton
-                        aria-label="Delete bank"
-                        icon={<DeleteIcon />}
-                        onClick={() => {
-                          setSelectedBankId(bank.bank_id);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      />
+                      <div>
+                        <IconButton
+                          aria-label="Delete bank"
+                          icon={<DeleteIcon />}
+                          onClick={() => {
+                            setSelectedBankId(bank.bank_id);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                          style={{marginRight: 15}}
+                        />
+                        <IconButton
+                          aria-label="Edit bank"
+                          icon={<EditIcon />}
+                          onClick={() => {
+                            navigateToAnotherPage(bank.bank_id)
+                          }}
+                        />
+                      </div>
                     </Td>
                   </Tr>
                 ))}
