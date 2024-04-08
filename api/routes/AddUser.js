@@ -140,6 +140,7 @@ router.delete("/deleteuser/:userId", async (req, res) => {
   }
 });
 
+// User Edit Api
 router.put("/edituser/:userId", async (req, res) => {
   const { userId } = req.params;
   const updates = req.body;
