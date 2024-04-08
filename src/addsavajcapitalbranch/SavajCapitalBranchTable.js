@@ -139,6 +139,7 @@ function SavajCapitalBranchTable() {
                           );
                           setIsDeleteDialogOpen(true);
                         }}
+                        style={{ marginRight: 15 }}
                       />
                       <IconButton
                         aria-label="Edit branch"

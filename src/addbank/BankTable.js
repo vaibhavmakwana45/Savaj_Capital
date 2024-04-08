@@ -83,7 +83,12 @@ function Tables() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Banks and Users
               </Text>
-              <Button onClick={navigateToAnotherPage} colorScheme="blue">
+              <Button
+                onClick={() => {
+                  navigateToAnotherPage();
+                }}
+                colorScheme="blue"
+              >
                 Add Bank
               </Button>
             </Flex>
@@ -129,13 +134,13 @@ function Tables() {
                             setSelectedBankId(bank.bank_id);
                             setIsDeleteDialogOpen(true);
                           }}
-                          style={{marginRight: 15}}
+                          style={{ marginRight: 15 }}
                         />
                         <IconButton
                           aria-label="Edit bank"
                           icon={<EditIcon />}
                           onClick={() => {
-                            navigateToAnotherPage(bank.bank_id)
+                            navigateToAnotherPage(bank.bank_id);
                           }}
                         />
                       </div>
