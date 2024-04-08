@@ -107,7 +107,7 @@ function AddSavajCapitalBranch() {
       setLoading(false);
     }
   };
-  
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>

@@ -164,7 +164,9 @@ router.get("/allsavajcapitalbranch", async (req, res) => {
 router.delete("/deletebranch/:savajcapitalbranch_id", async (req, res) => {
   try {
     const branchId = req.params.savajcapitalbranch_id;
-    const branch = await SavajCapitalBranch.findOne({ savajcapitalbranch_id : branchId });
+    const branch = await SavajCapitalBranch.findOne({
+      savajcapitalbranch_id: branchId,
+    });
 
     if (!branch) {
       return res.status(404).json({
@@ -180,6 +182,86 @@ router.delete("/deletebranch/:savajcapitalbranch_id", async (req, res) => {
     res.json({
       success: true,
       message: "Branch and associated users deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/savajcapitalbranch/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const savajcapitalbranch = await SavajCapitalBranch.findOne({
+      savajcapitalbranch_id: id,
+    });
+
+    if (!savajcapitalbranch) {
+      return res.status(404).json({
+        success: false,
+        message: "Savaj Capital Branch not found",
+      });
+    }
+
+    const users = await SavajCapitalUser.find({
+      savajcapitalbranch_id: id,
+    });
+
+    const savajcapitalbranchWithUsers = { ...savajcapitalbranch._doc, users };
+
+    res.json({
+      success: true,
+      data: savajcapitalbranchWithUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.put("/editsavajcapitalbranch/:id", async (req, res) => {
+  console.log(req.body);
+  const { id } = req.params;
+  const { branchData, userData } = req.body;
+
+  try {
+    const updatedBranch = await SavajCapitalBranch.findOneAndUpdate(
+      { savajcapitalbranch_id: id },
+      { $set: branchData },
+      { new: true }
+    );
+
+    if (!updatedBranch) {
+      return res.status(404).json({
+        success: false,
+        message: "Savaj Capital Branch not found",
+      });
+    }
+
+    const userUpdates = userData.map((user) => {
+      return SavajCapitalUser.findOneAndUpdate(
+        { savajcapitalbranch_id: id },
+        { $set: user },
+        { new: true }
+      );
+    });
+
+    const updatedUsers = await Promise.all(userUpdates);
+
+    res.json({
+      success: true,
+      message: "Branch and Users updated successfully",
+      data: {
+        updatedBranch,
+        updatedUsers,
+      },
     });
   } catch (error) {
     console.error(error);

@@ -6,6 +6,7 @@ import UserDashboard from "userdashboard/UserDashboard";
 import SavajCapitalBranchDashboard from "savajcapitaldashboard/SavajCapitalDashboard";
 import BankTable from "addbank/BankTable";
 import SavajCapitalBranchTable from "addsavajcapitalbranch/SavajCapitalBranchTable";
+import EditSavajCapitalBranch from "addsavajcapitalbranch/EditSavajCapitalBranch";
 import UserTable from "adduser/UserTable";
 import Profile from "views/Dashboard/Profile.js";
 import SignIn from "views/Pages/SignIn.js";
@@ -74,6 +75,14 @@ var dashRoutes = [
     name: "Add User",
     icon: <CreditIcon color="inherit" />,
     component: AddUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/editsavajcapitalbranch/:id",
+    name: "Add Savaj Capital Branch",
+    icon: <CreditIcon color="inherit" />,
+    component: EditSavajCapitalBranch,
     layout: "/superadmin",
     hideInSidebar: true,
   },

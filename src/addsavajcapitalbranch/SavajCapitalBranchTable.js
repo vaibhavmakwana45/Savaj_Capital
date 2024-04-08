@@ -77,6 +77,9 @@ function SavajCapitalBranchTable() {
       toast.error("branch not delete");
     }
   };
+  const navigateToEditPage = (branchId) => {
+    history.push(`/superadmin/editsavajcapitalbranch/${branchId}`);
+  };
 
   return (
     <>
@@ -136,6 +139,15 @@ function SavajCapitalBranchTable() {
                           );
                           setIsDeleteDialogOpen(true);
                         }}
+                      />
+                      <IconButton
+                        aria-label="Edit branch"
+                        icon={<EditIcon />}
+                        onClick={() =>
+                          navigateToEditPage(
+                            savajcapitalbranch.savajcapitalbranch_id
+                          )
+                        }
                       />
                     </Td>
                   </Tr>
