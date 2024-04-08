@@ -77,6 +77,14 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
   },
+  {
+    path: "/edituser/:user_id",
+    name: "Edit User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
   //auth
   {
     name: "ACCOUNT PAGES",
