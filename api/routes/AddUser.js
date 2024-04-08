@@ -145,9 +145,9 @@ router.put("/edituser/:userId", async (req, res) => {
   const updates = req.body;
 
   try {
-    if (updates.password) {
-      updates.password = await hashPassword(updates.password);
-    }
+    // if (updates.password) {
+    //   updates.password = await hashPassword(updates.password);
+    // }
 
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
@@ -165,7 +165,7 @@ router.put("/edituser/:userId", async (req, res) => {
     res.json({
       success: true,
       message: "User data updated successfully",
-      admin: updatedUser,
+      user: updatedUser,
     });
   } catch (error) {
     console.error(error);
@@ -210,6 +210,30 @@ router.get("/bankuser/:bank_id", async (req, res) => {
       success: true,
       bankDetails,
       userDetails,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/user/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+    const user = await AddUser.findOne({ user_id });
+
+    if (!user) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      user,
     });
   } catch (error) {
     console.error(error);
