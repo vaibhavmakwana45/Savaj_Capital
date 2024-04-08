@@ -31,18 +31,22 @@ import CardHeader from "components/Card/CardHeader.js";
 import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
+import Loader from "react-js-loader";
+import TableComponent from "TableComponent";
 
 function Tables() {
   const [banks, setBanks] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchBanks = async () => {
       try {
         const response = await AxiosInstance.get("/addbankuser/banks");
         setBanks(response.data.data);
+        setLoading(false)
       } catch (error) {
         console.error("Error fetching banks:", error);
       }
@@ -59,6 +63,17 @@ function Tables() {
     history.push("/superadmin/addbank");
   };
 
+  const allHeaders = ["Bank Name", "Branch Name", "City", "State", "Users", "Action"];
+
+  const formattedData = banks.map(bank => ([
+    bank.bank_id,
+    bank.bank_name,
+    bank.branch_name,
+    bank.city,
+    bank.state,
+    bank.users.map(user => user.email).join(", "), // Concatenate emails of users
+  ]));
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBankId, setSelectedBankId] = useState(null);
   const cancelRef = React.useRef();
@@ -74,6 +89,15 @@ function Tables() {
     }
   };
 
+
+  const handleDelete = (id) => {
+    setSelectedBankId(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const handleEdit = (id) => {
+    navigateToAnotherPage(id)
+  }
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -83,67 +107,24 @@ function Tables() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Banks and Users
               </Text>
-              <Button onClick={navigateToAnotherPage} colorScheme="blue">
+              <Button onClick={() => { navigateToAnotherPage() }} colorScheme="blue">
                 Add Bank
               </Button>
             </Flex>
           </CardHeader>
           <CardBody>
-            <Table variant="simple" color={textColor}>
-              <Thead>
-                <Tr my=".8rem" pl="0px" color="gray.400">
-                  <Th pl="0px" borderColor={borderColor} color="gray.400">
-                    Bank Name
-                  </Th>
-                  <Th pl="0px" borderColor={borderColor} color="gray.400">
-                    Branch Name
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    City
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    State
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    Users
-                  </Th>
-                  <Th borderColor={borderColor} color="gray.400">
-                    Action
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {banks.map((bank) => (
-                  <Tr key={bank._id}>
-                    <Td pl="0px">{bank.bank_name}</Td>
-                    <Td pl="0px">{bank.branch_name}</Td>
-                    <Td>{bank.city}</Td>
-                    <Td>{bank.state}</Td>
-                    <Td>{bank.users.map((user) => user.email).join(", ")}</Td>
-                    <Td>
-                      <div>
-                        <IconButton
-                          aria-label="Delete bank"
-                          icon={<DeleteIcon />}
-                          onClick={() => {
-                            setSelectedBankId(bank.bank_id);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                          style={{marginRight: 15}}
-                        />
-                        <IconButton
-                          aria-label="Edit bank"
-                          icon={<EditIcon />}
-                          onClick={() => {
-                            navigateToAnotherPage(bank.bank_id)
-                          }}
-                        />
-                      </div>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+
+            <TableComponent
+              banks={banks}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+            />
+
           </CardBody>
         </Card>
         <AlertDialog
