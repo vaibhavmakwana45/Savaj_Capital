@@ -11,6 +11,7 @@ import {
   Td,
   useColorModeValue,
   Button,
+  Input
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -40,6 +41,19 @@ function Tables() {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredUsers = searchTerm.length === 0
+    ? banks
+    : banks.filter((bank) =>
+      bank.bank_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bank.users.some((user) =>
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -65,7 +79,7 @@ function Tables() {
 
   const allHeaders = ["Bank Name", "Branch Name", "City", "State", "Users", "Action"];
 
-  const formattedData = banks.map(bank => ([
+  const formattedData = filteredUsers.map(bank => ([
     bank.bank_id,
     bank.bank_name,
     bank.branch_name,
@@ -98,18 +112,36 @@ function Tables() {
   const handleEdit = (id) => {
     navigateToAnotherPage(id)
   }
+
+  const handleRow = (id) => {
+    console.log(id)
+  }
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
+
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Banks and Users
               </Text>
-              <Button onClick={() => { navigateToAnotherPage() }} colorScheme="blue">
-                Add Bank
-              </Button>
+              <div>
+
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  marginRight="10px"
+                />
+
+                <Button onClick={() => { navigateToAnotherPage() }} colorScheme="blue">
+                  Add Bank
+                </Button>
+
+              </div>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -123,6 +155,7 @@ function Tables() {
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
+              handleRow={handleRow}
             />
 
           </CardBody>

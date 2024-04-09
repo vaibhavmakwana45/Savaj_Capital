@@ -16,7 +16,7 @@
     import React, { useEffect, useState } from "react";
     import Loader from "react-js-loader";
 
-    const TableComponent = ({ data, loading, allHeaders, handleDelete, handleEdit }) => {
+    const TableComponent = ({ data, loading, allHeaders, handleDelete, handleEdit, handleRow }) => {
         return (
             <Table variant="simple" color={"black"}>
                 <Thead>
@@ -43,7 +43,7 @@
                         data.map((rowData, rowIndex) => (
                             <Tr pl="0px" key={rowIndex} >
                                 {rowData.slice(1).map((cellData, cellIndex) => (
-                                    <Td pl="0px" key={cellIndex} >
+                                    <Td style={{cursor:'pointer'}} pl="0px" key={cellIndex} onClick={()=>{handleRow(rowData[0])}} >
                                         {cellData}
                                     </Td>
                                 ))}
