@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
+const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
+const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
 
 router.post("/", async (req, res) => {
   try {
@@ -89,7 +91,6 @@ router.put("/:role_id", async (req, res) => {
   }
 });
 
-// Pass role_id and get Branch
 router.get("/:role_id", async (req, res) => {
   try {
     const role_id = req.params.role_id;
@@ -114,18 +115,29 @@ router.get("/:role_id", async (req, res) => {
   }
 });
 
-// Delete Branch
+// Delete Role
 router.delete("/:role_id", async (req, res) => {
   try {
     const { role_id } = req.params;
 
-    const deletedUser = await SavajCapital_Branch.findOneAndDelete({
+    const user = await SavajCapital_User.findOne({
+      role_id: role_id,
+    });
+
+    if (user) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "This Role is already in use",
+      });
+    }
+
+    const deletedUser = await SavajCapital_Role.findOneAndDelete({
       role_id: role_id,
     });
 
     if (!deletedUser) {
       return res.status(200).json({
-        statusCode: 201,
+        statusCode: 202,
         message: "Role not found",
       });
     }

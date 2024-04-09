@@ -23,6 +23,8 @@ const decrypt = (text) => {
   return decrypted;
 };
 
+const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+
 router.post("/adduser", async (req, res) => {
   try {
     const { userDetails } = req.body;
@@ -30,11 +32,11 @@ router.post("/adduser", async (req, res) => {
     const user = await AddUser.findOne({ email: userDetails.email });
     const bankUser = await BankUser.findOne({ email: userDetails.email });
     const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
-    const SavajCapital_User = await SavajCapital_User.findOne({
+    const savajCapital_user = await SavajCapital_User.findOne({
       email: userDetails.email,
     });
 
-    if (bankUser || superAdmin || user || SavajCapital_User) {
+    if (bankUser || superAdmin || user || savajCapital_user) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
@@ -52,8 +54,8 @@ router.post("/adduser", async (req, res) => {
     const newUser = new AddUser({
       ...userDetails,
       user_id: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: currentDate,
+      updatedAt: currentDate,
       password: hashedPassword,
     });
 

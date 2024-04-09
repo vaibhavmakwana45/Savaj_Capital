@@ -18,10 +18,10 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
   },
-  createAt: {
+  createdAt: {
     type: String,
   },
-  updateAt: {
+  updatedAt: {
     type: String,
   },
 });
