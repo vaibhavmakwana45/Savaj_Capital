@@ -82,16 +82,18 @@ const superAdminToken = async (
 
 const savajCapitalUserToken = async (
   _id,
-  savajcapitaluser_id,
-  savajcapitalbranch_id,
+  branchuser_id,
+  role_id,
+  branch_id,
   email,
   createdAt,
   updatedAt
 ) => {
   const payload = {
     _id: _id,
-    savajcapitaluser_id: savajcapitaluser_id,
-    savajcapitalbranch_id: savajcapitalbranch_id,
+    branchuser_id: branchuser_id,
+    role_id: role_id,
+    branch_id: branch_id,
     email: email,
     role: "savajcapitaluser",
     createdAt: createdAt,
@@ -108,14 +110,7 @@ const savajCapitalUserToken = async (
   return { token, expiresIn };
 };
 
-const userToken = async (
-  _id,
-  user_id,
-  email,
-  number,
-  createdAt,
-  updatedAt
-) => {
+const userToken = async (_id, user_id, email, number, createdAt, updatedAt) => {
   const payload = {
     _id: _id,
     user_id: user_id,
@@ -135,4 +130,11 @@ const userToken = async (
 
   return { token, expiresIn };
 };
-module.exports = { hashPassword, hashCompare, bankUserToken, superAdminToken ,savajCapitalUserToken ,userToken };
+module.exports = {
+  hashPassword,
+  hashCompare,
+  bankUserToken,
+  superAdminToken,
+  savajCapitalUserToken,
+  userToken,
+};

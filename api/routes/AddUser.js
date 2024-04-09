@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const AddUser = require("../models/AddUser");
-const BankUser = require("../models/BankUserSchema");
-const BankSchema = require("../models/BankSchema");
+const BankUser = require("../models/Bank/BankUserSchema");
+const BankSchema = require("../models/Bank/BankSchema");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
-const SavajCapitalUser = require("../models/SavajCapitalUser");
+const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 
@@ -23,6 +23,8 @@ const decrypt = (text) => {
   return decrypted;
 };
 
+const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+
 router.post("/adduser", async (req, res) => {
   try {
     const { userDetails } = req.body;
@@ -30,11 +32,11 @@ router.post("/adduser", async (req, res) => {
     const user = await AddUser.findOne({ email: userDetails.email });
     const bankUser = await BankUser.findOne({ email: userDetails.email });
     const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
-    const savajCapitalUser = await SavajCapitalUser.findOne({
+    const savajCapital_user = await SavajCapital_User.findOne({
       email: userDetails.email,
     });
 
-    if (bankUser || superAdmin || user || savajCapitalUser) {
+    if (bankUser || superAdmin || user || savajCapital_user) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
@@ -52,8 +54,8 @@ router.post("/adduser", async (req, res) => {
     const newUser = new AddUser({
       ...userDetails,
       user_id: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: currentDate,
+      updatedAt: currentDate,
       password: hashedPassword,
     });
 

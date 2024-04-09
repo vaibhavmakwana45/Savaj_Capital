@@ -65,18 +65,28 @@ function UserTable() {
   const filteredUsers =
     searchTerm.length === 0
       ? users
-      : users.filter((user) =>
-          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.number.toLowerCase().includes(searchTerm.toLowerCase()) 
+      : users.filter(
+          (user) =>
+            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.number.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = ["Name", "Email", "Number", "Action"];
+  const allHeaders = [
+    "Name",
+    "Email",
+    "Number",
+    "CreatedAt",
+    "UpdatedAt",
+    "Action",
+  ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
     item.username,
     item.email,
     item.number,
+    item.createdAt,
+    item.updatedAt,
   ]);
 
   const handleDelete = (id) => {
@@ -89,7 +99,7 @@ function UserTable() {
   };
 
   const handleRow = (id) => {
-    console.log(id)
+    console.log(id);
   };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
