@@ -25,6 +25,7 @@ import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
 import AddSavajCapitalUser from "addsavajcapitalbranch/AddSavajUser";
 import AddUser from "adduser/AddUser";
 import SavajUsers from "addsavajcapitalbranch/SavajUsers";
+import SavajUsersRole from "addsavajcapitalbranch/SavajUsersRole";
 
 var dashRoutes = [
   //superadmin
@@ -54,6 +55,14 @@ var dashRoutes = [
     name: "Savaj Capital Users",
     icon: <StatsIcon color="inherit" />,
     component: SavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+  },
+  {
+    path: "/savajuserroles",
+    name: "Savaj Capital Users",
+    icon: <StatsIcon color="inherit" />,
+    component: SavajUsersRole,
     hideInSidebar: true,
     layout: "/superadmin",
   },

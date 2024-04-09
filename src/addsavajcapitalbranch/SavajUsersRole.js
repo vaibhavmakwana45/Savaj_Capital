@@ -45,7 +45,7 @@ import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
 import TableComponent from "TableComponent";
 
-function Tables() {
+function SavajUsersRole() {
     const location = useLocation();
     const [banks, setBanks] = useState([]);
     const textColor = useColorModeValue("gray.700", "white");
@@ -55,57 +55,55 @@ function Tables() {
     const [role, setRole] = useState("")
     const [branch, setBranch] = useState({})
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedRoleId, setSelectedRoleId] = useState("");
+    const [selectedRole, setSelectedRole] = useState("")
 
     const searchParams = new URLSearchParams(location.search);
     const id = searchParams.get('id');
+
+    const getRolesData = async () => {
+
+        try {
+            const response = await AxiosInstance.get(
+                "/role/"
+            );
+
+            if (response.data.success) {
+                setBanks(response.data.data);
+                setLoading(false);
+            } else {
+                alert("Please try again later...!")
+            }
+        } catch (error) {
+            setLoading(false)
+            console.error(error)
+        }
+    }
 
 
     const filteredUsers =
         searchTerm.length === 0
             ? banks
             : banks.filter((user) =>
-                user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.role.toLowerCase().includes(searchTerm.toLowerCase())
+                user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.createdAt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.updatedAt.toLowerCase().includes(searchTerm.toLowerCase()) 
             );
 
     let navbarIcon = useColorModeValue("white", "gray.200");
     let menuBg = useColorModeValue("white", "navy.800");
 
-    const fetchBanks = async () => {
-        try {
-            const response = await AxiosInstance.get("/savaj_user/" + id);
-            if (response.data.data) {
-                setBanks(response.data.data);
-                setBranch(response.data.branch);
-            }
-            setLoading(false)
-        } catch (error) {
-            console.error("Error fetching banks:", error);
-        }
-    };
-
     useEffect(() => {
-        fetchBanks();
+        getRolesData();
     }, []);
 
-    const navigateToAnotherPage = (userId) => {
-        if (userId) {
-            history.push("/superadmin/addsavajcapitaluser?id=" + userId + "&&branch_id=" + id);
-            return;
-        }
-        history.push("/superadmin/addsavajcapitaluser");
-    };
-
-    const navigateToAnotherPageUser = () => {
-        history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
-    };
-
-    const allHeaders = ["Bank Name", "role", "Action"];
+    const allHeaders = ["role", "create date", "update date", "Action"];
 
     const formattedData = filteredUsers.map(bank => ([
-        bank.branchuser_id,
-        bank.email,
+        bank.role_id,
         bank.role,
+        bank.createdAt,
+        bank.updatedAt,
     ]));
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -114,13 +112,20 @@ function Tables() {
     const cancelRef = React.useRef();
     const deleteBank = async (bankId) => {
         try {
-            await AxiosInstance.delete(`/savaj_user/${bankId}`);
-            fetchBanks();
+            const response = await AxiosInstance.delete(`/role/${bankId}`);
+            getRolesData();
+            console.log(response.data);
             setIsDeleteDialogOpen(false);
-            toast.success("User deleted successfully!");
+            if (response.data.success) {
+
+                toast.success("Role deleted successfully!");
+            } else {
+                toast.error(response.data.message || "Please try again later!");
+
+            }
         } catch (error) {
             console.error("Error deleting bank:", error);
-            toast.error("Branch not delete");
+            toast.error("Role not delete");
         }
     };
 
@@ -131,8 +136,22 @@ function Tables() {
     }
 
     const handleEdit = (id) => {
-        navigateToAnotherPage(id)
+        setSelectedRoleId(id);
+        setIsAddRole(true);
+        console.log(banks);
+        
+        // Filter out the role based on its role_id
+        const role = banks.find((bank) => bank.role_id === id);
+    
+        // Check if role exists before accessing its properties
+        if (role) {
+            setSelectedRole(role.role);
+        } else {
+            // Handle the case where the role with the specified id is not found
+            console.error("Role not found for id:", id);
+        }
     }
+    
 
     const handleRow = (id) => {
         console.log(id)
@@ -148,6 +167,33 @@ function Tables() {
             if (response.data.success) {
                 toast.success("Role added successfully!");
                 setIsAddRole(false);
+                setSelectedRoleId("")
+                getRolesData()
+                setRole("")
+            } else {
+                toast.error(response.data.message || "Please try again later!")
+            }
+
+        } catch (error) {
+            console.error("Submission error", error);
+            toast.error("Failed to add. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const editRole = async (role) => {
+        try {
+            const response = await AxiosInstance.put(
+                "/role/"+selectedRoleId,
+                { role }
+            );
+
+            if (response.data.success) {
+                toast.success("Role Updated successfully!");
+                setIsAddRole(false);
+                setSelectedRoleId("")
+                getRolesData()
                 setRole("")
             } else {
                 toast.error(response.data.message || "Please try again later!")
@@ -168,7 +214,7 @@ function Tables() {
                     <CardHeader p="6px 0px 22px 0px">
                         <Flex justifyContent="space-between" alignItems="center">
                             <Text fontSize="xl" color={textColor} fontWeight="bold">
-                                {branch?.branch_name || "..."} {branch?.state && " - " + branch?.state + "," + branch?.city}
+                                Savaj Capital User Roles
                             </Text>
                             <div>
                                 <Input
@@ -178,32 +224,10 @@ function Tables() {
                                     width="250px"
                                     marginRight="10px"
                                 />
-                                <Menu>
-                                    <MenuButton>
-                                        <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                                            ...
-                                        </Button>
-                                    </MenuButton>
-                                    <MenuList p="16px 8px" bg={menuBg} mt="10px">
-                                        <Flex flexDirection="column" style={{ gap: 10 }}>
-                                            <MenuItem borderRadius="8px" onClick={navigateToAnotherPageUser}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Add User
-                                                </Flex>
-                                            </MenuItem>
-                                            <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPage() }}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Add Branch
-                                                </Flex>
-                                            </MenuItem>
-                                            <MenuItem borderRadius="8px" onClick={() => { history.push("/superadmin/savajuserroles") }}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Role
-                                                </Flex>
-                                            </MenuItem>
-                                        </Flex>
-                                    </MenuList>
-                                </Menu>
+                                <Button onClick={() => { setIsAddRole(true) }} colorScheme="blue">
+                                    Add Role
+                                </Button>
+
                             </div>
                         </Flex>
                     </CardHeader>
@@ -259,7 +283,7 @@ function Tables() {
                 <AlertDialog
                     isOpen={isAddRole}
                     leastDestructiveRef={cancelRef}
-                    onClose={() => setIsAddRole(false)}
+                    onClose={() => {setIsAddRole(false); setSelectedRoleId("")}}
                 >
                     <AlertDialogOverlay>
                         <AlertDialogContent>
@@ -271,13 +295,17 @@ function Tables() {
                                 <FormControl id="branch_name" isRequired>
                                     <Input
                                         name="branch_name"
-                                        onChange={(e) => { setRole(e.target.value) }}
-                                        value={role}
+                                        onChange={(e) => {  selectedRoleId == "" ? setRole(e.target.value) : setSelectedRole(e.target.value) }}
+                                        value={selectedRoleId == "" ? role : selectedRole}
                                         placeholder="Add role"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault(); // Prevent the default behavior of Enter key
-                                                handleAddRole(role); // Call the addRole function
+                                                if (selectedRoleId == "") {
+                                                    handleAddRole(role); // Call the addRole function
+                                                }else{
+                                                    editRole(selectedRole)
+                                                }
                                             }
                                         }}
                                     />
@@ -287,7 +315,7 @@ function Tables() {
                             <AlertDialogFooter>
                                 <Button
                                     ref={cancelRef}
-                                    onClick={() => setIsAddRole(false)}
+                                    onClick={() => {setIsAddRole(false); setSelectedRoleId("")}}
                                 >
                                     Cancel
                                 </Button>
@@ -297,7 +325,7 @@ function Tables() {
                                     ml={3}
                                     type="submit"
                                 >
-                                    Add Now
+                                    {selectedRoleId != "" ? "Updated Now" : "Add Now"} 
                                 </Button>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -309,4 +337,4 @@ function Tables() {
     );
 }
 
-export default Tables;
+export default SavajUsersRole;

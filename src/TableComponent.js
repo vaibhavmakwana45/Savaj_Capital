@@ -55,11 +55,13 @@
                                             onClick={() => handleDelete(rowData[0])}
                                             style={{ marginRight: 15 }}
                                         />
+                                        
                                         <IconButton
                                             aria-label="Edit bank"
                                             icon={<EditIcon />}
                                             onClick={() => handleEdit(rowData[0])}
                                         />
+                                        
                                     </div>
                                 </Td>
                             </Tr>

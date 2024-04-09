@@ -1,3 +1,11 @@
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Stack,
+  FormControl,
+} from "@chakra-ui/react";// Add axios to your imports
 // Add axios to your imports
 import axios from "axios";
 import {
@@ -51,6 +59,10 @@ function SavajCapitalBranchTable() {
         );
 
   const allHeaders = ["Savaj Capital Branch", "City", "State", "Action"];
+
+  
+  let navbarIcon = useColorModeValue("white", "gray.200");
+  let menuBg = useColorModeValue("white", "navy.800");
 
   const formattedData = filteredUsers?.map(item => ([
     item.branch_id,
@@ -141,7 +153,7 @@ function SavajCapitalBranchTable() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Savaj Capital Branches
               </Text>
-              <div >
+              <div>
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -149,13 +161,33 @@ function SavajCapitalBranchTable() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button style={{ marginRight: 15 }} onClick={navigateToAnotherPageUser} colorScheme="blue">
-                  Add User
-                </Button>
-                <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                  Add Branch
-                </Button>
-              </div>
+                                <Menu>
+                                    <MenuButton>
+                                        <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                                            ...
+                                        </Button>
+                                    </MenuButton>
+                                    <MenuList p="16px 8px" bg={menuBg} mt="10px">
+                                        <Flex flexDirection="column" style={{ gap: 10 }}>
+                                            <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPage() }}>
+                                                <Flex align="center" justifyContent="flex-start">
+                                                    Add Branch
+                                                </Flex>
+                                            </MenuItem>
+                                            <MenuItem borderRadius="8px" onClick={navigateToAnotherPageUser}>
+                                                <Flex align="center" justifyContent="flex-start">
+                                                    Add User
+                                                </Flex>
+                                            </MenuItem>
+                                            <MenuItem borderRadius="8px" onClick={() => { history.push("/superadmin/savajuserroles") }}>
+                                                <Flex align="center" justifyContent="flex-start">
+                                                    Role
+                                                </Flex>
+                                            </MenuItem>
+                                        </Flex>
+                                    </MenuList>
+                                </Menu>
+                            </div>
             </Flex>
           </CardHeader>
           <CardBody>
