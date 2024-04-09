@@ -180,7 +180,6 @@ function AddBank() {
     setLoading(true);
 
     const submissionData = {
-      bankDetails: {
         bank_name: formData.bank_name,
         country: formData.country,
         state: formData.state,
@@ -188,11 +187,6 @@ function AddBank() {
         branch_name: formData.branch_name,
         state_code: selectedState,
         country_code: selectedCountry,
-      },
-      userDetails: {
-        email: formData.email,
-        password: formData.password,
-      },
     };
 
     try {
@@ -215,6 +209,8 @@ function AddBank() {
       else {
 
         const response = await AxiosInstance.post("/addbankuser/addbankuser", submissionData);
+
+        console.log(submissionData, "submissionData")
 
         if (response.data?.statusCode === 201) {
           toast.error("Email already in use");
@@ -332,38 +328,6 @@ function AddBank() {
                 <FormLabel>Branch Name</FormLabel>
                 <Input name="branch_name" onChange={handleChange} value={formData.branch_name} />
               </FormControl>
-
-              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
-                Login Credentials
-              </Text>
-              <FormControl id="email" mt={4} isRequired>
-                <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} value={formData.email} />
-              </FormControl>
-
-              {
-                !id &&
-                <FormControl id="password" mt={4} isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem" // ensures that text doesn't go under the icon
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      onChange={handleChange}
-                    />
-                    <InputRightElement width="4.5rem">
-                      <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              }
 
               <Button
                 mt={4}

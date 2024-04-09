@@ -1,4 +1,9 @@
-// Add axios to your imports
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+} from "@chakra-ui/react";// Add axios to your imports// Add axios to your imports
 import axios from "axios";
 import {
   Flex,
@@ -33,6 +38,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
+
 import TableComponent from "TableComponent";
 
 function Tables() {
@@ -42,6 +48,7 @@ function Tables() {
   const history = useHistory();
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("");
+  let menuBg = useColorModeValue("white", "navy.800");
 
   const filteredUsers = searchTerm.length === 0
     ? banks
@@ -58,7 +65,8 @@ function Tables() {
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const response = await AxiosInstance.get("/addbankuser/banks");
+        const response = await AxiosInstance.get("/addbankuser");
+        console.log(response.data.data)
         setBanks(response.data.data);
         setLoading(false)
       } catch (error) {
@@ -77,15 +85,27 @@ function Tables() {
     history.push("/superadmin/addbank");
   };
 
-  const allHeaders = ["Bank Name", "Branch Name", "City", "State", "Users", "Action"];
+  const navigateToAnotherPageUser = (id) => {
+    if (id) {
+      history.push("/superadmin/addbankuser?id=" + id);
+      return;
+    }
+    history.push("/superadmin/addbankuser");
+  };
 
+  const allHeaders = ["Bank Name", "Branch Name", "City",  "State", "users", "Action",];
+  
   const formattedData = filteredUsers.map(bank => ([
     bank.bank_id,
     bank.bank_name,
     bank.branch_name,
     bank.city,
     bank.state,
-    bank.users.map(user => user.email).join(", "), // Concatenate emails of users
+    bank?.user_count,
+  ]));
+
+  const formattedCollapsedData = filteredUsers.map(bank => ([
+    bank.bank_id,
   ]));
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -114,8 +134,8 @@ function Tables() {
   }
 
   const handleRow = (id) => {
-    console.log(id)
-  }
+    history.push("/superadmin/bankusers?id="+id)
+}
 
   return (
     <>
@@ -137,9 +157,27 @@ function Tables() {
                   marginRight="10px"
                 />
 
-                <Button onClick={() => { navigateToAnotherPage() }} colorScheme="blue">
-                  Add Bank
-                </Button>
+                <Menu>
+                  <MenuButton>
+                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                      ...
+                    </Button>
+                  </MenuButton>
+                  <MenuList p="16px 8px" bg={menuBg} mt="10px">
+                    <Flex flexDirection="column" style={{ gap: 10 }}>
+                      <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPage() }}>
+                        <Flex align="center" justifyContent="flex-start">
+                          Add Bank
+                        </Flex>
+                      </MenuItem>
+                      <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPageUser() }}>
+                        <Flex align="center" justifyContent="flex-start">
+                          Add Bank User
+                        </Flex>
+                      </MenuItem>
+                    </Flex>
+                  </MenuList>
+                </Menu>
 
               </div>
             </Flex>

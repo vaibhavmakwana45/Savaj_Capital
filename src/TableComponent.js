@@ -44,7 +44,7 @@
                             <Tr pl="0px" key={rowIndex} >
                                 {rowData.slice(1).map((cellData, cellIndex) => (
                                     <Td style={{cursor:'pointer'}} pl="0px" key={cellIndex} onClick={()=>{handleRow(rowData[0])}} >
-                                        {cellData}
+                                        {cellData || "-"}
                                     </Td>
                                 ))}
                                 <Td pl="0px">
