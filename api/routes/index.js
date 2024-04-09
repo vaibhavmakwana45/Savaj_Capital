@@ -4,7 +4,7 @@ const moment = require("moment");
 const SuperAdminSignup = require("../models/SuperAdminSignupSchema");
 const BankUser = require("../models/BankUserSchema");
 const AddUser = require("../models/AddUser");
-const SavajCapitalUser = require("../models/SavajCapitalUser");
+const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const {
   bankUserToken,
   superAdminToken,
@@ -40,7 +40,7 @@ router.post("/login", async (req, res) => {
     const superAdmin = await SuperAdminSignup.findOne({
       email: req.body.email,
     });
-    const savajCapitalUser = await SavajCapitalUser.findOne({
+    const savajCapitalUser = await SavajCapital_User.findOne({
       email: req.body.email,
     });
 

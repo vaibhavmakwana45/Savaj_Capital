@@ -5,7 +5,7 @@ const AddUser = require("../models/AddUser");
 const BankUser = require("../models/BankUserSchema");
 const BankSchema = require("../models/BankSchema");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
-const SavajCapitalUser = require("../models/SavajCapitalUser");
+const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 
@@ -30,11 +30,11 @@ router.post("/adduser", async (req, res) => {
     const user = await AddUser.findOne({ email: userDetails.email });
     const bankUser = await BankUser.findOne({ email: userDetails.email });
     const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
-    const savajCapitalUser = await SavajCapitalUser.findOne({
+    const SavajCapital_User = await SavajCapital_User.findOne({
       email: userDetails.email,
     });
 
-    if (bankUser || superAdmin || user || savajCapitalUser) {
+    if (bankUser || superAdmin || user || SavajCapital_User) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
