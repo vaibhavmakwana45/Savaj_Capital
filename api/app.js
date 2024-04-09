@@ -14,7 +14,8 @@ var app = express();
 
 const SuperAdminSignupRouter = require("./routes/SuperAdminSignupApi");
 const AddUserRouter = require("./routes/AddUser");
-const BankRouter = require("./routes/AddBanksRoutes");
+const BankRouter = require("./routes/Bank/AddBanksRoutes");
+const BankUserRouter = require("./routes/Bank/BankUser");
 const SavajCapital_BranchRoutes = require("./routes/Savaj_Capital/SavajCapital_Branch"); // Branch
 const SavajCapital_Role = require("./routes/Savaj_Capital/SavajCapital_Role"); // Role
 const SavajCapital_UserRoutes = require("./routes/Savaj_Capital/SavajCapital_User"); // Role
@@ -36,6 +37,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/superadminsignup", SuperAdminSignupRouter);
 app.use("/api/addusers", AddUserRouter);
 app.use("/api/addbankuser", BankRouter);
+app.use("/api/bank_user", BankUserRouter);
 app.use("/api/branch", SavajCapital_BranchRoutes);
 app.use("/api/role", SavajCapital_Role);
 app.use("/api/savaj_user", SavajCapital_UserRoutes);

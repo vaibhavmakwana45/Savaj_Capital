@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const moment = require("moment");
 const SuperAdminSignup = require("../models/SuperAdminSignupSchema");
-const BankUser = require("../models/BankUserSchema");
+const BankUser = require("../models/Bank/BankUserSchema");
 const AddUser = require("../models/AddUser");
 const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const {
