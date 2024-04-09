@@ -22,7 +22,9 @@ import {
   SupportIcon,
 } from "components/Icons/Icons";
 import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
+import AddSavajCapitalUser from "addsavajcapitalbranch/AddSavajUser";
 import AddUser from "adduser/AddUser";
+import SavajUsers from "addsavajcapitalbranch/SavajUsers";
 
 var dashRoutes = [
   //superadmin
@@ -48,6 +50,14 @@ var dashRoutes = [
     layout: "/superadmin",
   },
   {
+    path: "/savajusers",
+    name: "Savaj Capital Users",
+    icon: <StatsIcon color="inherit" />,
+    component: SavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+  },
+  {
     path: "/alluser",
     name: "All User",
     icon: <PersonIcon color="inherit" />,
@@ -67,6 +77,14 @@ var dashRoutes = [
     name: "Add Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,
     component: AddSavajCapitalBranch,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/addsavajcapitaluser",
+    name: "Add Savaj Capital User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddSavajCapitalUser,
     layout: "/superadmin",
     hideInSidebar: true,
   },

@@ -39,6 +39,40 @@ function AddBank() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get('id');
 
+  const allBanksName  = [
+    "State Bank of India (SBI)",
+    "HDFC Bank",
+    "ICICI Bank",
+    "Punjab National Bank (PNB)",
+    "Axis Bank",
+    "Canara Bank",
+    "Bank of Baroda (BoB)",
+    "Union Bank of India",
+    "Bank of India (BoI)",
+    "IndusInd Bank",
+    "IDBI Bank",
+    "Kotak Mahindra Bank",
+    "Central Bank of India",
+    "Yes Bank",
+    "Indian Bank",
+    "Federal Bank",
+    "UCO Bank",
+    "Syndicate Bank",
+    "Bank of Maharashtra",
+    "South Indian Bank",
+    "Karur Vysya Bank",
+    "Punjab & Sind Bank",
+    "Dena Bank",
+    "Vijaya Bank",
+    "Andhra Bank",
+    "IDFC FIRST Bank",
+    "RBL Bank",
+    "HSBC India",
+    "Standard Chartered Bank India",
+    "Citibank India"
+  ];
+  
+
 
   const [formData, setFormData] = useState({
     bank_id: "",
@@ -215,9 +249,23 @@ function AddBank() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="bank_name" isRequired>
+
+              <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Bank Name</FormLabel>
-                <Input name="bank_name" value={formData.bank_name} onChange={handleChange} />
+                <Select
+                  name="bank_name"
+                  placeholder="Select Bank"
+                  onChange={(e) =>
+                    setFormData({ ...formData, bank_name: e.target.value })
+                  }
+                  value={formData.bank_name}
+                >
+                   { allBanksName.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                </Select>
               </FormControl>
 
               <FormControl id="country" mt={4} isRequired>

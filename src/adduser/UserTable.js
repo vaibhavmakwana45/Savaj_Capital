@@ -20,6 +20,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   IconButton,
+  Input,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
@@ -38,16 +39,17 @@ function UserTable() {
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await AxiosInstance.get("/addusers/getusers");
         setUsers(response.data.users);
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
-        setLoading(false)
+        setLoading(false);
 
         console.error("Error fetching users:", error);
       }
@@ -60,106 +62,127 @@ function UserTable() {
     history.push("/superadmin/adduser");
   };
 
-  const allHeaders = ["Name", "Email", "Number", "Action"];
+  const filteredUsers =
+    searchTerm.length === 0
+      ? users
+      : users.filter((user) =>
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.number.toLowerCase().includes(searchTerm.toLowerCase()) 
+        );
 
-  const formattedData = users.map(item => ([
+  const allHeaders = ["Name", "Email", "Number", "Action"];
+  const formattedData = filteredUsers.map((item) => [
     item.user_id,
     item.username,
     item.email,
     item.number,
-  ]));
+  ]);
 
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
-  }
+  };
 
   const handleEdit = (id) => {
-    history.push(
-      "/superadmin/adduser?id=" + id
-    )
-  }
+    history.push("/superadmin/adduser?id=" + id);
+  };
 
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState(null);
-    const cancelRef = React.useRef();
-    const deletebranch = async (userId) => {
-      try {
-        await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
-        setUsers(users.filter((user) => user.user_id !== userId));
-        setIsDeleteDialogOpen(false);
-        toast.success("User deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        toast.error("user not delete");
-      }
-    };
+  const handleRow = (id) => {
+    console.log(id)
+  };
 
-    return (
-      <>
-        <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-          <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
-            <CardHeader p="6px 0px 22px 0px">
-              <Flex justifyContent="space-between" alignItems="center">
-                <Text fontSize="xl" color={textColor} fontWeight="bold">
-                  All Users
-                </Text>
-                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const cancelRef = React.useRef();
+  const deletebranch = async (userId) => {
+    try {
+      await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
+      setUsers(users.filter((user) => user.user_id !== userId));
+      setIsDeleteDialogOpen(false);
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("user not delete");
+    }
+  };
+
+  return (
+    <>
+      <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+        <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
+          <CardHeader p="6px 0px 22px 0px">
+            <Flex justifyContent="space-between" alignItems="center">
+              <Text fontSize="xl" color={textColor} fontWeight="bold">
+                All Users
+              </Text>
+              <Flex>
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  marginRight="10px"
+                />
+                <Button
+                  onClick={() => history.push("/superadmin/adduser")}
+                  colorScheme="blue"
+                >
                   Add User
                 </Button>
               </Flex>
-            </CardHeader>
-            <CardBody>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <TableComponent
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              handleRow={handleRow}
+            />
+          </CardBody>
+        </Card>
+        <AlertDialog
+          isOpen={isDeleteDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Delete User
+              </AlertDialogHeader>
 
-              <TableComponent
-                data={formattedData}
-                textColor={textColor}
-                borderColor={borderColor}
-                loading={loading}
-                allHeaders={allHeaders}
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-              />
+              <AlertDialogBody>
+                Are you sure? You can't undo this action afterwards.
+              </AlertDialogBody>
 
-            </CardBody>
-          </Card>
-          <AlertDialog
-            isOpen={isDeleteDialogOpen}
-            leastDestructiveRef={cancelRef}
-            onClose={() => setIsDeleteDialogOpen(false)}
-          >
-            <AlertDialogOverlay>
-              <AlertDialogContent>
-                <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                  Delete User
-                </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => deletebranch(selectedUserId)}
+                  ml={3}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+      </Flex>
+      <Toaster />
+    </>
+  );
+}
 
-                <AlertDialogBody>
-                  Are you sure? You can't undo this action afterwards.
-                </AlertDialogBody>
-
-                <AlertDialogFooter>
-                  <Button
-                    ref={cancelRef}
-                    onClick={() => setIsDeleteDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    colorScheme="red"
-                    onClick={() => deletebranch(selectedUserId)}
-                    ml={3}
-                  >
-                    Delete
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialogOverlay>
-          </AlertDialog>
-        </Flex>
-        <Toaster />
-      </>
-    );
-  }
-
-  export default UserTable;
+export default UserTable;

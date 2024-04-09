@@ -11,6 +11,7 @@ import {
   Td,
   useColorModeValue,
   Button,
+  Input
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -38,15 +39,24 @@ function SavajCapitalBranchTable() {
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const allHeaders = ["Savaj Capital Branch", "City", "State", "Users", "Action"];
+  const filteredUsers =
+    searchTerm.length === 0
+      ? savajcapitalbranch
+      : savajcapitalbranch.filter((user) =>
+          user.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.state.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
-  const formattedData = savajcapitalbranch.map(item => ([
-    item.savajcapitalbranch_id,
-    item.savajcapitalbranch_name,
+  const allHeaders = ["Savaj Capital Branch", "City", "State", "Action"];
+
+  const formattedData = filteredUsers?.map(item => ([
+    item.branch_id,
+    item.branch_name,
     item.city,
     item.state,
-    item.users.map((user) => user.email).join(", ")
   ]));
 
   const handleDelete = (id) => {
@@ -60,22 +70,30 @@ function SavajCapitalBranchTable() {
     navigateToEditPage(id)
   }
 
+  const handleRow = (id) => {
+    history.push("savajusers?id=" + id)
+  }
+
+  const fetchBanks = async () => {
+    try {
+      const response = await AxiosInstance.get(
+        "/branch"
+      );
+      setLoading(false)
+      setSavajcapitalbranch(response.data.data);
+    } catch (error) {
+      console.error("Error fetching savajcapitalbranch:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchBanks = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          "/addsavajbapitalbranch/allsavajcapitalbranch"
-        );
-        setLoading(false)
-        setSavajcapitalbranch(response.data.data);
-        console.log("first", response.data.data);
-      } catch (error) {
-        console.error("Error fetching savajcapitalbranch:", error);
-      }
-    };
 
     fetchBanks();
   }, []);
+
+  const navigateToAnotherPageUser = () => {
+    history.push("/superadmin/addsavajcapitaluser");
+  };
 
   const navigateToAnotherPage = () => {
     history.push("/superadmin/addsavajcapitalbranch");
@@ -86,8 +104,8 @@ function SavajCapitalBranchTable() {
   const cancelRef = React.useRef();
   const deletebranch = async (branchId) => {
     try {
-      await AxiosInstance.delete(
-        `/addsavajbapitalbranch/deletebranch/${branchId}`
+      const response = await AxiosInstance.delete(
+        `/branch/${branchId}`
       );
       setSavajcapitalbranch(
         savajcapitalbranch.filter(
@@ -95,7 +113,16 @@ function SavajCapitalBranchTable() {
         )
       );
       setIsDeleteDialogOpen(false);
-      toast.success("Branch deleted successfully!");
+      if (response.data.success) {
+        fetchBanks();
+        toast.success("Branch deleted Successfully!", {
+          duration: 800 // Time in milliseconds (3 seconds in this example)
+        });
+      } else if (response.data) {
+        toast.error(response.data.message || "please try again later!", {
+          duration: 800 // Time in milliseconds (3 seconds in this example)
+        });
+      }
     } catch (error) {
       console.error("Error deleting branch:", error);
       toast.error("branch not delete");
@@ -112,22 +139,35 @@ function SavajCapitalBranchTable() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Savaj Capital Branch User
+                Savaj Capital Branches
               </Text>
-              <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                Add
-              </Button>
+              <div >
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  marginRight="10px"
+                />
+                <Button style={{ marginRight: 15 }} onClick={navigateToAnotherPageUser} colorScheme="blue">
+                  Add User
+                </Button>
+                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                  Add Branch
+                </Button>
+              </div>
             </Flex>
           </CardHeader>
           <CardBody>
 
-          <TableComponent
-                data={formattedData}
-                loading={loading}
-                allHeaders={allHeaders}
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-              />
+            <TableComponent
+              data={formattedData}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              handleRow={handleRow}
+            />
 
           </CardBody>
         </Card>

@@ -29,7 +29,7 @@ function EditSavajCapitalBranch() {
   const [details, setDetails] = useState({
     state: "",
     city: "",
-    savajcapitalbranch_name: "",
+    branch_name: "",
     users: [{ email: "", password: "" }],
   });
   const toastInstance = useToast();
@@ -50,20 +50,11 @@ function EditSavajCapitalBranch() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:4000/api/addsavajbapitalbranch/savajcapitalbranch/${id}`
+        const response = await AxiosInstance.get(
+          "/branch/" + id
         );
         if (response.data.success) {
-          const fetchedData = response.data.data;
-          setDetails({
-            state: fetchedData.state,
-            city: fetchedData.city,
-            savajcapitalbranch_name: fetchedData.savajcapitalbranch_name,
-            users:
-              fetchedData.users.length > 0
-                ? fetchedData.users
-                : [{ email: "", password: "" }],
-          });
+          setDetails(response.data.data)
         } else {
           toastInstance({
             title: "An error occurred",
@@ -122,26 +113,11 @@ function EditSavajCapitalBranch() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const branchData = {
-      state: details.state,
-      city: details.city,
-      savajcapitalbranch_name: details.savajcapitalbranch_name,
-    };
-
-    const userData = details.users.map((user) => ({
-      email: user.email,
-      password: user.password,
-    }));
-
-    console.log(branchData);
-    console.log(userData);
-
-    const submissionData = { branchData, userData };
 
     try {
       const response = await AxiosInstance.put(
-        `http://localhost:4000/api/addsavajbapitalbranch/editsavajcapitalbranch/${id}`,
-        submissionData
+        `/branch/${id}`,
+        details
       );
       if (response.data.success) {
         toast.success("Details Updated", {
@@ -210,35 +186,12 @@ function EditSavajCapitalBranch() {
                 <FormLabel>Branch Name</FormLabel>
                 <Input
                   placeholder="Branch Name"
-                  name="savajcapitalbranch_name"
-                  value={details.savajcapitalbranch_name}
+                  name="branch_name"
+                  value={details.branch_name}
                   onChange={handleSavajCapitalBranchChange}
                 />
               </FormControl>
 
-              {details.users.map((user, index) => (
-                <React.Fragment key={index}>
-                  <FormControl isRequired mb={3}>
-                    <FormLabel>Email</FormLabel>
-                    <Input
-                      placeholder="Email"
-                      name="email"
-                      value={user.email}
-                      onChange={(e) => handleUserChange(index, e)}
-                    />
-                  </FormControl>
-                    {/* <FormControl isRequired mb={3}>
-                        <FormLabel>Password</FormLabel>
-                        <Input
-                        placeholder="Password"
-                        name="password"
-                        type="password"
-                        value={user.password}
-                        onChange={(e) => handleUserChange(index, e)}
-                        />
-                    </FormControl> */}
-                </React.Fragment>
-              ))}
               <Button mt={4} colorScheme="teal" type="submit">
                 Update Details
               </Button>

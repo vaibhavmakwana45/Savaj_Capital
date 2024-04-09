@@ -51,17 +51,17 @@ function AddSavajCapitalBranch() {
     setFormData((prevFormData) => ({
       ...prevFormData,
       state: stateFullName,
+      state_code: stateObj.isoCode,
     }));
   };
 
   const [formData, setFormData] = useState({
     savajcapitalbranch_id: "",
     savajcapitaluser_id: "",
-    savajcapitalbranch_name: "",
+    branch_name: "",
     state: "",
     city: "",
-    email: "",
-    password: "",
+    state_code: ""
   });
 
   const handleChange = (e) => {
@@ -76,29 +76,31 @@ function AddSavajCapitalBranch() {
     e.preventDefault();
     setLoading(true);
 
-    const submissionData = {
-      savajCapitalBranchDetails: {
-        state: formData.state,
-        city: formData.city,
-        savajcapitalbranch_name: formData.savajcapitalbranch_name,
-      },
-      savajCapitalUserDetails: {
-        email: formData.email,
-        password: formData.password,
-      },
-    };
+    // const submissionData = {
+    //   savajCapitalBranchDetails: {
+    //     state: formData.state,
+    //     city: formData.city,
+    //     branch_name: formData.branch_name,
+    //   },
+    //   savajCapitalUserDetails: {
+    //     email: formData.email,
+    //     password: formData.password,
+    //   },
+    // };
 
     try {
       const response = await AxiosInstance.post(
-        "/addsavajbapitalbranch/addsavajcapitalbranch",
-        submissionData
+        "/branch",
+        formData
       );
 
-      if (response.data.statusCode === 201) {
-        toast.error("Email already in use");
-      } else if (response.data.success) {
+      console.log(response.data, "response.data")
+
+      if (response.data.success) {
         toast.success("Branch and User added successfully!");
         history.push("/superadmin/savajcapitalbranch");
+      }else{
+        toast.error(response.data.message || "Please try again later!")
       }
     } catch (error) {
       console.error("Submission error", error);
@@ -115,7 +117,7 @@ function AddSavajCapitalBranch() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Add Savaj Capital Branch and User
+                Add Savaj Capital Branch
               </Text>
             </Flex>
           </CardHeader>
@@ -151,9 +153,9 @@ function AddSavajCapitalBranch() {
                   ))}
                 </Select>
               </FormControl>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              <FormControl id="branch_name" isRequired mt={4}>
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
-                <Input name="savajcapitalbranch_name" onChange={handleChange} />
+                <Input name="branch_name" onChange={handleChange} />
               </FormControl>
               {/* <FormControl id="branch_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
@@ -161,39 +163,14 @@ function AddSavajCapitalBranch() {
               </FormControl> */}
 
               {/* User Details */}
-              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
-                Login Credential
-              </Text>
-              <FormControl id="email" mt={4} isRequired>
-                <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} />
-              </FormControl>
-              <FormControl id="password" mt={4} isRequired>
-                <FormLabel>Password</FormLabel>
-                <InputGroup size="md">
-                  <Input
-                    pr="4.5rem" // ensures that text doesn't go under the icon
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    onChange={handleChange}
-                  />
-                  <InputRightElement width="4.5rem">
-                    <Button
-                      h="1.75rem"
-                      size="sm"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+
 
               <Button
                 mt={4}
                 colorScheme="blue"
                 type="submit"
                 isLoading={loading}
+                style={{ marginTop: 30 }}
               >
                 Add Branch
               </Button>
