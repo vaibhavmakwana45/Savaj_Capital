@@ -28,6 +28,9 @@ import SavajUsers from "addsavajcapitalbranch/SavajUsers";
 import SavajUsersRole from "addsavajcapitalbranch/SavajUsersRole";
 import AddBankUser from "addbank/AddBankUser";
 import BankUsers from "addbank/BankUsers";
+import LoanTypes from "loan/LoanTypes";
+import AddLoanType from "loan/AddLoanType";
+import LoanSubTypes from "loan/LoanSubTypes";
 
 var dashRoutes = [
   //superadmin
@@ -100,6 +103,21 @@ var dashRoutes = [
     hideInSidebar: true,
   },
   {
+    path: "/loan",
+    name: "Loan",
+    icon: <CreditIcon color="inherit" />,
+    component: LoanTypes,
+    layout: "/superadmin",
+  },
+  {
+    path: "/loantype",
+    name: "Loan",
+    icon: <CreditIcon color="inherit" />,
+    component: LoanSubTypes,
+    hideInSidebar: true,
+    layout: "/superadmin",
+  },
+  {
     path: "/addsavajcapitalbranch",
     name: "Add Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,
@@ -120,6 +138,14 @@ var dashRoutes = [
     name: "Add User",
     icon: <CreditIcon color="inherit" />,
     component: AddUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/addloantype",
+    name: "Add User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddLoanType,
     layout: "/superadmin",
     hideInSidebar: true,
   },
