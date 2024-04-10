@@ -26,6 +26,7 @@ import AddSavajCapitalUser from "addsavajcapitalbranch/AddSavajUser";
 import AddUser from "adduser/AddUser";
 import SavajUsers from "addsavajcapitalbranch/SavajUsers";
 import SavajUsersRole from "addsavajcapitalbranch/SavajUsersRole";
+import NewPassword from "views/Pages/NewPassword";
 
 var dashRoutes = [
   //superadmin
@@ -147,6 +148,13 @@ var dashRoutes = [
         name: "Sign Up",
         icon: <RocketIcon color="inherit" />,
         component: SignUp,
+        layout: "/auth",
+      },
+      {
+        path: "/setpassword",
+        name: "New Password",
+        icon: <RocketIcon color="inherit" />,
+        component: NewPassword,
         layout: "/auth",
       },
     ],

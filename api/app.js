@@ -16,6 +16,7 @@ const SuperAdminSignupRouter = require("./routes/SuperAdminSignupApi");
 const AddUserRouter = require("./routes/AddUser");
 const BankRouter = require("./routes/AddBanksRoutes");
 const SavajCapitalBranchRoutes = require("./routes/AddSavajCapitalBranchRoutes");
+const SetPasswordRoutes = require("./routes/ResetPassword");
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -34,6 +35,7 @@ app.use("/api/superadminsignup", SuperAdminSignupRouter);
 app.use("/api/addusers", AddUserRouter);
 app.use("/api/addbankuser", BankRouter);
 app.use("/api/addsavajbapitalbranch", SavajCapitalBranchRoutes);
+app.use("/api/setpassword", SetPasswordRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

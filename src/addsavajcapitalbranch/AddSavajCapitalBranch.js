@@ -61,7 +61,10 @@ function AddSavajCapitalBranch() {
     branch_name: "",
     state: "",
     city: "",
-    state_code: ""
+    state_code: "",
+    mobile: "",
+    email: "",
+    adress: "",
   });
 
   const handleChange = (e) => {
@@ -89,18 +92,15 @@ function AddSavajCapitalBranch() {
     // };
 
     try {
-      const response = await AxiosInstance.post(
-        "/branch",
-        formData
-      );
+      const response = await AxiosInstance.post("/branch", formData);
 
-      console.log(response.data, "response.data")
+      console.log(response.data, "response.data");
 
       if (response.data.success) {
         toast.success("Branch and User added successfully!");
         history.push("/superadmin/savajcapitalbranch");
-      }else{
-        toast.error(response.data.message || "Please try again later!")
+      } else {
+        toast.error(response.data.message || "Please try again later!");
       }
     } catch (error) {
       console.error("Submission error", error);
@@ -157,14 +157,23 @@ function AddSavajCapitalBranch() {
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl>
+              <FormControl id="mobile" isRequired mt={4}>
+                <FormLabel>Branch Mobile</FormLabel>
+                <Input name="mobile" onChange={handleChange} />
+              </FormControl>{" "}
+              <FormControl id="email" isRequired mt={4}>
+                <FormLabel>Branch Email</FormLabel>
+                <Input name="email" onChange={handleChange} />
+              </FormControl>{" "}
+              <FormControl id="adress" isRequired mt={4}>
+                <FormLabel>Branch Address</FormLabel> 
+                <Input name="adress" onChange={handleChange} />
+              </FormControl>
               {/* <FormControl id="branch_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl> */}
-
               {/* User Details */}
-
-
               <Button
                 mt={4}
                 colorScheme="blue"

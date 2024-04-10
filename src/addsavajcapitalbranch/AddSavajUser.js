@@ -39,59 +39,53 @@ function AddSavajCapitalBranch() {
   const [loading, setLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [branches, setBranches] = useState(["sbi", "pnb"]);
-  const [roles, setRoles] = useState(["billing checker", "cibil", "aadhar checker"])
+  const [roles, setRoles] = useState([
+    "billing checker",
+    "cibil",
+    "aadhar checker",
+  ]);
   const cancelRef = React.useRef();
   const [role, setRole] = useState("");
   const location = useLocation();
 
   const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get('id');
-  const branch_id = searchParams.get('branch_id');
+  const id = searchParams.get("id");
+  const branch_id = searchParams.get("branch_id");
 
   const history = useHistory();
 
   const getRolesData = async () => {
-
     try {
-      const response = await AxiosInstance.get(
-        "/role/"
-      );
+      const response = await AxiosInstance.get("/role/");
 
       if (response.data.success) {
         setRoles(response.data.data);
       } else {
-        alert("Please try again later...!")
+        alert("Please try again later...!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
   const getBranchesData = async () => {
-
     try {
-      const response = await AxiosInstance.get(
-        "/branch/"
-      );
+      const response = await AxiosInstance.get("/branch/");
 
       if (response.data.success) {
         setBranches(response.data.data);
       } else {
-        alert("Please try again later...!")
+        alert("Please try again later...!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const getData = async () => {
-
     try {
-      const response = await AxiosInstance.get(
-        "/savaj_user/user/" + id
-      );
+      const response = await AxiosInstance.get("/savaj_user/user/" + id);
 
       if (response.data.success) {
-
         const { branch, data } = response.data;
 
         const submissionData = {
@@ -101,24 +95,23 @@ function AddSavajCapitalBranch() {
           password: "",
         };
 
-        console.log(submissionData)
+        console.log(submissionData);
 
-        setFormData(submissionData)
+        setFormData(submissionData);
       } else {
-        alert("Please try again later...!")
+        alert("Please try again later...!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
-
+  };
 
   useEffect(() => {
     if (id) {
       getData();
     }
     if (branch_id) {
-      setFormData({ ...formData, branch_id: branch_id })
+      setFormData({ ...formData, branch_id: branch_id });
     }
     getRolesData();
     getBranchesData();
@@ -155,7 +148,7 @@ function AddSavajCapitalBranch() {
     password: "",
   });
 
-  console.log(formData)
+  console.log(formData);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -167,66 +160,50 @@ function AddSavajCapitalBranch() {
 
   const handleAddRole = async (role) => {
     try {
-      const response = await AxiosInstance.post(
-        "/role",
-        { role }
-      );
+      const response = await AxiosInstance.post("/role", { role });
 
       if (response.data.success) {
         toast.success("Role added successfully!");
         setIsDeleteDialogOpen(false);
-        setRole("")
+        setRole("");
         getRolesData();
       } else {
-        toast.error(response.data.message || "Please try again later!")
+        toast.error(response.data.message || "Please try again later!");
       }
-
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-
       if (id) {
+        const response = await AxiosInstance.put("/savaj_user/" + id, formData);
 
-        const response = await AxiosInstance.put(
-          "/savaj_user/"+id,
-          formData
-        );
+        console.log(response.data);
 
-        console.log(response.data)
-  
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.success) {
           toast.success("Branch and User Updated successfully!");
-          history.push("/superadmin/savajusers?id="+branch_id);
+          history.push("/superadmin/savajusers?id=" + branch_id);
         }
-        
-      }else {
-        
-              const response = await AxiosInstance.post(
-                "/savaj_user",
-                formData
-              );
-        
-              if (response.data.statusCode === 201) {
-                toast.error("Email already in use");
-              } else if (response.data.success) {
-                toast.success("Branch and User added successfully!");
-                history.push("/superadmin/savajcapitalbranch");
-              }
-              
-      }
+      } else {
+        const response = await AxiosInstance.post("/savaj_user", formData);
 
+        if (response.data.statusCode === 201) {
+          toast.error("Email already in use");
+        } else if (response.data.success) {
+          toast.success("Branch and User added successfully!");
+          history.push("/superadmin/savajcapitalbranch");
+        }
+      }
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -245,7 +222,12 @@ function AddSavajCapitalBranch() {
                 Add Savaj Capital User
               </Text>
 
-              <Button onClick={() => { setIsDeleteDialogOpen(true) }} colorScheme="blue">
+              <Button
+                onClick={() => {
+                  setIsDeleteDialogOpen(true);
+                }}
+                colorScheme="blue"
+              >
                 Add Role
               </Button>
             </Flex>
@@ -263,7 +245,11 @@ function AddSavajCapitalBranch() {
                   value={formData?.branch_id}
                 >
                   {branches.map((city) => (
-                    <option key={city.branch_name} name={city.branch_id} value={city.branch_id}>
+                    <option
+                      key={city.branch_name}
+                      name={city.branch_id}
+                      value={city.branch_id}
+                    >
                       {city.branch_name + ` (${city.city + ", " + city.state})`}
                     </option>
                   ))}
@@ -275,12 +261,16 @@ function AddSavajCapitalBranch() {
                   name="city"
                   placeholder="Select Role"
                   onChange={(e) =>
-                    setFormData({ ...formData, role_id: e.target.value, })
+                    setFormData({ ...formData, role_id: e.target.value })
                   }
                   value={formData?.role_id}
                 >
                   {roles.map((city) => (
-                    <option key={city.role_id} name={"fdkasdfadfkl"} value={city.role_id}>
+                    <option
+                      key={city.role_id}
+                      name={"fdkasdfadfkl"}
+                      value={city.role_id}
+                    >
                       {city.role}
                     </option>
                   ))}
@@ -297,10 +287,16 @@ function AddSavajCapitalBranch() {
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} disabled={id} value={formData.email} />
+                <Input
+                  name="email"
+                  type="email"
+                  onChange={handleChange}
+                  disabled={id}
+                  value={formData.email}
+                />
               </FormControl>
 
-              {
+              {/* {
                 !id &&
                 <FormControl id="password" mt={4} isRequired>
                   <FormLabel>Password</FormLabel>
@@ -322,15 +318,15 @@ function AddSavajCapitalBranch() {
                     </InputRightElement>
                   </InputGroup>
                 </FormControl>
-              }
+              } */}
 
               <Button
                 mt={4}
                 colorScheme="blue"
                 type="submit"
-              // isLoading={loading}
+                // isLoading={loading}
               >
-                {id?"Update User now" : "Add User"}
+                {id ? "Update User now" : "Add User"}
               </Button>
             </form>
           </CardBody>
@@ -351,11 +347,13 @@ function AddSavajCapitalBranch() {
               <FormControl id="branch_name" isRequired>
                 <Input
                   name="branch_name"
-                  onChange={(e) => { setRole(e.target.value) }}
+                  onChange={(e) => {
+                    setRole(e.target.value);
+                  }}
                   value={role}
                   placeholder="Add role"
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault(); // Prevent the default behavior of Enter key
                       handleAddRole(role); // Call the addRole function
                     }

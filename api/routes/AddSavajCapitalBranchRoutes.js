@@ -68,7 +68,7 @@ router.post("/addsavajcapitalbranch", async (req, res) => {
       await savajCapitalBranch.save();
     }
 
-    const hashedPassword = encrypt(savajCapitalUserDetails.password);
+    // const hashedPassword = encrypt(savajCapitalUserDetails.password);
 
     const newUser = new SavajCapitalUser({
       ...savajCapitalUserDetails,
@@ -76,7 +76,7 @@ router.post("/addsavajcapitalbranch", async (req, res) => {
       savajcapitalbranch_id: savajCapitalBranch.savajcapitalbranch_id,
       createdAt: new Date(),
       updatedAt: new Date(),
-      password: hashedPassword,
+      // password: hashedPassword,
     });
 
     await newUser.save();
