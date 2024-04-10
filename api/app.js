@@ -21,6 +21,9 @@ const SavajCapital_Role = require("./routes/Savaj_Capital/SavajCapital_Role"); /
 const SavajCapital_UserRoutes = require("./routes/Savaj_Capital/SavajCapital_User"); // Role
 const CountRoutes = require("./routes/Count"); // Role
 
+const LoanRoutes = require("./routes/Loan/Loan"); // Loan
+const Loan_Type = require("./routes/Loan/Loan_Type"); // Loan-Type
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
@@ -42,6 +45,8 @@ app.use("/api/branch", SavajCapital_BranchRoutes);
 app.use("/api/role", SavajCapital_Role);
 app.use("/api/savaj_user", SavajCapital_UserRoutes);
 app.use("/api/allcount", CountRoutes);
+app.use("/api/loan", LoanRoutes);
+app.use("/api/loan_type", Loan_Type);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
