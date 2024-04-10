@@ -90,9 +90,6 @@ function SavajUsersRole() {
                 user.updatedAt.toLowerCase().includes(searchTerm.toLowerCase()) 
             );
 
-    let navbarIcon = useColorModeValue("white", "gray.200");
-    let menuBg = useColorModeValue("white", "navy.800");
-
     useEffect(() => {
         getRolesData();
     }, []);

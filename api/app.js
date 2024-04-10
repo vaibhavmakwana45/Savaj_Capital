@@ -14,13 +14,17 @@ var app = express();
 
 const SuperAdminSignupRouter = require("./routes/SuperAdminSignupApi");
 const AddUserRouter = require("./routes/AddUser");
-const BankRouter = require("./routes/AddBanksRoutes");
-const SavajCapitalBranchRoutes = require("./routes/AddSavajCapitalBranchRoutes");
-const SetPasswordRoutes = require("./routes/ResetPassword");
+const BankRouter = require("./routes/Bank/AddBanksRoutes");
+const BankUserRouter = require("./routes/Bank/BankUser");
+const SavajCapital_BranchRoutes = require("./routes/Savaj_Capital/SavajCapital_Branch"); // Branch
+const SavajCapital_Role = require("./routes/Savaj_Capital/SavajCapital_Role"); // Role
+const SavajCapital_UserRoutes = require("./routes/Savaj_Capital/SavajCapital_User"); // Role
+const CountRoutes = require("./routes/Count"); // Role
+const PasswordRoutes = require("./routes/ResetPassword");
 
 // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
 
 app.use(cors());
 app.use(logger("dev"));
@@ -34,8 +38,12 @@ app.use("/api/users", usersRouter);
 app.use("/api/superadminsignup", SuperAdminSignupRouter);
 app.use("/api/addusers", AddUserRouter);
 app.use("/api/addbankuser", BankRouter);
-app.use("/api/addsavajbapitalbranch", SavajCapitalBranchRoutes);
-app.use("/api/setpassword", SetPasswordRoutes);
+app.use("/api/bank_user", BankUserRouter);
+app.use("/api/branch", SavajCapital_BranchRoutes);
+app.use("/api/role", SavajCapital_Role);
+app.use("/api/savaj_user", SavajCapital_UserRoutes);
+app.use("/api/allcount", CountRoutes);
+app.use("/api/setpassword", PasswordRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

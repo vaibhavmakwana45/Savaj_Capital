@@ -9,6 +9,10 @@ const BankSchema = new mongoose.Schema({
   state_code: { type: String },
   city: { type: String },
   branch_name: { type: String },
+  mobile: { type: Number },
+  email: { type: String },
+  adress: { type: String },
+  branch_name: { type: String },
   createdAt: { type: String },
   updatedAt: { type: String },
 });

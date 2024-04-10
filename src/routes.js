@@ -26,6 +26,8 @@ import AddSavajCapitalUser from "addsavajcapitalbranch/AddSavajUser";
 import AddUser from "adduser/AddUser";
 import SavajUsers from "addsavajcapitalbranch/SavajUsers";
 import SavajUsersRole from "addsavajcapitalbranch/SavajUsersRole";
+import AddBankUser from "addbank/AddBankUser";
+import BankUsers from "addbank/BankUsers";
 import NewPassword from "views/Pages/NewPassword";
 
 var dashRoutes = [
@@ -79,6 +81,22 @@ var dashRoutes = [
     name: "Add Bank",
     icon: <CreditIcon color="inherit" />,
     component: AddBank,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/addbankuser",
+    name: "Add Bank",
+    icon: <CreditIcon color="inherit" />,
+    component: AddBankUser,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/bankusers",
+    name: "Banks Users",
+    icon: <CreditIcon color="inherit" />,
+    component: BankUsers,
     layout: "/superadmin",
     hideInSidebar: true,
   },
