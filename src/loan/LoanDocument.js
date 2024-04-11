@@ -10,6 +10,7 @@ import {
   Tr,
   Td,
   useColorModeValue,
+  FormControl,
   Button,
 } from "@chakra-ui/react";
 import {
@@ -21,12 +22,11 @@ import {
   AlertDialogOverlay,
   IconButton,
   Input,
-  FormControl,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -35,57 +35,45 @@ import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
-function UserTable() {
-  const [users, setUsers] = useState([]);
+function LoanDocument() {
+  const [document, setDocument] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLoan, setSelectedLoan] = useState("");
-  const [selectedLoanId, setSelectedLoanId] = useState("");
-  const [isEditLoan, setisEditLoan] = useState(false);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get("id");
+  const [selectedDocument, setSelectedDocument] = useState("");
+  const [selectedDocumentId, setSelectedDocumentId] = useState("");
+  const [isEditDocument, setisEditDocument] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchDocument = async () => {
     try {
-      const response = await AxiosInstance.get("/loan");
-      setUsers(response.data.data);
+      const response = await AxiosInstance.get("/loan_docs/" + id);
+      setDocument(response.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
-
-      console.error("Error fetching users:", error);
+      console.error("Error fetching document:", error);
     }
   };
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
-  };
+  useEffect(() => {
+    fetchDocument();
+  }, []);
 
   const filteredUsers =
     searchTerm.length === 0
-      ? users
-      : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
+      ? document
+      : document.filter((user) =>
+          user.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = [
-    "Loan",
-    "Loan Types",
-    "Created At",
-    "Updated At",
-    "Action",
-  ];
+  const allHeaders = ["Loan Document", "Created At", "Updated At", "Action"];
   const formattedData = filteredUsers.map((item) => [
-    item.loan_id,
-    item.loan,
-    item.loantype_count,
+    item.loan_document_id,
+    item.loan_document,
     item.createdAt,
     item.updatedAt,
   ]);
@@ -96,59 +84,73 @@ function UserTable() {
   };
 
   const handleEdit = (id) => {
-    setisEditLoan(true);
-    setSelectedLoanId(id);
-    const data = users.find((user) => user.loan_id == id);
+    setisEditDocument(true);
+    setSelectedDocumentId(id);
+    const data = document.find((user) => user.loan_document_id == id);
     if (data) {
-      setSelectedLoan(data.loan);
+      setSelectedDocument(data.loan_document);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Data not found for id:", id);
-    }
-  };
-
-  const handleRow = (id) => {
-    // history.push("/superadmin/loantype?id=" + id);
-    const data = users.find((user) => user.loan_id == id);
-
-    if (data.loantype_count == 0) {
-      alert("navigate it to documents");
-    } else {
-      history.push("/superadmin/loantype?id=" + id);
     }
   };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const cancelRef = React.useRef();
-  const deletebranch = async (userId) => {
+
+  const deletebranch = async (documentId) => {
     try {
-      const response = await AxiosInstance.delete(`/loan/${userId}`);
-      if (response.data.success) {
-        setUsers(users.filter((user) => user.loan_id !== userId));
-        toast.success("User deleted successfully!");
-      } else {
-        toast.error(response.data.message || "Please try again later!");
-      }
+      const response = await AxiosInstance.delete(`/loan_docs/${documentId}`);
+      setDocument(
+        document.filter((user) => user.loan_document_id !== documentId)
+      );
       setIsDeleteDialogOpen(false);
+      toast.success("Document deleted successfully!");
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("user not delete");
     }
   };
 
-  const editRole = async (loan) => {
+  const AddDocument = async (loan_document) => {
     try {
-      const response = await AxiosInstance.put("/loan/" + selectedLoanId, {
-        loan,
+      const response = await AxiosInstance.post("/loan_docs/", {
+        loan_document: [loan_document], // Modify this line if necessary
+        loantype_id: id,
       });
+      console.log("response", response);
+      if (response.data.success) {
+        toast.success("Document Added successfully!");
+        setisEditDocument(false);
+        setSelectedDocument("");
+        fetchDocument();
+        setSelectedDocumentId("");
+      } else {
+        toast.error(response.data.message || "Please try again later!");
+      }
+    } catch (error) {
+      console.error("Submission error", error);
+      toast.error("Failed to add. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const editDocument = async (loan_document) => {
+    try {
+      const response = await AxiosInstance.put(
+        "/loan_docs/" + selectedDocumentId,
+        {
+          loan_document,
+        }
+      );
 
       if (response.data.success) {
-        toast.success("Role Updated successfully!");
-        setisEditLoan(false);
-        setSelectedLoan("");
-        fetchUsers();
-        setSelectedLoanId("");
+        toast.success("Document Name Updated successfully!");
+        setisEditDocument(false);
+        setSelectedDocument("");
+        fetchDocument();
+        setSelectedDocumentId("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -167,7 +169,7 @@ function UserTable() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                All Loan
+                {document[0]?.loan_type || "..."}
               </Text>
               <Flex>
                 <Input
@@ -177,21 +179,12 @@ function UserTable() {
                   width="250px"
                   marginRight="10px"
                 />
-                <div style={{ gap: "10px" }}>
-                  <Button
-                    onClick={() => history.push("/superadmin/addloantype")}
-                    colorScheme="blue"
-                    style={{ marginRight: "10px" }}
-                  >
-                    Add Loan
-                  </Button>
-                  <Button
-                    onClick={() => history.push("/superadmin/addloandocs")}
-                    colorScheme="blue"
-                  >
-                    Add Documents
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => setisEditDocument(true)}
+                  colorScheme="blue"
+                >
+                  Add Document
+                </Button>
               </Flex>
             </Flex>
           </CardHeader>
@@ -204,7 +197,7 @@ function UserTable() {
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
-              handleRow={handleRow}
+              //   handleRow={handleRow}
             />
           </CardBody>
         </Card>
@@ -244,32 +237,38 @@ function UserTable() {
 
         {/* edit */}
         <AlertDialog
-          isOpen={isEditLoan}
+          isOpen={isEditDocument}
           leastDestructiveRef={cancelRef}
           onClose={() => {
-            setisEditLoan(false);
-            setSelectedLoan("");
+            setisEditDocument(false);
+            setSelectedDocument("");
           }}
         >
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Edit Loan
+                {selectedDocumentId != "" ? "Edit Document" : "Add Document"}
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                <FormControl id="branch_name" isRequired>
+                <FormControl id="loan_document" isRequired>
                   <Input
-                    name="branch_name"
+                    name="loan_document"
                     onChange={(e) => {
-                      setSelectedLoan(e.target.value);
+                      setSelectedDocument(e.target.value);
                     }}
-                    value={selectedLoan}
-                    placeholder="Edit Loan"
+                    value={selectedDocument}
+                    placeholder={
+                      selectedDocumentId != ""
+                        ? "Edit Document"
+                        : "Add Document"
+                    }
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        editRole(selectedLoan);
+                        selectedDocumentId != ""
+                          ? editDocument(selectedDocument)
+                          : AddDocument(selectedDocument);
                       }
                     }}
                   />
@@ -280,19 +279,25 @@ function UserTable() {
                 <Button
                   ref={cancelRef}
                   onClick={() => {
-                    setisEditLoan(false);
-                    setSelectedLoan("");
+                    setisEditDocument(false);
+                    setSelectedDocument("");
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => handleAddRole(role)}
+                  onClick={() => {
+                    if (selectedDocumentId !== "") {
+                      editDocument(selectedDocument);
+                    } else {
+                      AddDocument(selectedDocument);
+                    }
+                  }}
                   ml={3}
                   type="submit"
                 >
-                  {selectedLoanId != "" ? "Updated Now" : "Add Now"}
+                  {selectedDocumentId != "" ? "Updated Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -304,4 +309,4 @@ function UserTable() {
   );
 }
 
-export default UserTable;
+export default LoanDocument;
