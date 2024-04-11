@@ -56,10 +56,10 @@ function Tables() {
       bank.bank_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.users.some((user) =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      bank.state.toLowerCase().includes(searchTerm.toLowerCase())
+      // bank.users.some((user) =>
+      //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      // )
     );
 
   useEffect(() => {

@@ -74,7 +74,62 @@ router.post("/adduser", async (req, res) => {
     });
   }
 });
+router.post("/adduserbyadmin", async (req, res) => {
+  try {
+    const { userDetails } = req.body;
+    const user = await AddUser.findOne({ email: userDetails.email });
+    const bankUser = await BankUser.findOne({ email: userDetails.email });
+    const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });
+    const savajCapital_user = await SavajCapital_User.findOne({
+      email: userDetails.email,
+    });
 
+    if (bankUser || superAdmin || user || savajCapital_user) {
+      return res
+        .status(200)
+        .send({ statusCode: 201, message: "Email already in use" });
+    }
+
+    // const hashedPassword = encrypt(userDetails.password);
+
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substr(2, 9);
+    const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
+      .toString()
+      .padStart(10, "0");
+    const userId = `${timestamp}${randomString}${randomNumber}`;
+
+    const newUser = new AddUser({
+      ...userDetails,
+      user_id: userId,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+      password: "",
+    });
+
+    await newUser.save();
+    const ApiResponse = await axios.post(
+      `http://192.168.1.12:4001/api/setpassword/passwordmail`,
+      {
+        email: req.body.email,
+      }
+    );
+
+    if (ApiResponse.status === 200) {
+      res.json({
+        success: true,
+        message: "User added successfully",
+        data: newUser,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+s;
 router.get("/getusers", async (req, res) => {
   try {
     const users = await AddUser.find({}, "-password");

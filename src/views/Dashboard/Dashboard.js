@@ -42,6 +42,7 @@ import {
 } from "variables/charts";
 import { pageVisits, socialTraffic } from "variables/general";
 import { useHistory, useLocation } from "react-router-dom";
+import AxiosInstance from "config/AxiosInstance";
 
 export default function Dashboard() {
   const history = useHistory();
@@ -64,14 +65,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:4000/api/allcount/data-count"
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setApiData(data);
+        const response = await AxiosInstance.get("/allcount/data-count");
+        setApiData(response.data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }

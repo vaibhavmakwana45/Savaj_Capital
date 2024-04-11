@@ -35,7 +35,7 @@ function AddUser(props) {
   const [showPassword, setShowPassword] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -46,30 +46,26 @@ function AddUser(props) {
   });
 
   const getData = async () => {
-
     try {
-      const response = await AxiosInstance.get(
-        "/addusers/user/" + id
-      );
+      const response = await AxiosInstance.get("/addusers/user/" + id);
 
       if (response.data.success) {
         const { user } = response.data;
 
         setFormData(user);
-
       } else {
-        alert("Please try again later...!")
+        alert("Please try again later...!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     if (id) {
-      getData()
+      getData();
     }
-  }, [])
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,12 +79,8 @@ function AddUser(props) {
     e.preventDefault();
     setLoading(true);
 
-
     try {
-
       if (!id) {
-
-
         const submissionData = {
           userDetails: {
             username: formData.username,
@@ -99,7 +91,7 @@ function AddUser(props) {
         };
 
         const response = await AxiosInstance.post(
-          "/addusers/adduser",
+          "/addusers/adduserbyadmin",
           submissionData
         );
 
@@ -109,25 +101,21 @@ function AddUser(props) {
           toast.success("User added successfully!");
           history.push("/superadmin/alluser");
         }
-
-      }
-      else {
+      } else {
         const response = await AxiosInstance.put(
           "/addusers/edituser/" + id,
           formData
         );
 
-        console.log(formData, "formData")
+        console.log(formData, "formData");
 
         if (response.data.success) {
           toast.success("User Updated successfully!");
           history.push("/superadmin/alluser");
         } else {
-          toast.error("Please try again later!")
+          toast.error("Please try again later!");
         }
-
       }
-
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -151,12 +139,20 @@ function AddUser(props) {
             <form onSubmit={handleSubmit}>
               <FormControl id="username" isRequired>
                 <FormLabel>User Name</FormLabel>
-                <Input name="username" onChange={handleChange} value={formData.username} />
+                <Input
+                  name="username"
+                  onChange={handleChange}
+                  value={formData.username}
+                />
               </FormControl>
 
               <FormControl id="number" mt={4} isRequired>
                 <FormLabel>Mobile Number</FormLabel>
-                <Input name="number" onChange={handleChange} value={formData.number} />
+                <Input
+                  name="number"
+                  onChange={handleChange}
+                  value={formData.number}
+                />
               </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
@@ -164,10 +160,15 @@ function AddUser(props) {
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
-                <Input name="email" type="email" onChange={handleChange} value={formData.email} />
+                <Input
+                  name="email"
+                  type="email"
+                  onChange={handleChange}
+                  value={formData.email}
+                />
               </FormControl>
 
-              {
+              {/* {
                 !id &&
                 <FormControl id="password" mt={4} isRequired>
                   <FormLabel>Password</FormLabel>
@@ -189,7 +190,7 @@ function AddUser(props) {
                     </InputRightElement>
                   </InputGroup>
                 </FormControl>
-              }
+              } */}
 
               <Button
                 mt={4}

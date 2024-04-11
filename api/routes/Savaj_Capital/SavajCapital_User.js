@@ -8,6 +8,7 @@ const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User"
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const crypto = require("crypto");
+const axios = require("axios");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -50,22 +51,29 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = moment()
       .utcOffset(330)
       .format("YYYY-MM-DD HH:mm:ss");
+    console.log("first");
 
-    const hashedPassword = encrypt(req.body.password);
-    req.body.password = hashedPassword;
+    req.body.password = "";
 
+    console.log(req.body.email);
     var data = await SavajCapital_User.create(req.body);
-    res.json({
-      success: true,
-      data: data,
-      message: "Add Branch-User Successfully",
-    });
-    // } else {
-    //   res.json({
-    //     statusCode: 201,
-    //     message: `${req.body.email} Email Already Added`,
-    //   });
-    // }
+    console.log(data);
+    const ApiResponse = await axios.post(
+      `http://192.168.1.12:4001/api/setpassword/passwordmail`,
+      {
+        email: req.body.email,
+      }
+    );
+    console.log(ApiResponse);
+
+    if (ApiResponse.status === 200) {
+      console.log("Password mail sent successfully");
+      res.json({
+        success: true,
+        data: data,
+        message: "Add Branch-User Successfully",
+      });
+    }
   } catch (error) {
     res.json({
       statusCode: 500,

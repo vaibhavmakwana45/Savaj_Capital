@@ -8,7 +8,7 @@ const SuperAdmin = require("../../models/SuperAdminSignupSchema");
 const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
 const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
-
+const axios = require("axios");
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
 router.post("/", async (req, res) => {
@@ -35,11 +35,21 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = currentDate;
 
     var data = await BankUser.create(req.body);
-    res.json({
-      success: true,
-      data: data,
-      message: "Add Branch Successfully",
-    });
+    const ApiResponse = await axios.post(
+      `http://192.168.1.12:4001/api/setpassword/passwordmail`,
+      {
+        email: req.body.email,
+      }
+    );
+    console.log(ApiResponse);
+
+    if (ApiResponse.status === 200) {
+      res.json({
+        success: true,
+        data: data,
+        message: "Add Branch Successfully",
+      });
+    }
   } catch (error) {
     res.json({
       statusCode: 500,
