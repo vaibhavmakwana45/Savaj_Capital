@@ -23,6 +23,7 @@ const CountRoutes = require("./routes/Count"); // Role
 
 const LoanRoutes = require("./routes/Loan/Loan"); // Loan
 const Loan_Type = require("./routes/Loan/Loan_Type"); // Loan-Type
+const Loan_Documents = require("./routes/Loan/Loan_Documents"); // Loan-Type
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -47,6 +48,7 @@ app.use("/api/savaj_user", SavajCapital_UserRoutes);
 app.use("/api/allcount", CountRoutes);
 app.use("/api/loan", LoanRoutes);
 app.use("/api/loan_type", Loan_Type);
+app.use("/api/loan_docs", Loan_Documents);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

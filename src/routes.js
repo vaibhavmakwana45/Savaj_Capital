@@ -31,6 +31,7 @@ import BankUsers from "addbank/BankUsers";
 import LoanTypes from "loan/LoanTypes";
 import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
+import AddLoanDocuments from "loan/AddLoanDocuments";
 
 var dashRoutes = [
   //superadmin
@@ -146,6 +147,14 @@ var dashRoutes = [
     name: "Add User",
     icon: <CreditIcon color="inherit" />,
     component: AddLoanType,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/addloandocs",
+    name: "Add User",
+    icon: <CreditIcon color="inherit" />,
+    component: AddLoanDocuments,
     layout: "/superadmin",
     hideInSidebar: true,
   },

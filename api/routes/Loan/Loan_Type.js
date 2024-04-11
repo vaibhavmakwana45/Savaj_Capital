@@ -188,4 +188,22 @@ router.get("/loan_type/:loan_id", async (req, res) => {
   }
 });
 
+
+router.get("/loan_type", async (req, res) => {
+  try {
+    const data = await Loan_Type.find({ });
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;
