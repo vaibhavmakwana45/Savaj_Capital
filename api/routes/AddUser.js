@@ -110,7 +110,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://192.168.1.12:4001/api/setpassword/passwordmail`,
+      `http://192.168.1.29:4001/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
@@ -130,7 +130,7 @@ router.post("/adduserbyadmin", async (req, res) => {
     });
   }
 });
-s;
+
 router.get("/getusers", async (req, res) => {
   try {
     const users = await AddUser.find({}, "-password");
