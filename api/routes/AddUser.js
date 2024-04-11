@@ -8,6 +8,7 @@ const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
+const axios = require("axios");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
