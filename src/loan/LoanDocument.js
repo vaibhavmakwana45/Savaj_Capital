@@ -35,58 +35,45 @@ import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
-function LoanSubTypes() {
-  const [users, setUsers] = useState([]);
+function LoanDocument() {
+  const [document, setDocument] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loan, setLoan] = useState({});
-
-  const [selectedLoan, setSelectedLoan] = useState("");
-  const [selectedLoanId, setSelectedLoanId] = useState("");
-  const [isEditLoan, setisEditLoan] = useState(false);
-
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
-  const fetchUsers = async () => {
+  const [selectedDocument, setSelectedDocument] = useState("");
+  const [selectedDocumentId, setSelectedDocumentId] = useState("");
+  const [isEditDocument, setisEditDocument] = useState(false);
+
+  const fetchDocument = async () => {
     try {
-      const response = await AxiosInstance.get("/loan_type/loan_type/" + id);
-      setUsers(response.data.data);
-      setLoan(response.data.loan[0]);
+      const response = await AxiosInstance.get("/loan_docs/" + id);
+      setDocument(response.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
-
-      console.error("Error fetching users:", error);
+      console.error("Error fetching document:", error);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchDocument();
   }, []);
-
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
-  };
 
   const filteredUsers =
     searchTerm.length === 0
-      ? users
-      : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
+      ? document
+      : document.filter((user) =>
+          user.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = ["Loan", "Created At", "Updated At", "Action"];
+  const allHeaders = ["Loan Document", "Created At", "Updated At", "Action"];
   const formattedData = filteredUsers.map((item) => [
-    item.loantype_id,
-    item.loan_type,
+    item.loan_document_id,
+    item.loan_document,
     item.createdAt,
     item.updatedAt,
   ]);
@@ -97,58 +84,47 @@ function LoanSubTypes() {
   };
 
   const handleEdit = (id) => {
-    setisEditLoan(true);
-    setSelectedLoanId(id);
-    const data = users.find((user) => user.loantype_id == id);
+    setisEditDocument(true);
+    setSelectedDocumentId(id);
+    const data = document.find((user) => user.loan_document_id == id);
     if (data) {
-      setSelectedLoan(data.loan_type);
+      setSelectedDocument(data.loan_document);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Data not found for id:", id);
     }
-  };
-
-  const handleRow = (id) => {
-    // history.push("/superadmin/loantype?id=" + id);
-    const data = users.find((user) => user.loan_id == id);
-    console.log('data', data)
-    // if (data.loantype_count == 0) {
-    //   alert("navigate it to documents");
-    // } else {
-    //   history.push("/superadmin/loandocument?id=" + id);
-    // }
-    history.push("/superadmin/loandocument?id=" + id);
-
   };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const cancelRef = React.useRef();
-  const deletebranch = async (userId) => {
+
+  const deletebranch = async (documentId) => {
     try {
-      const response = await AxiosInstance.delete(`/loan_type/${userId}`);
-      setUsers(users.filter((user) => user.loantype_id !== userId));
+      const response = await AxiosInstance.delete(`/loan_docs/${documentId}`);
+      setDocument(
+        document.filter((user) => user.loan_document_id !== documentId)
+      );
       setIsDeleteDialogOpen(false);
-      toast.success("Loan deleted successfully!");
+      toast.success("Document deleted successfully!");
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("user not delete");
     }
   };
 
-  const AddRole = async (loan_type) => {
+  const AddDocument = async (loan_document) => {
     try {
-      const response = await AxiosInstance.post("/loan_type/", {
-        loan_type,
-        loan_id: id,
+      const response = await AxiosInstance.post("/loan_docs/", {
+        loan_document: [loan_document], // Modify this line if necessary
+        loantype_id: id,
       });
-
+      console.log("response", response);
       if (response.data.success) {
-        toast.success("Role Added successfully!");
-        setisEditLoan(false);
-        setSelectedLoan("");
-        fetchUsers();
-        setSelectedLoanId("");
+        toast.success("Document Added successfully!");
+        setisEditDocument(false);
+        setSelectedDocument("");
+        fetchDocument();
+        setSelectedDocumentId("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -160,18 +136,21 @@ function LoanSubTypes() {
     }
   };
 
-  const editRole = async (loan_type) => {
+  const editDocument = async (loan_document) => {
     try {
-      const response = await AxiosInstance.put("/loan_type/" + selectedLoanId, {
-        loan_type,
-      });
+      const response = await AxiosInstance.put(
+        "/loan_docs/" + selectedDocumentId,
+        {
+          loan_document,
+        }
+      );
 
       if (response.data.success) {
-        toast.success("Role Updated successfully!");
-        setisEditLoan(false);
-        setSelectedLoan("");
-        fetchUsers();
-        setSelectedLoanId("");
+        toast.success("Document Name Updated successfully!");
+        setisEditDocument(false);
+        setSelectedDocument("");
+        fetchDocument();
+        setSelectedDocumentId("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -190,7 +169,7 @@ function LoanSubTypes() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                {loan?.loan || "..."}
+                {document[0]?.loan_type || "..."}
               </Text>
               <Flex>
                 <Input
@@ -200,8 +179,11 @@ function LoanSubTypes() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button onClick={() => setisEditLoan(true)} colorScheme="blue">
-                  Add Loan
+                <Button
+                  onClick={() => setisEditDocument(true)}
+                  colorScheme="blue"
+                >
+                  Add Document
                 </Button>
               </Flex>
             </Flex>
@@ -215,7 +197,7 @@ function LoanSubTypes() {
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
-              handleRow={handleRow}
+              //   handleRow={handleRow}
             />
           </CardBody>
         </Card>
@@ -255,36 +237,38 @@ function LoanSubTypes() {
 
         {/* edit */}
         <AlertDialog
-          isOpen={isEditLoan}
+          isOpen={isEditDocument}
           leastDestructiveRef={cancelRef}
           onClose={() => {
-            setisEditLoan(false);
-            setSelectedLoan("");
+            setisEditDocument(false);
+            setSelectedDocument("");
           }}
         >
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                {selectedLoanId != "" ? "Edit Loan" : "Add Loan"}
+                {selectedDocumentId != "" ? "Edit Document" : "Add Document"}
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                <FormControl id="branch_name" isRequired>
+                <FormControl id="loan_document" isRequired>
                   <Input
-                    name="branch_name"
+                    name="loan_document"
                     onChange={(e) => {
-                      setSelectedLoan(e.target.value);
+                      setSelectedDocument(e.target.value);
                     }}
-                    value={selectedLoan}
+                    value={selectedDocument}
                     placeholder={
-                      selectedLoanId != "" ? "Edit Loan" : "Add Loan"
+                      selectedDocumentId != ""
+                        ? "Edit Document"
+                        : "Add Document"
                     }
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        selectedLoanId != ""
-                          ? editRole(selectedLoan)
-                          : AddRole(selectedLoan);
+                        selectedDocumentId != ""
+                          ? editDocument(selectedDocument)
+                          : AddDocument(selectedDocument);
                       }
                     }}
                   />
@@ -295,19 +279,25 @@ function LoanSubTypes() {
                 <Button
                   ref={cancelRef}
                   onClick={() => {
-                    setisEditLoan(false);
-                    setSelectedLoan("");
+                    setisEditDocument(false);
+                    setSelectedDocument("");
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => AddRole(role)}
+                  onClick={() => {
+                    if (selectedDocumentId !== "") {
+                      editDocument(selectedDocument);
+                    } else {
+                      AddDocument(selectedDocument);
+                    }
+                  }}
                   ml={3}
                   type="submit"
                 >
-                  {selectedLoanId != "" ? "Updated Now" : "Add Now"}
+                  {selectedDocumentId != "" ? "Updated Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -319,4 +309,4 @@ function LoanSubTypes() {
   );
 }
 
-export default LoanSubTypes;
+export default LoanDocument;

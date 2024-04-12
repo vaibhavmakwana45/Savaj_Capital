@@ -21,9 +21,6 @@ import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-
-
-
 function AddBank() {
   const location = useLocation();
   const textColor = useColorModeValue("gray.700", "white");
@@ -37,9 +34,9 @@ function AddBank() {
   const [showPassword, setShowPassword] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
 
-  const allBanksName  = [
+  const allBanksName = [
     "State Bank of India (SBI)",
     "HDFC Bank",
     "ICICI Bank",
@@ -69,10 +66,8 @@ function AddBank() {
     "RBL Bank",
     "HSBC India",
     "Standard Chartered Bank India",
-    "Citibank India"
+    "Citibank India",
   ];
-  
-
 
   const [formData, setFormData] = useState({
     bank_id: "",
@@ -87,14 +82,10 @@ function AddBank() {
   });
 
   const getData = async () => {
-
     try {
-      const response = await AxiosInstance.get(
-        "/addusers/bankuser/" + id
-      );
+      const response = await AxiosInstance.get("/addusers/bankuser/" + id);
 
       if (response.data.success) {
-
         const { bankDetails, userDetails } = response.data;
 
         const submissionData = {
@@ -108,19 +99,19 @@ function AddBank() {
           email: userDetails.email,
           password: "",
           country_code: bankDetails.country_code,
-          state_code: bankDetails.state_code
+          state_code: bankDetails.state_code,
         };
 
         setSelectedState(bankDetails.state_code);
         setSelectedCountry(bankDetails.country_code);
-        setFormData(submissionData)
+        setFormData(submissionData);
       } else {
-        alert("Please try again later...!")
+        alert("Please try again later...!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     if (id) {
@@ -166,7 +157,6 @@ function AddBank() {
     setSelectedCountry(event.target.value);
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -180,50 +170,46 @@ function AddBank() {
     setLoading(true);
 
     const submissionData = {
-        bank_name: formData.bank_name,
-        country: formData.country,
-        state: formData.state,
-        city: formData.city,
-        branch_name: formData.branch_name,
-        state_code: selectedState,
-        country_code: selectedCountry,
+      bank_name: formData.bank_name,
+      country: formData.country,
+      state: formData.state,
+      city: formData.city,
+      branch_name: formData.branch_name,
+      state_code: selectedState,
+      country_code: selectedCountry,
     };
 
     try {
-
-
       if (id) {
-
-        const response = await AxiosInstance.put(`/addbankuser/${id}`, submissionData);
+        const response = await AxiosInstance.put(
+          `/addbankuser/${id}`,
+          submissionData
+        );
         if (response.data.success) {
-          const msg = "Bank and User updated Successfully!"
+          const msg = "Bank and User updated Successfully!";
           toast.success(msg);
           history.push("/superadmin/bank");
         } else {
           toast.error("Please try again later!");
         }
 
-        console.log(submissionData)
+        console.log(submissionData);
+      } else {
+        const response = await AxiosInstance.post(
+          "/addbankuser/addbankuser",
+          submissionData
+        );
 
-      }
-      else {
-
-        const response = await AxiosInstance.post("/addbankuser/addbankuser", submissionData);
-
-        console.log(submissionData, "submissionData")
+        console.log(submissionData, "submissionData");
 
         if (response.data?.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.success) {
-          const msg = "Bank and User added successfully"
+          const msg = "Bank and User added successfully";
           toast.success(msg);
           history.push("/superadmin/bank");
         }
-
-
       }
-
-
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -245,7 +231,6 @@ function AddBank() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-
               <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Bank Name</FormLabel>
                 <Select
@@ -256,11 +241,11 @@ function AddBank() {
                   }
                   value={formData.bank_name}
                 >
-                   { allBanksName.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
+                  {allBanksName.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
                 </Select>
               </FormControl>
 
@@ -326,7 +311,11 @@ function AddBank() {
 
               <FormControl id="branch_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
-                <Input name="branch_name" onChange={handleChange} value={formData.branch_name} />
+                <Input
+                  name="branch_name"
+                  onChange={handleChange}
+                  value={formData.branch_name}
+                />
               </FormControl>
 
               <Button

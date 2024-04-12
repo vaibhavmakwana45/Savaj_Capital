@@ -146,24 +146,24 @@ function AddLoanDocuments() {
                 <Select
                   name="city"
                   placeholder="Select Loan-Type"
-                  // onChange={(e) =>
-                  //   setFormData({ ...formData, loantype_id: e.target.value })
-                  // }
-                  onChange={(e) => {
-                    const [loanId, loantype_id] = e.target.value.split("_");
-                    setFormData({
-                      ...formData,
-                      loan_id: loanId,
-                      loantype_id: loantype_id,
-                    });
-                  }}
+                  onChange={(e) =>
+                    setFormData({ ...formData, loantype_id: e.target.value })
+                  }
+                  // onChange={(e) => {
+                  //   const [loanId, loantype_id] = e.target.value.split("_");
+                  //   setFormData({
+                  //     ...formData,
+                  //     loan_id: loanId,
+                  //     loantype_id: loantype_id,
+                  //   });
+                  // }}
                 >
                   {loanType.map((index) => (
                     <option
                       key={index.loantype_id}
                       name={"fdkasdfadfkl"}
-                      // value={index.loantype_id && index.loan_id}
-                      value={`${index.loantype_id}${index.loan_id}`}
+                      value={index.loantype_id}
+                      // value={`${index.loantype_id}${index.loan_id}`}
                     >
                       {console.log(
                         index.loan_id,

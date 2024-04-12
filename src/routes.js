@@ -33,7 +33,10 @@ import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
-import FileUplode from "../src/components/File/FileUplode";
+import LoanDocument from "loan/LoanDocument";
+import Files from "files/Files";
+import AddFiles from "files/AddFiles";
+// import FileUplode from "../src/components/File/FileUplode";
 
 var dashRoutes = [
   //superadmin
@@ -56,7 +59,7 @@ var dashRoutes = [
   },
   {
     path: "/savajcapitalbranch",
-    name: "Savaj Capital Branch",
+    name: "SC Branch",
     icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
@@ -123,19 +126,27 @@ var dashRoutes = [
     hideInSResponsive: true
 
   },
-  {
-    path: "/file",
-    name: "File Upload",
-    icon: <CreditIcon color="inherit" />,
-    component: FileUplode,
-    layout: "/superadmin",
-    hideInSResponsive: true
-  },
+  // {
+  //   path: "/file",
+  //   name: "File Upload",
+  //   icon: <CreditIcon color="inherit" />,
+  //   component: FileUplode,
+  //   layout: "/superadmin",
+  //   hideInSResponsive: true
+  // },
   {
     path: "/loantype",
     name: "Loan",
     icon: <CreditIcon color="inherit" />,
     component: LoanSubTypes,
+    hideInSidebar: true,
+    layout: "/superadmin",
+  },
+  {
+    path: "/loandocument",
+    name: "Loan",
+    icon: <CreditIcon color="inherit" />,
+    component: LoanDocument,
     hideInSidebar: true,
     layout: "/superadmin",
   },
@@ -192,6 +203,21 @@ var dashRoutes = [
     name: "Add Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,
     component: EditSavajCapitalBranch,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/filetable",
+    name: "Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: Files,
+    layout: "/superadmin",
+  },
+  {
+    path: "/addfile",
+    name: "Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: AddFiles,
     layout: "/superadmin",
     hideInSidebar: true,
   },
