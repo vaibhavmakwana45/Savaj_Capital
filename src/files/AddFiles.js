@@ -151,18 +151,41 @@ function AddFiles() {
     }, 600);
   };
 
+  // useEffect(() => {
+  //   const fetchLoanDocuments = async () => {
+  //     try {
+  //       const response = await AxiosInstance.get(
+  //         `/loan_docs/${"1712751552190"}`
+  //       );
+  //       setLoanDocuments(response.data.data);
+  //     } catch (error) {
+  //       console.error("Error fetching loan documents:", error);
+  //     }
+  //   };
+
+  //   fetchLoanDocuments();
+  // }, []);
+
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
-        const response = await AxiosInstance.get("/loan_docs/1712751552190");
-        setLoanDocuments(response.data.data);
+        let url;
+        if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
+          url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+        } else if (selectedLoanType.loan_id) {
+          url = `/loan_docs/${selectedLoanType.loan_id}`;
+        }
+        if (url) {
+          const response = await AxiosInstance.get(url);
+          setLoanDocuments(response.data.data);
+        }
       } catch (error) {
         console.error("Error fetching loan documents:", error);
       }
     };
 
     fetchLoanDocuments();
-  }, []);
+  }, [selectedLoanType]);
 
   const fileInputRefs = useRef([]);
 
@@ -198,6 +221,7 @@ function AddFiles() {
                 ))}
               </Select>
             </FormControl>
+
             <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
               <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
@@ -211,7 +235,15 @@ function AddFiles() {
             {selectedLoanType.is_subtype && loanSubType.length > 0 && (
               <FormControl id="loantype_id" mt={4} isRequired>
                 <FormLabel>Loan Subtype</FormLabel>
-                <Select placeholder="Select Loan Subtype">
+                <Select
+                  placeholder="Select Loan Subtype"
+                  onChange={(event) => {
+                    setSelectedLoanType({
+                      ...selectedLoanType,
+                      loansubtype_id: event.target.value,
+                    });
+                  }}
+                >
                   {loanSubType.map((subType) => (
                     <option
                       key={subType.loantype_id}
@@ -225,7 +257,6 @@ function AddFiles() {
             )}
             <div style={{ marginTop: "40px" }}>
               {/* <h2>Aadhar card</h2> */}
-
               <div className="d-flex">
                 {loanDocuments.map((document, index) => (
                   <div key={document._id} className="upload-area col-6">

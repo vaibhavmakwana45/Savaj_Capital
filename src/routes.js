@@ -46,7 +46,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
     layout: "/superadmin",
-    hideInSResponsive: true
+    hideInSResponsive: true,
   },
   {
     path: "/bank",
@@ -54,8 +54,7 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: BankTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/savajcapitalbranch",
@@ -63,8 +62,7 @@ var dashRoutes = [
     icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/savajusers",
@@ -73,7 +71,6 @@ var dashRoutes = [
     component: SavajUsers,
     hideInSidebar: true,
     layout: "/superadmin",
-    
   },
   {
     path: "/savajuserroles",
@@ -89,8 +86,7 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/addbank",
@@ -99,7 +95,6 @@ var dashRoutes = [
     component: AddBank,
     layout: "/superadmin",
     hideInSidebar: true,
-    
   },
   {
     path: "/addbankuser",
@@ -123,8 +118,7 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: LoanTypes,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   // {
   //   path: "/file",
