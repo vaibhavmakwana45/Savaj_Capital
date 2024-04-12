@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
 
 import {
@@ -100,10 +100,9 @@ function AddFiles() {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loanDocuments, setLoanDocuments] = useState([]);
-
 
   const imagesTypes = ["jpeg", "png", "svg", "gif"];
 
@@ -123,30 +122,19 @@ function AddFiles() {
     uploadFile(file);
   };
 
-  const handleFileInputChange = (event) => {
+  const handleFileInputChange = (event, index) => {
     const file = event.target.files[0];
-    uploadFile(file);
-  };
-
-  const uploadFile = (file) => {
-    const fileType = file.type;
-    const fileSize = file.size;
-
-    if (fileValidate(fileType, fileSize)) {
-      setIsLoading(true);
-
-      const fileReader = new FileReader();
-      fileReader.onload = () => {
-        setTimeout(() => {
-          setPreviewImage(fileReader.result);
-          setIsLoading(false);
-          setUploadedFileName(file.name);
-          setUploadProgress(100);
-        }, 500);
-      };
-
-      fileReader.readAsDataURL(file);
-    }
+    setUploadedFileName((prevState) => {
+      const newState = [...prevState];
+      newState[index] = file;
+      return newState;
+    });
+    const blobUrl = URL.createObjectURL(file);
+    setPreviewImage((prevState) => {
+      const newState = [...prevState];
+      newState[index] = blobUrl;
+      return newState;
+    });
   };
 
   const progressMove = () => {
@@ -163,23 +151,6 @@ function AddFiles() {
     }, 600);
   };
 
-  const fileValidate = (fileType, fileSize) => {
-    const isImage = imagesTypes.some((type) =>
-      fileType.includes(`image/${type}`)
-    );
-
-    if (!isImage) {
-      alert("Please make sure to upload an image file type");
-      return false;
-    }
-
-    if (fileSize > 2000000) {
-      alert("Please ensure your file is 2 megabytes or less");
-      return false;
-    }
-
-    return true;
-  };
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
@@ -191,7 +162,16 @@ function AddFiles() {
     };
 
     fetchLoanDocuments();
-  }, []); 
+  }, []);
+
+  const fileInputRefs = useRef([]);
+
+  useEffect(() => {
+    // Initialize refs array
+    fileInputRefs.current = loanDocuments.map(
+      (_, index) => fileInputRefs.current[index] || createRef()
+    );
+  }, [loanDocuments]);
 
   return (
     <>
@@ -208,113 +188,112 @@ function AddFiles() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <Select placeholder="Select user">
-              {users.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {`${user.username} (${user.email})`}
-                </option>
-              ))}
-            </Select>
-            <div style={{marginTop:"40px"}}>
+            <FormControl id="user_id" mt={4} isRequired>
+              <FormLabel>User</FormLabel>
+              <Select placeholder="Select user">
+                {users.map((user) => (
+                  <option key={user.user_id} value={user.user_id}>
+                    {`${user.username} (${user.email})`}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl id="loan_id" mt={4} isRequired>
+              <FormLabel>Loan Type</FormLabel>
+              <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
+                {loanType.map((loan) => (
+                  <option key={loan.loan_id} value={loan.loan_id}>
+                    {loan.loan}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            {selectedLoanType.is_subtype && loanSubType.length > 0 && (
+              <FormControl id="loantype_id" mt={4} isRequired>
+                <FormLabel>Loan Subtype</FormLabel>
+                <Select placeholder="Select Loan Subtype">
+                  {loanSubType.map((subType) => (
+                    <option
+                      key={subType.loantype_id}
+                      value={subType.loantype_id}
+                    >
+                      {subType.loan_type}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            <div style={{ marginTop: "40px" }}>
               {/* <h2>Aadhar card</h2> */}
-            
+
               <div className="d-flex">
-              {loanDocuments.map((document) => (
-        <div key={document._id} className="upload-area col-6">
-            <Text fontSize="xl" className="mx-3" color={textColor}>
-              {document.loan_document}
-              </Text>
-          <div className={`upload-area__drop-zoon drop-zoon ${isDragging ? "drop-zoon--over" : ""}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById("fileInput").click()}
-          >
-            <span className="drop-zoon__icon">
-              <i className="bx bxs-file-image"></i>
-            </span>
-            <p className="drop-zoon__paragraph">Drop your file here</p>
-            <span id="loadingText" className="drop-zoon__loading-text" style={{ display: isLoading ? "block" : "none" }}>
-              Please Wait
-            </span>
-            <img src={previewImage} alt="Preview Image" className="drop-zoon__preview-image" style={{ display: previewImage ? "block" : "none" }} draggable="false" />
-            <input type="file" id="fileInput" className="drop-zoon__file-input" accept="image/*" onChange={handleFileInputChange} />
-          </div>
-          <div className="upload-area__file-details file-details" style={{ display: previewImage ? "block" : "none" }}>
-            <h3 className="file-details__title">Uploaded File</h3>
-            <div className="uploaded-file">
-              <div className="uploaded-file__icon-container">
-                <i className="bx bxs-file-blank uploaded-file__icon"></i>
-                <span className="uploaded-file__icon-text">{document.loan_document.split(".").pop()}</span>
-              </div>
-              <div className="uploaded-file__info uploaded-file__info--active">
-                <span className="uploaded-file__name">{document.loan_document}</span>
-                <span className="uploaded-file__counter">{`${uploadProgress}%`}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-              {/* <div className="upload-area col-6">
-                <div
-                  className={`upload-area__drop-zoon drop-zoon ${
-                    isDragging ? "drop-zoon--over" : ""
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => document.getElementById("fileInput").click()}
-                >
-                  <span className="drop-zoon__icon">
-                    <i className="bx bxs-file-image"></i>
-                  </span>
-                  <p className="drop-zoon__paragraph">Drop your file here</p>
-                  <span
-                    id="loadingText"
-                    className="drop-zoon__loading-text"
-                    style={{ display: isLoading ? "block" : "none" }}
-                  >
-                    Please Wait
-                  </span>
-                  <img
-                    src={previewImage}
-                    alt="Preview Image"
-                    className="drop-zoon__preview-image"
-                    style={{ display: previewImage ? "block" : "none" }}
-                    draggable="false"
-                  />
-                  <input
-                    type="file"
-                    id="fileInput"
-                    className="drop-zoon__file-input"
-                    accept="image/*"
-                    onChange={handleFileInputChange}
-                  />
-                </div>
-                <div
-                  className="upload-area__file-details file-details"
-                  style={{ display: previewImage ? "block" : "none" }}
-                >
-                  <h3 className="file-details__title">Uploaded File</h3>
-                  <div className="uploaded-file">
-                    <div className="uploaded-file__icon-container">
-                      <i className="bx bxs-file-blank uploaded-file__icon"></i>
-                      <span className="uploaded-file__icon-text">
-                        {uploadedFileName.split(".").pop()}
+                {loanDocuments.map((document, index) => (
+                  <div key={document._id} className="upload-area col-6">
+                    <Text fontSize="xl" className="mx-3" color={textColor}>
+                      {document.loan_document}
+                    </Text>
+                    <input
+                      type="file"
+                      ref={fileInputRefs.current[index]}
+                      className="drop-zoon__file-input"
+                      accept="image/*"
+                      onChange={(event) => handleFileInputChange(event, index)}
+                      style={{ display: "none" }}
+                    />
+                    <div
+                      className={`upload-area__drop-zoon drop-zoon ${
+                        isDragging ? "drop-zoon--over" : ""
+                      }`}
+                      onClick={() => {
+                        fileInputRefs.current[index].current.click();
+                      }}
+                    >
+                      <span className="drop-zoon__icon">
+                        <i className="bx bxs-file-image"></i>
                       </span>
+                      <p className="drop-zoon__paragraph">
+                        Drop your file here
+                      </p>
+                      <span
+                        id="loadingText"
+                        className="drop-zoon__loading-text"
+                        style={{ display: isLoading ? "block" : "none" }}
+                      >
+                        Please Wait
+                      </span>
+                      {previewImage[index] && (
+                        <img
+                          src={previewImage[index]}
+                          className="drop-zoon__preview-image"
+                          style={{ display: previewImage ? "block" : "none" }}
+                          draggable="false"
+                        />
+                      )}
                     </div>
-                    <div className="uploaded-file__info uploaded-file__info--active">
-                      <span className="uploaded-file__name">
-                        {uploadedFileName}
-                      </span>
-                      <span className="uploaded-file__counter">{`${uploadProgress}%`}</span>
+                    <div
+                      className="upload-area__file-details file-details"
+                      style={{ display: previewImage ? "block" : "none" }}
+                    >
+                      <h3 className="file-details__title">Uploaded File</h3>
+                      <div className="uploaded-file">
+                        <div className="uploaded-file__icon-container">
+                          <i className="bx bxs-file-blank uploaded-file__icon"></i>
+                          <span className="uploaded-file__icon-text">
+                            {document.loan_document.split(".").pop()}
+                          </span>
+                        </div>
+                        <div className="uploaded-file__info uploaded-file__info--active">
+                          <span className="uploaded-file__name">
+                            {document.loan_document}
+                          </span>
+                          <span className="uploaded-file__counter">{`${uploadProgress}%`}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div> */}
+                ))}
               </div>
             </div>
-            {/* </div> */}
           </CardBody>
         </Card>
       </Flex>
