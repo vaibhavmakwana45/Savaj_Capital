@@ -36,6 +36,7 @@ import TableComponent from "TableComponent";
 
 function Files() {
   const [users, setUsers] = useState([]);
+  console.log(users, "users");
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -45,8 +46,8 @@ function Files() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await AxiosInstance.get("/addusers/getusers");
-        setUsers(response.data.users);
+        const response = await AxiosInstance.get("/file_uplode");
+        setUsers(response.data.data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -67,27 +68,28 @@ function Files() {
       ? users
       : users.filter(
           (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.loan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.loan.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.number.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
   const allHeaders = [
-    "Name",
-    "Email",
-    "Number",
+    "File Id",
+    "Loan",
+    "Loan Type",
     "CreatedAt",
     "UpdatedAt",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
-    item.user_id,
-    item.username,
-    item.email,
-    item.number,
+    item.loan_id,
+    item.file_id,
+    item.loan,
+    item.loan_type,
     item.createdAt,
     item.updatedAt,
   ]);
+  console.log(formattedData, "formattedData");
 
   //   const handleDelete = (id) => {
   //     setSelectedUserId(id);
@@ -98,24 +100,24 @@ function Files() {
   //     history.push("/superadmin/adduser?id=" + id);
   //   };
 
-  //   const handleRow = (id) => {
-  //     console.log(id);
-  //   };
+  const handleRow = () => {
+    history.push("/superadmin/viewfile");
+  };
 
-  //   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  //   const [selectedUserId, setSelectedUserId] = useState(null);
-  //   const cancelRef = React.useRef();
-  //   const deletebranch = async (userId) => {
-  //     try {
-  //       await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
-  //       setUsers(users.filter((user) => user.user_id !== userId));
-  //       setIsDeleteDialogOpen(false);
-  //       toast.success("User deleted successfully!");
-  //     } catch (error) {
-  //       console.error("Error deleting user:", error);
-  //       toast.error("user not delete");
-  //     }
-  //   };
+  // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  // const [selectedUserId, setSelectedUserId] = useState(null);
+  // const cancelRef = React.useRef();
+  // const deletebranch = async (userId) => {
+  //   try {
+  //     await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
+  //     setUsers(users.filter((user) => user.user_id !== userId));
+  //     setIsDeleteDialogOpen(false);
+  //     toast.success("User deleted successfully!");
+  //   } catch (error) {
+  //     console.error("Error deleting user:", error);
+  //     toast.error("user not delete");
+  //   }
+  // };
 
   return (
     <>
@@ -152,7 +154,7 @@ function Files() {
               allHeaders={allHeaders}
               //   handleDelete={handleDelete}
               //   handleEdit={handleEdit}
-              //   handleRow={handleRow}
+              handleRow={handleRow}
             />
           </CardBody>
         </Card>

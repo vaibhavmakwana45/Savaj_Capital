@@ -4,6 +4,7 @@ const SavajCapital_UserSchema = new mongoose.Schema({
   branchuser_id: { type: String },
   role_id: { type: String },
   branch_id: { type: String },
+  full_name: { type: String },
   email: { type: String },
   password: { type: String },
 

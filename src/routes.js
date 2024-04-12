@@ -36,6 +36,7 @@ import NewPassword from "views/Pages/NewPassword";
 import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
+import ViewFile from "files/ViewFile";
 
 var dashRoutes = [
   //superadmin
@@ -198,6 +199,14 @@ var dashRoutes = [
     name: "Files",
     icon: <DocumentIcon color="inherit" />,
     component: AddFiles,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/viewfile",
+    name: "Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: ViewFile,
     layout: "/superadmin",
     hideInSidebar: true,
   },

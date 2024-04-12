@@ -45,4 +45,55 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/:loan_id", async (req, res) => {
+  try {
+    const { loan_id } = req.params;
+
+    const data = await Loan_Documents.find({ loan_id });
+
+    if (data.length === 0) {
+      return res.status(201).json({
+        statusCode: 201,
+        message: "Documents not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+router.get("/loan_docs/:loan_id/:loantype_id", async (req, res) => {
+  try {
+    const { loan_id, loantype_id } = req.params;
+
+    const data = await Loan_Documents.find({ loan_id, loantype_id });
+
+    if (data.length === 0) {
+      return res.status(201).json({
+        statusCode: 201,
+        message: "Documents not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;

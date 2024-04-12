@@ -55,16 +55,14 @@ router.post("/", async (req, res) => {
 
     req.body.password = "";
 
-    console.log(req.body.email);
     var data = await SavajCapital_User.create(req.body);
-    console.log(data);
+
     const ApiResponse = await axios.post(
-      `http://192.168.1.12:4000/api/setpassword/passwordmail`,
+      `http://192.168.1.13:4000/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
     );
-    console.log(ApiResponse);
 
     if (ApiResponse.status === 200) {
       console.log("Password mail sent successfully");
