@@ -37,6 +37,7 @@ import TableComponent from "TableComponent";
 
 function LoanSubTypes() {
   const [users, setUsers] = useState([]);
+  console.log('users', users)
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -109,17 +110,18 @@ function LoanSubTypes() {
   };
 
   const handleRow = (id) => {
-    // history.push("/superadmin/loantype?id=" + id);
-    const data = users.find((user) => user.loan_id == id);
-    console.log('data', data)
-    // if (data.loantype_count == 0) {
-    //   alert("navigate it to documents");
-    // } else {
-    //   history.push("/superadmin/loandocument?id=" + id);
-    // }
-    history.push("/superadmin/loandocument?id=" + id);
-
+    const data = users.find((user) => user.loantype_id === id);
+  
+    console.log("Navigating to documents page with data:", data);
+    if(data) {
+      history.push("/superadmin/documents", {
+        state: { loan_id: data.loan_id, loantype_id: data.loantype_id },
+      });
+    } else {
+      console.error("No data found for ID:", id);
+    }
   };
+  
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
