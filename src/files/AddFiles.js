@@ -71,7 +71,9 @@ function AddFiles(props) {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Users
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">Add New User</Button>
+              <Button onClick={onOpen} colorScheme="blue">
+                Add New User
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>
