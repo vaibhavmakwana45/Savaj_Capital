@@ -427,7 +427,12 @@ export function SidebarResponsive(props) {
     });
   };
 
-  var links = <>{createLinks(routes)}</>;
+  
+  const newroutes= routes.filter((route) => route.hideInSResponsive);
+  
+  // console.log(newroutes)
+
+  var links = <>{createLinks(newroutes)}</>;
 
   //  BRAND
 

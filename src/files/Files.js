@@ -147,7 +147,7 @@ function Files() {
           </CardHeader>
           <CardBody>
             <TableComponent
-              data={formattedData}
+             data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
               loading={loading}
