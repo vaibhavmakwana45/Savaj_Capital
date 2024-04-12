@@ -102,11 +102,12 @@ function Tables() {
     history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
   };
 
-  const allHeaders = ["Bank Name", "role", "Action"];
+  const allHeaders = ["Bank Name", "Name", "role", "Action"];
 
   const formattedData = filteredUsers.map((bank) => [
     bank.branchuser_id,
     bank.email,
+    bank.full_name,
     bank.role,
   ]);
 

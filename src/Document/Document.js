@@ -11,8 +11,8 @@ import AxiosInstance from "config/AxiosInstance";
 function Document() {
   const location = useLocation();
   const { loan_id, loantype_id } = location?.state?.state || {};
-  console.log('loan_id', loan_id);
-  console.log('loantype_id', loantype_id  );
+  console.log("loan_id", loan_id);
+  console.log("loantype_id", loantype_id);
   const [documents, setDocuments] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -30,7 +30,9 @@ function Document() {
       setLoading(true);
       try {
         // Decide the URL based on the presence of loantype_id
-        const url = loantype_id ? `/loan_docs/loan_docs/${loan_id}/${loantype_id}` : `/loan_docs/${loan_id}`;
+        const url = loantype_id
+          ? `/loan_docs/loan_docs/${loan_id}/${loantype_id}`
+          : `/loan_docs/${loan_id}`;
         const response = await AxiosInstance.get(url);
         console.log("API response:", response.data);
         setDocuments(response.data.data || []);
@@ -42,7 +44,12 @@ function Document() {
       }
     };
 
-    console.log("Fetching documents for loan_id:", loan_id, "and loantype_id:", loantype_id);
+    console.log(
+      "Fetching documents for loan_id:",
+      loan_id,
+      "and loantype_id:",
+      loantype_id
+    );
     fetchDocuments();
   }, [loan_id, loantype_id]);
 
@@ -57,7 +64,7 @@ function Document() {
     doc.createdAt,
     doc.updatedAt,
   ]);
-
+  const handleRow = () => {};
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -86,6 +93,7 @@ function Document() {
               borderColor={borderColor}
               loading={loading}
               allHeaders={allHeaders}
+              handleRow={handleRow}
             />
           </CardBody>
         </Card>

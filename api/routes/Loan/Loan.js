@@ -173,4 +173,21 @@ router.delete("/:loan_id", async (req, res) => {
   }
 });
 
+
+router.get("/loan", async (req, res) => {
+  try {
+    const data = await Loan.find({});
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 module.exports = router;

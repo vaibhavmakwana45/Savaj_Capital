@@ -34,12 +34,37 @@ function AddLoanDocuments() {
     loan_documents: [""],
   });
 
-  const [loanType, setLoanType] = useState([]);
-  const getData = async () => {
+  const [loandata, setLoanData] = useState([]);
+  console.log(loandata, "loandata");
+
+  const getLoanData = async () => {
     try {
-      const response = await AxiosInstance.get("/loan_type/loan_type");
+      const response = await AxiosInstance.get("/loan/loan");
 
       if (response.data.success) {
+        setLoanData(response.data.data);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getLoanData();
+  }, []);
+
+  const [loanType, setLoanType] = useState([]);
+  const getData = async (loanId) => {
+    try {
+      // Make the API call with the loan_id parameter
+      const response = await AxiosInstance.get(
+        `/loan_type/loan_type/${loanId}`
+      );
+
+      if (response.data.success) {
+        // Set the loanType state with the received data
         setLoanType(response.data.data);
       } else {
         alert("Please try again later...!");
@@ -110,7 +135,6 @@ function AddLoanDocuments() {
           formData.loan_documents.length - 1
         ),
       };
-      console.log(data, "data");
 
       const response = await AxiosInstance.post(`/loan_docs/`, data);
       if (response.data.success) {
@@ -142,6 +166,26 @@ function AddLoanDocuments() {
           <CardBody>
             <form onSubmit={handleSubmit}>
               <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+                <FormLabel>Select Loan</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select Loan-Type"
+                  onChange={(e) => {
+                    const selectedLoanId = e.target.value;
+                    setFormData({ ...formData, loan_id: selectedLoanId });
+                    // Call getData with the selected loan_id
+                    getData(selectedLoanId);
+                  }}
+                >
+                  {loandata.map((index) => (
+                    <option key={index.loan_id} value={index.loan_id}>
+                      {index.loan}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl id="savajcapitalbranch_name" mt={4}>
                 <FormLabel>Select Loan-Type</FormLabel>
                 <Select
                   name="city"
@@ -149,28 +193,14 @@ function AddLoanDocuments() {
                   onChange={(e) =>
                     setFormData({ ...formData, loantype_id: e.target.value })
                   }
-                  // onChange={(e) => {
-                  //   const [loanId, loantype_id] = e.target.value.split("_");
-                  //   setFormData({
-                  //     ...formData,
-                  //     loan_id: loanId,
-                  //     loantype_id: loantype_id,
-                  //   });
-                  // }}
                 >
                   {loanType.map((index) => (
                     <option
                       key={index.loantype_id}
                       name={"fdkasdfadfkl"}
                       value={index.loantype_id}
-                      // value={`${index.loantype_id}${index.loan_id}`}
                     >
-                      {console.log(
-                        index.loan_id,
-                        index.loantype_id,
-                        "index.loantype_id"
-                      )}
-                      {index.loan_type} - ({index.loan})
+                      {index.loan_type}
                     </option>
                   ))}
                 </Select>

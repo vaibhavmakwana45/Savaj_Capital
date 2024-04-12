@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, createRef } from "react";
+import "./file.scss";
+import { useHistory, useLocation } from "react-router-dom";
 import {
   Button,
   Select,
@@ -17,6 +19,7 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -24,7 +27,9 @@ import { useForm } from "react-hook-form";
 import AxiosInstance from "config/AxiosInstance";
 
 function AddFiles() {
+  const history = useHistory();
   const textColor = useColorModeValue("gray.700", "white");
+  const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
@@ -95,6 +100,154 @@ function AddFiles() {
     }
   };
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [loanDocuments, setLoanDocuments] = useState([]);
+
+  const imagesTypes = ["jpeg", "png", "svg", "gif"];
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files[0];
+    uploadFile(file);
+  };
+
+  // const handleFileInputChange = (event, index) => {
+  //   const file = event.target.files[0];
+  //   setUploadedFileName((prevState) => {
+  //     const newState = [...prevState];
+  //     newState[index] = file;
+  //     return newState;
+  //   });
+  //   const blobUrl = URL.createObjectURL(file);
+  //   setPreviewImage((prevState) => {
+  //     const newState = [...prevState];
+  //     newState[index] = blobUrl;
+  //     return newState;
+  //   });
+  // };
+
+  const progressMove = () => {
+    let counter = 0;
+    setTimeout(() => {
+      const counterIncrease = setInterval(() => {
+        if (counter === 100) {
+          clearInterval(counterIncrease);
+        } else {
+          counter += 10;
+          setUploadProgress(counter);
+        }
+      }, 100);
+    }, 600);
+  };
+
+  useEffect(() => {
+    const fetchLoanDocuments = async () => {
+      try {
+        const response = await AxiosInstance.get("/loan_docs/1712751552190");
+        setLoanDocuments(response.data.data);
+      } catch (error) {
+        console.error("Error fetching loan documents:", error);
+      }
+    };
+
+    fetchLoanDocuments();
+  }, []);
+
+  const fileInputRefs = useRef([]);
+
+  useEffect(() => {
+    // Initialize refs array
+    fileInputRefs.current = loanDocuments.map(
+      (_, index) => fileInputRefs.current[index] || createRef()
+    );
+  }, [loanDocuments]);
+
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
+  const [documents, setDocuments] = useState([]);
+
+  const handleUserChange = (event) => {
+    setSelectedUser(event.target.value);
+  };
+
+  const handleLoanChange = (event) => {
+    setSelectedLoanId(event.target.value);
+  };
+
+  const handleLoanSubtypeChange = (event) => {
+    setSelectedLoanSubtypeId(event.target.value);
+  };
+
+  const fileData = async (file) => {
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("b_video", file);
+
+    try {
+      const response = await AxiosInstance.post("/image_upload.php", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        },
+      });
+      console.log("Upload successful:", response.data);
+      setPreviewImage(URL.createObjectURL(file));
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Upload failed! Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFileInputChange = (event, index) => {
+    const file = event.target.files[0];
+    fileData(file);
+  };
+
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const payload = {
+      user_id: selectedUser,
+      loan_id: selectedLoanId,
+      loantype_id: selectedLoanSubtypeId,
+      documents: documents,
+    };
+
+    try {
+      const response = await AxiosInstance.post("/file_uplode", payload);
+      console.log(response.data);
+
+      history.push("/superadmin/filetable");
+    } catch (error) {
+      console.error("Error submitting documents:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -112,7 +265,7 @@ function AddFiles() {
           <CardBody>
             <FormControl id="user_id" mt={4} isRequired>
               <FormLabel>User</FormLabel>
-              <Select placeholder="Select user">
+              <Select placeholder="Select user" onChange={handleUserChange}>
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
                     {`${user.username} (${user.email})`}
@@ -120,7 +273,12 @@ function AddFiles() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl id="loan_id" mt={4} isRequired>
+            <FormControl
+              id="loan_id"
+              mt={4}
+              isRequired
+              onChange={handleLoanChange}
+            >
               <FormLabel>Loan Type</FormLabel>
               <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
                 {loanType.map((loan) => (
@@ -131,7 +289,12 @@ function AddFiles() {
               </Select>
             </FormControl>
             {selectedLoanType.is_subtype && loanSubType.length > 0 && (
-              <FormControl id="loantype_id" mt={4} isRequired>
+              <FormControl
+                id="loantype_id"
+                mt={4}
+                isRequired
+                onChange={handleLoanSubtypeChange}
+              >
                 <FormLabel>Loan Subtype</FormLabel>
                 <Select placeholder="Select Loan Subtype">
                   {loanSubType.map((subType) => (
@@ -145,6 +308,85 @@ function AddFiles() {
                 </Select>
               </FormControl>
             )}
+            <div style={{ marginTop: "40px" }}>
+              <div className="d-flex">
+                {loanDocuments.map((document, index) => (
+                  <div key={document._id} className="upload-area col-6">
+                    <Text fontSize="xl" className="mx-3" color={textColor}>
+                      {document.loan_document}
+                    </Text>
+                    <input
+                      type="file"
+                      ref={fileInputRefs.current[index]}
+                      className="drop-zoon__file-input"
+                      accept="image/*"
+                      onChange={(event) => handleFileInputChange(event, index)}
+                      style={{ display: "none" }}
+                    />
+                    <div
+                      className={`upload-area__drop-zoon drop-zoon ${
+                        isDragging ? "drop-zoon--over" : ""
+                      }`}
+                      onClick={() => {
+                        fileInputRefs.current[index].current.click();
+                      }}
+                    >
+                      <span className="drop-zoon__icon">
+                        <i className="bx bxs-file-image"></i>
+                      </span>
+                      <p className="drop-zoon__paragraph">
+                        Drop your file here
+                      </p>
+                      <span
+                        id="loadingText"
+                        className="drop-zoon__loading-text"
+                        style={{ display: isLoading ? "block" : "none" }}
+                      >
+                        Please Wait
+                      </span>
+                      {previewImage[index] && (
+                        <img
+                          src={previewImage[index]}
+                          className="drop-zoon__preview-image"
+                          style={{ display: previewImage ? "block" : "none" }}
+                          draggable="false"
+                        />
+                      )}
+                    </div>
+                    <div
+                      className="upload-area__file-details file-details"
+                      style={{ display: previewImage ? "block" : "none" }}
+                    >
+                      <h3 className="file-details__title">Uploaded File</h3>
+                      <div className="uploaded-file">
+                        <div className="uploaded-file__icon-container">
+                          <i className="bx bxs-file-blank uploaded-file__icon"></i>
+                          <span className="uploaded-file__icon-text">
+                            {document.loan_document.split(".").pop()}
+                          </span>
+                        </div>
+                        <div className="uploaded-file__info uploaded-file__info--active">
+                          <span className="uploaded-file__name">
+                            {document.loan_document}
+                          </span>
+                          <span className="uploaded-file__counter">{`${uploadProgress}%`}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Button
+              mt={4}
+              colorScheme="teal"
+              onClick={handleSubmitData}
+              isLoading={loading}
+              loadingText="Submitting"
+              style={{ marginTop: 40 }}
+            >
+              Submit
+            </Button>
           </CardBody>
         </Card>
       </Flex>
@@ -206,6 +448,7 @@ function AddFiles() {
           </form>
         </ModalContent>
       </Modal>
+      <Toaster />
     </>
   );
 }

@@ -37,6 +37,7 @@ import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
 import Document from "Document/Document";
+import ViewFile from "files/ViewFile";
 
 var dashRoutes = [
   //superadmin
@@ -46,6 +47,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
     layout: "/superadmin",
+    hideInSResponsive: true
   },
   {
     path: "/bank",
@@ -53,6 +55,8 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: BankTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/savajcapitalbranch",
@@ -60,6 +64,8 @@ var dashRoutes = [
     icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/savajusers",
@@ -68,6 +74,7 @@ var dashRoutes = [
     component: SavajUsers,
     hideInSidebar: true,
     layout: "/superadmin",
+    
   },
   {
     path: "/savajuserroles",
@@ -83,6 +90,8 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/addbank",
@@ -91,6 +100,7 @@ var dashRoutes = [
     component: AddBank,
     layout: "/superadmin",
     hideInSidebar: true,
+    
   },
   {
     path: "/addbankuser",
@@ -122,7 +132,17 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: LoanTypes,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
+  // {
+  //   path: "/file",
+  //   name: "File Upload",
+  //   icon: <CreditIcon color="inherit" />,
+  //   component: FileUplode,
+  //   layout: "/superadmin",
+  //   hideInSResponsive: true
+  // },
   {
     path: "/loantype",
     name: "Loan",
@@ -207,6 +227,14 @@ var dashRoutes = [
     name: "Files",
     icon: <DocumentIcon color="inherit" />,
     component: AddFiles,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/viewfile",
+    name: "Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: ViewFile,
     layout: "/superadmin",
     hideInSidebar: true,
   },

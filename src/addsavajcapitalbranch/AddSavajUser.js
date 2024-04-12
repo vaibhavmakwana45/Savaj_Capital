@@ -92,6 +92,7 @@ function AddSavajCapitalBranch() {
           branch_id: data[0].branch_id,
           role_id: data[0].role_id,
           email: data[0].email,
+          full_name: data[0].full_name,
           password: "",
         };
 
@@ -144,6 +145,7 @@ function AddSavajCapitalBranch() {
     savajcapitalbranch_name: "",
     state: "",
     city: "",
+    full_name: "",
     email: "",
     password: "",
   });
@@ -196,7 +198,6 @@ function AddSavajCapitalBranch() {
         }
       } else {
         const response = await AxiosInstance.post("/savaj_user", formData);
-
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.success) {
@@ -285,6 +286,15 @@ function AddSavajCapitalBranch() {
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 Login Credential
               </Text>
+              <FormControl id="email" mt={4} isRequired>
+                <FormLabel>Full Name</FormLabel>
+                <Input
+                  name="full_name"
+                  type="full_name"
+                  onChange={handleChange}
+                  value={formData.full_name}
+                />
+              </FormControl>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
