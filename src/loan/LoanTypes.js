@@ -34,6 +34,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
+// import "style.css"
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -177,14 +178,15 @@ function UserTable() {
                   width="250px"
                   marginRight="10px"
                 />
-                <div style={{gap: '10px'}}>
+                <div className="add-doc-btn">
                 <Button
                   onClick={() => history.push("/superadmin/addloantype")}
                   colorScheme="blue"
                 >
                   Add Loan
                 </Button>
-                <Button
+                <Button 
+                style={{marginLeft:"10px"}}
                   onClick={() => history.push("/superadmin/addloandocs")}
                   colorScheme="blue"
                 >

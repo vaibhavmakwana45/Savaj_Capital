@@ -33,6 +33,7 @@ import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
+import FileUplode from "../src/components/File/FileUplode";
 
 var dashRoutes = [
   //superadmin
@@ -42,6 +43,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
     layout: "/superadmin",
+    hideInSResponsive: true
   },
   {
     path: "/bank",
@@ -49,6 +51,8 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: BankTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/savajcapitalbranch",
@@ -56,6 +60,8 @@ var dashRoutes = [
     icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/savajusers",
@@ -64,6 +70,7 @@ var dashRoutes = [
     component: SavajUsers,
     hideInSidebar: true,
     layout: "/superadmin",
+    
   },
   {
     path: "/savajuserroles",
@@ -79,6 +86,8 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserTable,
     layout: "/superadmin",
+    hideInSResponsive: true
+
   },
   {
     path: "/addbank",
@@ -87,6 +96,7 @@ var dashRoutes = [
     component: AddBank,
     layout: "/superadmin",
     hideInSidebar: true,
+    
   },
   {
     path: "/addbankuser",
@@ -110,6 +120,16 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: LoanTypes,
     layout: "/superadmin",
+    hideInSResponsive: true
+
+  },
+  {
+    path: "/file",
+    name: "File Upload",
+    icon: <CreditIcon color="inherit" />,
+    component: FileUplode,
+    layout: "/superadmin",
+    hideInSResponsive: true
   },
   {
     path: "/loantype",
