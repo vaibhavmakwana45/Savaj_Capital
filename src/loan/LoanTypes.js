@@ -57,6 +57,7 @@ function UserTable() {
       console.error("Error fetching users:", error);
     }
   };
+  
   useEffect(() => {
     fetchUsers();
   }, []);

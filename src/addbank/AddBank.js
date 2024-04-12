@@ -73,7 +73,7 @@ function AddBank() {
     bank_id: "",
     user_id: "",
     bank_name: "",
-    country: "India", // Default to India
+    country: "India",
     state: "",
     city: "",
     branch_name: "",
@@ -92,7 +92,7 @@ function AddBank() {
           bank_id: id,
           user_id: "",
           bank_name: bankDetails.bank_name,
-          country: bankDetails.country, // Default to India
+          country: bankDetails.country,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
@@ -225,7 +225,7 @@ function AddBank() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Add Bank and User
+                Add Bank
               </Text>
             </Flex>
           </CardHeader>

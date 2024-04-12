@@ -80,7 +80,7 @@ function Files() {
     "UpdatedAt",
     "Action",
   ];
-  const formattedData = filteredUsers.map((item) => [
+  const formattedData = filteredUsers?.map((item) => [
     item.user_id,
     item.username,
     item.email,
