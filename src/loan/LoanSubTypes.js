@@ -37,7 +37,6 @@ import TableComponent from "TableComponent";
 
 function LoanSubTypes() {
   const [users, setUsers] = useState([]);
-  console.log('users', users)
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -304,7 +303,7 @@ function LoanSubTypes() {
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => handleAddRole(role)}
+                  onClick={() => AddRole(role)}
                   ml={3}
                   type="submit"
                 >

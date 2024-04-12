@@ -15,8 +15,9 @@ router.post("/", async (req, res) => {
     const createdAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
+    // Iterate over each loan document and create a separate object for each
     const loanDocumentsData = loan_document.map((document, index) => {
-      const uniqueId = `${timestamp}_${index + 1}`;
+      const uniqueId = `${timestamp}_${index + 1}`; // Generate unique ID for each loan document
       loanTypeCounter++;
       return {
         loan_document_id: uniqueId,
@@ -28,6 +29,7 @@ router.post("/", async (req, res) => {
       };
     });
 
+    // Add each loan document to the Loan_Documents collection
     const createdDocuments = await Loan_Documents.insertMany(loanDocumentsData);
 
     res.json({
@@ -43,103 +45,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Loan-Type
-router.get("/:loantype_id", async (req, res) => {
-  try {
-    const { loantype_id } = req.params;
-
-    const loanType = await Loan_Type.findOne({ loantype_id: loantype_id });
-
-    var data = await Loan_Documents.aggregate([
-      {
-        $match: { loantype_id: loantype_id },
-      },
-      {
-        $sort: { updatedAt: -1 },
-      },
-    ]);
-
-    if (loanType) {
-      data = data.map((doc) => ({
-        ...doc,
-        loan_type: loanType.loan_type,
-      }));
-    }
-
-    const count = data.length;
-
-    res.json({
-      success: true,
-      data: data,
-      count: count,
-      message: "Read All Loan Documents for Specified Loan-Type",
-    });
-  } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
-
-// Update Document Name
-router.put("/:loan_document_id", async (req, res) => {
-  try {
-    const { loan_document_id } = req.params;
-
-    req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-    const result = await Loan_Documents.findOneAndUpdate(
-      { loan_document_id: loan_document_id },
-      { $set: req.body },
-      { new: true }
-    );
-
-    if (result) {
-      res.json({
-        success: true,
-        data: result,
-        message: "Document Name Updated Successfully",
-      });
-    } else {
-      res.status(202).json({
-        statusCode: 202,
-        message: "Role not found",
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
-      statusCode: 500,
-      message: err.message,
-    });
-  }
-});
-// Delete Loan
-router.delete("/:loan_document_id", async (req, res) => {
-  try {
-    const { loan_document_id } = req.params;
-
-    const deletedDocument = await Loan_Documents.findOneAndDelete({
-      loan_document_id: loan_document_id,
-    });
-
-    if (!deletedDocument) {
-      return res.status(200).json({
-        statusCode: 202,
-        message: "Document not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Document deleted successfully",
-      deletedRoleId: loan_document_id,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-});
 module.exports = router;
