@@ -19,16 +19,18 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
-import toast from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "config/AxiosInstance";
 
-function AddFiles(props) {
+function AddFiles() {
   const textColor = useColorModeValue("gray.700", "white");
   const [users, setUsers] = useState([]);
+  const [loanType, setLoanType] = useState([]);
+  const [loanSubType, setLoanSubType] = useState([]);
+  const [selectedLoanType, setSelectedLoanType] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     register,
@@ -42,13 +44,44 @@ function AddFiles(props) {
       const response = await AxiosInstance.get("/addusers/getusers");
       setUsers(response.data.users);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching users:", error);
     }
   };
-
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const fetchLoanType = async () => {
+    try {
+      const response = await AxiosInstance.get("/loan");
+      setLoanType(response.data.data);
+    } catch (error) {
+      console.error("Error fetching loans:", error);
+    }
+  };
+  useEffect(() => {
+    fetchLoanType();
+  }, []);
+
+  const handleLoanTypeChange = async (event) => {
+    const loanId = event.target.value;
+    const selectedType = loanType.find((loan) => loan.loan_id === loanId);
+    setSelectedLoanType(selectedType || {});
+
+    if (selectedType && selectedType.is_subtype) {
+      try {
+        const response = await AxiosInstance.get(
+          `/loan_type/loan_type/${loanId}`
+        );
+        setLoanSubType(response.data.data);
+      } catch (error) {
+        console.error("Error fetching loan subtypes:", error);
+        setLoanSubType([]);
+      }
+    } else {
+      setLoanSubType([]);
+    }
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -167,7 +200,7 @@ function AddFiles(props) {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Users
+                Add File
               </Text>
               <Button onClick={onOpen} colorScheme="blue">
                 Add New User
