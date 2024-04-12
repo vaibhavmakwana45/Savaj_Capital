@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
+const Loan = require("../../models/Loan/Loan");
+const Loan_Type = require("../../models/Loan/Loan_Type");
 
 let loanTypeCounter = 0;
 

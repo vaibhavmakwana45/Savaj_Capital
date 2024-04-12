@@ -27,6 +27,7 @@ const decrypt = (text) => {
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
 router.post("/adduser", async (req, res) => {
+  console.log('first', req.body)
   try {
     const { userDetails } = req.body;
 
@@ -43,7 +44,7 @@ router.post("/adduser", async (req, res) => {
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
-    const hashedPassword = encrypt(userDetails.password);
+    // const hashedPassword = encrypt(userDetails.password);
 
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
@@ -57,7 +58,7 @@ router.post("/adduser", async (req, res) => {
       user_id: userId,
       createdAt: currentDate,
       updatedAt: currentDate,
-      password: hashedPassword,
+      password: "",
     });
 
     await newUser.save();
@@ -110,7 +111,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://192.168.1.13:4001/api/setpassword/passwordmail`,
+      `http://192.168.1.12:4000/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }

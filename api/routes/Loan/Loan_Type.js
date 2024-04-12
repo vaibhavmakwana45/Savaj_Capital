@@ -188,10 +188,9 @@ router.get("/loan_type/:loan_id", async (req, res) => {
   }
 });
 
-
 router.get("/loan_type", async (req, res) => {
   try {
-    const data = await Loan_Type.find({ });
+    const data = await Loan_Type.find({});
 
     res.json({
       success: true,

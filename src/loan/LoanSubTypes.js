@@ -108,7 +108,18 @@ function LoanSubTypes() {
     }
   };
 
-  const handleRow = (id) => {};
+  const handleRow = (id) => {
+    // history.push("/superadmin/loantype?id=" + id);
+    const data = users.find((user) => user.loan_id == id);
+    console.log('data', data)
+    // if (data.loantype_count == 0) {
+    //   alert("navigate it to documents");
+    // } else {
+    //   history.push("/superadmin/loandocument?id=" + id);
+    // }
+    history.push("/superadmin/loandocument?id=" + id);
+
+  };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);

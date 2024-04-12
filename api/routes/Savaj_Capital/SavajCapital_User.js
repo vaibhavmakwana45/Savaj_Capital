@@ -59,7 +59,7 @@ router.post("/", async (req, res) => {
     var data = await SavajCapital_User.create(req.body);
     console.log(data);
     const ApiResponse = await axios.post(
-      `http://192.168.1.13:4001/api/setpassword/passwordmail`,
+      `http://192.168.1.12:4000/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
