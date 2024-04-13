@@ -6,9 +6,38 @@ const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User"
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 
+// router.post("/", async (req, res) => {
+//   try {
+//     const uniqueId = `F${moment().format("YYYYMMDDHHmmss")}`;
+//     const timestampForDocId = Date.now();
+//     const uniqueIdForDocId = `${timestampForDocId}`;
+
+//     req.body["file_id"] = uniqueId;
+//     req.body["createdAt"] = moment()
+//       .utcOffset(330)
+//       .format("YYYY-MM-DD HH:mm:ss");
+//     req.body["updatedAt"] = moment()
+//       .utcOffset(330)
+//       .format("YYYY-MM-DD HH:mm:ss");
+
+//     var data = await File_Uplode.create(req.body);
+//     res.json({
+//       success: true,
+//       data: data,
+//       message: "Add Role Successfully",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   try {
     const uniqueId = `F${moment().format("YYYYMMDDHHmmss")}`;
+    const timestampForDocId = Date.now(); // Generating timestamp for doc_id
 
     req.body["file_id"] = uniqueId;
     req.body["createdAt"] = moment()
@@ -17,6 +46,11 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = moment()
       .utcOffset(330)
       .format("YYYY-MM-DD HH:mm:ss");
+
+    // Generating unique doc_id for each document in the documents array
+    req.body.documents.forEach((doc) => {
+      doc.doc_id = `${timestampForDocId}_${Math.floor(Math.random() * 1000)}`;
+    });
 
     var data = await File_Uplode.create(req.body);
     res.json({

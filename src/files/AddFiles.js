@@ -25,6 +25,7 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "config/AxiosInstance";
+import axios from "axios";
 
 function AddFiles() {
   const history = useHistory();
@@ -125,21 +126,6 @@ function AddFiles() {
     uploadFile(file);
   };
 
-  // const handleFileInputChange = (event, index) => {
-  //   const file = event.target.files[0];
-  //   setUploadedFileName((prevState) => {
-  //     const newState = [...prevState];
-  //     newState[index] = file;
-  //     return newState;
-  //   });
-  //   const blobUrl = URL.createObjectURL(file);
-  //   setPreviewImage((prevState) => {
-  //     const newState = [...prevState];
-  //     newState[index] = blobUrl;
-  //     return newState;
-  //   });
-  // };
-
   const progressMove = () => {
     let counter = 0;
     setTimeout(() => {
@@ -153,21 +139,6 @@ function AddFiles() {
       }, 100);
     }, 600);
   };
-
-  // useEffect(() => {
-  //   const fetchLoanDocuments = async () => {
-  //     try {
-  //       const response = await AxiosInstance.get(
-  //         `/loan_docs/${"1712751552190"}`
-  //       );
-  //       setLoanDocuments(response.data.data);
-  //     } catch (error) {
-  //       console.error("Error fetching loan documents:", error);
-  //     }
-  //   };
-
-  //   fetchLoanDocuments();
-  // }, []);
 
   useEffect(() => {
     const fetchLoanDocuments = async () => {
@@ -216,25 +187,34 @@ function AddFiles() {
     setSelectedLoanSubtypeId(event.target.value);
   };
 
-  const fileData = async (file) => {
+  const fileData = async (file, index) => {
     setIsLoading(true);
     const formData = new FormData();
     formData.append("b_video", file);
 
     try {
-      const response = await AxiosInstance.post("/image_upload.php", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percentCompleted);
-        },
-      });
+      const response = await axios.post(
+        "https://cdn.dohost.in/image_upload.php",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          },
+        }
+      );
       console.log("Upload successful:", response.data);
-      setPreviewImage(URL.createObjectURL(file));
+      const imageUrl = response.data.iamge_path;
+      setPreviewImage((prevState) => {
+        const newState = [...prevState];
+        newState[index] = imageUrl;
+        return newState;
+      });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Upload failed! Please try again.");
@@ -245,7 +225,7 @@ function AddFiles() {
 
   const handleFileInputChange = (event, index) => {
     const file = event.target.files[0];
-    fileData(file);
+    fileData(file, index);
   };
 
   const handleSubmitData = async (e) => {
@@ -297,7 +277,12 @@ function AddFiles() {
               </Select>
             </FormControl>
 
-            <FormControl id="loan_id" mt={4} isRequired onChange={handleLoanChange}>
+            <FormControl
+              id="loan_id"
+              mt={4}
+              isRequired
+              onChange={handleLoanChange}
+            >
               <FormLabel>Loan Type</FormLabel>
               <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
                 {loanType.map((loan) => (
@@ -335,6 +320,7 @@ function AddFiles() {
                 </Select>
               </FormControl>
             )}
+
             <div style={{ marginTop: "40px" }}>
               {/* <h2>Aadhar card</h2> */}
               <div className="d-flex">
@@ -405,6 +391,7 @@ function AddFiles() {
                 ))}
               </div>
             </div>
+
             <Button
               mt={4}
               colorScheme="teal"
