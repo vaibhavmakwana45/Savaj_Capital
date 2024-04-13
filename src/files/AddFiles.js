@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   Button,
   Select,
@@ -19,11 +19,12 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { IconButton } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import { useForm } from "react-hook-form";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 
@@ -35,13 +36,6 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
 
   const fetchUsers = async () => {
     try {
@@ -84,20 +78,6 @@ function AddFiles() {
       }
     } else {
       setLoanSubType([]);
-    }
-  };
-
-  const onSubmit = async (data) => {
-    try {
-      const wrappedData = { userDetails: data };
-      await AxiosInstance.post("/addusers/adduser", wrappedData);
-      toast.success("User Added Successfully!");
-      onClose();
-      fetchUsers();
-      reset();
-    } catch (error) {
-      console.error("Error adding user:", error);
-      toast.error("Please try again later!");
     }
   };
 
@@ -152,6 +132,7 @@ function AddFiles() {
         if (url) {
           const response = await AxiosInstance.get(url);
           setLoanDocuments(response.data.data);
+          console.log("response.data.data", response.data.data);
         }
       } catch (error) {
         console.error("Error fetching loan documents:", error);
@@ -164,7 +145,6 @@ function AddFiles() {
   const fileInputRefs = useRef([]);
 
   useEffect(() => {
-    // Initialize refs array
     fileInputRefs.current = loanDocuments.map(
       (_, index) => fileInputRefs.current[index] || createRef()
     );
@@ -173,7 +153,6 @@ function AddFiles() {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
-  const [documents, setDocuments] = useState([]);
 
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value);
@@ -187,65 +166,102 @@ function AddFiles() {
     setSelectedLoanSubtypeId(event.target.value);
   };
 
-  const fileData = async (file, index) => {
-    setIsLoading(true);
-    const formData = new FormData();
-    formData.append("b_video", file);
-
-    try {
-      const response = await axios.post(
-        "https://cdn.dohost.in/image_upload.php",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadProgress(percentCompleted);
-          },
-        }
-      );
-      console.log("Upload successful:", response.data);
-      const imageUrl = response.data.iamge_path;
-      setPreviewImage((prevState) => {
-        const newState = [...prevState];
-        newState[index] = imageUrl;
-        return newState;
-      });
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Upload failed! Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [fileData, setFileData] = useState([]);
 
   const handleFileInputChange = (event, index) => {
     const file = event.target.files[0];
-    fileData(file, index);
+    if (file) {
+      const filePreview = {
+        name: file.name,
+        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+        type: file.type,
+        documentId: loanDocuments[index].loan_document_id, // Store the document ID along with the file info
+      };
+      setFileData((prevData) => {
+        const newData = prevData.slice();
+        newData[index] = filePreview;
+        return newData;
+      });
+      setUploadedFileName((prevFiles) => [
+        ...prevFiles,
+        {
+          file,
+          name: file.name,
+          documentId: loanDocuments[index].loan_document_id,
+        },
+      ]);
+    }
+  };
+
+  const handleRemoveFile = (index) => {
+    setFileData((prevData) => {
+      const newData = [...prevData];
+      newData[index] = undefined;
+      return newData;
+    });
+    if (fileInputRefs.current[index]) {
+      fileInputRefs.current[index].current.value = "";
+    }
   };
 
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const payload = {
-      user_id: selectedUser,
-      loan_id: selectedLoanId,
-      loantype_id: selectedLoanSubtypeId,
-      documents: documents,
-    };
+    console.log("Form submission started");
 
     try {
+      const uploadPromises = uploadedFileName.map(async (item) => {
+        const formData = new FormData();
+        formData.append("b_video", item.file);
+        console.log("Uploading file", item.file.name);
+
+        const response = await axios.post(
+          "https://cdn.dohost.in/image_upload.php/",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Upload response", response.data);
+
+        if (!response.data.success) {
+          throw new Error(response.data.msg || "File upload failed");
+        }
+
+        if (!response.data.iamge_path) {
+          throw new Error("Image path is missing in the response");
+        }
+
+        const imageName = response.data.iamge_path.split("/").pop();
+        console.log("Extracted image name", imageName);
+        return { ...item, path: imageName, documentId: item.documentId };
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+      console.log("Uploaded files", uploadedFiles);
+
+      const payload = {
+        user_id: selectedUser,
+        loan_id: selectedLoanId,
+        loantype_id: selectedLoanSubtypeId,
+        documents: uploadedFiles.map((file) => ({
+          file_path: file.path,
+          loan_document_id: file.documentId,
+        })),
+      };
+
+      console.log("Payload to send", payload);
       const response = await AxiosInstance.post("/file_uplode", payload);
-      console.log(response.data);
+      console.log("Server response", response.data);
 
       history.push("/superadmin/filetable");
+      toast.success("All data submitted successfully!");
     } catch (error) {
-      console.error("Error submitting documents:", error);
+      console.error("Error while uploading files or submitting data:", error);
+      toast.error("Submission failed! Please try again.");
     } finally {
       setLoading(false);
     }
@@ -260,9 +276,6 @@ function AddFiles() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">
-                Add New User
-              </Button>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -322,73 +335,87 @@ function AddFiles() {
             )}
 
             <div style={{ marginTop: "40px" }}>
-              {/* <h2>Aadhar card</h2> */}
               <div className="d-flex">
-                {loanDocuments.map((document, index) => (
-                  <div key={document._id} className="upload-area col-6">
-                    <Text fontSize="xl" className="mx-3" color={textColor}>
-                      {document.loan_document}
-                    </Text>
-                    <input
-                      type="file"
-                      ref={fileInputRefs.current[index]}
-                      className="drop-zoon__file-input"
-                      accept="image/*"
-                      onChange={(event) => handleFileInputChange(event, index)}
-                      style={{ display: "none" }}
-                    />
-                    <div
-                      className={`upload-area__drop-zoon drop-zoon ${
-                        isDragging ? "drop-zoon--over" : ""
-                      }`}
-                      onClick={() => {
-                        fileInputRefs.current[index].current.click();
-                      }}
-                    >
-                      <span className="drop-zoon__icon">
-                        <i className="bx bxs-file-image"></i>
-                      </span>
-                      <p className="drop-zoon__paragraph">
-                        Drop your file here
-                      </p>
-                      <span
-                        id="loadingText"
-                        className="drop-zoon__loading-text"
-                        style={{ display: isLoading ? "block" : "none" }}
-                      >
-                        Please Wait
-                      </span>
-                      {previewImage[index] && (
-                        <img
-                          src={previewImage[index]}
-                          className="drop-zoon__preview-image"
-                          style={{ display: previewImage ? "block" : "none" }}
-                          draggable="false"
-                        />
+                <div className="d-flex">
+                  {loanDocuments.map((document, index) => (
+                    <div key={document._id} className="upload-area col-6">
+                      <Text fontSize="xl" className="mx-3" color={textColor}>
+                        {document.loan_document}
+                      </Text>
+                      <input
+                        type="file"
+                        ref={fileInputRefs.current[index]}
+                        className="drop-zoon__file-input"
+                        onChange={(event) =>
+                          handleFileInputChange(event, index)
+                        }
+                        style={{ display: "none" }}
+                      />
+                      {fileData[index] ? (
+                        <div
+                          className="file-preview"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%",
+                          }}
+                        >
+                          {fileData[index].url ? (
+                            <img
+                              src={fileData[index].url}
+                              alt="Preview"
+                              style={{
+                                width: 100,
+                                height: 100,
+                                marginRight: "auto",
+                                marginLeft: "auto",
+                              }}
+                            />
+                          ) : (
+                            <span
+                              style={{
+                                marginRight: "auto",
+                                marginLeft: "auto",
+                              }}
+                            >
+                              {fileData[index].name}
+                            </span>
+                          )}
+                          <IconButton
+                            aria-label="Remove file"
+                            icon={<CloseIcon />}
+                            size="sm"
+                            onClick={() => handleRemoveFile(index)}
+                            style={{ margin: "0 10px" }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className={`upload-area__drop-zoon drop-zoon ${
+                            isDragging ? "drop-zoon--over" : ""
+                          }`}
+                          onClick={() =>
+                            fileInputRefs.current[index].current.click()
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexDirection: "column",
+                          }}
+                        >
+                          <span className="drop-zoon__icon">
+                            <i className="bx bxs-file-image"></i>
+                          </span>
+                          <p className="drop-zoon__paragraph">
+                            Drop your file here or click to browse
+                          </p>
+                        </div>
                       )}
                     </div>
-                    <div
-                      className="upload-area__file-details file-details"
-                      style={{ display: previewImage ? "block" : "none" }}
-                    >
-                      <h3 className="file-details__title">Uploaded File</h3>
-                      <div className="uploaded-file">
-                        <div className="uploaded-file__icon-container">
-                          <i className="bx bxs-file-blank uploaded-file__icon"></i>
-                          <span className="uploaded-file__icon-text">
-                            {document.loan_document.split(".").pop()}
-                          </span>
-                        </div>
-                        <div className="uploaded-file__info uploaded-file__info--active">
-                          <span className="uploaded-file__name">
-                            {document.loan_document}
-                          </span>
-                          <span className="uploaded-file__counter">{`${uploadProgress}%`}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -405,64 +432,6 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Add New User</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalBody pb={6}>
-              <FormControl>
-                <FormLabel>Username</FormLabel>
-                <Input
-                  placeholder="Username"
-                  {...register("username", {
-                    required: "Username is required",
-                  })}
-                />
-                {errors.username && <p>{errors.username.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Number</FormLabel>
-                <Input
-                  placeholder="Number"
-                  {...register("number", {
-                    required: "Number is required",
-                    pattern: {
-                      value: /^\d+$/,
-                      message: "Invalid number",
-                    },
-                  })}
-                />
-                {errors.number && <p>{errors.number.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  placeholder="Email"
-                  type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                />
-                {errors.email && <p>{errors.email.message}</p>}
-              </FormControl>
-            </ModalBody>
-
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
-                Save
-              </Button>
-              <Button onClick={onClose}>Cancel</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
       <Toaster />
     </>
   );

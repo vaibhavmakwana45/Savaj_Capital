@@ -35,8 +35,8 @@ import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
 function Files() {
-  const [users, setUsers] = useState([]);
-  console.log(users, "users");
+  const [files, setFiles] = useState([]);
+  console.log(files, "files");
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -47,12 +47,12 @@ function Files() {
     const fetchUsers = async () => {
       try {
         const response = await AxiosInstance.get("/file_uplode");
-        setUsers(response.data.data);
+        setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
 
-        console.error("Error fetching users:", error);
+        console.error("Error fetching files:", error);
       }
     };
 
@@ -65,8 +65,8 @@ function Files() {
 
   const filteredUsers =
     searchTerm.length === 0
-      ? users
-      : users.filter(
+      ? files
+      : files.filter(
           (user) =>
             user.loan.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.loan.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,19 +82,14 @@ function Files() {
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
-    item.loan_id,
     item.file_id,
+    item.loan_id,
     item.loan,
     item.loan_type,
     item.createdAt,
     item.updatedAt,
   ]);
   console.log(formattedData, "formattedData");
-
-  //   const handleDelete = (id) => {
-  //     setSelectedUserId(id);
-  //     setIsDeleteDialogOpen(true);
-  //   };
 
   //   const handleEdit = (id) => {
   //     history.push("/superadmin/adduser?id=" + id);
@@ -104,20 +99,24 @@ function Files() {
     history.push("/superadmin/viewfile");
   };
 
-  // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  // const [selectedUserId, setSelectedUserId] = useState(null);
-  // const cancelRef = React.useRef();
-  // const deletebranch = async (userId) => {
-  //   try {
-  //     await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
-  //     setUsers(users.filter((user) => user.user_id !== userId));
-  //     setIsDeleteDialogOpen(false);
-  //     toast.success("User deleted successfully!");
-  //   } catch (error) {
-  //     console.error("Error deleting user:", error);
-  //     toast.error("user not delete");
-  //   }
-  // };
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const cancelRef = React.useRef();
+  const deletefile = async (fileId) => {
+    try {
+      await AxiosInstance.delete(`/file_uplode/${fileId}`);
+      setFiles(files.filter((file) => file.file_id !== fileId));
+      setIsDeleteDialogOpen(false);
+      toast.success("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("file not delete");
+    }
+  };
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
   return (
     <>
@@ -147,18 +146,51 @@ function Files() {
           </CardHeader>
           <CardBody>
             <TableComponent
-             data={formattedData}
+              data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
               loading={loading}
               allHeaders={allHeaders}
-              //   handleDelete={handleDelete}
+              handleDelete={handleDelete}
               //   handleEdit={handleEdit}
               handleRow={handleRow}
             />
           </CardBody>
         </Card>
       </Flex>
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete File
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => deletefile(selectedFileId)}
+                ml={3}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
       <Toaster />
     </>
   );
