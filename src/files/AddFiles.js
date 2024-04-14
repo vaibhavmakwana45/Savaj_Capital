@@ -25,6 +25,8 @@ import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 
@@ -124,29 +126,38 @@ function AddFiles() {
     const fetchLoanDocuments = async () => {
       try {
         let url;
-        if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
-          url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+        if (selectedLoanType.is_subtype) {
+          if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
+            url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+          }
         } else if (selectedLoanType.loan_id) {
           url = `/loan_docs/${selectedLoanType.loan_id}`;
         }
+
         if (url) {
           const response = await AxiosInstance.get(url);
           setLoanDocuments(response.data.data);
-          console.log("response.data.data", response.data.data);
         }
       } catch (error) {
         console.error("Error fetching loan documents:", error);
       }
     };
 
-    fetchLoanDocuments();
+    if (
+      (selectedLoanType.is_subtype && selectedLoanType.loansubtype_id) ||
+      !selectedLoanType.is_subtype
+    ) {
+      fetchLoanDocuments();
+    } else {
+      setLoanDocuments([]);
+    }
   }, [selectedLoanType]);
 
   const fileInputRefs = useRef([]);
 
   useEffect(() => {
     fileInputRefs.current = loanDocuments.map(
-      (_, index) => fileInputRefs.current[index] || createRef()
+      (_, index) => fileInputRefs.current[index] ?? createRef()
     );
   }, [loanDocuments]);
 
@@ -175,7 +186,7 @@ function AddFiles() {
         name: file.name,
         url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
         type: file.type,
-        documentId: loanDocuments[index].loan_document_id, // Store the document ID along with the file info
+        documentId: loanDocuments[index].loan_document_id,
       };
       setFileData((prevData) => {
         const newData = prevData.slice();
@@ -199,21 +210,79 @@ function AddFiles() {
       newData[index] = undefined;
       return newData;
     });
+
     if (fileInputRefs.current[index]) {
-      fileInputRefs.current[index].current.value = "";
+      fileInputRefs.current[index].value = "";
     }
+  };
+
+  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchSavajcapitalbranch = async () => {
+      try {
+        const response = await AxiosInstance.get("/branch");
+        setSavajcapitalbranch(response.data.data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
+
+    fetchSavajcapitalbranch();
+    getRolesData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSavajcapitalbranchUser = async () => {
+      if (!selectedBranchId) {
+        setSavajcapitalbranchUser([]);
+        return;
+      }
+
+      try {
+        const response = await AxiosInstance.get(
+          `/savaj_user/${selectedBranchId}`
+        );
+        setSavajcapitalbranchUser(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching branch users:", error);
+      }
+    };
+
+    fetchSavajcapitalbranchUser();
+  }, [selectedBranchId]);
+
+  const getRolesData = async () => {
+    try {
+      const response = await AxiosInstance.get("/role/");
+      if (response.data.success) {
+        setRoles(response.data.data);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  const getRoleName = (roleId) => {
+    const role = roles.find((role) => role.role_id === roleId);
+    return role ? role.role : "No role found";
   };
 
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("Form submission started");
 
     try {
       const uploadPromises = uploadedFileName.map(async (item) => {
         const formData = new FormData();
         formData.append("b_video", item.file);
-        console.log("Uploading file", item.file.name);
 
         const response = await axios.post(
           "https://cdn.dohost.in/image_upload.php/",
@@ -225,8 +294,6 @@ function AddFiles() {
           }
         );
 
-        console.log("Upload response", response.data);
-
         if (!response.data.success) {
           throw new Error(response.data.msg || "File upload failed");
         }
@@ -236,16 +303,16 @@ function AddFiles() {
         }
 
         const imageName = response.data.iamge_path.split("/").pop();
-        console.log("Extracted image name", imageName);
         return { ...item, path: imageName, documentId: item.documentId };
       });
 
       const uploadedFiles = await Promise.all(uploadPromises);
-      console.log("Uploaded files", uploadedFiles);
 
       const payload = {
         user_id: selectedUser,
         loan_id: selectedLoanId,
+        branch_id: selectedBranchId,
+        branchuser_id: selectedBranchUserId,
         loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
@@ -253,9 +320,7 @@ function AddFiles() {
         })),
       };
 
-      console.log("Payload to send", payload);
-      const response = await AxiosInstance.post("/file_uplode", payload);
-      console.log("Server response", response.data);
+      await AxiosInstance.post("/file_uplode", payload);
 
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
@@ -266,7 +331,6 @@ function AddFiles() {
       setLoading(false);
     }
   };
-
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -334,89 +398,147 @@ function AddFiles() {
               </FormControl>
             )}
 
-            <div style={{ marginTop: "40px" }}>
+            <div>
               <div className="d-flex">
                 <div className="d-flex">
-                  {loanDocuments.map((document, index) => (
-                    <div key={document._id} className="upload-area col-6">
-                      <Text fontSize="xl" className="mx-3" color={textColor}>
-                        {document.loan_document}
-                      </Text>
-                      <input
-                        type="file"
-                        ref={fileInputRefs.current[index]}
-                        className="drop-zoon__file-input"
-                        onChange={(event) =>
-                          handleFileInputChange(event, index)
-                        }
-                        style={{ display: "none" }}
-                      />
-                      {fileData[index] ? (
-                        <div
-                          className="file-preview"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            width: "100%",
-                          }}
-                        >
-                          {fileData[index].url ? (
-                            <img
-                              src={fileData[index].url}
-                              alt="Preview"
-                              style={{
-                                width: 100,
-                                height: 100,
-                                marginRight: "auto",
-                                marginLeft: "auto",
-                              }}
-                            />
-                          ) : (
-                            <span
-                              style={{
-                                marginRight: "auto",
-                                marginLeft: "auto",
-                              }}
-                            >
-                              {fileData[index].name}
-                            </span>
-                          )}
-                          <IconButton
-                            aria-label="Remove file"
-                            icon={<CloseIcon />}
-                            size="sm"
-                            onClick={() => handleRemoveFile(index)}
-                            style={{ margin: "0 10px" }}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className={`upload-area__drop-zoon drop-zoon ${
-                            isDragging ? "drop-zoon--over" : ""
-                          }`}
-                          onClick={() =>
-                            fileInputRefs.current[index].current.click()
+                  {(!selectedLoanType.is_subtype ||
+                    (selectedLoanType.is_subtype &&
+                      selectedLoanType.loansubtype_id)) &&
+                    loanDocuments.map((document, index) => (
+                      <div key={document._id} className="upload-area col-6">
+                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                          {document.loan_document}
+                        </Text>
+                        <input
+                          type="file"
+                          ref={(el) => (fileInputRefs.current[index] = el)}
+                          className="drop-zoon__file-input"
+                          onChange={(event) =>
+                            handleFileInputChange(event, index)
                           }
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <span className="drop-zoon__icon">
-                            <i className="bx bxs-file-image"></i>
-                          </span>
-                          <p className="drop-zoon__paragraph">
-                            Drop your file here or click to browse
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                          style={{ display: "none" }}
+                        />
+                        {fileData[index] ? (
+                          <div
+                            className="file-preview"
+                            style={{
+                              display: "flex",
+                              marginTop: "15px",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              width: "100%",
+                              padding: "10px",
+                              boxSizing: "border-box",
+                              backgroundColor: "#e8f0fe",
+                              borderRadius: "8px",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            }}
+                          >
+                            {fileData[index].url ? (
+                              <img
+                                src={fileData[index].url}
+                                alt="Preview"
+                                style={{
+                                  width: 100,
+                                  height: 100,
+                                  margin: "auto",
+                                  borderRadius: "4px",
+                                }}
+                              />
+                            ) : (
+                              <span
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "100%",
+                                  padding: "20px",
+                                }}
+                              >
+                                <FontAwesomeIcon
+                                  icon={faFile}
+                                  style={{
+                                    fontSize: "24px",
+                                    marginBottom: 10,
+                                    color: "#0056b3",
+                                  }}
+                                />
+                                {fileData[index].name}
+                              </span>
+                            )}
+
+                            <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className={`upload-area__drop-zoon drop-zoon ${
+                              isDragging ? "drop-zoon--over" : ""
+                            }`}
+                            onClick={() => fileInputRefs.current[index].click()}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexDirection: "column",
+                            }}
+                          >
+                            <span className="drop-zoon__icon">
+                              <i className="bx bxs-file-image"></i>
+                            </span>
+                            <p className="drop-zoon__paragraph">
+                              Drop your file here or click to browse
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
+            </div>
+            <div>
+              <FormControl id="branch_id" mt={4} isRequired>
+                <FormLabel>Savaj Capital Branch</FormLabel>
+                <Select
+                  placeholder="Select Branch"
+                  onChange={(e) => setSelectedBranchId(e.target.value)}
+                >
+                  {savajcapitalbranch.map((branch) => (
+                    <option key={branch.branch_id} value={branch.branch_id}>
+                      {`${branch.branch_name} (${branch.city})`}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {selectedBranchId && (
+                <FormControl id="branchuser_id" mt={4} isRequired>
+                  <FormLabel>Branch User</FormLabel>
+                  {savajcapitalbranchUser.length > 0 ? (
+                    <Select
+                      placeholder="Select User"
+                      onChange={(e) => setSelectedBranchUserId(e.target.value)}
+                    >
+                      {savajcapitalbranchUser.map((user) => (
+                        <option
+                          key={user.branchuser_id}
+                          value={user.branchuser_id}
+                        >
+                          {`${user.full_name} (${getRoleName(user.role_id)})`}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Text>No users available for this branch.</Text>
+                  )}
+                </FormControl>
+              )}
             </div>
 
             <Button

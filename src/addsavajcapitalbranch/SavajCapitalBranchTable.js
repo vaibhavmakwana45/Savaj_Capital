@@ -86,7 +86,7 @@ function SavajCapitalBranchTable() {
     history.push("savajusers?id=" + id)
   }
 
-  const fetchBanks = async () => {
+  const fetchSavajcapitalbranch = async () => {
     try {
       const response = await AxiosInstance.get(
         "/branch"
@@ -100,7 +100,7 @@ function SavajCapitalBranchTable() {
 
   useEffect(() => {
 
-    fetchBanks();
+    fetchSavajcapitalbranch();
   }, []);
 
   const navigateToAnotherPageUser = () => {

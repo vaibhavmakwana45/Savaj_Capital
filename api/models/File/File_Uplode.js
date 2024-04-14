@@ -17,7 +17,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   documents: {
-    type: Array,
+    type: Array,  
+  },
+  branchuser_id: {
+    type: String,
+  },
+  branch_id: {
+    type: String,
   },
   createdAt: {
     type: String,
