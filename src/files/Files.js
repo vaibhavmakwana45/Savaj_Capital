@@ -91,12 +91,12 @@ function Files() {
   ]);
   console.log(formattedData, "formattedData");
 
-  //   const handleEdit = (id) => {
-  //     history.push("/superadmin/adduser?id=" + id);
-  //   };
+  const handleEdit = (id) => {
+    history.push("/superadmin/editfile?id=" + id);
+  };
 
-  const handleRow = () => {
-    history.push("/superadmin/viewfile");
+  const handleRow = (id) => {
+    history.push("/superadmin/viewfile?id=" + id);
   };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -152,7 +152,7 @@ function Files() {
               loading={loading}
               allHeaders={allHeaders}
               handleDelete={handleDelete}
-              //   handleEdit={handleEdit}
+              handleEdit={handleEdit}
               handleRow={handleRow}
             />
           </CardBody>
