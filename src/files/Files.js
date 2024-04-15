@@ -82,8 +82,8 @@ function Files() {
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
-    item.loan_id,
     item.file_id,
+    item.loan_id,
     item.loan,
     item.loan_type,
     item.createdAt,
@@ -100,9 +100,10 @@ function Files() {
   //     history.push("/superadmin/adduser?id=" + id);
   //   };
 
-  const handleRow = () => {
-    history.push("/superadmin/viewfile");
+  const handleRow = (id) => {
+    history.push("/superadmin/viewfile?id=" + id);
   };
+
 
   // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // const [selectedUserId, setSelectedUserId] = useState(null);
