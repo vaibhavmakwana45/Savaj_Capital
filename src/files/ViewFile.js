@@ -112,7 +112,7 @@ function ViewFile() {
     const fetchData = async () => {
       try {
         const response = await AxiosInstance.get(
-          "http://192.168.1.19:4000/api/file_uplode/file_upload/" + id
+          "http://192.168.1.19:4000/api/file_upload/file_upload/" + id
         );
         console.log(
           response.data.data.file,

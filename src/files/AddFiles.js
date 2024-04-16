@@ -19,6 +19,7 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -38,6 +39,13 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   const fetchUsers = async () => {
     try {
@@ -274,7 +282,19 @@ function AddFiles() {
     const role = roles.find((role) => role.role_id === roleId);
     return role ? role.role : "No role found";
   };
-
+  const onSubmit = async (data) => {
+    try {
+      const wrappedData = { userDetails: data };
+      await AxiosInstance.post("/addusers/adduser", wrappedData);
+      toast.success("User Added Successfully!");
+      onClose();
+      fetchUsers();
+      reset();
+    } catch (error) {
+      console.error("Error adding user:", error);
+      toast.error("Please try again later!");
+    }
+  };
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -320,7 +340,7 @@ function AddFiles() {
         })),
       };
 
-      await AxiosInstance.post("/file_uplode", payload);
+      await AxiosInstance.post("/file_upload", payload);
 
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
@@ -331,6 +351,7 @@ function AddFiles() {
       setLoading(false);
     }
   };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -340,6 +361,9 @@ function AddFiles() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
+              <Button onClick={onOpen} colorScheme="blue">
+                Add New User
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -554,6 +578,63 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add New User</ModalHeader>
+          <ModalCloseButton />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <ModalBody pb={6}>
+              <FormControl>
+                <FormLabel>Username</FormLabel>
+                <Input
+                  placeholder="Username"
+                  {...register("username", {
+                    required: "Username is required",
+                  })}
+                />
+                {errors.username && <p>{errors.username.message}</p>}
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Number</FormLabel>
+                <Input
+                  placeholder="Number"
+                  {...register("number", {
+                    required: "Number is required",
+                    pattern: {
+                      value: /^\d+$/,
+                      message: "Invalid number",
+                    },
+                  })}
+                />
+                {errors.number && <p>{errors.number.message}</p>}
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && <p>{errors.email.message}</p>}
+              </FormControl>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button colorScheme="blue" mr={3} type="submit">
+                Save
+              </Button>
+              <Button onClick={onClose}>Cancel</Button>
+            </ModalFooter>
+          </form>
+        </ModalContent>
+      </Modal>
       <Toaster />
     </>
   );

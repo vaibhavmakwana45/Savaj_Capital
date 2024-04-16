@@ -46,7 +46,7 @@ function Files() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await AxiosInstance.get("/file_uplode");
+        const response = await AxiosInstance.get("/file_upload");
         setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
@@ -83,7 +83,7 @@ function Files() {
   ];
   const formattedData = filteredUsers.map((item) => [
     item.file_id,
-    item.loan_id,
+    item.file_id,
     item.loan,
     item.loan_type,
     item.createdAt,
@@ -104,7 +104,7 @@ function Files() {
   const cancelRef = React.useRef();
   const deletefile = async (fileId) => {
     try {
-      await AxiosInstance.delete(`/file_uplode/${fileId}`);
+      await AxiosInstance.delete(`/file_upload/${fileId}`);
       setFiles(files.filter((file) => file.file_id !== fileId));
       setIsDeleteDialogOpen(false);
       toast.success("File deleted successfully!");

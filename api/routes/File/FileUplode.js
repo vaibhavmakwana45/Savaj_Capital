@@ -247,4 +247,52 @@ router.delete("/:file_id", async (req, res) => {
   }
 });
 
+router.put("/:file_id", async (req, res) => {
+  console.log(req.params);
+  try {
+      const { file_id } = req.params;
+      const updateData = req.body;
+
+      // Generate document IDs and assign to each document in the request
+      if (updateData.documents && updateData.documents.length > 0) {
+          const timestampForDocId = moment().unix(); // Create a UNIX timestamp for unique ID generation
+          updateData.documents.forEach((doc, index) => {
+              doc.doc_id = `${timestampForDocId}_${Math.floor(Math.random() * 1000)}_${index}`;
+          });
+      }
+
+      updateData.updatedAt = moment()
+          .utcOffset(330) // IST timezone offset in minutes
+          .format("YYYY-MM-DD HH:mm:ss");
+
+      const updatedFile = await File_Uplode.findOneAndUpdate(
+          { file_id: file_id },
+          { $set: updateData },
+          { new: true }
+      );
+
+      if (!updatedFile) {
+          console.log(`No file found with ID: ${file_id}`);
+          return res.status(404).json({
+              statusCode: 404,
+              message: "File not found",
+          });
+      }
+
+      console.log(`File updated successfully: ${file_id}`);
+      res.json({
+          statusCode: 200,
+          success: true,
+          message: "File updated successfully",
+          data: updatedFile,
+      });
+  } catch (error) {
+      console.error(`Error when trying to update file: ${error}`);
+      res.status(500).json({
+          statusCode: 500,
+          message: "Internal Server Error",
+          error: error.message,
+      });
+  }
+});
 module.exports = router;
