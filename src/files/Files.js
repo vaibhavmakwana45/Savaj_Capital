@@ -266,11 +266,9 @@ function Row(props) {
 
   const [open, setOpen] = React.useState(false);
   const [files, setFiles] = useState([]);
-  const [loader, setLoader] = useState(false);
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        // setLoader(true)
         const response = await axios.get(
           "http://192.168.1.28:4000/api/file_uplode"
         );
