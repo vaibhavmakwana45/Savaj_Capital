@@ -1,9 +1,4 @@
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-} from "@chakra-ui/react";// Add axios to your imports// Add axios to your imports
+import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"; // Add axios to your imports// Add axios to your imports
 import axios from "axios";
 import {
   Flex,
@@ -16,7 +11,7 @@ import {
   Td,
   useColorModeValue,
   Button,
-  Input
+  Input,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -46,29 +41,31 @@ function Tables() {
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   let menuBg = useColorModeValue("white", "navy.800");
 
-  const filteredUsers = searchTerm.length === 0
-    ? banks
-    : banks.filter((bank) =>
-      bank.bank_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bank.state.toLowerCase().includes(searchTerm.toLowerCase())
-      // bank.users.some((user) =>
-      //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      // )
-    );
+  const filteredUsers =
+    searchTerm.length === 0
+      ? banks
+      : banks.filter(
+          (bank) =>
+            bank.bank_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.state.toLowerCase().includes(searchTerm.toLowerCase())
+          // bank.users.some((user) =>
+          //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
+          // )
+        );
 
   useEffect(() => {
     const fetchBanks = async () => {
       try {
         const response = await AxiosInstance.get("/addbankuser");
-        console.log(response.data.data)
+        console.log(response.data.data);
         setBanks(response.data.data);
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching banks:", error);
       }
@@ -93,20 +90,25 @@ function Tables() {
     history.push("/superadmin/addbankuser");
   };
 
-  const allHeaders = ["Bank Name", "Branch Name", "City",  "State", "users", "Action",];
-  
-  const formattedData = filteredUsers.map(bank => ([
+  const allHeaders = [
+    "Bank Name",
+    "Branch Name",
+    "City",
+    "State",
+    "users",
+    "Action",
+  ];
+
+  const formattedData = filteredUsers.map((bank) => [
     bank.bank_id,
     bank.bank_name,
     bank.branch_name,
     bank.city,
     bank.state,
     bank?.user_count,
-  ]));
+  ]);
 
-  const formattedCollapsedData = filteredUsers.map(bank => ([
-    bank.bank_id,
-  ]));
+  const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBankId, setSelectedBankId] = useState(null);
@@ -123,19 +125,18 @@ function Tables() {
     }
   };
 
-
   const handleDelete = (id) => {
     setSelectedBankId(id);
     setIsDeleteDialogOpen(true);
-  }
+  };
 
   const handleEdit = (id) => {
-    navigateToAnotherPage(id)
-  }
+    navigateToAnotherPage(id);
+  };
 
   const handleRow = (id) => {
-    history.push("/superadmin/bankusers?id="+id)
-}
+    history.push("/superadmin/bankusers?id=" + id);
+  };
 
   return (
     <>
@@ -143,12 +144,10 @@ function Tables() {
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
-
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Banks and Users
               </Text>
               <div>
-
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -165,12 +164,22 @@ function Tables() {
                   </MenuButton>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
-                      <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPage() }}>
+                      <MenuItem
+                        borderRadius="8px"
+                        onClick={() => {
+                          navigateToAnotherPage();
+                        }}
+                      >
                         <Flex align="center" justifyContent="flex-start">
                           Add Bank
                         </Flex>
                       </MenuItem>
-                      <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPageUser() }}>
+                      <MenuItem
+                        borderRadius="8px"
+                        onClick={() => {
+                          navigateToAnotherPageUser();
+                        }}
+                      >
                         <Flex align="center" justifyContent="flex-start">
                           Add Bank User
                         </Flex>
@@ -178,12 +187,10 @@ function Tables() {
                     </Flex>
                   </MenuList>
                 </Menu>
-
               </div>
             </Flex>
           </CardHeader>
           <CardBody>
-
             <TableComponent
               banks={banks}
               data={formattedData}
@@ -195,7 +202,6 @@ function Tables() {
               handleEdit={handleEdit}
               handleRow={handleRow}
             />
-
           </CardBody>
         </Card>
         <AlertDialog

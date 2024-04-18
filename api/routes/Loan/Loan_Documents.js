@@ -44,7 +44,6 @@ router.post("/", async (req, res) => {
     });
   }
 });
-
 router.get("/:loan_id", async (req, res) => {
   try {
     const { loan_id } = req.params;

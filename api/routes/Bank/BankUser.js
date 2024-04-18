@@ -103,7 +103,6 @@ router.put("/:bankuser_id", async (req, res) => {
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     if (!req.body.password) {
       delete req.body.password;

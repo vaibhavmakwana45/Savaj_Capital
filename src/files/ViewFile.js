@@ -1,18 +1,10 @@
 // import React from 'react'
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
+import Loader from "react-js-loader";
 
 import {
-  Button,
-  Select,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   useColorModeValue,
   FormControl,
   FormLabel,
@@ -23,10 +15,61 @@ import {
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import { useForm } from "react-hook-form";
 import AxiosInstance from "config/AxiosInstance";
-import adhar from "../assets/img/SidebarHelpImage.png";
-import { useHistory, useLocation } from "react-router-dom";
+import {  useLocation } from "react-router-dom";
+import { Spinner } from "@chakra-ui/react";
+const FileDisplay = ({ data }) => {
+  const basePath = "https://cdn.dohost.in/upload/";
+  const groupedFiles = data.reduce((acc, curr) => {
+    if (!acc[curr.loan_document]) {
+      acc[curr.loan_document] = [];
+    }
+    acc[curr.loan_document].push(curr);
+    return acc;
+  }, {});
+  // const [loading, setLoading] = useState(true);
+
+  return (
+    <div>
+      <div className="d-flex flex-wrap justify-content-start">
+        {Object.entries(groupedFiles).map(([title, files], index) => (
+          <div key={index} className="mx-3 mb-4" style={{ flexBasis: "30%" }}>
+            <h2 className="my-4">
+              <i>{title}</i>
+            </h2>
+            {files.map((file, idx) => (
+              <div key={idx} className="d-flex mb-3">
+                {file.file_path.endsWith(".pdf") ? (
+                  <embed
+                    src={`${basePath}${file.file_path}`}
+                    type="application/pdf"
+                    width="100%"
+                    height="200"
+                    style={{
+                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                      borderRadius: "12px",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={`${basePath}${file.file_path}`}
+                    alt={file.loan_document_id}
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      borderRadius: "12px",
+                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 function ViewFile() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -42,6 +85,8 @@ function ViewFile() {
 
   const id = searchParams.get("id");
   console.log(id, "ididididid");
+
+  const basePath = "https://cdn.dohost.in/upload/";
 
   // document.addEventListener("DOMContentLoaded", function () {
   //   var container = document.getElementById("fullscreen-container");
@@ -61,12 +106,13 @@ function ViewFile() {
   // });
 
   const [fileData, setFileData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await AxiosInstance.get(
-          "http://192.168.1.19:4000/api/file_uplode/file_upload/" + id
+          "http://192.168.1.28:4000/api/file_uplode/file_upload/" + id
         );
         console.log(
           response.data.data.file,
@@ -74,6 +120,7 @@ function ViewFile() {
         );
         setFileData(response.data.data.file);
         // console.log()
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching file data:", error);
       }
@@ -83,78 +130,130 @@ function ViewFile() {
   }, []);
   return (
     <div>
-      <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-        <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-          <CardHeader p="6px 0px 22px 0px"></CardHeader>
-          <CardBody>
-            <FormLabel className="text-center" style={{ fontSize: "25px" }}>
-              <u>
-                <b>{fileData?.loan} File</b>
-              </u>
-            </FormLabel>
-            <div>
-              <FormControl id="user_id" mt={4}>
-                <h6 className="mb-3 my-5">
-                  {fileData?.documents.map((document, index) => (
-                    <p key={index}>
-                      <i>{document.loan_document}: </i>
-                    </p>
-                  ))}
-                </h6>
-                {/* {fileData?.documents.map((document, index) => (
-                <div className="d-flex gap-2" id="fullscreen-container">
-                  <img
-                    src={document.file_path}
-                    id="adhar"
-                    style={{
-                      width: "30%",
-                      height: "100%",
-                      borderRadius: "12px",
-                      // boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
-                    }}
-                  />
-                </div>
-                 ))} */}
-                {fileData?.documents.map((document, index) => (
+      {loading ? ( // Render loading spinner if loading is true
+        <Flex justify="center" align="center" height="100vh">
+          {/* <Spinner size="xl" /> */}
+          <Loader
+            type="spinner-circle"
+            bgColor={"#3182CE"}
+            color={"black"}
+            size={50}
+          />
+        </Flex>
+      ) : (
+        <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+          <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+            <CardHeader p="6px 0px 22px 0px"></CardHeader>
+            <CardBody style={{ padding: "40px" }}>
+              <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
+                <b>{fileData?.loan} File Details</b>
+              </FormLabel>
+              <div>
+                <FormControl id="user_id" mt={4}>
                   <div
-                    className="d-flex gap-2"
-                    id="fullscreen-container"
-                    key={index}
+                    class="card"
+                    style={{
+                      borderRadius: "14px",
+                      boxShadow:
+                        "rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
+                    }}
                   >
-                    {document.type === "pdf" ? (
-                      <embed
-                        src={document.file_path}
-                        type="application/pdf"
-                        id="pdf"
+                    <div class="card-header" style={{ fontSize: "20px" }}>
+                      {fileData?.loan} File -{fileData?.loan_type}
+                    </div>
+                    <u>
+                      <FormLabel
+                        className="my-3"
                         style={{
-                          width: "30%",
-                          height: "100%",
-                          border: "none",
-                          borderRadius: "12px",
-                          boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+                          fontSize: "18px",
+                          paddingLeft: "20px",
+                          // paddingBottom: 0,
                         }}
-                      />
-                    ) : (
-                      <img
-                        src={document.file_path}
-                        alt="document"
-                        id="adhar"
-                        style={{
-                          width: "30%",
-                          height: "100%",
-                          borderRadius: "12px",
-                          boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
-                        }}
-                      />
+                      >
+                        <b>Loan User : {fileData?.username}</b>
+                      </FormLabel>
+                    </u>
+                    <div class="card-body">
+                      <blockquote class="blockquote mb-0">
+                        <div class="card" style={{ marginTop: "-20px" }}>
+                          <div class="card-body">
+                            <blockquote class="blockquote mb-0">
+                              <FormLabel
+                                className="my-3"
+                                style={{
+                                  fontSize: "18px",
+                                  paddingLeft: "20px",
+                                  justifyContent: "space-between",
+                                  display: "flex",
+                                  // paddingBottom: 0,
+                                }}
+                              >
+                                <label>Branch UserName :</label>
+                                <b> {fileData?.username}</b>
+                              </FormLabel>
+                              <FormLabel
+                                className="my-3"
+                                style={{
+                                  fontSize: "18px",
+                                  paddingLeft: "20px",
+                                  justifyContent: "space-between",
+                                  display: "flex",
+                                  // paddingBottom: 0,
+                                }}
+                              >
+                                <label>Branch Name :</label>
+                                <b> {fileData?.branch_name}</b>
+                              </FormLabel>
+                            </blockquote>
+                          </div>
+                        </div>
+                      </blockquote>
+                    </div>
+                  </div>
+                  <div>
+                    {/* <h6 className="mb-3 my-5">
+                    {fileData?.documents.map((document, index) => (
+                      <p key={index}>
+                        <i>{document.loan_document}: </i>
+                      </p>
+                    ))}
+                  </h6>
+                  {fileData?.documents.map((document, index) => (
+                    <div className="d-flex gap-2" id="fullscreen-container">
+                      {document.file_path.endsWith(".pdf") ? (
+                        <embed
+                          src={`${basePath}${document.file_path}`}
+                          type="application/pdf"
+                          width="400"
+                          height="200"
+                          style={{
+                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={`${basePath}${document.file_path}`}
+                          id="adhar"
+                          style={{
+                            width: "20%",
+                            height: "50%",
+                            borderRadius: "12px",
+                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))} */}
+                    {fileData?.documents && (
+                      <FileDisplay data={fileData?.documents} />
                     )}
                   </div>
-                ))}
-              </FormControl>
-            </div>
-          </CardBody>
-        </Card>
-      </Flex>
+                </FormControl>
+              </div>
+            </CardBody>
+          </Card>
+        </Flex>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
+import {  BrowserRouter as Router , Route, Switch, Redirect } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme"; // Adjust the import path as needed
 import AuthLayout from "./layouts/Auth"; // Adjust import paths as needed
@@ -15,7 +15,7 @@ const AuthGuard = ({ children }) => {
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>
-    <HashRouter>
+    <Router>
       <Switch>
         <Route path="/auth" component={AuthLayout} />
         <Route
@@ -52,7 +52,7 @@ ReactDOM.render(
         />
         <Redirect from="/" to="/auth/signin" />
       </Switch>
-    </HashRouter>
+    </Router>
   </ChakraProvider>,
   document.getElementById("root")
 );

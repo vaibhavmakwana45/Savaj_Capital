@@ -36,6 +36,7 @@ import NewPassword from "views/Pages/NewPassword";
 import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
+import Document from "Document/Document";
 import ViewFile from "files/ViewFile";
 
 var dashRoutes = [
@@ -46,7 +47,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
     layout: "/superadmin",
-    hideInSResponsive: true
+    hideInSResponsive: true,
   },
   {
     path: "/bank",
@@ -54,8 +55,7 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: BankTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/savajcapitalbranch",
@@ -63,8 +63,7 @@ var dashRoutes = [
     icon: <StatsIcon color="inherit" />,
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/savajusers",
@@ -73,7 +72,6 @@ var dashRoutes = [
     component: SavajUsers,
     hideInSidebar: true,
     layout: "/superadmin",
-    
   },
   {
     path: "/savajuserroles",
@@ -89,8 +87,7 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserTable,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   {
     path: "/addbank",
@@ -99,7 +96,6 @@ var dashRoutes = [
     component: AddBank,
     layout: "/superadmin",
     hideInSidebar: true,
-    
   },
   {
     path: "/addbankuser",
@@ -118,13 +114,20 @@ var dashRoutes = [
     hideInSidebar: true,
   },
   {
+    path: "/documents",
+    name: "Document",
+    icon: <CreditIcon color="inherit" />,
+    component: Document,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
     path: "/loan",
     name: "Loan",
     icon: <CreditIcon color="inherit" />,
     component: LoanTypes,
     layout: "/superadmin",
-    hideInSResponsive: true
-
+    hideInSResponsive: true,
   },
   // {
   //   path: "/file",
