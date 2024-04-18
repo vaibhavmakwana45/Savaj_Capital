@@ -38,6 +38,7 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
+  console.log(selectedLoanType, "selectedLoanType");
 
   const fetchUsers = async () => {
     try {
@@ -386,12 +387,14 @@ function AddFiles() {
                     });
                   }}
                 >
+                  <option key="title" disabled style={{ fontWeight: 800 }}>
+                    {selectedLoanType.loan}
+                  </option>
                   {loanSubType.map((subType) => (
                     <option
                       key={subType.loantype_id}
                       value={subType.loantype_id}
                     >
-                   
                       {subType.loan_type}
                     </option>
                   ))}
