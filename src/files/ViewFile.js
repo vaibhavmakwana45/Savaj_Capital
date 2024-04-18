@@ -16,7 +16,7 @@ import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
-import {  useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Spinner } from "@chakra-ui/react";
 const FileDisplay = ({ data }) => {
   const basePath = "https://cdn.dohost.in/upload/";
@@ -112,7 +112,7 @@ function ViewFile() {
     const fetchData = async () => {
       try {
         const response = await AxiosInstance.get(
-          "http://192.168.1.28:4000/api/file_uplode/file_upload/" + id
+          "http://192.168.1.19:4000/api/file_uplode/file_upload/" + id
         );
         console.log(
           response.data.data.file,
@@ -132,7 +132,6 @@ function ViewFile() {
     <div>
       {loading ? ( // Render loading spinner if loading is true
         <Flex justify="center" align="center" height="100vh">
-          {/* <Spinner size="xl" /> */}
           <Loader
             type="spinner-circle"
             bgColor={"#3182CE"}

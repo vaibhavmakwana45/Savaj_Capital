@@ -38,6 +38,7 @@ import Files from "files/Files";
 import AddFiles from "files/AddFiles";
 import Document from "Document/Document";
 import ViewFile from "files/ViewFile";
+import EditFile from "files/EditFile";
 
 var dashRoutes = [
   //superadmin
@@ -229,6 +230,14 @@ var dashRoutes = [
     name: "Files",
     icon: <DocumentIcon color="inherit" />,
     component: ViewFile,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  {
+    path: "/editfile",
+    name: "Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: EditFile,
     layout: "/superadmin",
     hideInSidebar: true,
   },

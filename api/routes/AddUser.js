@@ -27,7 +27,7 @@ const decrypt = (text) => {
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
 router.post("/adduser", async (req, res) => {
-  console.log('first', req.body)
+  console.log("first", req.body);
   try {
     const { userDetails } = req.body;
 
