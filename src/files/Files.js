@@ -317,7 +317,7 @@ function Row(props) {
         <TableCell align="" style={{ border: "none" }}>
           {/* <div className="">
             <div className="">
-              <div className="progress mx-auto" data-value="20">
+              <div className="progress mx-auto" data-value="20"> 
                 <span className="progress-left">
                   <span className="progress-bar border-primary"></span>
                 </span>
@@ -333,19 +333,18 @@ function Row(props) {
             </div>
           </div> */}
           <div class="progress mx-auto" data-value="20">
-  <span class="progress-left">
-    <span class="progress-bar"></span>
-  </span>
-  <span class="progress-right">
-    <span class="progress-bar"></span>
-  </span>
-  <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-    <div class="font-weight-bold">
-      20<sup class="small">%</sup>
-    </div>
-  </div>
-</div>
-
+            <span class="progress-left">
+              <span class="progress-bar"></span>
+            </span>
+            <span class="progress-right">
+              <span class="progress-bar"></span>
+            </span>
+            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+              <div class="font-weight-bold">
+                20<sup class="small">%</sup>
+              </div>
+            </div>
+          </div>
         </TableCell>
         <TableCell align="">
           <Flex>
@@ -493,15 +492,14 @@ export default function CollapsibleTable() {
   //   }
   // });
 
-
   $(function () {
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
       var progressBars = $(this).find(".progress-bar");
-  
+
       // Remove existing color classes
       progressBars.removeClass("red yellow purple blue green");
-  
+
       // Add color class based on value range
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
@@ -514,21 +512,27 @@ export default function CollapsibleTable() {
       } else if (value >= 80 && value <= 100) {
         progressBars.addClass("green");
       }
-  
+
       // Set progress bar rotation
       if (value <= 50) {
-        progressBars.eq(1).css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
       } else {
         progressBars.eq(1).css("transform", "rotate(180deg)");
-        progressBars.eq(0).css("transform", "rotate(" + percentageToDegrees(value - 50) + "deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
       }
     });
-  
+
     function percentageToDegrees(percentage) {
       return (percentage / 100) * 360;
     }
   });
-  
 
   return (
     <div className="card" style={{ marginTop: "120px", borderRadius: "30px" }}>
