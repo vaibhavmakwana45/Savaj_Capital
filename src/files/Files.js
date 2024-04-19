@@ -260,7 +260,6 @@ import {
 } from "@mui/icons-material";
 import Loader from "react-js-loader";
 
-
 const theme = createTheme();
 
 function Row(props) {
@@ -272,7 +271,7 @@ function Row(props) {
     const fetchFiles = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.28:4000/api/file_uplode"
+          "http://192.168.1.23:4000/api/file_uplode"
         );
         if (response.data.statusCode === 200) {
           setFiles(response.data.data);
@@ -318,7 +317,7 @@ function Row(props) {
         <TableCell align="" style={{ border: "none" }}>
           {file?.updatedAt}
         </TableCell>
-        <TableCell align="center" style={{  }}>
+        <TableCell align="center" style={{}}>
           {/* <div className="">
             <div className="">
               <div className="progress mx-auto" data-value="20"> 
@@ -370,7 +369,7 @@ function Row(props) {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        {/* <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
@@ -400,6 +399,75 @@ function Row(props) {
                   ))}
                 </TableBody>
               </Table>
+            </Box>
+          </Collapse>
+        </TableCell> */}
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography variant="h6" gutterBottom component="div">
+                Documents
+              </Typography>
+              <Paper elevation={3} sx={{ borderRadius: 8 }}>
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Document
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Status
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {/* Static Documents */}
+                    {/* <TableRow>
+                      <TableCell component="th" scope="row">
+                        Aadhar Card
+                      </TableCell>
+                      <TableCell>
+                        <span style={{ color: "green", fontWeight: "bold" }}>
+                          Approved
+                        </span>
+                      </TableCell>
+                    </TableRow> */}
+                    {/* <TableRow>
+                      <TableCell component="th" scope="row">
+                        PAN Card
+                      </TableCell>
+                      <TableCell>
+                        <span style={{ color: "red", fontWeight: "bold" }}>
+                          Pending
+                        </span>
+                      </TableCell>
+                    </TableRow> */}
+                    {/* Dynamic Documents */}
+                    {file?.loan_document_ids?.map((documentRow) => (
+                      <TableRow key={documentRow.loan_document_id}>
+                        <TableCell component="th" scope="row">
+                          {documentRow.loan_document}
+                        </TableCell>
+                        <TableCell>
+                          {documentRow.is_uploaded ? (
+                            // <CheckCircleIcon style={{ color: 'green' }} />
+                            <span
+                              style={{ color: "green", fontWeight: "bold" }}
+                            >
+                              Approved
+                            </span>
+                          ) : (
+                            // <HighlightOffIcon style={{ color: 'red' }} />
+                            <span style={{ color: "red", fontWeight: "bold" }}>
+                              Pending
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Paper>
             </Box>
           </Collapse>
         </TableCell>
@@ -464,11 +532,10 @@ export default function CollapsibleTable() {
     const fetchFiles = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.28:4000/api/file_uplode"
+          "http://192.168.1.23:4000/api/file_uplode"
         );
         setFiles(response.data.data);
         setLoading(false);
-
       } catch (error) {
         console.error("Error fetching files:", error);
       }
@@ -546,58 +613,58 @@ export default function CollapsibleTable() {
         </Flex>
       </CardHeader>
       <ThemeProvider theme={theme}>
-      {loading ? ( // Render loading spinner if loading is true
-        <Flex justify="center" align="center" height="100vh">
-          <Loader
-            type="spinner-circle"
-            bgColor={"#3182CE"}
-            color={"black"}
-            size={50}
-          />
-        </Flex>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table aria-label="collapsible table">
-            <TableHead style={{ borderBottom: "1px solid red" }}>
-              <TableRow>
-                <TableCell />
-                {/* <TableCell align="right">Name</TableCell> */}
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  File Id
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Loan
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Loan Type
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Created At
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Updated At
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Status
-                </TableCell>
-                <TableCell align="" style={{ color: "#BEC7D4" }}>
-                  Action
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredUsers.map((file) => (
-                <Row
-                  key={file._id}
-                  file={file}
-                  id={file.file_id}
-                  handleRow={handleRow}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-          )}
+        {loading ? ( // Render loading spinner if loading is true
+          <Flex justify="center" align="center" height="100vh">
+            <Loader
+              type="spinner-circle"
+              bgColor={"#3182CE"}
+              color={"black"}
+              size={50}
+            />
+          </Flex>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="collapsible table">
+              <TableHead style={{ borderBottom: "1px solid red" }}>
+                <TableRow>
+                  <TableCell />
+                  {/* <TableCell align="right">Name</TableCell> */}
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    File Id
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Loan
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Loan Type
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Created At
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Updated At
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Status
+                  </TableCell>
+                  <TableCell align="" style={{ color: "#BEC7D4" }}>
+                    Action
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredUsers.map((file) => (
+                  <Row
+                    key={file._id}
+                    file={file}
+                    id={file.file_id}
+                    handleRow={handleRow}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </ThemeProvider>
     </div>
   );
