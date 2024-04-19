@@ -1,4 +1,3 @@
-// import React from 'react'
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
 import Loader from "react-js-loader";
@@ -27,7 +26,6 @@ const FileDisplay = ({ data }) => {
     acc[curr.loan_document].push(curr);
     return acc;
   }, {});
-  // const [loading, setLoading] = useState(true);
 
   return (
     <div>
@@ -88,29 +86,13 @@ function ViewFile() {
 
   const basePath = "https://cdn.dohost.in/upload/";
 
-  // document.addEventListener("DOMContentLoaded", function () {
-  //   var container = document.getElementById("fullscreen-container");
-  //   var image = document.getElementById("adhar");
-
-  //   container.addEventListener("click", function () {
-  //     if (!document.fullscreenElement) {
-  //       image.requestFullscreen().catch((err) => {
-  //         console.error(
-  //           `Error attempting to enable full-screen mode: ${err.message}`
-  //         );
-  //       });
-  //     } else {
-  //       document.exitFullscreen();
-  //     }
-  //   });
-  // });
-
   const [fileData, setFileData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true)
         const response = await AxiosInstance.get(
           "/file_uplode/file_upload/" + id
         );
@@ -119,7 +101,6 @@ function ViewFile() {
           "responsejmyhtgbvncfgdrsfbcfgdgbcgfd"
         );
         setFileData(response.data.data.file);
-        // console.log()
         setLoading(false);
       } catch (error) {
         console.error("Error fetching file data:", error);
@@ -130,7 +111,7 @@ function ViewFile() {
   }, []);
   return (
     <div>
-      {loading ? ( // Render loading spinner if loading is true
+      {loading ? ( 
         <Flex justify="center" align="center" height="100vh">
           <Loader
             type="spinner-circle"
@@ -142,9 +123,8 @@ function ViewFile() {
       ) : (
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-            <CardHeader p="6px 0px 22px 0px"></CardHeader>
             <CardBody style={{ padding: "40px" }}>
-              <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
+              <FormLabel className="mb-5" style={{ fontSize: "25px"}}>
                 <b>{fileData?.loan} File Details</b>
               </FormLabel>
               <div>
@@ -157,7 +137,7 @@ function ViewFile() {
                         "rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
                     }}
                   >
-                    <div class="card-header" style={{ fontSize: "20px" }}>
+                    <div class="card-header" style={{ fontSize: "20px",backgroundColor:"#6AA3DA",borderTopLeftRadius:"14px",borderTopRightRadius:"14px",color:"white" }}>
                       {fileData?.loan} File -{fileData?.loan_type}
                     </div>
                     <u>
@@ -166,7 +146,6 @@ function ViewFile() {
                         style={{
                           fontSize: "18px",
                           paddingLeft: "20px",
-                          // paddingBottom: 0,
                         }}
                       >
                         <b>Loan User : {fileData?.username}</b>
@@ -184,7 +163,6 @@ function ViewFile() {
                                   paddingLeft: "20px",
                                   justifyContent: "space-between",
                                   display: "flex",
-                                  // paddingBottom: 0,
                                 }}
                               >
                                 <label>Branch UserName :</label>
@@ -197,7 +175,6 @@ function ViewFile() {
                                   paddingLeft: "20px",
                                   justifyContent: "space-between",
                                   display: "flex",
-                                  // paddingBottom: 0,
                                 }}
                               >
                                 <label>Branch Name :</label>
@@ -210,39 +187,6 @@ function ViewFile() {
                     </div>
                   </div>
                   <div>
-                    {/* <h6 className="mb-3 my-5">
-                    {fileData?.documents.map((document, index) => (
-                      <p key={index}>
-                        <i>{document.loan_document}: </i>
-                      </p>
-                    ))}
-                  </h6>
-                  {fileData?.documents.map((document, index) => (
-                    <div className="d-flex gap-2" id="fullscreen-container">
-                      {document.file_path.endsWith(".pdf") ? (
-                        <embed
-                          src={`${basePath}${document.file_path}`}
-                          type="application/pdf"
-                          width="400"
-                          height="200"
-                          style={{
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          }}
-                        />
-                      ) : (
-                        <img
-                          src={`${basePath}${document.file_path}`}
-                          id="adhar"
-                          style={{
-                            width: "20%",
-                            height: "50%",
-                            borderRadius: "12px",
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))} */}
                     {fileData?.documents && (
                       <FileDisplay data={fileData?.documents} />
                     )}

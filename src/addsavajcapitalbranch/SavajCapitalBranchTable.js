@@ -5,8 +5,7 @@ import {
   MenuList,
   Stack,
   FormControl,
-} from "@chakra-ui/react";// Add axios to your imports
-// Add axios to your imports
+} from "@chakra-ui/react";
 import axios from "axios";
 import {
   Flex,

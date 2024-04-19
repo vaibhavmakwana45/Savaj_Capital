@@ -215,7 +215,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  // IconButton,
   Collapse,
   Box,
   Typography,
@@ -223,35 +222,9 @@ import {
 import "./file.scss";
 import { useHistory } from "react-router-dom";
 
-import {
-  Button,
-  Select,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useColorModeValue,
-  FormControl,
-  FormLabel,
-  Input,
-  Flex,
-  Text,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-} from "@chakra-ui/react";
+import { Button, useColorModeValue, Input, Flex, Text } from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
-import {
-  DeleteIcon,
-  EditIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
 
 import {
@@ -302,22 +275,12 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
-          {file?.file_id}
-        </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
-          {file?.loan}
-        </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
-          {file?.loan_type || "-"}
-        </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
-          {file?.createdAt}
-        </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
-          {file?.updatedAt}
-        </TableCell>
-        <TableCell align="center" style={{}}>
+        <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{file?.loan}</TableCell>
+        <TableCell align="">{file?.loan_type || "-"}</TableCell>
+        <TableCell align="">{file?.createdAt}</TableCell>
+        <TableCell align="">{file?.updatedAt}</TableCell>
+        <TableCell align="center">
           {/* <div className="">
             <div className="">
               <div className="progress mx-auto" data-value="20"> 
@@ -355,14 +318,12 @@ function Row(props) {
             <IconButton
               aria-label="Delete bank"
               icon={<DeleteIcon />}
-              // onClick={() => handleDelete(rowData[0])}
               style={{ marginRight: 15, fontSize: "20px" }}
             />
 
             <IconButton
               aria-label="Edit bank"
               icon={<EditIcon />}
-              // onClick={() => handleEdit(rowData[0])}
               style={{ fontSize: "20px" }}
             />
           </Flex>
@@ -403,12 +364,14 @@ function Row(props) {
           </Collapse>
         </TableCell> */}
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit
+            style={{ width: "50%" }}
+          >
             <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Documents
-              </Typography>
-              <Paper elevation={3} sx={{ borderRadius: 8 }}>
+              <Paper elevation={3} sx={{ borderRadius: 3 }}>
                 <Table size="small" aria-label="documents">
                   <TableHead>
                     <TableRow>
@@ -450,16 +413,18 @@ function Row(props) {
                         </TableCell>
                         <TableCell>
                           {documentRow.is_uploaded ? (
-                            // <CheckCircleIcon style={{ color: 'green' }} />
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
                             >
-                              Approved
+                              <i class="fa-regular fa-circle-check"></i>
+                              &nbsp;&nbsp;Uploaded
                             </span>
                           ) : (
-                            // <HighlightOffIcon style={{ color: 'red' }} />
-                            <span style={{ color: "red", fontWeight: "bold" }}>
-                              Pending
+                            <span
+                              style={{ color: "#FFB302 ", fontWeight: "bold" }}
+                            >
+                              <i class="fa-regular fa-clock"></i>
+                              &nbsp;&nbsp;Pending
                             </span>
                           )}
                         </TableCell>
@@ -518,7 +483,6 @@ export default function CollapsibleTable() {
 
   const handleRow = (url) => {
     history.push(url);
-    // alert(url)
   };
   const [loading, setLoading] = useState(true);
 
@@ -588,7 +552,6 @@ export default function CollapsibleTable() {
 
   return (
     <div className="card" style={{ marginTop: "120px", borderRadius: "30px" }}>
-      {/* <div className='card-header' style={{padding:"20px"}}><h1>hello</h1></div> */}
       <CardHeader style={{ padding: "30px" }}>
         <Flex justifyContent="space-between" alignItems="center">
           <Text fontSize="xl" fontWeight="bold">
@@ -613,7 +576,7 @@ export default function CollapsibleTable() {
         </Flex>
       </CardHeader>
       <ThemeProvider theme={theme}>
-        {loading ? ( // Render loading spinner if loading is true
+        {loading ? ( 
           <Flex justify="center" align="center" height="100vh">
             <Loader
               type="spinner-circle"
@@ -628,7 +591,6 @@ export default function CollapsibleTable() {
               <TableHead style={{ borderBottom: "1px solid red" }}>
                 <TableRow>
                   <TableCell />
-                  {/* <TableCell align="right">Name</TableCell> */}
                   <TableCell align="" style={{ color: "#BEC7D4" }}>
                     File Id
                   </TableCell>
