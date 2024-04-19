@@ -274,7 +274,9 @@ function Row(props) {
         const response = await axios.get(
           "http://192.168.1.28:4000/api/file_uplode"
         );
-        setFiles(response.data.data);
+        if (response.data.statusCode === 200) {
+          setFiles(response.data.data);
+        }
       } catch (error) {
         console.error("Error fetching files:", error);
       }
@@ -343,7 +345,8 @@ function Row(props) {
             </span>
             <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
               <div class="font-weight-bold">
-              {file?.document_percentage}<sup class="small">%</sup>
+                {file?.document_percentage}
+                <sup class="small">%</sup>
               </div>
             </div>
           </div>
@@ -428,8 +431,14 @@ export default function CollapsibleTable() {
   const filteredUsers =
     searchTerm.length === 0
       ? files
-      : files.filter((user) =>
-          user.loan.toLowerCase().includes(searchTerm.toLowerCase())
+      : files.filter(
+          (user) =>
+            (user.loan &&
+              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.file_id &&
+              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.loan_type &&
+              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
         );
 
   const history = useHistory();
@@ -467,33 +476,6 @@ export default function CollapsibleTable() {
 
     fetchFiles();
   }, []);
-
-  // $(function () {
-  //   $(".progress").each(function () {
-  //     var value = $(this).attr("data-value");
-  //     var left = $(this).find(".progress-left .progress-bar");
-  //     var right = $(this).find(".progress-right .progress-bar");
-
-  //     if (value > 0) {
-  //       if (value <= 50) {
-  //         right.css(
-  //           "transform",
-  //           "rotate(" + percentageToDegrees(value) + "deg)"
-  //         );
-  //       } else {
-  //         right.css("transform", "rotate(180deg)");
-  //         left.css(
-  //           "transform",
-  //           "rotate(" + percentageToDegrees(value - 50) + "deg)"
-  //         );
-  //       }
-  //     }
-  //   });
-
-  //   function percentageToDegrees(percentage) {
-  //     return (percentage / 100) * 360;
-  //   }
-  // });
 
   $(function () {
     $(".progress").each(function () {
@@ -604,7 +586,7 @@ export default function CollapsibleTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {files.map((file) => (
+              {filteredUsers.map((file) => (
                 <Row
                   key={file._id}
                   file={file}
