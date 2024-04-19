@@ -19,7 +19,6 @@ import {
   PersonIcon,
   DocumentIcon,
   RocketIcon,
-  SupportIcon,
 } from "components/Icons/Icons";
 import AddSavajCapitalBranch from "addsavajcapitalbranch/AddSavajCapitalBranch";
 import AddSavajCapitalUser from "addsavajcapitalbranch/AddSavajUser";
@@ -36,7 +35,7 @@ import NewPassword from "views/Pages/NewPassword";
 import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
-import Document from "Document/Document";
+import Document from "loan/Document";
 import ViewFile from "files/ViewFile";
 import EditFile from "files/EditFile";
 
@@ -89,9 +88,9 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "filetable",
-    key: "viewfile",
+    key: "editfile",
   },
-  //user
+  //users
   {
     path: "/alluser",
     name: "Customers",
@@ -113,7 +112,7 @@ var dashRoutes = [
     key: "adduser",
   },
   {
-    path: "/edituser/:user_id",
+    path: "/edituser",
     name: "Edit Customer",
     icon: <CreditIcon color="inherit" />,
     component: AddUser,
@@ -199,22 +198,8 @@ var dashRoutes = [
     component: SavajCapitalBranchTable,
     layout: "/superadmin",
     hideInSResponsive: true,
-  },
-  {
-    path: "/savajusers",
-    name: "Savaj Capital Users",
-    icon: <StatsIcon color="inherit" />,
-    component: SavajUsers,
-    hideInSidebar: true,
-    layout: "/superadmin",
-  },
-  {
-    path: "/savajuserroles",
-    name: "Savaj Capital Users",
-    icon: <StatsIcon color="inherit" />,
-    component: SavajUsersRole,
-    hideInSidebar: true,
-    layout: "/superadmin",
+    parent: "superadmin",
+    key: "savajcapitalbranch",
   },
   {
     path: "/addsavajcapitalbranch",
@@ -223,6 +208,8 @@ var dashRoutes = [
     component: AddSavajCapitalBranch,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "savajcapitalbranch",
+    key: "addsavajcapitalbranch",
   },
   {
     path: "/addsavajcapitaluser",
@@ -231,14 +218,38 @@ var dashRoutes = [
     component: AddSavajCapitalUser,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "savajcapitalbranch",
+    key: "addsavajcapitaluser",
+  },
+  {
+    path: "/savajuserroles",
+    name: "Add Savaj Capital Roles",
+    icon: <StatsIcon color="inherit" />,
+    component: SavajUsersRole,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "savajcapitalbranch",
+    key: "savajuserroles",
+  },
+  {
+    path: "/savajusers",
+    name: "Savaj Capital Users",
+    icon: <StatsIcon color="inherit" />,
+    component: SavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "savajcapitalbranch",
+    key: "savajusers",
   },
   {
     path: "/editsavajcapitalbranch/:id",
-    name: "Add Savaj Capital Branch",
+    name: "Edit Savaj Capital Branch",
     icon: <CreditIcon color="inherit" />,
     component: EditSavajCapitalBranch,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "savajcapitalbranch",
+    key: "editsavajcapitalbranch",
   },
   //bank
   {
@@ -248,6 +259,8 @@ var dashRoutes = [
     component: BankTable,
     layout: "/superadmin",
     hideInSResponsive: true,
+    parent: "superadmin",
+    key: "bank",
   },
   {
     path: "/addbank",
@@ -256,6 +269,8 @@ var dashRoutes = [
     component: AddBank,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "bank",
+    key: "addbank",
   },
   {
     path: "/addbankuser",
@@ -264,6 +279,8 @@ var dashRoutes = [
     component: AddBankUser,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "bank",
+    key: "addbank",
   },
   {
     path: "/bankusers",
@@ -272,8 +289,9 @@ var dashRoutes = [
     component: BankUsers,
     layout: "/superadmin",
     hideInSidebar: true,
+    parent: "bank",
+    key: "addbank",
   },
-
   //auth
   {
     name: "ACCOUNT PAGES",

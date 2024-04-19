@@ -93,6 +93,7 @@ export default function AdminNavbar(props) {
   const findRouteByKey = (key) => routes.find((route) => route.key === key);
 
   const generateBreadcrumbItems = (currentRoute, items = []) => {
+    console.log("Generating breadcrumbs for: ", currentRoute);
     if (!currentRoute) return items;
 
     const parentRoute = currentRoute.parent
