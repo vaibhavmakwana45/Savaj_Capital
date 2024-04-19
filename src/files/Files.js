@@ -271,7 +271,7 @@ function Row(props) {
     const fetchFiles = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.23:4000/api/file_uplode"
+          "/file_uplode"
         );
         if (response.data.statusCode === 200) {
           setFiles(response.data.data);

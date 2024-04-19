@@ -545,16 +545,27 @@ function AddFiles() {
               )}
             </div>
 
-            <Button
-              mt={4}
-              colorScheme="teal"
-              onClick={handleSubmitData}
-              isLoading={loading}
-              loadingText="Submitting"
-              style={{ marginTop: 40 }}
-            >
-              Submit
-            </Button>
+            <div>
+              <Button
+                mt={4}
+                colorScheme="teal"
+                onClick={handleSubmitData}
+                isLoading={loading}
+                loadingText="Submitting"
+                style={{ marginTop: 40 }}
+              >
+                Submit
+              </Button>
+
+              <Button
+                mt={4}
+                colorScheme="yellow"
+                style={{ marginTop: 40, marginLeft: 8 }}
+                onClick={() => history.push("/superadmin/filetable")}
+              >
+                Cancel
+              </Button>
+            </div>
           </CardBody>
         </Card>
       </Flex>

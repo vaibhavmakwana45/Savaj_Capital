@@ -427,9 +427,8 @@ export function SidebarResponsive(props) {
     });
   };
 
-  
-  const newroutes= routes.filter((route) => route.hideInSResponsive);
-  
+  const newroutes = routes.filter((route) => route.hideInSResponsive);
+
   // console.log(newroutes)
 
   var links = <>{createLinks(newroutes)}</>;
