@@ -258,6 +258,8 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
+import Loader from "react-js-loader";
+
 
 const theme = createTheme();
 
@@ -316,10 +318,10 @@ function Row(props) {
         <TableCell align="" style={{ border: "none" }}>
           {file?.updatedAt}
         </TableCell>
-        <TableCell align="" style={{ border: "none" }}>
+        <TableCell align="center" style={{  }}>
           {/* <div className="">
             <div className="">
-              <div className="progress mx-auto" data-value="20">
+              <div className="progress mx-auto" data-value="20"> 
                 <span className="progress-left">
                   <span className="progress-bar border-primary"></span>
                 </span>
@@ -334,7 +336,7 @@ function Row(props) {
               </div>
             </div>
           </div> */}
-          <div class="progress mx-auto" data-value={file?.document_percentage}>
+          <div class="progress " data-value={file?.document_percentage}>
             <span class="progress-left">
               <span class="progress-bar"></span>
             </span>
@@ -450,6 +452,7 @@ export default function CollapsibleTable() {
     history.push(url);
     // alert(url)
   };
+  const [loading, setLoading] = useState(true);
 
   const handleEdit = (id) => {
     history.push("/superadmin/adduser?id=" + id);
@@ -464,6 +467,8 @@ export default function CollapsibleTable() {
           "http://192.168.1.28:4000/api/file_uplode"
         );
         setFiles(response.data.data);
+        setLoading(false);
+
       } catch (error) {
         console.error("Error fetching files:", error);
       }
@@ -541,6 +546,16 @@ export default function CollapsibleTable() {
         </Flex>
       </CardHeader>
       <ThemeProvider theme={theme}>
+      {loading ? ( // Render loading spinner if loading is true
+        <Flex justify="center" align="center" height="100vh">
+          <Loader
+            type="spinner-circle"
+            bgColor={"#3182CE"}
+            color={"black"}
+            size={50}
+          />
+        </Flex>
+      ) : (
         <TableContainer component={Paper}>
           <Table aria-label="collapsible table">
             <TableHead style={{ borderBottom: "1px solid red" }}>
@@ -582,6 +597,7 @@ export default function CollapsibleTable() {
             </TableBody>
           </Table>
         </TableContainer>
+          )}
       </ThemeProvider>
     </div>
   );
