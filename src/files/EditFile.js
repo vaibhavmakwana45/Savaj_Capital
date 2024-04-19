@@ -289,7 +289,7 @@ function EditFile() {
       const newFiles = fileDataArray.filter((file) => file.new);
       const existingFiles = fileDataArray.filter((file) => !file.new);
 
-      const uploadPromises = newFiles.map(async (item, index) => {
+      const uploadPromises = newFiles.map(async (item) => {
         const formData = new FormData();
         formData.append("b_video", item.file);
 
