@@ -6,11 +6,22 @@ import {
   BreadcrumbLink,
   Flex,
   Link,
-  useColorModeValue
+  useColorModeValue,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
+import routes from "../../routes";
 
+const filteredRoutes = routes.filter((route) => route.layout !== "/auth");
+
+function formatPathSegment(pathSegment) {
+  return pathSegment
+    .replace(/-/g, " ")
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 export default function AdminNavbar(props) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -19,8 +30,8 @@ export default function AdminNavbar(props) {
 
     return () => {
       window.removeEventListener("scroll", changeNavbar);
-    }
-  })
+    };
+  });
 
   const {
     variant,
@@ -29,13 +40,17 @@ export default function AdminNavbar(props) {
     secondary,
     brandText,
     onOpen,
-
     ...rest
   } = props;
 
-  // Here are all the props that may change depending on navbar's type or state.(secondary, variant, scrolled)
-  let mainText = (fixed && scrolled) ? useColorModeValue("gray.700", "gray.200") : useColorModeValue("white", "gray.200");
-  let secondaryText = (fixed && scrolled) ? useColorModeValue("gray.700", "gray.200") : useColorModeValue("white", "gray.200");
+  let mainText =
+    fixed && scrolled
+      ? useColorModeValue("gray.700", "gray.200")
+      : useColorModeValue("white", "gray.200");
+  let secondaryText =
+    fixed && scrolled
+      ? useColorModeValue("gray.700", "gray.200")
+      : useColorModeValue("white", "gray.200");
   let navbarPosition = "absolute";
   let navbarFilter = "none";
   let navbarBackdrop = "none";
@@ -76,7 +91,59 @@ export default function AdminNavbar(props) {
       setScrolled(false);
     }
   };
-  
+
+  const findRouteByKey = (key) =>
+    filteredRoutes.find((route) => route.key === key);
+
+  const generateBreadcrumbItems = (currentRoute, items = []) => {
+    console.log("Generating breadcrumbs for: ", currentRoute);
+    if (!currentRoute) return items;
+
+    const parentRoute = currentRoute.parent
+      ? findRouteByKey(currentRoute.parent)
+      : null;
+
+    if (parentRoute) {
+      generateBreadcrumbItems(parentRoute, items);
+    }
+
+    if (items.length === 0) {
+      items.push(
+        <BreadcrumbItem key="superadmin">
+          <BreadcrumbLink href="/superadmin" color="white">
+            Superadmin
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      );
+    }
+
+    const routeName = formatPathSegment(currentRoute.name);
+    const isLast =
+      currentRoute.path ===
+      window.location.pathname.replace(currentRoute.layout, "");
+
+    items.push(
+      <BreadcrumbItem key={currentRoute.key} isCurrentPage={isLast}>
+        <BreadcrumbLink
+          href={currentRoute.layout + currentRoute.path}
+          color={isLast ? "white" : "white"}
+        >
+          {routeName}
+        </BreadcrumbLink>
+      </BreadcrumbItem>
+    );
+
+    return items;
+  };
+
+  const generateBreadcrumbs = () => {
+    const pathname = window.location.pathname;
+    const currentRoute = filteredRoutes.find(
+      (route) => route.layout + route.path === pathname
+    );
+    return generateBreadcrumbItems(currentRoute);
+  };
+
   return (
     <Flex
       position={navbarPosition}
@@ -112,6 +179,7 @@ export default function AdminNavbar(props) {
       pt="8px"
       top="18px"
       w={{ sm: "calc(100vw - 30px)", xl: "calc(100vw - 75px - 275px)" }}
+      style={{ position: "fixed", zIndex: "9", backgroundColor: "#3182CE" }}
     >
       <Flex
         w="100%"
@@ -122,21 +190,9 @@ export default function AdminNavbar(props) {
         alignItems={{ xl: "center" }}
       >
         <Box mb={{ sm: "8px", md: "0px" }}>
-          <Breadcrumb>
-            <BreadcrumbItem color={mainText}>
-              <BreadcrumbLink href="#" color={secondaryText}>
-                Pages
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbItem color={mainText}>
-              <BreadcrumbLink href="#" color={mainText}>
-                {brandText}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-          {/* Here we create navbar brand, based on route name */}
+          <Breadcrumb separator=">">{generateBreadcrumbs()}</Breadcrumb>
           <Link
+            pt="20px"
             color={mainText}
             href="#"
             bg="inherit"
@@ -155,6 +211,7 @@ export default function AdminNavbar(props) {
             {brandText}
           </Link>
         </Box>
+
         <Box ms="auto" w={{ sm: "100%", md: "unset" }}>
           <AdminNavbarLinks
             onOpen={props.onOpen}

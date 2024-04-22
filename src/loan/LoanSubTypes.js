@@ -34,10 +34,11 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 
 function LoanSubTypes() {
   const [users, setUsers] = useState([]);
-  console.log('users', users)
+  console.log("users", users);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -111,9 +112,9 @@ function LoanSubTypes() {
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loantype_id === id);
-  
+
     console.log("Navigating to documents page with data:", data);
-    if(data) {
+    if (data) {
       history.push("/superadmin/documents", {
         state: { loan_id: data.loan_id, loantype_id: data.loantype_id },
       });
@@ -121,7 +122,6 @@ function LoanSubTypes() {
       console.error("No data found for ID:", id);
     }
   };
-  
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -192,6 +192,12 @@ function LoanSubTypes() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
+                <IconButton
+                  icon={<ArrowBackIcon />}
+                  onClick={() => history.goBack()}
+                  aria-label="Back"
+                  mr="4"
+                />
                 {loan?.loan || "..."}
               </Text>
               <Flex>

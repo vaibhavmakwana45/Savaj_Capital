@@ -330,14 +330,25 @@ function AddSavajCapitalBranch() {
                 </FormControl>
               } */}
 
-              <Button
-                mt={4}
-                colorScheme="blue"
-                type="submit"
-                // isLoading={loading}
-              >
-                {id ? "Update User now" : "Add User"}
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="blue"
+                  type="submit"
+                  // isLoading={loading}
+                >
+                  {id ? "Update User now" : "Add User"}
+                </Button>
+
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginLeft: 8 }}
+                  onClick={() => history.push("/superadmin/savajcapitalbranch")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>

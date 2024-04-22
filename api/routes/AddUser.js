@@ -27,7 +27,7 @@ const decrypt = (text) => {
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
 router.post("/adduser", async (req, res) => {
-  console.log('first', req.body)
+  console.log("first", req.body);
   try {
     const { userDetails } = req.body;
 
@@ -111,7 +111,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://192.168.1.12:4000/api/setpassword/passwordmail`,
+      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }

@@ -56,6 +56,8 @@ function AddLoanDocuments() {
   }, []);
 
   const [loanType, setLoanType] = useState([]);
+  const [subType, setSubType] = useState(null);
+  const [loanName, setLoanName] = useState("");
   const getData = async (loanId) => {
     try {
       // Make the API call with the loan_id parameter
@@ -66,6 +68,8 @@ function AddLoanDocuments() {
       if (response.data.success) {
         // Set the loanType state with the received data
         setLoanType(response.data.data);
+        setLoanName(response.data.loan[0].loan);
+        setSubType(response.data.loan[0].is_subtype);
       } else {
         alert("Please try again later...!");
       }
@@ -194,12 +198,11 @@ function AddLoanDocuments() {
                     setFormData({ ...formData, loantype_id: e.target.value })
                   }
                 >
+                  <option key="title" disabled style={{ fontWeight: 800 }}>
+                    {subType === true ? loanName : ""}
+                  </option>
                   {loanType.map((index) => (
-                    <option
-                      key={index.loantype_id}
-                      name={"fdkasdfadfkl"}
-                      value={index.loantype_id}
-                    >
+                    <option key={index.loantype_id} value={index.loantype_id}>
                       {index.loan_type}
                     </option>
                   ))}
@@ -230,16 +233,27 @@ function AddLoanDocuments() {
                 </FormControl>
               ))}
 
-              <Button
-                mt={4}
-                colorScheme="teal"
-                type="submit"
-                isLoading={loading}
-                loadingText="Submitting"
-                style={{ marginTop: 40 }}
-              >
-                Submit
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  type="submit"
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{ marginTop: 40 }}
+                >
+                  Submit
+                </Button>
+
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginTop: 40, marginLeft: 8 }}
+                  onClick={() => history.push("/superadmin/loan")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>

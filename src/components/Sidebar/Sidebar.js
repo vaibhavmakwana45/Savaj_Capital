@@ -427,9 +427,8 @@ export function SidebarResponsive(props) {
     });
   };
 
-  
-  const newroutes= routes.filter((route) => route.hideInSResponsive);
-  
+  const newroutes = routes.filter((route) => route.hideInSResponsive);
+
   // console.log(newroutes)
 
   var links = <>{createLinks(newroutes)}</>;
@@ -489,7 +488,6 @@ export function SidebarResponsive(props) {
               <Stack direction="column" mb="40px">
                 <Box>{links}</Box>
               </Stack>
-              {/* <SidebarHelp /> */}
             </Box>
           </DrawerBody>
         </DrawerContent>

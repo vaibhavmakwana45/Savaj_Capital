@@ -192,16 +192,26 @@ function AddUser(props) {
                 </FormControl>
               } */}
 
-              <Button
-                mt={4}
-                colorScheme="teal"
-                type="submit"
-                isLoading={loading}
-                loadingText="Submitting"
-                style={{ marginTop: 20 }}
-              >
-                Submit
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  type="submit"
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{ marginTop: 20 }}
+                >
+                  Submit
+                </Button>
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginTop: 20, marginLeft: 8 }}
+                  onClick={() => history.push("/superadmin/alluser")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>
