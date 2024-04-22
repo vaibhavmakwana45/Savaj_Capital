@@ -9,34 +9,6 @@ const Loan_Documents = require("../../models/Loan/Loan_Documents");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const AddUser = require("../../models/AddUser");
 
-// router.post("/", async (req, res) => {
-//   try {
-//     const uniqueId = `F${moment().format("YYYYMMDDHHmmss")}`;
-//     const timestampForDocId = Date.now();
-//     const uniqueIdForDocId = `${timestampForDocId}`;
-
-//     req.body["file_id"] = uniqueId;
-//     req.body["createdAt"] = moment()
-//       .utcOffset(330)
-//       .format("YYYY-MM-DD HH:mm:ss");
-//     req.body["updatedAt"] = moment()
-//       .utcOffset(330)
-//       .format("YYYY-MM-DD HH:mm:ss");
-
-//     var data = await File_Uplode.create(req.body);
-//     res.json({
-//       success: true,
-//       data: data,
-//       message: "Add Role Successfully",
-//     });
-//   } catch (error) {
-//     res.json({
-//       statusCode: 500,
-//       message: error.message,
-//     });
-//   }
-// });
-
 router.post("/", async (req, res) => {
   try {
     const uniqueId = `F${moment().format("YYYYMMDDHHmmss")}`;
@@ -102,22 +74,31 @@ router.post("/", async (req, res) => {
 //       }
 
 //       // Count the number of documents uploaded based on loantype_id
+//       let documentCount;
 //       if (loantype_id === "") {
 //         // If loantype_id is empty, find the count based on loan_id
-//         const documentCount = await Loan_Documents.countDocuments({
+//         documentCount = await Loan_Documents.countDocuments({
 //           loan_id: loan_id,
 //         });
-//         data[i].document_count = documentCount;
 //       } else {
 //         // If loantype_id is not empty, find the count based on loantype_id
-//         const documentCount = await Loan_Documents.countDocuments({
+//         documentCount = await Loan_Documents.countDocuments({
 //           loantype_id: loantype_id,
 //         });
-//         data[i].document_count = documentCount;
 //       }
 
+//       // Calculate the percentage
+//       const uploadedDocumentsCount = data[i].documents.length;
+//       let percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(
+//         2
+//       ); // Limit to two decimal places
+
+//       // Store the count and percentage in the document
+//       data[i].document_count = documentCount;
+//       data[i].document_percentage = parseFloat(percentage); // Convert back to float
+
 //       // Count the number of documents uploaded by the user
-//       data[i].uploaded_documents_count = data[i].documents.length;
+//       data[i].uploaded_documents_count = uploadedDocumentsCount;
 //     }
 
 //     const count = data.length;
@@ -182,6 +163,34 @@ router.get("/", async (req, res) => {
           loantype_id: loantype_id,
         });
       }
+
+      // Get the loan_document_ids based on the document_count
+      let loan_doc_data;
+      if (loantype_id === "") {
+        // If loantype_id is empty, find documents based on loan_id
+        loan_doc_data = await Loan_Documents.find({
+          loan_id: loan_id,
+        }).limit(documentCount);
+      } else {
+        // If loantype_id is not empty, find documents based on loantype_id
+        loan_doc_data = await Loan_Documents.find({
+          loantype_id: loantype_id,
+        }).limit(documentCount);
+      }
+
+      // Extract loan_document_ids and add them to the object in data array
+      data[i].loan_document_ids = loan_doc_data.map((doc) => ({
+        loan_document_id: doc.loan_document_id,
+        loan_document: doc.loan_document,
+      }));
+
+      // Check if loan_document_id exists in documents array and set is_uploaded accordingly
+      data[i].loan_document_ids.forEach((doc) => {
+        const found = data[i].documents.some(
+          (d) => d.loan_document_id === doc.loan_document_id
+        );
+        doc.is_uploaded = found;
+      });
 
       // Calculate the percentage
       const uploadedDocumentsCount = data[i].documents.length;
@@ -342,4 +351,52 @@ router.delete("/:file_id", async (req, res) => {
   }
 });
 
+router.put("/:file_id", async (req, res) => {
+  console.log(req.params);
+  try {
+      const { file_id } = req.params;
+      const updateData = req.body;
+
+      // Generate document IDs and assign to each document in the request
+      if (updateData.documents && updateData.documents.length > 0) {
+          const timestampForDocId = moment().unix(); // Create a UNIX timestamp for unique ID generation
+          updateData.documents.forEach((doc, index) => {
+              doc.doc_id = `${timestampForDocId}_${Math.floor(Math.random() * 1000)}_${index}`;
+          });
+      }
+
+      updateData.updatedAt = moment()
+          .utcOffset(330) // IST timezone offset in minutes
+          .format("YYYY-MM-DD HH:mm:ss");
+
+      const updatedFile = await File_Uplode.findOneAndUpdate(
+          { file_id: file_id },
+          { $set: updateData },
+          { new: true }
+      );
+
+      if (!updatedFile) {
+          console.log(`No file found with ID: ${file_id}`);
+          return res.status(404).json({
+              statusCode: 404,
+              message: "File not found",
+          });
+      }
+
+      console.log(`File updated successfully: ${file_id}`);
+      res.json({
+          statusCode: 200,
+          success: true,
+          message: "File updated successfully",
+          data: updatedFile,
+      });
+  } catch (error) {
+      console.error(`Error when trying to update file: ${error}`);
+      res.status(500).json({
+          statusCode: 500,
+          message: "Internal Server Error",
+          error: error.message,
+      });
+  }
+});
 module.exports = router;

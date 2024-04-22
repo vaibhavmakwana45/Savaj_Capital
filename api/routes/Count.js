@@ -6,6 +6,7 @@ const AddUser = require("../models/AddUser");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapital_Role = require("../models/Savaj_Capital/SavajCapital_Role");
 const SavajCapital_Branch = require("../models/Savaj_Capital/SavajCapital_Branch");
+const File_Uplode = require("../models/File/File_Uplode");
 
 router.get("/data-count", async (req, res) => {
   try {
@@ -14,6 +15,7 @@ router.get("/data-count", async (req, res) => {
     const savajCapitalbranch = await SavajCapital_Branch.countDocuments();
     const superAdmin = await SuperAdmin.countDocuments();
     const role = await SavajCapital_Role.countDocuments();
+    const files = await File_Uplode.countDocuments();
 
     res.json({
       banks: bank,
@@ -21,6 +23,7 @@ router.get("/data-count", async (req, res) => {
       savajcapitalbrnach: savajCapitalbranch,
       superadmin: superAdmin,
       role: role,
+      files: files,
     });
   } catch (error) {
     console.error("Error fetching counts:", error);

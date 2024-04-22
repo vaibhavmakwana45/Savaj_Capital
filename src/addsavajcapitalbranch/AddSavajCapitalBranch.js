@@ -166,7 +166,7 @@ function AddSavajCapitalBranch() {
                 <Input name="email" onChange={handleChange} />
               </FormControl>{" "}
               <FormControl id="adress" isRequired mt={4}>
-                <FormLabel>Branch Address</FormLabel> 
+                <FormLabel>Branch Address</FormLabel>
                 <Input name="adress" onChange={handleChange} />
               </FormControl>
               {/* <FormControl id="branch_name" mt={4} isRequired>
@@ -174,15 +174,26 @@ function AddSavajCapitalBranch() {
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl> */}
               {/* User Details */}
-              <Button
-                mt={4}
-                colorScheme="blue"
-                type="submit"
-                isLoading={loading}
-                style={{ marginTop: 30 }}
-              >
-                Add Branch
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="blue"
+                  type="submit"
+                  isLoading={loading}
+                  style={{ marginTop: 30 }}
+                >
+                  Add Branch
+                </Button>
+
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginTop: 30, marginLeft: 8 }}
+                  onClick={() => history.push("/superadmin/savajcapitalbranch")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>

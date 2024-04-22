@@ -318,16 +318,26 @@ function AddBank() {
                 />
               </FormControl>
 
-              <Button
-                mt={4}
-                colorScheme="teal"
-                type="submit"
-                isLoading={loading}
-                loadingText="Submitting"
-                style={{ marginTop: 40 }}
-              >
-                Submit
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  type="submit"
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{ marginTop: 40 }}
+                >
+                  Submit
+                </Button>
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginTop: 40, marginLeft: 8 }}
+                  onClick={()=> history.push('/superadmin/bank')}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>
