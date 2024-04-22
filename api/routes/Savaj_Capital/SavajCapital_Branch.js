@@ -3,6 +3,27 @@ const router = express.Router();
 const moment = require("moment");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
+const crypto = require("crypto");
+
+const generateToken = () => {
+  return crypto.randomBytes(18).toString("hex");
+};
+
+let currentToken = generateToken();
+
+// Rotate the token every 3 minutes
+setInterval(() => {
+  currentToken = generateToken();
+}, 180000); // 3 minutes in milliseconds
+
+// Middleware to authenticate requests
+const authenticateToken = (req, res, next) => {
+  const authToken = req.headers["authorization"];
+  if (!authToken || authToken !== currentToken) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  next();
+};
 
 // Post Branch
 router.post("/", async (req, res) => {

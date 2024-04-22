@@ -496,7 +496,7 @@ export default function CollapsibleTable() {
     const fetchFiles = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.23:4000/api/file_uplode"
+          "http://192.168.1.7:4000/api/file_uplode"
         );
         setFiles(response.data.data);
         setLoading(false);

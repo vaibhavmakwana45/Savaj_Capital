@@ -92,7 +92,7 @@ function ViewFile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const response = await AxiosInstance.get(
           "/file_uplode/file_upload/" + id
         );
@@ -111,7 +111,7 @@ function ViewFile() {
   }, []);
   return (
     <div>
-      {loading ? ( 
+      {loading ? (
         <Flex justify="center" align="center" height="100vh">
           <Loader
             type="spinner-circle"
@@ -124,7 +124,7 @@ function ViewFile() {
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
             <CardBody style={{ padding: "40px" }}>
-              <FormLabel className="mb-5" style={{ fontSize: "25px"}}>
+              <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
                 <b>{fileData?.loan} File Details</b>
               </FormLabel>
               <div>
@@ -137,7 +137,16 @@ function ViewFile() {
                         "rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
                     }}
                   >
-                    <div class="card-header" style={{ fontSize: "20px",backgroundColor:"#6AA3DA",borderTopLeftRadius:"14px",borderTopRightRadius:"14px",color:"white" }}>
+                    <div
+                      class="card-header"
+                      style={{
+                        fontSize: "20px",
+                        backgroundColor: "#6AA3DA",
+                        borderTopLeftRadius: "14px",
+                        borderTopRightRadius: "14px",
+                        color: "white",
+                      }}
+                    >
                       {fileData?.loan} File -{fileData?.loan_type}
                     </div>
                     <u>
