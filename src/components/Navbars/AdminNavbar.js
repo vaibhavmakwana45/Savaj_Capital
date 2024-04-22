@@ -12,6 +12,8 @@ import React, { useEffect, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
 import routes from "../../routes";
 
+const filteredRoutes = routes.filter((route) => route.layout !== "/auth");
+
 function formatPathSegment(pathSegment) {
   return pathSegment
     .replace(/-/g, " ")
@@ -90,7 +92,8 @@ export default function AdminNavbar(props) {
     }
   };
 
-  const findRouteByKey = (key) => routes.find((route) => route.key === key);
+  const findRouteByKey = (key) =>
+    filteredRoutes.find((route) => route.key === key);
 
   const generateBreadcrumbItems = (currentRoute, items = []) => {
     console.log("Generating breadcrumbs for: ", currentRoute);
@@ -135,7 +138,7 @@ export default function AdminNavbar(props) {
 
   const generateBreadcrumbs = () => {
     const pathname = window.location.pathname;
-    const currentRoute = routes.find(
+    const currentRoute = filteredRoutes.find(
       (route) => route.layout + route.path === pathname
     );
     return generateBreadcrumbItems(currentRoute);
@@ -176,8 +179,7 @@ export default function AdminNavbar(props) {
       pt="8px"
       top="18px"
       w={{ sm: "calc(100vw - 30px)", xl: "calc(100vw - 75px - 275px)" }}
-      style={{position:"fixed",zIndex:"9",backgroundColor:"#3182CE"}}
-
+      style={{ position: "fixed", zIndex: "9", backgroundColor: "#3182CE" }}
     >
       <Flex
         w="100%"

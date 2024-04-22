@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
-import {
-  Button,
-  Select,
-  useColorModeValue,
-  FormControl,
-  FormLabel,
-  Flex,
-  Text,
-} from "@chakra-ui/react";
+  import {
+    Button,
+    Select,
+    useColorModeValue,
+    FormControl,
+    FormLabel,
+    Flex,
+    Text,
+    useDisclosure,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalCloseButton,
+    ModalBody,
+    Input,
+    ModalFooter,
+  } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
