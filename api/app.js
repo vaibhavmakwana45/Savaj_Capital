@@ -52,7 +52,7 @@ app.use("/api/loan", LoanRoutes);
 app.use("/api/loan_type", Loan_Type);
 app.use("/api/loan_docs", Loan_Documents);
 app.use("/api/setpassword", PasswordRoutes);
-app.use("/api/file_uplode", FileUplodeRoutes);
+app.use("/api/file_upload", FileUplodeRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

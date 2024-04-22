@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Flex, Text, Input, useColorModeValue, Button } from "@chakra-ui/react";
+import {
+  Flex,
+  Text,
+  Input,
+  useColorModeValue,
+  IconButton,
+} from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import TableComponent from "TableComponent";
 import AxiosInstance from "config/AxiosInstance";
+import { ArrowBackIcon } from "@chakra-ui/icons";
+import { useHistory, useLocation } from "react-router-dom";
 
 function Document() {
   const location = useLocation();
+  const history = useHistory();
   const { loan_id, loantype_id } = location?.state?.state || {};
   console.log("loan_id", loan_id);
   console.log("loantype_id", loantype_id);
@@ -72,6 +80,12 @@ function Document() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
+                <IconButton
+                  icon={<ArrowBackIcon />}
+                  onClick={() => history.goBack()}
+                  aria-label="Back"
+                  mr="4"
+                />
                 Documents
               </Text>
               <div>

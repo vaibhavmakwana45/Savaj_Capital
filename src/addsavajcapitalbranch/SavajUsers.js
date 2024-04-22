@@ -21,7 +21,7 @@ import {
   useColorMode,
   useColorModeValue,
   Input,
-} from "@chakra-ui/react"; // Add axios to your imports
+} from "@chakra-ui/react";
 import axios from "axios";
 import {
   AlertDialog,
@@ -33,6 +33,8 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
+import { ArrowBackIcon } from "@chakra-ui/icons";
+
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
@@ -166,6 +168,12 @@ function Tables() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
+                <IconButton
+                  icon={<ArrowBackIcon />}
+                  onClick={() => history.goBack()}
+                  aria-label="Back"
+                  mr="4"
+                />
                 {branch?.branch_name || "..."}{" "}
                 {branch?.state && " - " + branch?.state + "," + branch?.city}
               </Text>

@@ -56,7 +56,7 @@ function AddLoanDocuments() {
   }, []);
 
   const [loanType, setLoanType] = useState([]);
-  const [subType, setSubType] = useState(null)
+  const [subType, setSubType] = useState(null);
   const [loanName, setLoanName] = useState("");
   const getData = async (loanId) => {
     try {
@@ -199,7 +199,7 @@ function AddLoanDocuments() {
                   }
                 >
                   <option key="title" disabled style={{ fontWeight: 800 }}>
-                    {subType === true ? loanName : ''}
+                    {subType === true ? loanName : ""}
                   </option>
                   {loanType.map((index) => (
                     <option key={index.loantype_id} value={index.loantype_id}>
@@ -233,16 +233,27 @@ function AddLoanDocuments() {
                 </FormControl>
               ))}
 
-              <Button
-                mt={4}
-                colorScheme="teal"
-                type="submit"
-                isLoading={loading}
-                loadingText="Submitting"
-                style={{ marginTop: 40 }}
-              >
-                Submit
-              </Button>
+              <div>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  type="submit"
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{ marginTop: 40 }}
+                >
+                  Submit
+                </Button>
+
+                <Button
+                  mt={4}
+                  colorScheme="yellow"
+                  style={{ marginTop: 40, marginLeft: 8 }}
+                  onClick={() => history.push("/superadmin/loan")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>

@@ -215,7 +215,7 @@ export default function UserDashboard() {
       <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}
         templateRows={{ lg: "repeat(2, auto)" }}
-        gap='20px'>
+      gap='20px'>
         <Card
           bg={
             colorMode === "dark"
