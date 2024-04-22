@@ -5,6 +5,7 @@ import BankDashboard from "banksdashboard/BankDashboard";
 import UserDashboard from "userdashboard/UserDashboard";
 import SavajCapitalBranchDashboard from "savajcapitaldashboard/SavajCapitalDashboard";
 import UserFile from "savajcapitaldashboard/UserFile";
+import adduserfile from "savajcapitaldashboard/CreateUserFile";
 import BankTable from "addbank/BankTable";
 import SavajCapitalBranchTable from "addsavajcapitalbranch/SavajCapitalBranchTable";
 import EditSavajCapitalBranch from "addsavajcapitalbranch/EditSavajCapitalBranch";
@@ -345,17 +346,29 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
+    hideInSResponsiveSavajUser: true,
+
   },
   {
     path: "/userfile",
     name: "User File",
-    icon: <HomeIcon color="inherit" />,
+    icon: <PersonIcon color="inherit" />,
     component: UserFile,
-    layout: "/userfile",
+    layout: "/savajcapitaluser",
     hideInSResponsive: false,
-    hideInSResponsiveSavajUser: false,
+    hideInSResponsiveSavajUser: true,
+  },
+  {
+    path: "/adduserfile",
+    name: "Add user file",
+    component: adduserfile,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "adduserfile",
   },
   //user
+
   {
     path: "/dashboard",
     name: "User Dashboard",

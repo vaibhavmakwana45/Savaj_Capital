@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
-import "./file.scss";
+import "./userfile.scss";
 import { useHistory } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import {
   Button,
   Select,
@@ -224,12 +225,24 @@ function AddFiles() {
     }
   };
 
+//   setdata
+
+const [jwt, setJwt] = useState({})
+
   const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
   const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
   const [roles, setRoles] = useState([]);
   const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
+  React.useEffect(async () => {
 
+    const jwtCode = await localStorage.getItem("authToken")
+    console.log(jwtCode, "jwtCode")
+    const jwt = jwtDecode(jwtCode);
+
+    setJwt(jwt)
+
+  }, []);
   useEffect(() => {
     const fetchSavajcapitalbranch = async () => {
       try {
@@ -253,7 +266,7 @@ function AddFiles() {
 
       try {
         const response = await AxiosInstance.get(
-          `/savaj_user/${selectedBranchId}`
+          `file_upload/get/${selectedBranchId}`
         );
         setSavajcapitalbranchUser(response.data.data || []);
         setLoading(false);
@@ -299,6 +312,8 @@ function AddFiles() {
     e.preventDefault();
     setLoading(true);
 
+   
+
     try {
       const uploadPromises = uploadedFileName.map(async (item) => {
         const formData = new FormData();
@@ -331,8 +346,8 @@ function AddFiles() {
       const payload = {
         user_id: selectedUser,
         loan_id: selectedLoanId,
-        branch_id: selectedBranchId,
-        branchuser_id: selectedBranchUserId,
+        branch_id: jwt._id.branch_id,
+        branchuser_id: jwt._id.branchuser_id,
         loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
@@ -342,7 +357,7 @@ function AddFiles() {
 
       await AxiosInstance.post("/file_upload", payload);
 
-      history.push("/superadmin/filetable");
+      history.push("/savajcapitaluser/userfile");
       toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
@@ -529,7 +544,7 @@ function AddFiles() {
                 </div>
               </div>
             </div>
-            <div>
+            {/* <div>
               <FormControl id="branch_id" mt={4} isRequired>
                 <FormLabel>Savaj Capital Branch</FormLabel>
                 <Select
@@ -566,7 +581,7 @@ function AddFiles() {
                   )}
                 </FormControl>
               )}
-            </div>
+            </div> */}
 
             <div>
               <Button
@@ -584,7 +599,7 @@ function AddFiles() {
                 mt={4}
                 colorScheme="yellow"
                 style={{ marginTop: 40, marginLeft: 8 }}
-                onClick={() => history.push("/superadmin/filetable")}
+                onClick={() => history.push("/savajcapitaluser/userfile")}
               >
                 Cancel
               </Button>
@@ -653,4 +668,5 @@ function AddFiles() {
     </>
   );
 }
+
 export default AddFiles;
