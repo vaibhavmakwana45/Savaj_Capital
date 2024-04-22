@@ -70,11 +70,8 @@ function UserTable() {
   const filteredUsers =
     searchTerm.length === 0
       ? users
-      : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
+      : users.filter((user) =>
+          user.loan.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
   const allHeaders = [
@@ -111,7 +108,7 @@ function UserTable() {
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loan_id === id);
-    console.log('data', data)
+    console.log("data", data);
     if (!data) {
       console.error("No data found for loan with ID:", id);
       return;
@@ -122,7 +119,6 @@ function UserTable() {
       history.push("/superadmin/documents", {
         state: { loan_id: data.loan_id },
       });
-      
     } else {
       history.push(`/superadmin/loantype?id=${id}`, {
         state: { loan_id: data.loan_id, loantype_id: data.loantype_id },
@@ -190,19 +186,19 @@ function UserTable() {
                   marginRight="10px"
                 />
                 <div className="add-doc-btn">
-                <Button
-                  onClick={() => history.push("/superadmin/addloantype")}
-                  colorScheme="blue"
-                >
-                  Add Loan
-                </Button>
-                <Button 
-                style={{marginLeft:"10px"}}
-                  onClick={() => history.push("/superadmin/addloandocs")}
-                  colorScheme="blue"
-                >
-                  Add Documents
-                </Button>
+                  <Button
+                    onClick={() => history.push("/superadmin/addloantype")}
+                    colorScheme="blue"
+                  >
+                    Add Loan
+                  </Button>
+                  <Button
+                    style={{ marginLeft: "10px" }}
+                    onClick={() => history.push("/superadmin/addloandocs")}
+                    colorScheme="blue"
+                  >
+                    Add Documents
+                  </Button>
                 </div>
               </Flex>
             </Flex>
