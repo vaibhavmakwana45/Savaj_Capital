@@ -71,7 +71,7 @@ function LoanDocument() {
         );
 
   const allHeaders = ["Loan Document", "Created At", "Updated At", "Action"];
-  const formattedData = filteredUsers.map((item) => [
+  const formattedData = filteredUsers?.map((item) => [
     item.loan_document_id,
     item.loan_document,
     item.createdAt,

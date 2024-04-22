@@ -330,6 +330,58 @@ export default function Dashboard() {
             </Text> */}
           </Flex>
         </Card>
+        
+        <Card
+          minH="125px"
+          style={{ cursor: "pointer" }}
+          onClick={() => history.push("/superadmin/filetable")}
+        >
+          <Flex direction="column">
+            <Flex
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
+                <StatLabel
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
+                  Total Files
+                </StatLabel>
+                <Flex>
+                  <StatNumber
+                    fontSize="lg"
+                    color={textColor}
+                    fontWeight="bold"
+                    style={{ paddingTop: "10px" }}
+                  >
+                    {apiData.files}
+                  </StatNumber>
+                </Flex>
+              </Stat>
+              <IconBox
+                borderRadius="50%"
+                as="box"
+                h={"45px"}
+                w={"45px"}
+                bg={iconBlue}
+              >
+                <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+              </IconBox>
+            </Flex>
+            {/* <Text color="gray.400" fontSize="sm">
+              <Text as="span" color="red.500" fontWeight="bold">
+                -2.82%{" "}
+              </Text>
+              Since last month
+            </Text> */}
+          </Flex>
+        </Card>
       </SimpleGrid>
       {/* <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}

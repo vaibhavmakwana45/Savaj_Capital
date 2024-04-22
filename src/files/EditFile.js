@@ -10,6 +10,8 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { IconButton } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -31,28 +33,47 @@ function EditFile() {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
+  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [selectedBranchUserId, setSelectedBranchUserId] = useState("");
   const [loanDocuments, setLoanDocuments] = useState([]);
   const [fileData, setFileData] = useState([]);
-
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
         const response = await AxiosInstance.get(
-          `/file_uplode/edit_file_upload/${id}`
+          `/file_upload/edit_file_upload/${id}`
         );
         if (response.data && response.data.statusCode === 200) {
           const details = response.data.data.fileDetails;
-          console.log("details", details);
-          setSelectedUser(details.user_id);
           setSelectedLoanId(details.loan_id);
+          setSelectedUser(details.user_id);
           setSelectedLoanSubtypeId(details.loantype_id);
+          setSelectedBranchId(details.branch_id);
+          setSelectedBranchUserId(details.branchuser_id);
           const documentsWithCDN = details.documents.map((doc) => ({
             ...doc,
             file_path: `${CDN_BASE_URL}${doc.file_path}`,
           }));
           setLoanDocuments(documentsWithCDN);
+
+          const initialFileData = documentsWithCDN.reduce(
+            (acc, doc, index) => ({
+              ...acc,
+              [index]: {
+                url: doc.file_path,
+                name: doc.file_name,
+                type: "application/pdf",
+                new: false,
+              },
+            }),
+            {}
+          );
+          setFileData(initialFileData);
         } else {
           throw new Error("Failed to fetch file details");
         }
@@ -89,10 +110,67 @@ function EditFile() {
     fetchLoanType();
   }, []);
 
+  useEffect(() => {
+    const fetchSavajcapitalbranch = async () => {
+      try {
+        const response = await AxiosInstance.get("/branch");
+        setSavajcapitalbranch(response.data.data);
+        console.log("response", response);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
+
+    fetchSavajcapitalbranch();
+    getRolesData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedBranchId) {
+      setSavajcapitalbranchUser([]);
+      return;
+    }
+    const fetchSavajcapitalbranchUser = async () => {
+      try {
+        const response = await AxiosInstance.get(
+          `/savaj_user/${selectedBranchId}`
+        );
+        setSavajcapitalbranchUser(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching branch users:", error);
+      }
+    };
+    fetchSavajcapitalbranchUser();
+  }, [selectedBranchId]);
+
+  const getRolesData = async () => {
+    try {
+      const response = await AxiosInstance.get("/role/");
+      if (response.data.success) {
+        setRoles(response.data.data);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
   const handleLoanTypeChange = (event) => {
     const loanId = event.target.value;
     const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
     setSelectedLoanType(selectedLoan || {});
+  };
+
+  const handleBranchChange = (event) => {
+    console.log("Branch ID Selected:", event.target.value);
+    setSelectedBranchId(event.target.value);
+  };
+
+  const handleBranchUserChange = (event) => {
+    console.log("Branch User ID Selected:", event.target.value);
+    setSelectedBranchUserId(event.target.value);
   };
 
   useEffect(() => {
@@ -126,6 +204,11 @@ function EditFile() {
 
     fetchLoanSubtypes();
   }, [selectedLoanId, loanType]);
+
+  const getRoleName = (roleId) => {
+    const role = roles.find((role) => role.role_id === roleId);
+    return role ? role.role : "No role found";
+  };
 
   useEffect(() => {
     const fetchLoanDocuments = async () => {
@@ -164,25 +247,103 @@ function EditFile() {
     const file = event.target.files[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    const newData = {
-      ...fileData,
-      [index]: {
+    setFileData((prevFileData) => {
+      const safePrevFileData = { ...prevFileData };
+      const url = URL.createObjectURL(file);
+
+      const loanDocumentId =
+        prevFileData[index]?.loan_document_id ||
+        loanDocuments[index]?.loan_document_id;
+
+      safePrevFileData[index] = {
         url,
         name: file.name,
         type: file.type,
-      },
-    };
-    setFileData(newData);
+        file,
+        new: true,
+        loan_document_id: loanDocumentId,
+      };
+      return safePrevFileData;
+    });
   };
 
   const handleRemoveFile = (index) => {
-    const newData = { ...fileData };
-    delete newData[index];
-    setFileData(newData);
-    // Optionally reset the file input if needed
-    if (fileInputRefs.current[index]) {
-      fileInputRefs.current[index].value = "";
+    if (fileData[index]) {
+      const updatedFileData = { ...fileData };
+      delete updatedFileData[index];
+      setFileData(updatedFileData);
+
+      if (fileInputRefs.current && fileInputRefs.current[index]) {
+        fileInputRefs.current[index].value = "";
+      }
+    }
+  };
+
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const fileDataArray = Object.values(fileData);
+
+    try {
+      const newFiles = fileDataArray.filter((file) => file.new);
+      const existingFiles = fileDataArray.filter((file) => !file.new);
+
+      const uploadPromises = newFiles.map(async (item) => {
+        const formData = new FormData();
+        formData.append("b_video", item.file);
+
+        const response = await axios.post(
+          "https://cdn.dohost.in/image_upload.php/",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        if (!response.data.success) {
+          throw new Error(response.data.msg || "File upload failed");
+        }
+
+        return {
+          path: response.data.iamge_path,
+          loan_document_id: item.loan_document_id,
+        };
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+
+      const documents = existingFiles
+        .map((file) => ({
+          file_path: file.url.split(CDN_BASE_URL).pop(),
+          loan_document_id: file.loan_document_id,
+        }))
+        .concat(
+          uploadedFiles.map((file) => ({
+            file_path: file.path.split("/").pop(),
+            loan_document_id: file.loan_document_id,
+          }))
+        );
+
+      const payload = {
+        user_id: selectedUser,
+        loan_id: selectedLoanId,
+        loantype_id: selectedLoanSubtypeId,
+        documents: documents,
+      };
+
+      const finalResponse = await AxiosInstance.put(
+        `/file_upload/${id}`,
+        payload
+      );
+
+      history.push("/superadmin/filetable");
+      toast.success("All data updated successfully!");
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      toast.error("Submission failed! Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -273,7 +434,6 @@ function EditFile() {
                           accept="image/*,application/pdf"
                           style={{ display: "none" }}
                         />
-
                         {fileData[index] ? (
                           <div
                             className="file-preview"
@@ -343,7 +503,54 @@ function EditFile() {
               </div>
             </div>
 
-            <Button mt={4} colorScheme="teal" loadingText="Submitting">
+            <FormControl id="branch_id" mt={4} isRequired>
+              <FormLabel>Branch</FormLabel>
+              <Select
+                placeholder="Select branch"
+                onChange={handleBranchChange}
+                value={selectedBranchId}
+              >
+                {savajcapitalbranch.map((branch) => (
+                  <option key={branch.branch_id} value={branch.branch_id}>
+                    {`${branch.branch_name} (${branch.city})`}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+
+            {selectedBranchId && (
+              <FormControl id="branchuser_id" mt={4} isRequired>
+                <FormLabel>Branch User</FormLabel>
+                <Select
+                  placeholder="Select branch user"
+                  onChange={handleBranchUserChange}
+                  value={selectedBranchUserId}
+                >
+                  {savajcapitalbranchUser.length > 0 ? (
+                    savajcapitalbranchUser.map((branchUser) => (
+                      <option
+                        key={branchUser.branchuser_id}
+                        value={branchUser.branchuser_id}
+                      >
+                        {`${branchUser.full_name} (${getRoleName(
+                          branchUser.role_id
+                        )})`}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No users available</option>
+                  )}
+                </Select>
+              </FormControl>
+            )}
+
+            <Button
+              mt={4}
+              colorScheme="teal"
+              onClick={handleSubmitData}
+              isLoading={loading}
+              loadingText="Submitting"
+            >
               Submit
             </Button>
           </CardBody>

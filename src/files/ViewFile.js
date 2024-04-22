@@ -10,6 +10,7 @@ import {
   Input,
   Flex,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -17,6 +18,9 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom";
 import { Spinner } from "@chakra-ui/react";
+import { ArrowBackIcon } from "@chakra-ui/icons";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+
 const FileDisplay = ({ data }) => {
   const basePath = "https://cdn.dohost.in/upload/";
   const groupedFiles = data.reduce((acc, curr) => {
@@ -76,7 +80,7 @@ function ViewFile() {
   const [loanSubType, setLoanSubType] = useState([]);
   const location = useLocation();
   const data = location.state;
-
+  const history = useHistory();
   const [selectedLoanType, setSelectedLoanType] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const searchParams = new URLSearchParams(location.search);
@@ -94,7 +98,7 @@ function ViewFile() {
       try {
         setLoading(true);
         const response = await AxiosInstance.get(
-          "/file_uplode/file_upload/" + id
+          "/file_upload/file_upload/" + id
         );
         console.log(
           response.data.data.file,
@@ -125,6 +129,12 @@ function ViewFile() {
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
             <CardBody style={{ padding: "40px" }}>
               <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
+                <IconButton
+                  icon={<ArrowBackIcon />}
+                  onClick={() => history.goBack()}
+                  aria-label="Back"
+                  mr="4"
+                />
                 <b>{fileData?.loan} File Details</b>
               </FormLabel>
               <div>
