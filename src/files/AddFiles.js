@@ -38,6 +38,7 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
+  console.log(selectedLoanType, "selectedLoanType");
 
   const fetchUsers = async () => {
     try {
@@ -386,6 +387,9 @@ function AddFiles() {
                     });
                   }}
                 >
+                  <option key="title" disabled style={{ fontWeight: 800 }}>
+                    {selectedLoanType.loan}
+                  </option>
                   {loanSubType.map((subType) => (
                     <option
                       key={subType.loantype_id}
@@ -399,8 +403,8 @@ function AddFiles() {
             )}
 
             <div>
-              <div className="d-flex">
-                <div className="d-flex">
+              <div className="d-flex ">
+                <div className="d-flex mainnnn">
                   {(!selectedLoanType.is_subtype ||
                     (selectedLoanType.is_subtype &&
                       selectedLoanType.loansubtype_id)) &&

@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 
     var data = await BankUser.create(req.body);
     const ApiResponse = await axios.post(
-      `http://192.168.1.28:4000/api/setpassword/passwordmail`,
+      `http://192.168.1.7:4000/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }

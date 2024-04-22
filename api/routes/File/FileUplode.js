@@ -68,6 +68,74 @@ router.post("/", async (req, res) => {
   }
 });
 
+// router.get("/", async (req, res) => {
+//   try {
+//     var data = await File_Uplode.aggregate([
+//       {
+//         $sort: { updatedAt: -1 },
+//       },
+//     ]);
+
+//     for (let i = 0; i < data.length; i++) {
+//       const branchuser_id = data[i].branchuser_id;
+//       const loan_id = data[i].loan_id;
+//       const loantype_id = data[i].loantype_id;
+
+//       const branchUserData = await SavajCapital_User.findOne({
+//         branchuser_id: branchuser_id,
+//       });
+//       const loanData = await Loan.findOne({
+//         loan_id: loan_id,
+//       });
+//       const loanTypeData = await Loan_Type.findOne({
+//         loantype_id: loantype_id,
+//       });
+
+//       if (branchUserData) {
+//         data[i].full_name = branchUserData.full_name;
+//       }
+//       if (loanData) {
+//         data[i].loan = loanData.loan;
+//       }
+//       if (loanTypeData) {
+//         data[i].loan_type = loanTypeData.loan_type;
+//       }
+
+//       // Count the number of documents uploaded based on loantype_id
+//       if (loantype_id === "") {
+//         // If loantype_id is empty, find the count based on loan_id
+//         const documentCount = await Loan_Documents.countDocuments({
+//           loan_id: loan_id,
+//         });
+//         data[i].document_count = documentCount;
+//       } else {
+//         // If loantype_id is not empty, find the count based on loantype_id
+//         const documentCount = await Loan_Documents.countDocuments({
+//           loantype_id: loantype_id,
+//         });
+//         data[i].document_count = documentCount;
+//       }
+
+//       // Count the number of documents uploaded by the user
+//       data[i].uploaded_documents_count = data[i].documents.length;
+//     }
+
+//     const count = data.length;
+
+//     res.json({
+//       statusCode: 200,
+//       data: data,
+//       count: count,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.get("/", async (req, res) => {
   try {
     var data = await File_Uplode.aggregate([
@@ -100,6 +168,33 @@ router.get("/", async (req, res) => {
       if (loanTypeData) {
         data[i].loan_type = loanTypeData.loan_type;
       }
+
+      // Count the number of documents uploaded based on loantype_id
+      let documentCount;
+      if (loantype_id === "") {
+        // If loantype_id is empty, find the count based on loan_id
+        documentCount = await Loan_Documents.countDocuments({
+          loan_id: loan_id,
+        });
+      } else {
+        // If loantype_id is not empty, find the count based on loantype_id
+        documentCount = await Loan_Documents.countDocuments({
+          loantype_id: loantype_id,
+        });
+      }
+
+      // Calculate the percentage
+      const uploadedDocumentsCount = data[i].documents.length;
+      let percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(
+        2
+      ); // Limit to two decimal places
+
+      // Store the count and percentage in the document
+      data[i].document_count = documentCount;
+      data[i].document_percentage = parseFloat(percentage); // Convert back to float
+
+      // Count the number of documents uploaded by the user
+      data[i].uploaded_documents_count = uploadedDocumentsCount;
     }
 
     const count = data.length;
