@@ -163,6 +163,7 @@ function AddSavajCapitalBranch() {
   const handleAddRole = async (role) => {
     try {
       const response = await AxiosInstance.post("/role", { role });
+      console.log(response.data, "shivam")
 
       if (response.data.success) {
         toast.success("Role added successfully!");
@@ -198,6 +199,7 @@ function AddSavajCapitalBranch() {
         }
       } else {
         const response = await AxiosInstance.post("/savaj_user", formData);
+        console.log(response.data, "shivam")
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.success) {

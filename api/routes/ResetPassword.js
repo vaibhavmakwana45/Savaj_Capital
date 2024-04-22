@@ -48,7 +48,7 @@ router.post("/passwordmail", async (req, res) => {
 
         <p>Set your password now:</p>
         <p><a href="${
-          `http://192.168.1.11:3000/#/auth/setpassword?token=` + token
+          `http://localhost:3000/#/auth/setpassword?token=` + token
         }" style="text-decoration: none;">Set Password Link</a></p>
         
         <p>Best regards,<br>
