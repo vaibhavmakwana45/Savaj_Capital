@@ -32,7 +32,6 @@ import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
-import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
 import Document from "loan/Document";
@@ -181,14 +180,6 @@ var dashRoutes = [
     layout: "/superadmin",
     parent: "loan",
     key: "loantype",
-  },
-  {
-    path: "/loandocument",
-    name: "Loan Document",
-    icon: <CreditIcon color="inherit" />,
-    component: LoanDocument,
-    hideInSidebar: true,
-    layout: "/superadmin",
   },
   //sc branch
   {

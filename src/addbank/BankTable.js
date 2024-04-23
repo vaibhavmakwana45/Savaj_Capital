@@ -155,7 +155,6 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-
                 <Menu>
                   <MenuButton>
                     <Button onClick={navigateToAnotherPage} colorScheme="blue">

@@ -36,37 +36,54 @@ router.post("/passwordmail", async (req, res) => {
   try {
     const { email } = req.body;
     const encryptedEmail = encrypt(email);
-
     const token = encryptedEmail;
-
     tokenExpirationMap.set(token, true);
 
     const subject = "Welcome to your new resident center with Savaj Capital";
 
-    const text = `
-    <p>Hello Sir/Ma'am,</p>
+    const logoUrl =
+      "https://lh5.googleusercontent.com/p/AF1QipOyJre2lxZ1x9J76oq6yEXQptAixuoq8Kv0-bXU";
+    const passwordResetLink = `https://admin.savajcapital.com/auth/setpassword?token=${token}`;
 
-        <p>Set your password now:</p>
-        <p><a href="${
-          `https://admin.savajcapital.com/#/auth/setpassword?token=` + token
-        }" style="text-decoration: none;">Set Password Link</a></p>
-        
-        <p>Best regards,<br>
-        The Savaj Capital Team</p>
+    const htmlContent = `
+      <div style="font-family: 'Arial', sans-serif; color: #333;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="20" cellspacing="0" style="border: 1px solid #ccc; margin-top: 20px;">
+                <tr style="background-color: #f8f8f8;">
+                  <td align="center" style="padding: 10px;">
+                    <img src="${logoUrl}" alt="Savaj Capital Logo" style="height: 100px; width: 200px;"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 16px; padding: 20px;">
+                    <p>Hello,</p>
+                    <p>Thank you for registering with Savaj Capital. To complete your registration, please set up your password by clicking on the link below:</p>
+                    <p><a href="${passwordResetLink}" style="background-color: #0046d5; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Set Your Password</a></p>
+                    <p>If the button above does not work, paste this link into your browser:</p>
+                    <p><a href="${passwordResetLink}" style="color: #0046d5; text-decoration: none;">${passwordResetLink}</a></p>
+                    <p>Best regards,<br>The Savaj Capital Team</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
     `;
 
-    await emailService.sendWelcomeEmail(req.body.email, subject, text);
+    await emailService.sendWelcomeEmail(email, subject, htmlContent);
 
     res.json({
       statusCode: 200,
-      data: info,
-      message: "Send Mail Successfully",
+      message: "Email sent successfully",
     });
 
     scheduleTokenCleanup();
   } catch (error) {
-    res.json({
-      statusCode: false,
+    res.status(500).json({
+      statusCode: 500,
       message: error.message,
     });
   }

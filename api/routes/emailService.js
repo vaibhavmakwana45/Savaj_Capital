@@ -2,12 +2,12 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
+  host: "smtp.hostinger.com",
+  port: 465,
   secure: false,
   auth: {
-    user: "ip32portal@gmail.com",
-    pass: "urfszbvriwpqjnux",
+    user: "no-reply@savajcapital.com",
+    pass: "AApp@00.com",
   },
   tls: {
     rejectUnauthorized: false,
@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendWelcomeEmail(toEmail, subject, htmlContent) {
   const info = await transporter.sendMail({
-    from: "ip32portal@gmail.com",
+    from: "no-reply@savajcapital.com",
     to: toEmail,
     subject: subject,
     html: htmlContent,
