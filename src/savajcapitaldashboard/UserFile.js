@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-import React from "react";
-
-function UserFile() {
-  return <div>Hello</div>;
-}
-
-export default UserFile;
-=======
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
@@ -371,4 +362,3 @@ export default function CollapsibleTable() {
     </div>
   );
 }
->>>>>>> 8f521861d731818243f44fb447ae0da9d5cf06ca

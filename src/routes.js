@@ -347,11 +347,6 @@ var dashRoutes = [
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
     hideInSResponsiveSavajUser: true,
-<<<<<<< HEAD
-    hideInSResponsive: false,
-=======
-
->>>>>>> 8f521861d731818243f44fb447ae0da9d5cf06ca
   },
   {
     path: "/userfile",
@@ -361,8 +356,6 @@ var dashRoutes = [
     layout: "/savajcapitaluser",
     hideInSResponsive: false,
     hideInSResponsiveSavajUser: true,
-<<<<<<< HEAD
-=======
   },
   {
     path: "/adduserfile",
@@ -372,7 +365,6 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "adduserfile",
     key: "adduserfile",
->>>>>>> 8f521861d731818243f44fb447ae0da9d5cf06ca
   },
 
   //user
