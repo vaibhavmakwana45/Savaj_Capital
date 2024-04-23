@@ -173,6 +173,7 @@ function AddSavajCapitalBranch() {
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
+      setLoading(true);
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -337,7 +338,8 @@ function AddSavajCapitalBranch() {
                   mt={4}
                   colorScheme="blue"
                   type="submit"
-                  // isLoading={loading}
+                  isLoading={loading}
+                  loadingText="Add..."
                 >
                   {id ? "Update User now" : "Add User"}
                 </Button>
@@ -397,6 +399,7 @@ function AddSavajCapitalBranch() {
                 onClick={() => handleAddRole(role)}
                 ml={3}
                 type="submit"
+                isLoading={loading}
               >
                 Add Now
               </Button>
