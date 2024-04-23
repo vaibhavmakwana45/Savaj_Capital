@@ -180,6 +180,7 @@ function AddSavajCapitalBranch() {
                   colorScheme="blue"
                   type="submit"
                   isLoading={loading}
+                  loadingText="Add...."
                   style={{ marginTop: 30 }}
                 >
                   Add Branch

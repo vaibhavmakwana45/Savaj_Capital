@@ -95,6 +95,7 @@ function AddUser(props) {
           "/addusers/adduserbyadmin",
           submissionData
         );
+        console.log("objecttttttttttttttttttt",response.data);
 
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
@@ -110,6 +111,7 @@ function AddUser(props) {
 
         console.log(formData, "formData");
 
+       
         if (response.data.success) {
           toast.success("User Updated successfully!");
           history.push("/superadmin/alluser");
