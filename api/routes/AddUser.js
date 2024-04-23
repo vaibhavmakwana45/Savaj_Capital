@@ -110,20 +110,26 @@ router.post("/adduserbyadmin", async (req, res) => {
     });
 
     await newUser.save();
-    const ApiResponse = await axios.post(
-      `http://192.168.1.12:4000/api/setpassword/passwordmail`,
-      {
-        email: req.body.email,
-      }
-    );
+    // const ApiResponse = await axios.post(
+    //   `http://192.168.1.7:4000/api/setpassword/passwordmail`,
+    //   {
+    //     email: req.body.email,
+    //   }
+    // );
 
-    if (ApiResponse.status === 200) {
-      res.json({
-        success: true,
-        message: "User added successfully",
-        data: newUser,
-      });
-    }
+    // if (ApiResponse.status === 200) {
+    //   res.json({
+    //     success: true,
+    //     message: "User added successfully",
+    //     data: newUser,
+    //   });
+    // }
+
+    res.json({
+      success: true,
+      message: "User added successfully",
+      data: newUser,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
