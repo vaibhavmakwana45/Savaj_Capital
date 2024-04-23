@@ -67,7 +67,7 @@ function AddLoanDocuments() {
       if (response.data.success) {
         // Set the loanType state with the received data
         setLoanType(response.data.data);
-        setLoanName(response.data.loan[0].loan);
+        setLoanName(response?.data?.loan[0]?.loan);
         setSubType(response.data.loan[0].is_subtype);
       } else {
         alert("Please try again later...!");

@@ -345,16 +345,19 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
+    hideInSResponsiveSavajUser: true,
+    hideInSResponsive: false,
   },
   {
     path: "/userfile",
     name: "User File",
     icon: <HomeIcon color="inherit" />,
     component: UserFile,
-    layout: "/userfile",
+    layout: "/savajcapitaluser",
     hideInSResponsive: false,
-    hideInSResponsiveSavajUser: false,
+    hideInSResponsiveSavajUser: true,
   },
+
   //user
   {
     path: "/dashboard",

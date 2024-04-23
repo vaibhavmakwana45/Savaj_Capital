@@ -1,11 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function UserFile() {
-  return (
-    <div>
-      
-    </div>
-  )
+  return <div>Hello</div>;
 }
 
-export default UserFile
+export default UserFile;
