@@ -6,6 +6,7 @@ import {
   Button,
   Flex,
   Menu,
+  MenuGroup,
   MenuButton,
   MenuItem,
   MenuList,
@@ -18,6 +19,8 @@ import {
 import avatar1 from "assets/img/avatars/avatar1.png";
 import avatar2 from "assets/img/avatars/avatar2.png";
 import avatar3 from "assets/img/avatars/avatar3.png";
+import { Row,Media,Col } from "reactstrap";
+
 // Custom Icons
 import {
   ArgonLogoDark,
@@ -34,11 +37,37 @@ import { useHistory } from "react-router-dom";
 import { ItemContent } from "components/Menu/ItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React from "react";
+import React,{useState, useEffect} from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
 
 export default function HeaderLinks(props) {
+
+  const [userdata, setuserdata] =useState([])
+  useEffect(() => {
+    const decodedToken = localStorage.getItem('decodedToken');
+    if (decodedToken) {
+      // console.log("objectttttttttt",parsedToken)
+      const parsedToken = JSON.parse(decodedToken);
+      const { superadmin_id } = parsedToken;
+
+      setuserdata({
+        firstname: parsedToken._id.firstname,
+        lastname: parsedToken._id.lastname,
+        email: parsedToken._id.email,
+      });
+    }
+  }, []);
+
+  const getInitials = () => {
+    const { firstname, lastname } = userdata || {};
+    return `${firstname ? firstname.charAt(0) : ''}${lastname ? lastname.charAt(0) : ''}`;
+  };
+
+
+
+
+
   const {
     variant,
     children,
@@ -67,6 +96,9 @@ export default function HeaderLinks(props) {
     localStorage.removeItem("authToken");
     history.push("/auth/signin");
   };
+
+  
+
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
@@ -112,6 +144,7 @@ export default function HeaderLinks(props) {
         h="18px"
       />
       <Menu>
+      
         <MenuButton>
           <BellIcon color={navbarIcon} w="18px" h="18px" />
         </MenuButton>
@@ -154,6 +187,7 @@ export default function HeaderLinks(props) {
         </MenuList>
       </Menu>
       <Menu>
+     
         <MenuButton>
           <ProfileIcon
             color={navbarIcon}
@@ -164,6 +198,38 @@ export default function HeaderLinks(props) {
         </MenuButton>
         <MenuList p="16px 8px" bg={menuBg} mt="10px">
           <Flex flexDirection="column">
+          <MenuGroup>
+        <Row>
+          <Col>
+          <Media className="align-items-center">
+                <span
+                  className="d-flex justify-content-center align-items-center p-1"
+                  style={{
+                    width: "40px",
+                    height: "45px",
+                    backgroundColor: "rgba(21, 43, 81, 1)",
+                    borderRadius: "12px",
+                    color: "#fff",
+                  }}
+                >   
+                  {`${userdata?.firstname
+                    ?.slice(0, 1)
+                    .toUpperCase()}${userdata?.lastname
+                    ?.slice(0, 1)
+                    .toUpperCase()}`}
+                </span>
+                </Media>
+          </Col>
+          <Col style={{marginBottom:"10px"}}>
+              <Text>
+                {userdata?.firstname} {userdata?.lastname}
+              </Text>
+              <Text style={{fontSize:"small"}}>
+                {userdata.email}
+              </Text>
+          </Col>
+        </Row>
+      </MenuGroup>
             <MenuItem borderRadius="8px" onClick={handleLogout}>
               <Flex align="center" justifyContent="flex-start">
                 <FaSignOutAlt color="currentColor" pr="20px" />
