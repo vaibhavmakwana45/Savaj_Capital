@@ -100,9 +100,9 @@ export default function AdminNavbar(props) {
       ? findRouteByKey(currentRoute.parent)
       : null;
 
-    if (parentRoute) {
-      generateBreadcrumbItems(parentRoute, items);
-    }
+    // if (parentRoute) {
+    //   generateBreadcrumbItems(parentRoute, items);
+    // }
 
     if (items.length === 0) {
       items.push(
