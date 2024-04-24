@@ -28,7 +28,6 @@ function AddLoanDocuments() {
   const [loading, setLoading] = useState(false);
 
   const subtypeRefs = useRef([]);
-
   const [formData, setFormData] = useState({
     loan_type: "",
     loan_documents: [""],
@@ -68,7 +67,7 @@ function AddLoanDocuments() {
       if (response.data.success) {
         // Set the loanType state with the received data
         setLoanType(response.data.data);
-        setLoanName(response.data.loan[0].loan);
+        setLoanName(response?.data?.loan[0]?.loan);
         setSubType(response.data.loan[0].is_subtype);
       } else {
         alert("Please try again later...!");
@@ -188,26 +187,34 @@ function AddLoanDocuments() {
                   ))}
                 </Select>
               </FormControl>
-
+              {console.log("loan name",loanName)}
               <FormControl id="savajcapitalbranch_name" mt={4}>
-                <FormLabel>Select Loan-Type</FormLabel>
-                <Select
-                  name="city"
-                  placeholder="Select Loan-Type"
-                  onChange={(e) =>
-                    setFormData({ ...formData, loantype_id: e.target.value })
-                  }
-                >
-                  <option key="title" disabled style={{ fontWeight: 800 }}>
-                    {subType === true ? loanName : ""}
-                  </option>
-                  {loanType.map((index) => (
-                    <option key={index.loantype_id} value={index.loantype_id}>
-                      {index.loan_type}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
+ 
+  {subType === true && (loanName !== 'Car' && loanName !== 'CRL-Car Loan' )? (
+    <>
+     <FormLabel>Select Loan-Type</FormLabel>
+    <Select
+      name="city"
+      placeholder="Select Loan-Type"
+      onChange={(e) =>
+        setFormData({ ...formData, loantype_id: e.target.value })
+      }
+    >
+      <option key="title" disabled style={{ fontWeight: 800 }}>
+        {loanName}
+      </option>
+      {loanType.map((index) => (
+        <option key={index.loantype_id} value={index.loantype_id}>
+          {index.loan_type}
+        </option>
+      ))}
+    </Select>
+    </>
+  ) : (
+    <></>
+  )}
+</FormControl>
+
 
               {formData.loan_documents.map((subtype, index) => (
                 <FormControl key={index} id={`loan_document_${index}`} mt={8}>

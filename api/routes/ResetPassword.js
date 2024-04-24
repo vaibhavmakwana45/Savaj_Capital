@@ -89,6 +89,46 @@ router.post("/passwordmail", async (req, res) => {
   }
 });
 
+// router.post("/passwordmail", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const encryptedEmail = encrypt(email);
+
+//     const token = encryptedEmail;
+
+//     tokenExpirationMap.set(token, true);
+
+//     const subject = "Welcome to your new resident center with Savaj Capital";
+
+//     const text = `
+//     <p>Hello Sir/Ma'am,</p>
+
+//         <p>Set your password now:</p>
+//         <p><a href="${
+//           `http://localhost:3000/#/auth/setpassword?token=` + token
+//         }" style="text-decoration: none;">Set Password Link</a></p>
+
+//         <p>Best regards,<br>
+//         The Savaj Capital Team</p>
+//     `;
+
+//     await emailService.sendWelcomeEmail(req.body.email, subject, text);
+
+//     res.json({
+//       statusCode: 200,
+//       data: info,
+//       message: "Send Mail Successfully",
+//     });
+
+//     scheduleTokenCleanup();
+//   } catch (error) {
+//     res.json({
+//       statusCode: false,
+//       message: error.message,
+//     });
+//   }
+// });
+
 function scheduleTokenCleanup() {
   setInterval(() => {
     const currentTimestamp = Date.now();

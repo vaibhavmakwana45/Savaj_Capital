@@ -27,18 +27,33 @@ import {
   ProfileIcon,
   SettingsIcon,
 } from "components/Icons/Icons";
-import { FaSignOutAlt } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaExclamationTriangle,
+  FaMailBulk,
+  FaMailchimp,
+  FaSignOutAlt,
+  FaUser,
+  FaVoicemail,
+} from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 // Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
+import { jwtDecode } from "jwt-decode";
 
 export default function HeaderLinks(props) {
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
   const {
     variant,
     children,
@@ -164,10 +179,23 @@ export default function HeaderLinks(props) {
         </MenuButton>
         <MenuList p="16px 8px" bg={menuBg} mt="10px">
           <Flex flexDirection="column">
+            <MenuItem borderRadius="8px">
+              <Flex align="center" justifyContent="flex-start">
+                <FaUser color="currentColor" pr="20px" />
+                &nbsp; {accessType?.firstname} {accessType?.lastname}{" "}
+                {accessType?.full_name}
+              </Flex>
+            </MenuItem>
+            <MenuItem borderRadius="8px">
+              <Flex align="center" justifyContent="flex-start">
+                <FaEnvelope color="currentColor" pr="20px" />
+                &nbsp; {accessType?.email}
+              </Flex>
+            </MenuItem>
             <MenuItem borderRadius="8px" onClick={handleLogout}>
               <Flex align="center" justifyContent="flex-start">
                 <FaSignOutAlt color="currentColor" pr="20px" />
-                Logout
+                &nbsp; Logout
               </Flex>
             </MenuItem>
           </Flex>

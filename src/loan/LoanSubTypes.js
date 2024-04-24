@@ -141,7 +141,7 @@ function LoanSubTypes() {
   const AddRole = async (loan_type) => {
     try {
       const response = await AxiosInstance.post("/loan_type/", {
-        loan_type,
+        loan_type: loan_type,
         loan_id: id,
       });
 
@@ -162,7 +162,31 @@ function LoanSubTypes() {
     }
   };
 
+  // const editRole = async (loan_type) => {
+  //   try {
+  //     const response = await AxiosInstance.put("/loan_type/" + selectedLoanId, {
+  //       loan_type: loan_type,
+  //     });
+
+  //     if (response.data.success) {
+  //       toast.success("Role Updated successfully!");
+  //       setisEditLoan(false);
+  //       setSelectedLoan("");
+  //       fetchUsers();
+  //       setSelectedLoanId("");
+  //     } else {
+  //       toast.error(response.data.message || "Please try again later!");
+  //     }
+  //   } catch (error) {
+  //     console.error("Submission error", error);
+  //     toast.error("Failed to add. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const editRole = async (loan_type) => {
+    setLoading(true);
     try {
       const response = await AxiosInstance.put("/loan_type/" + selectedLoanId, {
         loan_type,
@@ -179,7 +203,7 @@ function LoanSubTypes() {
       }
     } catch (error) {
       console.error("Submission error", error);
-      toast.error("Failed to add. Please try again.");
+      toast.error("Failed to update. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -262,7 +286,7 @@ function LoanSubTypes() {
         </AlertDialog>
 
         {/* edit */}
-        <AlertDialog
+        {/* <AlertDialog
           isOpen={isEditLoan}
           leastDestructiveRef={cancelRef}
           onClose={() => {
@@ -311,11 +335,75 @@ function LoanSubTypes() {
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => AddRole(role)}
+                  onClick={() => AddRole()}
                   ml={3}
                   type="submit"
                 >
                   {selectedLoanId != "" ? "Updated Now" : "Add Now"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog> */}
+
+        <AlertDialog
+          isOpen={isEditLoan}
+          leastDestructiveRef={cancelRef}
+          onClose={() => {
+            setisEditLoan(false);
+            setSelectedLoan("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                {selectedLoanId !== "" ? "Edit Loan" : "Add Loan"}
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                <FormControl id="branch_name" isRequired>
+                  <Input
+                    name="branch_name"
+                    onChange={(e) => {
+                      setSelectedLoan(e.target.value);
+                    }}
+                    value={selectedLoan}
+                    placeholder={
+                      selectedLoanId !== "" ? "Edit Loan" : "Add Loan"
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        selectedLoanId !== ""
+                          ? editRole(selectedLoan)
+                          : AddRole(selectedLoan);
+                      }
+                    }}
+                  />
+                </FormControl>
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => {
+                    setisEditLoan(false);
+                    setSelectedLoan("");
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="blue"
+                  onClick={() =>
+                    selectedLoanId !== ""
+                      ? editRole(selectedLoan)
+                      : AddRole(selectedLoan)
+                  }
+                  ml={3}
+                  type="submit"
+                >
+                  {selectedLoanId !== "" ? "Update Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -86,12 +86,6 @@ export default function SavajCapitalDashboard() {
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
-                +3.48%{" "}
-              </Text>
-              Since last month
-            </Text>
           </Flex>
         </Card>
         <Card minH='125px'>
@@ -125,12 +119,6 @@ export default function SavajCapitalDashboard() {
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
-                +5.2%{" "}
-              </Text>
-              Since last month
-            </Text>
           </Flex>
         </Card>
         <Card minH='125px'>
@@ -164,12 +152,6 @@ export default function SavajCapitalDashboard() {
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='red.500' fontWeight='bold'>
-                -2.82%{" "}
-              </Text>
-              Since last month
-            </Text>
           </Flex>
         </Card>
         <Card minH='125px'>
@@ -203,16 +185,16 @@ export default function SavajCapitalDashboard() {
                 <CartIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
+            {/* <Text color='gray.400' fontSize='sm'>
               <Text as='span' color='green.400' fontWeight='bold'>
                 +8.12%{" "}
               </Text>
               Since last month
-            </Text>
+            </Text> */}
           </Flex>
         </Card>
       </SimpleGrid>
-      <Grid
+      {/* <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}
         templateRows={{ lg: "repeat(2, auto)" }}
         gap='20px'>
@@ -393,7 +375,7 @@ export default function SavajCapitalDashboard() {
             </Table>
           </Box>
         </Card>
-      </Grid>
+      </Grid> */}
     </Flex>
   );
 }
