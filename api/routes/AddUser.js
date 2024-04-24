@@ -79,7 +79,7 @@ router.post("/adduser", async (req, res) => {
 router.post("/adduserbyadmin", async (req, res) => {
   try {
     const { userDetails } = req.body;
-    
+
     const user = await AddUser.findOne({ email: userDetails.email });
     const bankUser = await BankUser.findOne({ email: userDetails.email });
     const superAdmin = await SuperAdmin.findOne({ email: userDetails.email });

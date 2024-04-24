@@ -40,13 +40,16 @@ function Row(props) {
 
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
-    console.log(jwt._id.branchuser_id, "jwt")
+    console.log(jwt._id.branchuser_id, "jwt");
   }, []);
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get(`/file_upload/get/${jwt._id.branchuser_id}`);
+        const response = await AxiosInstance.get(
+          `/file_upload/get/${jwt?._id.branchuser_id}`
+        );
+        console.log(`/file_upload/get/${jwt?._id.branchuser_id}`, "shivam")
         if (response.data.statusCode === 200) {
           setFiles(response.data.data);
         }
@@ -57,7 +60,6 @@ function Row(props) {
 
     fetchFiles();
   }, []);
-  
 
   return (
     <React.Fragment>
@@ -224,14 +226,14 @@ export default function CollapsibleTable() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get("/file_upload/get/1712915645772");
+        const response = await AxiosInstance.get(
+          "/file_upload/get/1712915645772"
+        );
         setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
       }
-
-
     };
 
     fetchFiles();
@@ -278,7 +280,6 @@ export default function CollapsibleTable() {
   const handleEditClick = (id) => {
     history.push(`/superadmin/editfile?id=${id}`);
   };
-
 
   return (
     <div className="card" style={{ marginTop: "120px", borderRadius: "30px" }}>
