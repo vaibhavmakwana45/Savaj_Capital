@@ -432,8 +432,19 @@ function AddFiles() {
                     (selectedLoanType.is_subtype &&
                       selectedLoanType.loansubtype_id)) &&
                     loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                      <div
+                        key={document._id}
+                        className="upload-area col-xl-12 col-md-12 col-sm-12"
+                      >
+                        <Text
+                          fontSize="xl"
+                          className="mx-3"
+                          color={textColor}
+                          style={{
+                            fontSize: "12px",
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {document.loan_document}
                         </Text>
                         <input

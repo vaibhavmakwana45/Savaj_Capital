@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
@@ -39,14 +38,16 @@ function Row(props) {
   const [files, setFiles] = useState([]);
 
   React.useEffect(() => {
-    const jwt = jwtDecode(localStorage.getItem("authToken"));
-    console.log(jwt._id.branchuser_id, "jwt")
+    const jwt = jwtDecode(localStorage?.getItem("authToken"));
+    console.log(jwt?._id?.branchuser_id, "jwt");
   }, []);
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get(`/file_upload/get/${jwt._id.branchuser_id}`);
+        const response = await AxiosInstance.get(
+          `/file_upload/get/${jwt?._id?.branchuser_id}`
+        );
         if (response.data.statusCode === 200) {
           setFiles(response.data.data);
         }
@@ -57,7 +58,6 @@ function Row(props) {
 
     fetchFiles();
   }, []);
-  
 
   return (
     <React.Fragment>
@@ -84,17 +84,17 @@ function Row(props) {
         <TableCell align="">{file?.createdAt}</TableCell>
         <TableCell align="">{file?.updatedAt}</TableCell>
         <TableCell align="center">
-          <div class="progress " data-value={file?.document_percentage}>
-            <span class="progress-left">
-              <span class="progress-bar"></span>
+          <div className="progress " data-value={file?.document_percentage}>
+            <span className="progress-left">
+              <span className="progress-bar"></span>
             </span>
-            <span class="progress-right">
-              <span class="progress-bar"></span>
+            <span className="progress-right">
+              <span className="progress-bar"></span>
             </span>
-            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-              <div class="font-weight-bold">
+            <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+              <div className="font-weight-bold">
                 {file?.document_percentage}
-                <sup class="small">%</sup>
+                <sup className="small">%</sup>
               </div>
             </div>
           </div>
@@ -152,14 +152,14 @@ function Row(props) {
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
                             >
-                              <i class="fa-regular fa-circle-check"></i>
+                              <i className="fa-regular fa-circle-check"></i>
                               &nbsp;&nbsp;Uploaded
                             </span>
                           ) : (
                             <span
                               style={{ color: "#FFB302 ", fontWeight: "bold" }}
                             >
-                              <i class="fa-regular fa-clock"></i>
+                              <i className="fa-regular fa-clock"></i>
                               &nbsp;&nbsp;Pending
                             </span>
                           )}
@@ -224,14 +224,14 @@ export default function CollapsibleTable() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get("/file_upload/get/1712915645772");
+        const response = await AxiosInstance.get(
+          "/file_upload/get/1712915645772"
+        );
         setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
       }
-
-
     };
 
     fetchFiles();
@@ -279,86 +279,142 @@ export default function CollapsibleTable() {
     history.push(`/superadmin/editfile?id=${id}`);
   };
 
-
   return (
-    <div className="card" style={{ marginTop: "120px", borderRadius: "30px" }}>
-      <CardHeader style={{ padding: "30px" }}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Text fontSize="xl" fontWeight="bold">
-            Add File
-          </Text>
-          <div>
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name"
-              width="250px"
-              marginRight="10px"
-            />
+    <>
+      <div
+        className="card"
+        style={{ marginTop: "120px", borderRadius: "30px" }}
+      >
+        <CardHeader style={{ padding: "30px" }}>
+          <Flex justifyContent="space-between" alignItems="center">
+            <Text fontSize="xl" fontWeight="bold">
+              Add File
+            </Text>
+            <div>
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+              />
 
-            <Button
-              onClick={() => history.push("/savajcapitaluser/adduserfile")}
-              colorScheme="blue"
-            >
-              Add Files
-            </Button>
-          </div>
-        </Flex>
-      </CardHeader>
-      <ThemeProvider theme={theme}>
-        {loading ? (
-          <Flex justify="center" align="center" height="100vh">
-            <Loader
-              type="spinner-circle"
-              bgColor={"#3182CE"}
-              color={"black"}
-              size={50}
-            />
+              <Button
+                onClick={() => history.push("/savajcapitaluser/adduserfile")}
+                colorScheme="blue"
+              >
+                Add Files
+              </Button>
+            </div>
           </Flex>
-        ) : (
-          <TableContainer component={Paper}>
-            <Table aria-label="collapsible table">
-              <TableHead style={{ borderBottom: "1px solid red" }}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    File Id
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Loan
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Loan Type
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Created At
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Updated At
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Status
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Action
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredUsers.map((file) => (
-                  <Row
-                    key={file._id}
-                    file={file}
-                    id={file.file_id}
-                    handleRow={handleRow}
-                    handleEditClick={handleEditClick}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </ThemeProvider>
-    </div>
+        </CardHeader>
+        <ThemeProvider theme={theme}>
+          {loading ? (
+            <Flex justify="center" align="center" height="100vh">
+              <Loader
+                type="spinner-circle"
+                bgColor={"#3182CE"}
+                color={"black"}
+                size={50}
+              />
+            </Flex>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table aria-label="collapsible table">
+                <TableHead style={{ borderBottom: "1px solid red" }}>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      File Id
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Loan
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Loan Type
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Created At
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Updated At
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Status
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Action
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredUsers.map((file) => (
+                    <Row
+                      key={file._id}
+                      file={file}
+                      id={file.file_id}
+                      handleRow={handleRow}
+                      handleEditClick={handleEditClick}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </ThemeProvider>
+      </div>
+      <div className="container-fluid progress-bar-area">
+        <div className="row h-100 align-items-center">
+          <div className="col">
+            <ul className="progressbar">
+              <li id="step1" className="complete">
+                <div className="circle-container">
+                  <a href="#">
+                    <div className="circle-button"></div>
+                  </a>
+                </div>
+                Step 1
+              </li>
+
+              <li id="step2" className="complete">
+                <div className="circle-container">
+                  <a href="#">
+                    <div className="circle-button"></div>
+                  </a>
+                </div>
+                Step 2
+              </li>
+
+              <li id="step3" className="active">
+                <div className="circle-container">
+                  <a href="#">
+                    <div className="circle-button"></div>
+                  </a>
+                </div>
+                Step 3
+              </li>
+
+              <li id="step4">
+                <div className="circle-container">
+                  <a href="#">
+                    <div className="circle-button"></div>
+                  </a>
+                </div>
+                Step 4
+              </li>
+
+              <li id="step5">
+                <div className="circle-container">
+                  <a href="#">
+                    <div className="circle-button"></div>
+                  </a>
+                </div>
+                Step 5
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
