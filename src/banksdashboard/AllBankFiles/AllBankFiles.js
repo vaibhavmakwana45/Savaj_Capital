@@ -295,7 +295,7 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "30px" }}>
           <Flex justifyContent="space-between" alignItems="center">
             <Text fontSize="xl" fontWeight="bold">
-              Add File
+              All File
             </Text>
             <div>
               <Input

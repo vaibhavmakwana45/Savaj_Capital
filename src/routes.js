@@ -363,7 +363,7 @@ var dashRoutes = [
     component: BankFileDetailPage,
     layout: "/bankuser",
     hideInSidebar: true,
-    hideInBResponsivrUser: true,
+    // hideInBResponsivrUser: true,
     parent: "bankuser",
     key: "viewbankfile",
   },
