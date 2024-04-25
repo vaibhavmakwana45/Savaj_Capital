@@ -26,6 +26,7 @@ const Loan_Type = require("./routes/Loan/Loan_Type"); // Loan-Type
 const Loan_Documents = require("./routes/Loan/Loan_Documents"); // Loan-Type
 const PasswordRoutes = require("./routes/ResetPassword");
 const FileUplodeRoutes = require("./routes/File/FileUplode");
+const BankApprovalRoutes = require("./routes/Bank/BankApproval");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -53,6 +54,7 @@ app.use("/api/loan_type", Loan_Type);
 app.use("/api/loan_docs", Loan_Documents);
 app.use("/api/setpassword", PasswordRoutes);
 app.use("/api/file_upload", FileUplodeRoutes);
+app.use("/api/bank_approval", BankApprovalRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
