@@ -3,6 +3,7 @@ const router = express.Router();
 const moment = require("moment");
 const BankApproval = require("../../models/Bank/BankApproval");
 const File_Uplode = require("../../models/File/File_Uplode");
+const User = require("../../models/AddUser");
 const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
 const Loan = require("../../models/Loan/Loan");
@@ -95,14 +96,19 @@ router.get("/bank_user/:bankuser_id", async (req, res) => {
       if (branchUserData) {
         const loan_id = branchUserData.loan_id;
         const loantype_id = branchUserData?.loantype_id
+        const user_id = branchUserData?.user_id
         const loan_data = await Loan.findOne({ loan_id: loan_id });
         const loan_type_data = await Loan_Type.findOne({ loantype_id: loantype_id });
+        const user_data = await User.findOne({user_id: user_id})
 
         if (loan_data) {
           data[i].loan = loan_data.loan;
         }
         if (loan_type_data) {
           data[i].loan_type = loan_type_data.loan_type;
+        }
+        if (user_data) {
+          data[i].username = user_data.username;
         }
       }
     }

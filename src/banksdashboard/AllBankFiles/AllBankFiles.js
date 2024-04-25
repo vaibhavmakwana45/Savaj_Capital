@@ -39,6 +39,7 @@ import {
 import Loader from "react-js-loader";
 import AxiosInstance from "config/AxiosInstance";
 import { jwtDecode } from "jwt-decode";
+import moment from "moment";
 
 const theme = createTheme();
 
@@ -83,26 +84,13 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{file?.username}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">{file?.createdAt}</TableCell>
-        <TableCell align="">{file?.updatedAt}</TableCell>
-        <TableCell align="center">
-          <div class="progress " data-value={file?.document_percentage}>
-            <span class="progress-left">
-              <span class="progress-bar"></span>
-            </span>
-            <span class="progress-right">
-              <span class="progress-bar"></span>
-            </span>
-            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-              <div class="font-weight-bold">
-                {file?.document_percentage}
-                <sup class="small">%</sup>
-              </div>
-            </div>
-          </div>
+        <TableCell align="">
+          {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
         </TableCell>
+        
         <TableCell align="">
           <Flex>
             <IconButton
@@ -140,12 +128,6 @@ function Row(props) {
                 <Table size="small" aria-label="documents">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                        Document
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                        Status
-                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -352,19 +334,16 @@ export default function CollapsibleTable() {
                       File Id
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Username
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan Type
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Created At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Updated At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Status
+                      Assign Date
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Action
