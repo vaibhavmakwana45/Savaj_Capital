@@ -225,9 +225,9 @@ function AddFiles() {
     }
   };
 
-//   setdata
+  //   setdata
 
-const [jwt, setJwt] = useState({})
+  const [jwt, setJwt] = useState([null]);
 
   const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
@@ -235,13 +235,11 @@ const [jwt, setJwt] = useState({})
   const [roles, setRoles] = useState([]);
   const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
   React.useEffect(async () => {
-
-    const jwtCode = await localStorage.getItem("authToken")
-    console.log(jwtCode, "jwtCode")
+    const jwtCode = await localStorage.getItem("authToken");
+    console.log(jwtCode, "jwtCode");
     const jwt = jwtDecode(jwtCode);
 
-    setJwt(jwt)
-
+    setJwt(jwt);
   }, []);
   useEffect(() => {
     const fetchSavajcapitalbranch = async () => {
@@ -312,8 +310,6 @@ const [jwt, setJwt] = useState({})
     e.preventDefault();
     setLoading(true);
 
-   
-
     try {
       const uploadPromises = uploadedFileName.map(async (item) => {
         const formData = new FormData();
@@ -354,11 +350,12 @@ const [jwt, setJwt] = useState({})
           loan_document_id: file.documentId,
         })),
       };
+      console.log(payload, "yash", jwt);
 
-      await AxiosInstance.post("/file_upload", payload);
+      // await AxiosInstance.post("/file_upload", payload);
 
-      history.push("/savajcapitaluser/userfile");
-      toast.success("All data submitted successfully!");
+      // history.push("/savajcapitaluser/userfile");
+      // toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
       toast.error("Submission failed! Please try again.");
@@ -448,7 +445,7 @@ const [jwt, setJwt] = useState({})
                       selectedLoanType.loansubtype_id)) &&
                     loanDocuments.map((document, index) => (
                       <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                        <Text fontSize="xl" className="mx-3" color={textColor} style={{fontSize:"12px",textTransform:"capitalize"}}>
                           {document.loan_document}
                         </Text>
                         <input
@@ -544,45 +541,6 @@ const [jwt, setJwt] = useState({})
                 </div>
               </div>
             </div>
-            {/* <div>
-              <FormControl id="branch_id" mt={4} isRequired>
-                <FormLabel>Savaj Capital Branch</FormLabel>
-                <Select
-                  placeholder="Select Branch"
-                  onChange={(e) => setSelectedBranchId(e.target.value)}
-                >
-                  {savajcapitalbranch.map((branch) => (
-                    <option key={branch.branch_id} value={branch.branch_id}>
-                      {`${branch.branch_name} (${branch.city})`}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {selectedBranchId && (
-                <FormControl id="branchuser_id" mt={4} isRequired>
-                  <FormLabel>Branch User</FormLabel>
-                  {savajcapitalbranchUser.length > 0 ? (
-                    <Select
-                      placeholder="Select User"
-                      onChange={(e) => setSelectedBranchUserId(e.target.value)}
-                    >
-                      {savajcapitalbranchUser.map((user) => (
-                        <option
-                          key={user.branchuser_id}
-                          value={user.branchuser_id}
-                        >
-                          {`${user.full_name} (${getRoleName(user.role_id)})`}
-                        </option>
-                      ))}
-                    </Select>
-                  ) : (
-                    <Text>No users available for this branch.</Text>
-                  )}
-                </FormControl>
-              )}
-            </div> */}
-
             <div>
               <Button
                 mt={4}
