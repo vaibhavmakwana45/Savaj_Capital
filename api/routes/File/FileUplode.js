@@ -446,5 +446,27 @@ router.get("/get/:branchuser_id", async (req, res) => {
     });
   }
 });
+router.get("/allfiles", async (req, res) => {
+  try {
+    var data = await File_Uplode.aggregate([
+      {
+        $sort: { updatedAt: -1 },
+      },
+    ]);
 
+    const count = data.length;
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
 module.exports = router;

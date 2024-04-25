@@ -38,24 +38,22 @@ import Loader from "react-js-loader";
 import TableComponent from "TableComponent";
 
 function BankUsers() {
-  const [banks, setBanks] = useState([]);
+  const [bankUsers, setBankUsers] = useState([]);
+  const [bank, setBank] = useState({});
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  let menuBg = useColorModeValue("white", "navy.800");
-  const [bank, setBank] = useState({});
-
+  const menuBg = useColorModeValue("white", "navy.800");
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
   const filteredUsers =
     searchTerm.length === 0
-      ? banks
-      : banks.filter(
+      ? bankUsers
+      : bankUsers.filter(
           (bank) =>
             bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
             bank?.mobile
@@ -74,11 +72,11 @@ function BankUsers() {
       try {
         const response = await AxiosInstance.get("/bank_user/" + id);
         console.log(response.data.data);
-        setBanks(response.data.data);
+        setBankUsers(response.data.data);
         setBank(response.data.bank);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching banks:", error);
+        console.error("Error fetching bankUsers:", error);
       }
     };
 
@@ -118,10 +116,10 @@ function BankUsers() {
   const cancelRef = React.useRef();
   const deleteBank = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/addbankuser/deletebanks/${bankId}`);
-      setBanks(banks.filter((bank) => bank.bank_id !== bankId));
+      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
+      setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
       setIsDeleteDialogOpen(false);
-      toast.success("Bank deleted successfully!");
+      toast.success("Bank User deleted successfully!");
     } catch (error) {
       console.error("Error deleting bank:", error);
       toast.error("bank not delete");
@@ -134,12 +132,10 @@ function BankUsers() {
   };
 
   const handleEdit = (id) => {
-    navigateToAnotherPage(id);
+    navigateToAnotherPageUser(id);
   };
 
-  const handleRow = (id) => {
-    history.push("/superadmin/bankusers?id=");
-  };
+  const handleRow = () => {};
 
   return (
     <>
@@ -202,7 +198,7 @@ function BankUsers() {
           </CardHeader>
           <CardBody>
             <TableComponent
-              banks={banks}
+              bankUsers={bankUsers}
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
