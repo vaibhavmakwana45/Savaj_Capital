@@ -41,7 +41,6 @@ router.post("/", async (req, res) => {
         email: req.body.email,
       }
     );
-    console.log(ApiResponse);
 
     if (ApiResponse.status === 200) {
       res.json({
@@ -135,7 +134,6 @@ router.put("/:bankuser_id", async (req, res) => {
 
 router.get("/:bank_id", async (req, res) => {
   try {
-    console.log("first");
     const bank_id = req.params.bank_id;
 
     var data = await BankUser.aggregate([

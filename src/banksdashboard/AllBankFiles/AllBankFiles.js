@@ -71,7 +71,7 @@ function Row(props) {
         onClick={() => props.handleRow("/bankuser/viewbankfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
-        <TableCell style={{ border: "" }}>
+        <TableCell >
           <IconButton
             aria-label="expand row"
             size="small"
@@ -91,29 +91,7 @@ function Row(props) {
           {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
         </TableCell>
         
-        <TableCell align="">
-          <Flex>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(file.file_id);
-              }}
-              aria-label="Delete bank"
-              icon={<DeleteIcon />}
-              style={{ marginRight: 15, fontSize: "20px" }}
-            />
-
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditClick(file.file_id);
-              }}
-              aria-label="Edit bank"
-              icon={<EditIcon />}
-              style={{ fontSize: "20px" }}
-            />
-          </Flex>
-        </TableCell>
+     
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -121,44 +99,60 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "50%" }}
+            style={{ width: "100%" }}
           >
-            <Box sx={{ margin: 1 }}>
-              <Paper elevation={3} sx={{ borderRadius: 3 }}>
-                <Table size="small" aria-label="documents">
-                  <TableHead>
-                    <TableRow>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {file?.loan_document_ids?.map((documentRow) => (
-                      <TableRow key={documentRow.loan_document_id}>
-                        <TableCell component="th" scope="row">
-                          {documentRow.loan_document}
-                        </TableCell>
-                        <TableCell>
-                          {documentRow.is_uploaded ? (
-                            <span
-                              style={{ color: "green", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-circle-check"></i>
-                              &nbsp;&nbsp;Uploaded
-                            </span>
-                          ) : (
-                            <span
-                              style={{ color: "#FFB302 ", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-clock"></i>
-                              &nbsp;&nbsp;Pending
-                            </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Paper>
-            </Box>
+            <div className="container-fluid progress-bar-area" style={{height:"20%"}}>
+              <div className="row  ">
+                <div className="col">
+                  <ul className="progressbar">
+                    <li id="step1" className="complete">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 1
+                    </li>
+
+                    <li id="step2" className="complete">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 2
+                    </li>
+
+                    <li id="step3" className="active">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 3
+                    </li>
+
+                    <li id="step4">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 4
+                    </li>
+
+                    <li id="step5">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 5
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -344,9 +338,6 @@ export default function CollapsibleTable() {
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Assign Date
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Action
                     </TableCell>
                   </TableRow>
                 </TableHead>

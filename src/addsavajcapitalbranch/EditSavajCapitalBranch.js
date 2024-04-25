@@ -65,7 +65,6 @@ function EditSavajCapitalBranch() {
           });
         }
       } catch (error) {
-        console.error("Error fetching branch details:", error);
         toastInstance({
           title: "An error occurred",
           description: "Unable to fetch branch details.",

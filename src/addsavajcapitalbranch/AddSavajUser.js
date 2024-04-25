@@ -150,8 +150,6 @@ function AddSavajCapitalBranch() {
     password: "",
   });
 
-  console.log(formData);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -163,7 +161,6 @@ function AddSavajCapitalBranch() {
   const handleAddRole = async (role) => {
     try {
       const response = await AxiosInstance.post("/role", { role });
-      console.log(response.data, "shivam")
 
       if (response.data.success) {
         toast.success("Role added successfully!");
@@ -189,8 +186,6 @@ function AddSavajCapitalBranch() {
     try {
       if (id) {
         const response = await AxiosInstance.put("/savaj_user/" + id, formData);
-
-        console.log(response.data);
 
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
