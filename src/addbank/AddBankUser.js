@@ -372,7 +372,7 @@ function AddBankUser() {
                 <FormLabel>Full Name</FormLabel>
                 <Input
                   name="bankuser_name"
-                  type="bankuser_name"
+                  type="text"
                   onChange={handleChange}
                   value={formData.bankuser_name}
                 />
@@ -390,7 +390,7 @@ function AddBankUser() {
                 <FormLabel>Address</FormLabel>
                 <Input
                   name="adress"
-                  type="adress"
+                  type="textarea"
                   onChange={handleChange}
                   value={formData.adress}
                 />
@@ -399,7 +399,7 @@ function AddBankUser() {
                 <FormLabel>Date of Birth</FormLabel>
                 <Input
                   name="dob"
-                  type="dob"
+                  type="date"
                   onChange={handleChange}
                   value={formData.dob}
                 />
@@ -408,7 +408,7 @@ function AddBankUser() {
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
                   name="mobile"
-                  type="mobile"
+                  type="number"
                   onChange={handleChange}
                   value={formData.mobile}
                 />
@@ -417,7 +417,7 @@ function AddBankUser() {
                 <FormLabel>Aadhar Number</FormLabel>
                 <Input
                   name="adhar"
-                  type="adhar"
+                  type="number"
                   onChange={handleChange}
                   value={formData.adhar}
                 />
@@ -426,7 +426,7 @@ function AddBankUser() {
                 <FormLabel>Emergency Contact</FormLabel>
                 <Input
                   name="emergancy_contact"
-                  type="emergancy_contact"
+                  type="number"
                   onChange={handleChange}
                   value={formData.emergancy_contact}
                 />
