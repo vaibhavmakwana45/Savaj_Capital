@@ -135,7 +135,7 @@ router.put("/:bankuser_id", async (req, res) => {
 
 router.get("/:bank_id", async (req, res) => {
   try {
-    console.log('first')
+    console.log("first");
     const bank_id = req.params.bank_id;
 
     var data = await BankUser.aggregate([
@@ -205,6 +205,5 @@ router.delete("/deletebankuser/:bankId", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

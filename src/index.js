@@ -1,11 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {  BrowserRouter as Router , Route, Switch, Redirect } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
-import theme from "./theme/theme"; // Adjust the import path as needed
-import AuthLayout from "./layouts/Auth"; // Adjust import paths as needed
-import AdminLayout from "./layouts/Superadmin"; // Adjust import paths as needed
-
+import theme from "./theme/theme";
+import AuthLayout from "./layouts/Auth";
+import AdminLayout from "./layouts/Superadmin";
 
 // Define an AuthGuard component
 const AuthGuard = ({ children }) => {

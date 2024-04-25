@@ -64,7 +64,6 @@ export default function HeaderLinks(props) {
     name,
     ...rest
   } = props;
-  console.log("name", name);
   const { colorMode } = useColorMode();
 
   // Chakra Color Mode
