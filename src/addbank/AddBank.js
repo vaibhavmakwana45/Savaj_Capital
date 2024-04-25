@@ -192,15 +192,11 @@ function AddBank() {
         } else {
           toast.error("Please try again later!");
         }
-
-        console.log(submissionData);
       } else {
         const response = await AxiosInstance.post(
           "/addbankuser/addbankuser",
           submissionData
         );
-
-        console.log(submissionData, "submissionData");
 
         if (response.data?.statusCode === 201) {
           toast.error("Email already in use");

@@ -39,7 +39,6 @@ function Row(props) {
 
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage?.getItem("authToken"));
-    console.log(jwt?._id?.branchuser_id, "jwt");
   }, []);
 
   useEffect(() => {

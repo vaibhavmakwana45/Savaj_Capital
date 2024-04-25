@@ -71,7 +71,6 @@ function BankUsers() {
     const fetchBanks = async () => {
       try {
         const response = await AxiosInstance.get("/bank_user/" + id);
-        console.log(response.data.data);
         setBankUsers(response.data.data);
         setBank(response.data.bank);
         setLoading(false);

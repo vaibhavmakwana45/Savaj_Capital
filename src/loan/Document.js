@@ -43,7 +43,6 @@ function Document() {
         ? `/loan_docs/loan_docs/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
       const response = await AxiosInstance.get(url);
-      console.log("API response:", response.data);
       setDocuments(response.data.data || []);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -114,7 +113,6 @@ function Document() {
         loantype_id: loantype_id,
         loan_id: loan_id,
       });
-      console.log("response", response);
       if (response.data.success) {
         toast.success("Document Added successfully!");
         setIsEditDocument(false);

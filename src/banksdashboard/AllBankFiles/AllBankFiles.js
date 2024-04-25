@@ -38,6 +38,8 @@ import {
 } from "@mui/icons-material";
 import Loader from "react-js-loader";
 import AxiosInstance from "config/AxiosInstance";
+import { jwtDecode } from "jwt-decode";
+import moment from "moment";
 
 const theme = createTheme();
 
@@ -69,7 +71,7 @@ function Row(props) {
         onClick={() => props.handleRow("/bankuser/viewbankfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
-        <TableCell style={{ border: "" }}>
+        <TableCell >
           <IconButton
             aria-label="expand row"
             size="small"
@@ -82,49 +84,14 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{file?.username}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">{file?.createdAt}</TableCell>
-        <TableCell align="">{file?.updatedAt}</TableCell>
-        <TableCell align="center">
-          <div class="progress " data-value={file?.document_percentage}>
-            <span class="progress-left">
-              <span class="progress-bar"></span>
-            </span>
-            <span class="progress-right">
-              <span class="progress-bar"></span>
-            </span>
-            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-              <div class="font-weight-bold">
-                {file?.document_percentage}
-                <sup class="small">%</sup>
-              </div>
-            </div>
-          </div>
-        </TableCell>
         <TableCell align="">
-          <Flex>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(file.file_id);
-              }}
-              aria-label="Delete bank"
-              icon={<DeleteIcon />}
-              style={{ marginRight: 15, fontSize: "20px" }}
-            />
-
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditClick(file.file_id);
-              }}
-              aria-label="Edit bank"
-              icon={<EditIcon />}
-              style={{ fontSize: "20px" }}
-            />
-          </Flex>
+          {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
         </TableCell>
+        
+     
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -132,50 +99,60 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "50%" }}
+            style={{ width: "100%" }}
           >
-            <Box sx={{ margin: 1 }}>
-              <Paper elevation={3} sx={{ borderRadius: 3 }}>
-                <Table size="small" aria-label="documents">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                        Document
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-                        Status
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {file?.loan_document_ids?.map((documentRow) => (
-                      <TableRow key={documentRow.loan_document_id}>
-                        <TableCell component="th" scope="row">
-                          {documentRow.loan_document}
-                        </TableCell>
-                        <TableCell>
-                          {documentRow.is_uploaded ? (
-                            <span
-                              style={{ color: "green", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-circle-check"></i>
-                              &nbsp;&nbsp;Uploaded
-                            </span>
-                          ) : (
-                            <span
-                              style={{ color: "#FFB302 ", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-clock"></i>
-                              &nbsp;&nbsp;Pending
-                            </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Paper>
-            </Box>
+            <div className="container-fluid progress-bar-area" style={{height:"20%"}}>
+              <div className="row  ">
+                <div className="col">
+                  <ul className="progressbar">
+                    <li id="step1" className="complete">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 1
+                    </li>
+
+                    <li id="step2" className="complete">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 2
+                    </li>
+
+                    <li id="step3" className="active">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 3
+                    </li>
+
+                    <li id="step4">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 4
+                    </li>
+
+                    <li id="step5">
+                      <div className="circle-container">
+                        <a href="#">
+                          <div className="circle-button"></div>
+                        </a>
+                      </div>
+                      Step 5
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -221,12 +198,25 @@ export default function CollapsibleTable() {
   const handleRow = (url) => {
     history.push(url);
   };
+
+  const [accessType, setAccessType] = useState("");
+  console.log(accessType.bankuser_id, "id");
+  const bankUserId = accessType.bankuser_id;
+  console.log(bankUserId, "bankUserId");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get("/file_upload");
+        const response = await AxiosInstance.get(
+          `/bank_approval/bank_user/1712915645772`
+        );
+        console.log(`/file_upload/branch_user/${bankUserId}`, "shivam");
         setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
@@ -338,22 +328,16 @@ export default function CollapsibleTable() {
                       File Id
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Username
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan Type
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Created At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Updated At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Status
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Action
+                      Assign Date
                     </TableCell>
                   </TableRow>
                 </TableHead>

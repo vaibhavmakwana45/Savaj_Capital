@@ -124,7 +124,6 @@ function EditFile() {
       try {
         const response = await AxiosInstance.get("/branch");
         setSavajcapitalbranch(response.data.data);
-        console.log("response", response);
       } catch (error) {
         console.error("Error fetching branches:", error);
       }
@@ -173,12 +172,10 @@ function EditFile() {
   };
 
   const handleBranchChange = (event) => {
-    console.log("Branch ID Selected:", event.target.value);
     setSelectedBranchId(event.target.value);
   };
 
   const handleBranchUserChange = (event) => {
-    console.log("Branch User ID Selected:", event.target.value);
     setSelectedBranchUserId(event.target.value);
   };
 
@@ -458,7 +455,6 @@ function EditFile() {
                             className="file-preview text-end"
                             style={{
                               marginTop: "15px",
-                              // alignItems: "center",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",

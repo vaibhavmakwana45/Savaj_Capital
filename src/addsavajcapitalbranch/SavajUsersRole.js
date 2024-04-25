@@ -111,7 +111,6 @@ function SavajUsersRole() {
         try {
             const response = await AxiosInstance.delete(`/role/${bankId}`);
             getRolesData();
-            console.log(response.data);
             setIsDeleteDialogOpen(false);
             if (response.data.success) {
 
@@ -135,7 +134,6 @@ function SavajUsersRole() {
     const handleEdit = (id) => {
         setSelectedRoleId(id);
         setIsAddRole(true);
-        console.log(banks);
         
         // Filter out the role based on its role_id
         const role = banks.find((bank) => bank.role_id === id);
