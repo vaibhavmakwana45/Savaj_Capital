@@ -113,11 +113,11 @@ router.post("/passwordmail", async (req, res) => {
     `;
 
     await emailService.sendWelcomeEmail(req.body.email, subject, text);
-    console.log(emailService, "emailService")
+    console.log(emailService, "emailService");
 
     res.json({
       statusCode: 200,
-      data: info,
+      // data: info,
       message: "Send Mail Successfully",
     });
 

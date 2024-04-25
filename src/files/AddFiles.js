@@ -184,7 +184,7 @@ function AddFiles() {
   const fileInputRefs = useRef([]);
 
   useEffect(() => {
-    fileInputRefs.current = loanDocuments.map(
+    fileInputRefs.current = loanDocuments?.map(
       (_, index) => fileInputRefs.current[index] ?? createRef()
     );
   }, [loanDocuments]);
@@ -500,10 +500,10 @@ function AddFiles() {
             <div>
               <div className="d-flex ">
                 <div className="d-flex mainnnn">
-                  {(!selectedLoanType.is_subtype ||
-                    (selectedLoanType.is_subtype &&
-                      selectedLoanType.loansubtype_id)) &&
-                    loanDocuments.map((document, index) => (
+                  {(!selectedLoanType?.is_subtype ||
+                    (selectedLoanType?.is_subtype &&
+                      selectedLoanType?.loansubtype_id)) &&
+                    loanDocuments?.map((document, index) => (
                       <div
                         key={document._id}
                         className="upload-area col-xl-12 col-md-12 col-sm-12"
@@ -675,9 +675,9 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} >
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent style={{height:"80%",overflow:"scroll",scrollbarWidth:"thin"}}>
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -800,7 +800,7 @@ function AddFiles() {
                 {errors.dob && <p>{errors.dob.message}</p>}
               </FormControl>
 
-              <FormControl>
+              <FormControl className="my-2">
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   placeholder="Adhar Card"
