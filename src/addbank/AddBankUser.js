@@ -33,7 +33,7 @@ function AddBankUser() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [branches, setBranches] = useState([]);
-
+  console.log("branches", branches);
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
@@ -73,8 +73,9 @@ function AddBankUser() {
   const [formData, setFormData] = useState({
     bank_id: "",
     user_id: "",
+    bankuser_name:"",
     bank_name: "",
-    country: "India", // Default to India
+    country: "India",
     state: "",
     city: "",
     branch_name: "",
@@ -87,12 +88,13 @@ function AddBankUser() {
       const response = await AxiosInstance.get(
         "/addusers/bankuser/by-user-id/" + id
       );
-
+      console.log("first", response.data);
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 
         const submissionData = {
           bank_id: bankDetails.bank_id,
+          bankuser_name: bankDetails.bankuser_name,
           user_id: userDetails.user_id,
           bank_name: bankDetails.bank_name,
           country: bankDetails.country,
@@ -113,6 +115,11 @@ function AddBankUser() {
         setSelectedState(bankDetails.state_code);
         setSelectedCountry(bankDetails.country_code);
         setFormData(submissionData);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          bank_id: bankDetails.bank_id,
+        }));
+        getBranches(bankDetails.bank_name, bankDetails.city);
       } else {
         alert("Please try again later...!");
       }
@@ -129,6 +136,7 @@ function AddBankUser() {
         );
 
         if (response.data.success) {
+          console.log("Branches loaded: ", response.data.data);
           setBranches(response.data.data);
         } else {
           alert("Please try again later...!");
@@ -204,6 +212,7 @@ function AddBankUser() {
       branch_name: formData.branch_name,
       state_code: selectedState,
       country_code: selectedCountry,
+      bankuser_name: formData.bankuser_name,
       email: formData.email,
       adress: formData.adress,
       dob: formData.dob,
@@ -342,7 +351,7 @@ function AddBankUser() {
                 <Select
                   disabled={branches.length == 0}
                   name="branch_name"
-                  placeholder="Select Bank"
+                  placeholder="Select Bank Brnach"
                   onChange={(e) => {
                     setFormData({ ...formData, bank_id: e.target.value });
                   }}
@@ -359,6 +368,15 @@ function AddBankUser() {
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 User Data
               </Text>
+              <FormControl id="bankuser_name" mt={4} isRequired>
+                <FormLabel>Full Name</FormLabel>
+                <Input
+                  name="bankuser_name"
+                  type="bankuser_name"
+                  onChange={handleChange}
+                  value={formData.bankuser_name}
+                />
+              </FormControl>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
