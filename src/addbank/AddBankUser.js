@@ -33,7 +33,6 @@ function AddBankUser() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [branches, setBranches] = useState([]);
-  console.log("branches", branches);
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
@@ -88,7 +87,6 @@ function AddBankUser() {
       const response = await AxiosInstance.get(
         "/addusers/bankuser/by-user-id/" + id
       );
-      console.log("first", response.data);
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 
@@ -131,7 +129,6 @@ function AddBankUser() {
         );
 
         if (response.data.success) {
-          console.log("Branches loaded: ", response.data.data);
           setBranches(response.data.data);
         } else {
           alert("Please try again later...!");

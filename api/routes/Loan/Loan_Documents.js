@@ -123,7 +123,6 @@ router.delete("/:loan_document_id", async (req, res) => {
 });
 
 router.put("/:loan_document_id", async (req, res) => {
-  console.log("first", req.body);
   try {
     const { loan_document_id } = req.params;
 

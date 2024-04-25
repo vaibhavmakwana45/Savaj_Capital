@@ -108,14 +108,12 @@ function UserTable() {
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loan_id === id);
-    console.log("data", data);
     if (!data) {
       console.error("No data found for loan with ID:", id);
       return;
     }
 
     if (data.loantype_count === 0) {
-      console.log("Pushing state:", { loan_id: data.loan_id });
       history.push("/superadmin/documents", {
         state: { loan_id: data.loan_id },
       });

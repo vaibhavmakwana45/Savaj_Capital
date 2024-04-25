@@ -31,7 +31,6 @@ function BankAssignFile() {
     try {
       const response = await AxiosInstance.get("/file_upload/allfiles");
       setFiles(response.data.data);
-      console.log("first", response.data.data);
     } catch (error) {
       console.error("Error fetching files:", error);
     }

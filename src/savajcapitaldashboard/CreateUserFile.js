@@ -236,7 +236,6 @@ function AddFiles() {
   const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
   React.useEffect(async () => {
     const jwtCode = await localStorage.getItem("authToken");
-    console.log(jwtCode, "jwtCode");
     const jwt = jwtDecode(jwtCode);
 
     setJwt(jwt);
@@ -350,7 +349,6 @@ function AddFiles() {
           loan_document_id: file.documentId,
         })),
       };
-      console.log(payload, "yash", jwt);
 
       // await AxiosInstance.post("/file_upload", payload);
 

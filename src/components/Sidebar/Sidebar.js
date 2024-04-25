@@ -433,8 +433,6 @@ export function SidebarResponsive(props) {
     (route) => route.hideInSResponsivrUser
   );
 
-  // console.log(newroutes)
-
   var links = <>{createLinks(newroutes)}</>;
   var scbranchlink = <>{createLinks(hideInSResponsivrUser)}</>;
   var banklink = <>{createLinks(bankUser)}</>;

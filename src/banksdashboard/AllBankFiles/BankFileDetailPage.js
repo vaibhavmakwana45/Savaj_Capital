@@ -86,7 +86,6 @@ function BankFileDetailPage() {
   const searchParams = new URLSearchParams(location.search);
 
   const id = searchParams.get("id");
-  console.log(id, "ididididid");
 
   const basePath = "https://cdn.dohost.in/upload/";
 
@@ -99,10 +98,6 @@ function BankFileDetailPage() {
         setLoading(true);
         const response = await AxiosInstance.get(
           "/file_upload/file_upload/" + id
-        );
-        console.log(
-          response.data.data.file,
-          "responsejmyhtgbvncfgdrsfbcfgdgbcgfd"
         );
         setFileData(response.data.data.file);
         setLoading(false);

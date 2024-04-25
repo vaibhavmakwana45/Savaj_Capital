@@ -187,7 +187,6 @@ function AddLoanDocuments() {
                   ))}
                 </Select>
               </FormControl>
-              {console.log("loan name",loanName)}
               <FormControl id="savajcapitalbranch_name" mt={4}>
  
   {subType === true && (loanName !== 'Car' && loanName !== 'CRL-Car Loan' )? (
