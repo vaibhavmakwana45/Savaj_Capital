@@ -71,7 +71,7 @@ function Row(props) {
         onClick={() => props.handleRow("/bankuser/viewbankfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
-        <TableCell >
+        <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -90,8 +90,6 @@ function Row(props) {
         <TableCell align="">
           {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
         </TableCell>
-        
-     
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -101,7 +99,10 @@ function Row(props) {
             unmountOnExit
             style={{ width: "100%" }}
           >
-            <div className="container-fluid progress-bar-area" style={{height:"20%"}}>
+            <div
+              className="container-fluid progress-bar-area"
+              style={{ height: "20%" }}
+            >
               <div className="row  ">
                 <div className="col">
                   <ul className="progressbar">
