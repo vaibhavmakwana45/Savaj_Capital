@@ -64,10 +64,6 @@ export default function HeaderLinks(props) {
     return `${firstname ? firstname.charAt(0) : ''}${lastname ? lastname.charAt(0) : ''}`;
   };
 
-
-
-
-
   const {
     variant,
     children,
