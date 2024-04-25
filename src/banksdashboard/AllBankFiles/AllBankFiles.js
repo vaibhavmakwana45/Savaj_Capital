@@ -71,7 +71,7 @@ function Row(props) {
         onClick={() => props.handleRow("/bankuser/viewbankfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
-        <TableCell >
+        <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -90,8 +90,6 @@ function Row(props) {
         <TableCell align="">
           {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
         </TableCell>
-        
-     
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -101,7 +99,10 @@ function Row(props) {
             unmountOnExit
             style={{ width: "100%" }}
           >
-            <div className="container-fluid progress-bar-area" style={{height:"20%"}}>
+            <div
+              className="container-fluid progress-bar-area"
+              style={{ height: "20%" }}
+            >
               <div className="row  ">
                 <div className="col">
                   <ul className="progressbar">
@@ -200,32 +201,36 @@ export default function CollapsibleTable() {
   };
 
   const [accessType, setAccessType] = useState("");
-  console.log(accessType.bankuser_id, "id");
-  const bankUserId = accessType.bankuser_id;
-  console.log(bankUserId, "bankUserId");
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id);
+    setAccessType(jwt._id); // Set the entire jwt object instead of just jwt._id
   }, []);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/bank_approval/bank_user/1712915645772`
-        );
-        console.log(`/file_upload/branch_user/${bankUserId}`, "shivam");
-        setFiles(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching files:", error);
+      if (accessType.bankuser_id) {
+        try {
+          const response = await AxiosInstance.get(
+            `/bank_approval/bank_user/${accessType.bankuser_id}`
+          );
+          console.log(response.data.data, "shivam");
+          console.log(
+            `/file_upload/branch_user/${accessType.bankuser_id}`,
+            "shivam"
+          );
+          setFiles(response.data.data);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching files:", error);
+        }
       }
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
   $(function () {
     $(".progress").each(function () {
