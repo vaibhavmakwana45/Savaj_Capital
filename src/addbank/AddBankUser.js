@@ -31,9 +31,7 @@ function AddBankUser() {
   const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [branches, setBranches] = useState([]);
-  console.log("branches", branches);
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
@@ -73,7 +71,7 @@ function AddBankUser() {
   const [formData, setFormData] = useState({
     bank_id: "",
     user_id: "",
-    bankuser_name:"",
+    bankuser_name: "",
     bank_name: "",
     country: "India",
     state: "",
@@ -97,7 +95,7 @@ function AddBankUser() {
           bankuser_name: bankDetails.bankuser_name,
           user_id: userDetails.user_id,
           bank_name: bankDetails.bank_name,
-          country: bankDetails.country, // Default to India
+          country: bankDetails.country,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
@@ -154,7 +152,7 @@ function AddBankUser() {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
@@ -166,7 +164,7 @@ function AddBankUser() {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); // Clear cities if no state is selected
+      setCities([]);
     }
   }, [selectedState, selectedCountry]);
 
@@ -344,19 +342,25 @@ function AddBankUser() {
               <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Select
-                  disabled={branches.length == 0}
+                  // disabled={branches.length === 0}
                   name="branch_name"
-                  placeholder="Select Bank Brnach"
+                  placeholder="Select Bank Branch"
                   onChange={(e) => {
                     setFormData({ ...formData, bank_id: e.target.value });
                   }}
                   value={formData.bank_id}
                 >
-                  {branches.map((city) => (
-                    <option key={city.bank_id} value={city.bank_id}>
-                      {city.branch_name}
+                  {branches.length > 0 ? (
+                    branches.map((branch) => (
+                      <option key={branch.bank_id} value={branch.bank_id}>
+                        {branch.branch_name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value="">
+                      PLease add a branch for this city and bank
                     </option>
-                  ))}
+                  )}
                 </Select>
               </FormControl>
 

@@ -218,8 +218,8 @@ export default function CollapsibleTable() {
 
   const history = useHistory();
 
-  const handleRow = (id) => {
-    history.push();
+  const handleRow = (url) => {
+    history.push(url);
   };
   const [loading, setLoading] = useState(true);
 
