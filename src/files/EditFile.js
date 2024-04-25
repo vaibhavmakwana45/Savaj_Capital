@@ -42,6 +42,15 @@ function EditFile() {
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
+  // function to get extension
+  function getFileExtension(url) {
+    // Split the URL by dot (.)
+    const parts = url.split('.');
+    // Get the last part which should be the extension
+    const extension = parts[parts.length - 1];
+    return extension.toLowerCase(); // Return extension in lowercase for consistency
+  }
+
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -330,6 +339,8 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
+        branchuser_id:selectedBranchUserId,
+        branch_id:selectedBranchId,
       };
 
       const finalResponse = await AxiosInstance.put(
@@ -455,6 +466,7 @@ function EditFile() {
                               backgroundColor: "#e8f0fe",
                               borderRadius: "8px",
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              overflow: "hidden",
                             }}
                           >
                             <IconButton
@@ -464,7 +476,8 @@ function EditFile() {
                               onClick={() => handleRemoveFile(index)}
                               style={{ margin: "0 10px" }}
                             />
-                            {fileData[index].type === "application/pdf" ? (
+                            
+                            {getFileExtension(fileData[index].url) === "pdf" ? (
                               <embed
                                 src={fileData[index].url}
                                 type="application/pdf"
@@ -475,12 +488,12 @@ function EditFile() {
                               />
                             ) : (
                               <img
+                                className="editimage"
                                 src={fileData[index].url}
                                 alt="Preview"
                                 style={{
-                                  width: 100,
-                                  height: 100,
-                                  margin: "auto",
+                                  width: "100%",
+                                  height: "100%",
                                   borderRadius: "4px",
                                 }}
                               />
