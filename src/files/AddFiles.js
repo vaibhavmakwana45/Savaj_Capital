@@ -30,6 +30,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
+import { Country, State, City } from "country-state-city";
 
 function AddFiles() {
   const history = useHistory();
@@ -40,6 +41,25 @@ function AddFiles() {
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCountry, setSelectedCountry] = useState("IN");
+  const [countries, setCountries] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [formData, setFormData] = useState({
+    user_id: "",
+    username: "",
+    number: "",
+    email: "",
+    pan_card: "",
+    aadhar_card: "",
+    dob: "",
+    country: "India",
+    state: "",
+    city: "",
+  });
+
   const {
     register,
     handleSubmit,
@@ -282,9 +302,19 @@ function AddFiles() {
     const role = roles.find((role) => role.role_id === roleId);
     return role ? role.role : "No role found";
   };
+
   const onSubmit = async (data) => {
     try {
-      const wrappedData = { userDetails: data };
+      const wrappedData = {
+        userDetails: {
+          ...data,
+          country: formData.country,
+          state: formData.state,
+          city: formData.city,
+          state_code: selectedState,
+          country_code: selectedCountry,
+        },
+      };
       await AxiosInstance.post("/addusers/adduser", wrappedData);
       toast.success("User Added Successfully!");
       onClose();
@@ -295,6 +325,7 @@ function AddFiles() {
       toast.error("Please try again later!");
     }
   };
+
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -350,6 +381,47 @@ function AddFiles() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    // if (id) {
+    //   getData();
+    // }
+    setCountries(Country.getAllCountries());
+    setStates(State.getStatesOfCountry("IN"));
+  }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
+      setStates(statesOfSelectedCountry);
+      setSelectedState(""); // Reset selected state when country changes
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    // if (selectedState) {
+    const citiesOfState = City.getCitiesOfState(selectedCountry, selectedState);
+    setCities(citiesOfState);
+    // } else {
+    //   setCities([]); // Clear cities if no state is selected
+    // }
+  }, [selectedState, selectedCountry]);
+
+  const handleCountryChange = (event) => {
+    setSelectedCountry(event.target.value);
+  };
+
+  const handleStateChange = (event) => {
+    const stateCode = event.target.value;
+    const stateObj = states.find((state) => state.isoCode === stateCode);
+    const stateFullName = stateObj ? stateObj.name : "";
+
+    setSelectedState(stateCode);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: stateFullName,
+    }));
   };
 
   return (
@@ -637,6 +709,108 @@ function AddFiles() {
                   })}
                 />
                 {errors.email && <p>{errors.email.message}</p>}
+              </FormControl>
+
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
+
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl id="state" mt={4} isRequired>
+                <FormLabel>State</FormLabel>
+                <Select
+                  name="state"
+                  placeholder="Select state"
+                  onChange={handleStateChange}
+                  disabled={!selectedCountry}
+                  value={selectedState}
+                  // {...register("state", {
+                  //   required: "State is required",
+                  // })}
+                >
+                  {states.length ? (
+                    states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a country first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl id="city" mt={4} isRequired>
+                <FormLabel>City</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select city"
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  disabled={!selectedState}
+                  value={formData.city}
+                  // {...register("city", {
+                  //   required: "City is required",
+                  // })}
+                >
+                  {cities.length ? (
+                    cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a state first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Dob</FormLabel>
+                <Input
+                  placeholder="DOB"
+                  type="date"
+                  {...register("dob", {
+                    required: "DOB is required",
+                  })}
+                />
+                {errors.dob && <p>{errors.dob.message}</p>}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  placeholder="Adhar Card"
+                  type="number"
+                  {...register("aadhar_card", {
+                    required: "Aadhar card is required",
+                  })}
+                />
+                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  placeholder="Pan Card"
+                  type="string"
+                  {...register("pan_card", {
+                    required: "Pan card is required",
+                  })}
+                />
+                {errors.pan_card && <p>{errors.pan_card.message}</p>}
               </FormControl>
             </ModalBody>
 
