@@ -27,7 +27,6 @@ const decrypt = (text) => {
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
 router.post("/adduser", async (req, res) => {
-  console.log("first", req.body);
   try {
     const { userDetails } = req.body;
 
@@ -76,6 +75,7 @@ router.post("/adduser", async (req, res) => {
     });
   }
 });
+
 router.post("/adduserbyadmin", async (req, res) => {
   try {
     const { userDetails } = req.body;
@@ -118,13 +118,13 @@ router.post("/adduserbyadmin", async (req, res) => {
       }
     );
 
-    // if (ApiResponse.status === 200) {
-    //   res.json({
-    //     success: true,
-    //     message: "User added successfully",
-    //     data: newUser,
-    //   });
-    // }
+    if (ApiResponse.status === 200) {
+      res.json({
+        success: true,
+        message: "User added successfully",
+        data: newUser,
+      });
+    }
 
     res.json({
       success: true,
@@ -301,6 +301,65 @@ router.get("/user/:user_id", async (req, res) => {
     res.json({
       success: true,
       user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
+  try {
+    const bankuser_id = req.params.bankuser_id;
+
+    const bankUser = await BankUser.findOne({ bankuser_id });
+
+    if (!bankUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const bankData = await BankSchema.findOne({ bank_id: bankUser.bank_id });
+
+    if (!bankData) {
+      return res.status(404).json({
+        success: false,
+        message: "Bank details not found"
+      });
+    }
+
+    const bankDetails = {
+      bank_name: bankData.bank_name,
+      country: bankData.country,
+      state_code: bankData.state_code,
+      country_code: bankData.country_code,
+      state: bankData.state,
+      city: bankData.city,
+      branch_name: bankData.branch_name,
+      bank_id: bankData.bank_id,
+    };
+
+    const userDetails = {
+      email: bankUser.email,
+      password: bankUser.password,
+      bankuser_id: bankUser.bankuser_id,
+      bank_id: bankUser.bank_id,
+      adress: bankUser.adress,
+      dob: bankUser.dob,
+      mobile: bankUser.mobile,
+      adhar: bankUser.adhar,
+      emergancy_contact: bankUser.emergancy_contact,
+    };
+
+    res.json({
+      success: true,
+      bankDetails,
+      userDetails,
     });
   } catch (error) {
     console.error(error);

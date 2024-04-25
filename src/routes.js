@@ -1,5 +1,5 @@
 // import
-import React, { Component } from "react";
+import React from "react";
 import Dashboard from "views/Dashboard/Dashboard.js";
 import BankDashboard from "banksdashboard/BankDashboard";
 import UserDashboard from "userdashboard/UserDashboard";
@@ -39,6 +39,7 @@ import AddFiles from "files/AddFiles";
 import Document from "loan/Document";
 import ViewFile from "files/ViewFile";
 import EditFile from "files/EditFile";
+import BankAssignFile from "addbank/BankAssignFile";
 
 var dashRoutes = [
   //superadmin
@@ -284,6 +285,16 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "bank",
     key: "addbank",
+  },
+  {
+    path: "/bankassignfile",
+    name: "Bank Assign File",
+    icon: <CreditIcon color="inherit" />,
+    component: BankAssignFile,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    parent: "bank",
+    key: "bankassignfile",
   },
   //auth
   {

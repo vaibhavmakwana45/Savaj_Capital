@@ -33,10 +33,10 @@ function AddLoanType() {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
 
-  const [isSubtype, setIsSubtype] = useState(false); // State variable to hold switch state
+  const [isSubtype, setIsSubtype] = useState(false);
 
   const handleSwitchChange = () => {
-    setIsSubtype(!isSubtype); // Toggle the state when switch is clicked
+    setIsSubtype(!isSubtype);
   };
 
   const searchParams = new URLSearchParams(location.search);
@@ -93,7 +93,7 @@ function AddLoanType() {
           bank_id: id,
           user_id: "",
           bank_name: bankDetails.bank_name,
-          country: bankDetails.country, // Default to India
+          country: bankDetails.country,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
@@ -138,7 +138,7 @@ function AddLoanType() {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); // Clear cities if no state is selected
+      setCities([]);
     }
   }, [selectedState, selectedCountry]);
 
@@ -321,7 +321,7 @@ function AddLoanType() {
                   mt={4}
                   colorScheme="yellow"
                   style={{ marginTop: 40, marginLeft: 8 }}
-                  onClick={()=> history.push('/superadmin/loan')}
+                  onClick={() => history.push("/superadmin/loan")}
                 >
                   Cancel
                 </Button>
