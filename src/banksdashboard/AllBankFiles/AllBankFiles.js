@@ -201,32 +201,36 @@ export default function CollapsibleTable() {
   };
 
   const [accessType, setAccessType] = useState("");
-  console.log(accessType.bankuser_id, "id");
-  const bankUserId = accessType.bankuser_id;
-  console.log(bankUserId, "bankUserId");
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id);
+    setAccessType(jwt._id); // Set the entire jwt object instead of just jwt._id
   }, []);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/bank_approval/bank_user/1712915645772`
-        );
-        console.log(`/file_upload/branch_user/${bankUserId}`, "shivam");
-        setFiles(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching files:", error);
+      if (accessType.bankuser_id) {
+        try {
+          const response = await AxiosInstance.get(
+            `/bank_approval/bank_user/${accessType.bankuser_id}`
+          );
+          console.log(response.data.data, "shivam");
+          console.log(
+            `/file_upload/branch_user/${accessType.bankuser_id}`,
+            "shivam"
+          );
+          setFiles(response.data.data);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching files:", error);
+        }
       }
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
   $(function () {
     $(".progress").each(function () {
