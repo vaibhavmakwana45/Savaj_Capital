@@ -112,9 +112,9 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
+      `http://localhost:4010/api/setpassword/passwordmail`,
       {
-        email: req.body.email,
+        email: req.body.userDetails.email,
       }
     );
 
@@ -125,12 +125,6 @@ router.post("/adduserbyadmin", async (req, res) => {
         data: newUser,
       });
     }
-
-    res.json({
-      success: true,
-      message: "User added successfully",
-      data: newUser,
-    });
   } catch (error) {
     res.status(500).json({
       success: false,

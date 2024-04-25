@@ -420,8 +420,8 @@ function EditFile() {
                     (!selectedLoanType.is_subtype || selectedLoanSubtypeId) &&
                     loanDocuments.length > 0 &&
                     loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                      <div key={document._id} className="upload-area col-6" >
+                        <Text fontSize="xl" className="mx-3" color={textColor} style={{fontSize:"12px",textTransform:"capitalize"}}>
                           {document.loan_document}
                         </Text>
                         <input
@@ -436,11 +436,11 @@ function EditFile() {
                         />
                         {fileData[index] ? (
                           <div
-                            className="file-preview"
+                            className="file-preview text-end"
                             style={{
-                              display: "flex",
+                              
                               marginTop: "15px",
-                              alignItems: "center",
+                              // alignItems: "center",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -450,6 +450,13 @@ function EditFile() {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                             }}
                           >
+                              <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
                             {fileData[index].type === "application/pdf" ? (
                               <embed
                                 src={fileData[index].url}
@@ -471,13 +478,7 @@ function EditFile() {
                                 }}
                               />
                             )}
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
+                          
                           </div>
                         ) : (
                           <div

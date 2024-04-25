@@ -348,7 +348,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
-    hideInSResponsiveSavajUser: true,
+    hideInSResponsivrUser:true
   },
   {
     path: "/userfile",
@@ -357,7 +357,7 @@ var dashRoutes = [
     component: UserFile,
     layout: "/savajcapitaluser",
     hideInSResponsive: false,
-    hideInSResponsiveSavajUser: true,
+    hideInSResponsivrUser:true
   },
   {
     path: "/adduserfile",
@@ -367,6 +367,7 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "adduserfile",
     key: "adduserfile",
+ 
   },
 
   //user

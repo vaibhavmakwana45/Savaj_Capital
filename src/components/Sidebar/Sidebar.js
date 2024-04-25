@@ -429,11 +429,15 @@ export function SidebarResponsive(props) {
 
   const newroutes = routes.filter((route) => route.hideInSResponsive);
   const savajUser = routes.filter((route) => route.hideInSResponsiveSavajUser);
+  const hideInSResponsivrUser = routes.filter(
+    (route) => route.hideInSResponsivrUser
+  );
 
   // console.log(newroutes)
 
   var links = <>{createLinks(newroutes)}</>;
-  var links = <>{createLinks(savajUser)}</>;
+  // var links = <>{createLinks(savajUser)}</>;
+  var link = <>{createLinks(hideInSResponsivrUser)}</>;
 
   //  BRAND
 
@@ -488,9 +492,9 @@ export function SidebarResponsive(props) {
             <Box maxW="100%" h="100vh">
               <Box>{brand}</Box>
               <Stack direction="column" mb="40px">
-                <Box>{links}</Box>
+                {location.pathname.includes("/superadmin") && <Box>{links}</Box>}
+                {location.pathname.includes("/savajcapitaluser") && <Box>{link}</Box>}
               </Stack>
-              {/* <SidebarHelp /> */}
             </Box>
           </DrawerBody>
         </DrawerContent>
