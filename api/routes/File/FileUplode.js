@@ -41,8 +41,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-
 router.get("/", async (req, res) => {
   try {
     var data = await File_Uplode.aggregate([
@@ -53,12 +51,15 @@ router.get("/", async (req, res) => {
 
     for (let i = 0; i < data.length; i++) {
       const branchuser_id = data[i].branchuser_id;
+      const user_id = data[i].user_id;
       const loan_id = data[i].loan_id;
       const loantype_id = data[i].loantype_id;
 
       const branchUserData = await SavajCapital_User.findOne({
         branchuser_id: branchuser_id,
       });
+
+      const userData = await AddUser.findOne({ user_id: user_id });
       const loanData = await Loan.findOne({
         loan_id: loan_id,
       });
@@ -67,7 +68,11 @@ router.get("/", async (req, res) => {
       });
 
       if (branchUserData) {
-        data[i].full_name = branchUserData.full_name;
+        data[i].brachuser_full_name = branchUserData.full_name;
+      }
+
+      if (userData) {
+        data[i].user_username = userData.username;
       }
       if (loanData) {
         data[i].loan = loanData.loan;
@@ -394,7 +399,5 @@ router.get("/allfiles", async (req, res) => {
     });
   }
 });
-
-
 
 module.exports = router;

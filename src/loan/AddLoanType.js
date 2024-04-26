@@ -248,6 +248,25 @@ function AddLoanType() {
     }
   };
 
+  // ======================== Loan Steps =================================================
+
+  const [loanSteps, setLoanSteps] = useState([]);
+  const getLoanStepsData = async () => {
+    try {
+      const response = await AxiosInstance.get("/loan_step");
+
+      if (response.data.success) {
+        setLoanSteps(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getLoanStepsData();
+  }, []);
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -269,6 +288,26 @@ function AddLoanType() {
                   value={formData.loan_type}
                 />
               </FormControl>
+
+              <div className="d-flex flex-wrap">
+                {loanSteps.map((step, index) => (
+                  <FormControl
+                    key={step._id}
+                    alignItems="center"
+                    mt="5"
+                    style={{ width: "25%" }} // Each switch takes up 33.33% of the width
+                  >
+                    <Switch
+                      id={`email-alerts-${step._id}`}
+                      // onChange={handleSwitchChange}
+                      // isChecked={isSubtype}
+                    />
+                    <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
+                      {step.loan_step}
+                    </FormLabel>
+                  </FormControl>
+                ))}
+              </div>
 
               <FormControl display="flex" alignItems="center" mt="5">
                 <FormLabel htmlFor="email-alerts" mb="0">
