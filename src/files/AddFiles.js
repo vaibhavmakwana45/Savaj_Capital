@@ -530,11 +530,11 @@ function AddFiles() {
                         />
                         {fileData[index] ? (
                           <div
-                            className="file-preview"
+                            className="file-preview text-end"
                             style={{
-                              display: "flex",
+                              // display: "flex",
                               marginTop: "15px",
-                              alignItems: "center",
+                              // alignItems: "end",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -544,6 +544,13 @@ function AddFiles() {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                             }}
                           >
+                                 <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
                             {fileData[index].url ? (
                               <img
                                 src={fileData[index].url}
@@ -578,13 +585,7 @@ function AddFiles() {
                               </span>
                             )}
 
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
+                       
                           </div>
                         ) : (
                           <div

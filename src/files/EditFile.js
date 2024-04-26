@@ -45,10 +45,14 @@ function EditFile() {
   // function to get extension
   function getFileExtension(url) {
     // Split the URL by dot (.)
-    const parts = url.split('.');
-    // Get the last part which should be the extension
-    const extension = parts[parts.length - 1];
-    return extension.toLowerCase(); // Return extension in lowercase for consistency
+    if (url !== undefined) { 
+      const parts = url.split(".");
+      // Get the last part which should be the extension
+      const extension = parts[parts.length - 1];
+      return extension.toLowerCase(); // Return extension in lowercase for consistency
+    }else{
+      return;
+    }
   }
 
   useEffect(() => {
@@ -336,8 +340,8 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
-        branchuser_id:selectedBranchUserId,
-        branch_id:selectedBranchId,
+        branchuser_id: selectedBranchUserId,
+        branch_id: selectedBranchId,
       };
 
       const finalResponse = await AxiosInstance.put(
@@ -472,8 +476,13 @@ function EditFile() {
                               onClick={() => handleRemoveFile(index)}
                               style={{ margin: "0 10px" }}
                             />
-                            
-                            {getFileExtension(fileData[index].url) === "pdf" ? (
+
+                            {
+                              console.log(fileData, "fileData[index].type")
+                            }
+
+                            {getFileExtension(fileData[index].url) === "pdf" ||
+                            getFileExtension(fileData[index].name) === "pdf" ? (
                               <embed
                                 src={fileData[index].url}
                                 type="application/pdf"

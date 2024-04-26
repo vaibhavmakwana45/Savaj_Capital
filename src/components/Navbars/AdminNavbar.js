@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
 import routes from "../../routes";
+import "./navbar-responsive.css"
 
 const filteredRoutes = routes.filter((route) => route.layout !== "/auth");
 
@@ -144,7 +145,7 @@ export default function AdminNavbar(props) {
   };
 
   return (
-    <Flex
+    <Flex className="navbar-responsive"
       position={navbarPosition}
       boxShadow={navbarShadow}
       bg={navbarBg}

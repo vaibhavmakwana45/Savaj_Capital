@@ -33,9 +33,9 @@ const FileDisplay = ({ data }) => {
 
   return (
     <div>
-      <div className="d-flex flex-wrap justify-content-start">
+      <div className="d-flex flex-wrap justify-content-start image-responsive">
         {Object.entries(groupedFiles).map(([title, files], index) => (
-          <div key={index} className="mx-3 mb-4" style={{ flexBasis: "30%" }}>
+          <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
             <h2 className="my-4">
               <i>{title}</i>
             </h2>
@@ -120,22 +120,113 @@ function ViewFile() {
           />
         </Flex>
       ) : (
+        // <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+        //   <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+        //     <CardBody style={{ padding: "40px" }} className="cardss">
+        //       <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
+        //         <IconButton
+        //           icon={<ArrowBackIcon />}
+        //           onClick={() => history.goBack()}
+        //           aria-label="Back"
+        //           mr="4"
+        //         />
+        //         <b>{fileData?.loan} File Details</b>
+        //       </FormLabel>
+        //       <div>
+        //         <FormControl id="user_id" mt={4}>
+        //           <div
+        //             class="card"
+        //             style={{
+        //               borderRadius: "14px",
+        //               boxShadow:
+        //                 "rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
+        //             }}
+        //           >
+        //             <div
+        //               class="card-header"
+        //               style={{
+        //                 fontSize: "20px",
+        //                 backgroundColor: "#6AA3DA",
+        //                 borderTopLeftRadius: "14px",
+        //                 borderTopRightRadius: "14px",
+        //                 color: "white",
+        //               }}
+        //             >
+        //               {fileData?.loan} File -{fileData?.loan_type}
+        //             </div>
+        //             <u>
+        //               <FormLabel
+        //                 className="my-3"
+        //                 style={{
+        //                   fontSize: "18px",
+        //                   paddingLeft: "20px",
+        //                 }}
+        //               >
+        //                 <b>Loan User : {fileData?.username}</b>
+        //               </FormLabel>
+        //             </u>
+        //             <div class="card-body">
+        //               <blockquote class="blockquote mb-0">
+        //                 <div class="card" style={{ marginTop: "-20px" }}>
+        //                   <div class="card-body">
+        //                     <blockquote class="blockquote mb-0">
+        //                       <FormLabel
+        //                         className="my-3 content"
+        //                         style={{
+        //                           fontSize: "18px",
+        //                           paddingLeft: "20px",
+        //                           justifyContent: "space-between",
+        //                           display: "flex",
+        //                         }}
+        //                       >
+        //                         <label>Branch UserName :</label>
+        //                         <b> {fileData?.username}</b>
+        //                       </FormLabel>
+        //                       <FormLabel
+        //                         className="my-3 content"
+        //                         style={{
+        //                           fontSize: "18px",
+        //                           paddingLeft: "20px",
+        //                           justifyContent: "space-between",
+        //                           display: "flex",
+        //                         }}
+        //                       >
+        //                         <label>Branch Name :</label>
+        //                         <b> {fileData?.branch_name}</b>
+        //                       </FormLabel>
+        //                     </blockquote>
+        //                   </div>
+        //                 </div>
+        //               </blockquote>
+        //             </div>
+        //           </div>
+        //           <div>
+        //             {fileData?.documents && (
+        //               <FileDisplay data={fileData?.documents} />
+        //             )}
+        //           </div>
+        //         </FormControl>
+        //       </div>
+        //     </CardBody>
+        //   </Card>
+        // </Flex>
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-            <CardBody style={{ padding: "40px" }}>
-              <FormLabel className="mb-5" style={{ fontSize: "25px" }}>
+            <CardBody style={{ padding: "40px" }} className="cardss">
+              <FormLabel className="mb-2 back-responsive" style={{ fontSize: "25px" }}>
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}
                   aria-label="Back"
                   mr="4"
+                  className="icon-button"
                 />
                 <b>{fileData?.loan} File Details</b>
               </FormLabel>
               <div>
                 <FormControl id="user_id" mt={4}>
                   <div
-                    class="card"
+                    className="card"
                     style={{
                       borderRadius: "14px",
                       boxShadow:
@@ -143,7 +234,7 @@ function ViewFile() {
                     }}
                   >
                     <div
-                      class="card-header"
+                      className="card-header"
                       style={{
                         fontSize: "20px",
                         backgroundColor: "#6AA3DA",
@@ -165,13 +256,13 @@ function ViewFile() {
                         <b>Loan User : {fileData?.username}</b>
                       </FormLabel>
                     </u>
-                    <div class="card-body">
-                      <blockquote class="blockquote mb-0">
-                        <div class="card" style={{ marginTop: "-20px" }}>
-                          <div class="card-body">
-                            <blockquote class="blockquote mb-0">
+                    <div className="card-body">
+                      <blockquote className="blockquote mb-0">
+                        <div className="card" style={{ marginTop: "-20px" }}>
+                          <div className="card-body card-bodyy">
+                            <blockquote className="blockquote mb-0">
                               <FormLabel
-                                className="my-3"
+                                className="my-3 content"
                                 style={{
                                   fontSize: "18px",
                                   paddingLeft: "20px",
@@ -183,7 +274,7 @@ function ViewFile() {
                                 <b> {fileData?.username}</b>
                               </FormLabel>
                               <FormLabel
-                                className="my-3"
+                                className="my-3 content"
                                 style={{
                                   fontSize: "18px",
                                   paddingLeft: "20px",
@@ -191,7 +282,7 @@ function ViewFile() {
                                   display: "flex",
                                 }}
                               >
-                                <label>Branch Name :</label>
+                                <label>Branch Name:</label>
                                 <b> {fileData?.branch_name}</b>
                               </FormLabel>
                             </blockquote>
