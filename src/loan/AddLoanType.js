@@ -295,12 +295,10 @@ function AddLoanType() {
                     key={step._id}
                     alignItems="center"
                     mt="5"
-                    style={{ width: "25%" }} // Each switch takes up 33.33% of the width
+                    style={{ width: "25%" }} 
                   >
                     <Switch
                       id={`email-alerts-${step._id}`}
-                      // onChange={handleSwitchChange}
-                      // isChecked={isSubtype}
                     />
                     <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
                       {step.loan_step}

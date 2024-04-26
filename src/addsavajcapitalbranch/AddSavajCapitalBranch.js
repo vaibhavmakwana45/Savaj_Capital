@@ -172,7 +172,7 @@ function AddSavajCapitalBranch() {
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl> */}
               {/* User Details */}
-              <div>
+              <div className="d-flex">
                 <Button
                   mt={4}
                   colorScheme="blue"

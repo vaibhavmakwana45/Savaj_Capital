@@ -33,6 +33,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
+import "./user.css"
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -122,11 +123,11 @@ function UserTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex justifyContent="space-between"  className="thead">
+              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
                 All Users
               </Text>
-              <Flex>
+              <Flex className="thead">
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -137,6 +138,7 @@ function UserTable() {
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
+                  className="adduser-btn"
                 >
                   Add User
                 </Button>
