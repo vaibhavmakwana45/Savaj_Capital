@@ -374,10 +374,17 @@ function AddLoanType() {
                   >
                     <Switch
                       id={`email-alerts-${step.loan_step_id}`}
-                      isChecked={selectedLoanStepIds.includes(step.loan_step_id)}
-                      onChange={(event) => handleSwitchToggle(event, step.loan_step_id)}
+                      isChecked={selectedLoanStepIds.includes(
+                        step.loan_step_id
+                      )}
+                      onChange={(event) =>
+                        handleSwitchToggle(event, step.loan_step_id)
+                      }
                     />
-                    <FormLabel htmlFor={`email-alerts-${step.loan_step_id}`} mb="0">
+                    <FormLabel
+                      htmlFor={`email-alerts-${step.loan_step_id}`}
+                      mb="0"
+                    >
                       {step.loan_step}
                     </FormLabel>
                   </FormControl>
