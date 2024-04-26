@@ -270,7 +270,6 @@ function AddFiles() {
         setSavajcapitalbranchUser([]);
         return;
       }
-
       try {
         const response = await AxiosInstance.get(
           `/savaj_user/${selectedBranchId}`
@@ -676,9 +675,11 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose} >
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent style={{height:"80%",overflow:"scroll",scrollbarWidth:"thin"}}>
+        <ModalContent
+          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
+        >
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>

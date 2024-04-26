@@ -77,6 +77,7 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
+        <TableCell align="">{file?.user_username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
@@ -220,13 +221,23 @@ export default function CollapsibleTable() {
     history.push("/superadmin/adduser");
   };
 
+  const [accessType, setAccessType] = useState("");
+
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+  
+  console.log("accessType", accessType);
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
         const response = await AxiosInstance.get(
-          "/file_upload/get/1712915645772"
+          `/file_upload/get/${accessType.branchuser_id}`
         );
         setFiles(response.data.data);
+        console.log("first", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -234,7 +245,7 @@ export default function CollapsibleTable() {
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
   $(function () {
     $(".progress").each(function () {
@@ -275,7 +286,7 @@ export default function CollapsibleTable() {
     }
   });
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
 
   return (
@@ -285,8 +296,8 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontSize="xl" fontWeight="bold">
+          <Flex justifyContent="space-between" className="thead">
+            <Text fontSize="xl" fontWeight="bold" className="ttext d-flex" >
               Add File
             </Text>
             <div>
@@ -322,6 +333,9 @@ export default function CollapsibleTable() {
               <Table aria-label="collapsible table">
                 <TableHead style={{ borderBottom: "1px solid red" }}>
                   <TableRow>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      User
+                    </TableCell>
                     <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
@@ -347,7 +361,7 @@ export default function CollapsibleTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((file) => (
+                  {filteredUsers?.map((file) => (
                     <Row
                       key={file._id}
                       file={file}
@@ -362,7 +376,7 @@ export default function CollapsibleTable() {
           )}
         </ThemeProvider>
       </div>
-      <div className="container-fluid progress-bar-area">
+      {/* <div className="container-fluid progress-bar-area">
         <div className="row h-100 align-items-center">
           <div className="col">
             <ul className="progressbar">
@@ -413,7 +427,7 @@ export default function CollapsibleTable() {
             </ul>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

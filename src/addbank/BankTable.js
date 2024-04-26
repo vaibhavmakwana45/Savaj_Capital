@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"; // Add axios to your imports// Add axios to your imports
+import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import axios from "axios";
 import {
   Flex,
@@ -169,6 +169,7 @@ function Tables() {
                       ...
                     </Button>
                   </MenuButton>
+
                   <Button onClick={navigateToAssignFile} colorScheme="blue">
                     Assign File
                   </Button>

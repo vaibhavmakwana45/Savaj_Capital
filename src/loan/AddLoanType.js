@@ -209,6 +209,46 @@ function AddLoanType() {
     }
   }, [formData.loan_subtype]);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const data = {
+  //       loan: formData.loan_type,
+  //       is_subtype: isSubtype,
+  //       loan_type: formData.loan_subtype.slice(
+  //         0,
+  //         formData.loan_subtype.length - 1
+  //       ),
+  //       loan_step_id: formData.loan_step_id,
+  //     };
+
+  //     if (
+  //       isSubtype &&
+  //       formData.loan_subtype.slice(0, formData.loan_subtype.length - 1)
+  //         .length == 0
+  //     ) {
+  //       toast.error("please add subtypes");
+  //       return;
+  //     }
+
+  //     const response = await AxiosInstance.post(`/loan/`, data);
+  //     if (response.data.success) {
+  //       const msg = "Loan Added Successfully!";
+  //       toast.success(msg);
+  //       history.push("/superadmin/loan");
+  //     } else {
+  //       toast.error("Please try again later!");
+  //     }
+  //   } catch (error) {
+  //     console.error("Submission error", error);
+  //     toast.error("Failed to add. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -221,6 +261,7 @@ function AddLoanType() {
           0,
           formData.loan_subtype.length - 1
         ),
+        loan_step_id: selectedLoanStepIds, // Include selectedLoanStepIds here
       };
 
       if (
@@ -251,6 +292,8 @@ function AddLoanType() {
   // ======================== Loan Steps =================================================
 
   const [loanSteps, setLoanSteps] = useState([]);
+  const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
+
   const getLoanStepsData = async () => {
     try {
       const response = await AxiosInstance.get("/loan_step");
@@ -266,6 +309,22 @@ function AddLoanType() {
   useEffect(() => {
     getLoanStepsData();
   }, []);
+
+  // Function to handle switch toggle
+  const handleSwitchToggle = (event, stepId) => {
+    const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
+    const index = updatedSelectedLoanStepIds.indexOf(stepId);
+
+    if (event.target.checked && index === -1) {
+      // Add stepId to the array if the switch is checked and not already present
+      updatedSelectedLoanStepIds.push(stepId);
+    } else if (!event.target.checked && index !== -1) {
+      // Remove stepId from the array if the switch is unchecked and present
+      updatedSelectedLoanStepIds.splice(index, 1);
+    }
+
+    setSelectedLoanStepIds(updatedSelectedLoanStepIds);
+  };
 
   return (
     <>
@@ -289,18 +348,43 @@ function AddLoanType() {
                 />
               </FormControl>
 
-              <div className="d-flex flex-wrap">
+              {/* <div className="d-flex flex-wrap">
                 {loanSteps.map((step, index) => (
                   <FormControl
                     key={step._id}
                     alignItems="center"
                     mt="5"
-                    style={{ width: "25%" }} 
+                    style={{ width: "25%" }}
+                  >
+                    <Switch id={`email-alerts-${step._id}`} />
+                    <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
+                      {step.loan_step}
+                    </FormLabel>
+                  </FormControl>
+                ))}
+              </div> */}
+
+              <div className="d-flex flex-wrap">
+                {loanSteps.map((step) => (
+                  <FormControl
+                    key={step._id}
+                    alignItems="center"
+                    mt="5"
+                    style={{ width: "25%" }}
                   >
                     <Switch
-                      id={`email-alerts-${step._id}`}
+                      id={`email-alerts-${step.loan_step_id}`}
+                      isChecked={selectedLoanStepIds.includes(
+                        step.loan_step_id
+                      )}
+                      onChange={(event) =>
+                        handleSwitchToggle(event, step.loan_step_id)
+                      }
                     />
-                    <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
+                    <FormLabel
+                      htmlFor={`email-alerts-${step.loan_step_id}`}
+                      mb="0"
+                    >
                       {step.loan_step}
                     </FormLabel>
                   </FormControl>
