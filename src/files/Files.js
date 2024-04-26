@@ -3,7 +3,7 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
-
+import toast, { Toaster } from "react-hot-toast";
 import {
   Table,
   TableBody,
@@ -17,7 +17,19 @@ import {
 } from "@mui/material";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
-import { Button, useColorModeValue, Input, Flex, Text } from "@chakra-ui/react";
+import {
+  Button,
+  useColorModeValue,
+  Input,
+  Flex,
+  Text,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
@@ -31,7 +43,7 @@ import AxiosInstance from "config/AxiosInstance";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick } = props;
+  const { id, file, handleEditClick, handleDelete } = props;
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
   const [files, setFiles] = useState([]);
@@ -94,7 +106,10 @@ function Row(props) {
         <TableCell align="">
           <Flex>
             <IconButton
-              // onClick={handleDelete()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(file.file_id);
+              }}
               aria-label="Delete bank"
               icon={<DeleteIcon />}
               style={{ marginRight: 15, fontSize: "20px" }}
@@ -209,10 +224,6 @@ export default function CollapsibleTable() {
   };
   const [loading, setLoading] = useState(true);
 
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
-  };
-
   useEffect(() => {
     const fetchFiles = async () => {
       try {
@@ -265,89 +276,146 @@ export default function CollapsibleTable() {
       return (percentage / 100) * 360;
     }
   });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const cancelRef = React.useRef();
+  const deletefile = async (fileId) => {
+    try {
+      await AxiosInstance.delete(`/file_upload/${fileId}`);
+      setFiles(files.filter((file) => file.file_id !== fileId));
+      setIsDeleteDialogOpen(false);
+      toast.success("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("file not delete");
+    }
+  };
   const handleEditClick = (id) => {
     history.push(`/superadmin/editfile?id=${id}`);
   };
-
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
+  };
   return (
-    <div className="card" style={{ marginTop: "120px", borderRadius: "30px" }}>
-      <CardHeader style={{ padding: "30px" }}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Text fontSize="xl" fontWeight="bold">
-            Add File
-          </Text>
-          <div>
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name"
-              width="250px"
-              marginRight="10px"
-            />
+    <>
+      <div
+        className="card"
+        style={{ marginTop: "120px", borderRadius: "30px" }}
+      >
+        <CardHeader style={{ padding: "30px" }}>
+          <Flex justifyContent="space-between" alignItems="center">
+            <Text fontSize="xl" fontWeight="bold">
+              Add File
+            </Text>
+            <div>
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+              />
 
-            <Button
-              onClick={() => history.push("/superadmin/addfile")}
-              colorScheme="blue"
-            >
-              Add Files
-            </Button>
-          </div>
-        </Flex>
-      </CardHeader>
-      <ThemeProvider theme={theme}>
-        {loading ? (
-          <Flex justify="center" align="center" height="100vh">
-            <Loader
-              type="spinner-circle"
-              bgColor={"#3182CE"}
-              color={"black"}
-              size={50}
-            />
+              <Button
+                onClick={() => history.push("/superadmin/addfile")}
+                colorScheme="blue"
+              >
+                Add Files
+              </Button>
+            </div>
           </Flex>
-        ) : (
-          <TableContainer component={Paper}>
-            <Table aria-label="collapsible table">
-              <TableHead style={{ borderBottom: "1px solid red" }}>
-                <TableRow>
-                  <TableCell />
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    File Id
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Loan
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Loan Type
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Created At
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Updated At
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Status
-                  </TableCell>
-                  <TableCell align="" style={{ color: "#BEC7D4" }}>
-                    Action
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredUsers.map((file) => (
-                  <Row
-                    key={file._id}
-                    file={file}
-                    id={file.file_id}
-                    handleRow={handleRow}
-                    handleEditClick={handleEditClick}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </ThemeProvider>
-    </div>
+        </CardHeader>
+        <ThemeProvider theme={theme}>
+          {loading ? (
+            <Flex justify="center" align="center" height="100vh">
+              <Loader
+                type="spinner-circle"
+                bgColor={"#3182CE"}
+                color={"black"}
+                size={50}
+              />
+            </Flex>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table aria-label="collapsible table">
+                <TableHead style={{ borderBottom: "1px solid red" }}>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      File Id
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Loan
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Loan Type
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Created At
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Updated At
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Status
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Action
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredUsers.map((file) => (
+                    <Row
+                      key={file._id}
+                      file={file}
+                      id={file.file_id}
+                      handleRow={handleRow}
+                      handleEditClick={handleEditClick}
+                      handleDelete={handleDelete}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </ThemeProvider>
+        <AlertDialog
+          isOpen={isDeleteDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Delete File
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure? You can't undo this action afterwards.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => deletefile(selectedFileId)}
+                  ml={3}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+      </div>
+      <Toaster />
+    </>
   );
 }

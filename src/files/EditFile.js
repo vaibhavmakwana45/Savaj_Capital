@@ -97,7 +97,7 @@ function EditFile() {
     };
     fetchUsers();
   }, []);
-
+  
   useEffect(() => {
     const fetchLoanType = async () => {
       try {
@@ -109,7 +109,7 @@ function EditFile() {
     };
     fetchLoanType();
   }, []);
-
+  
   useEffect(() => {
     const fetchSavajcapitalbranch = async () => {
       try {
@@ -120,13 +120,14 @@ function EditFile() {
         console.error("Error fetching branches:", error);
       }
     };
-
+    
     fetchSavajcapitalbranch();
     getRolesData();
   }, []);
-
+  
   useEffect(() => {
-    if (!selectedBranchId) {
+    if (selectedBranchId) {
+      console.log("mitaliiiiiiiiiii",selectedBranchId)
       setSavajcapitalbranchUser([]);
       return;
     }
@@ -278,21 +279,21 @@ function EditFile() {
       }
     }
   };
-
+  
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    
     const fileDataArray = Object.values(fileData);
-
+    
     try {
       const newFiles = fileDataArray.filter((file) => file.new);
       const existingFiles = fileDataArray.filter((file) => !file.new);
-
+      
       const uploadPromises = newFiles.map(async (item) => {
         const formData = new FormData();
         formData.append("b_video", item.file);
-
+        
         const response = await axios.post(
           "https://cdn.dohost.in/image_upload.php/",
           formData,
@@ -300,7 +301,6 @@ function EditFile() {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
-
         if (!response.data.success) {
           throw new Error(response.data.msg || "File upload failed");
         }
@@ -330,8 +330,10 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
+        branchuser_id: savajcapitalbranchUser,
+        branch_id: selectedBranchId,
       };
-
+      
       const finalResponse = await AxiosInstance.put(
         `/file_upload/${id}`,
         payload
@@ -420,8 +422,8 @@ function EditFile() {
                     (!selectedLoanType.is_subtype || selectedLoanSubtypeId) &&
                     loanDocuments.length > 0 &&
                     loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                      <div key={document._id} className="upload-area col-6" >
+                        <Text fontSize="xl" className="mx-3" color={textColor} style={{fontSize:"12px",textTransform:"capitalize"}}>
                           {document.loan_document}
                         </Text>
                         <input
@@ -436,11 +438,11 @@ function EditFile() {
                         />
                         {fileData[index] ? (
                           <div
-                            className="file-preview"
+                            className="file-preview text-end"
                             style={{
-                              display: "flex",
+                              
                               marginTop: "15px",
-                              alignItems: "center",
+                              // alignItems: "center",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -450,6 +452,13 @@ function EditFile() {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                             }}
                           >
+                              <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
                             {fileData[index].type === "application/pdf" ? (
                               <embed
                                 src={fileData[index].url}
@@ -471,13 +480,7 @@ function EditFile() {
                                 }}
                               />
                             )}
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
+                          
                           </div>
                         ) : (
                           <div

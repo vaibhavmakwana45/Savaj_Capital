@@ -84,16 +84,18 @@ function AddBankUser() {
 
   const getData = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/bankuser/" + id);
+      const response = await AxiosInstance.get(
+        "/addusers/bankuser/by-user-id/" + id
+      );
 
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 
         const submissionData = {
-          bank_id: id,
-          user_id: "",
+          bank_id: bankDetails.bank_id,
+          user_id: userDetails.user_id,
           bank_name: bankDetails.bank_name,
-          country: bankDetails.country, // Default to India
+          country: bankDetails.country,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
@@ -101,6 +103,11 @@ function AddBankUser() {
           password: "",
           country_code: bankDetails.country_code,
           state_code: bankDetails.state_code,
+          adress: userDetails.adress,
+          dob: userDetails.dob,
+          mobile: userDetails.mobile,
+          adhar: userDetails.adhar,
+          emergancy_contact: userDetails.emergancy_contact,
         };
 
         setSelectedState(bankDetails.state_code);
@@ -144,7 +151,7 @@ function AddBankUser() {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
@@ -156,7 +163,7 @@ function AddBankUser() {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); // Clear cities if no state is selected
+      setCities([]);
     }
   }, [selectedState, selectedCountry]);
 
@@ -330,7 +337,7 @@ function AddBankUser() {
                 </Select>
               </FormControl>
 
-              <FormControl id="bank_name" mt={4} isRequired>
+              <FormControl id="branch_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Select
                   disabled={branches.length == 0}

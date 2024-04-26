@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 
     var data = await BankUser.create(req.body);
     const ApiResponse = await axios.post(
-      `http://192.168.1.7:4010/api/setpassword/passwordmail`,
+      `http://192.168.1.14:4010/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
@@ -135,6 +135,7 @@ router.put("/:bankuser_id", async (req, res) => {
 
 router.get("/:bank_id", async (req, res) => {
   try {
+    console.log('first')
     const bank_id = req.params.bank_id;
 
     var data = await BankUser.aggregate([
@@ -176,5 +177,34 @@ router.get("/:bank_id", async (req, res) => {
     });
   }
 });
+
+router.delete("/deletebankuser/:bankId", async (req, res) => {
+  try {
+    const { bankId } = req.params;
+
+    const deletedBankUser = await BankUser.findOneAndDelete({
+      bankuser_id: bankId,
+    });
+
+    if (!deletedBankUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Bank User deleted successfully",
+      deletedBankUserId: bankId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 
 module.exports = router;

@@ -90,6 +90,10 @@ function Tables() {
     history.push("/superadmin/addbankuser");
   };
 
+  const navigateToAssignFile = () => {
+    history.push("/superadmin/bankassignfile");
+  };
+
   const allHeaders = [
     "Bank Name",
     "Branch Name",
@@ -111,11 +115,12 @@ function Tables() {
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedBankId, setSelectedBankId] = useState(null);
+
+  const [selectedBankUserId, setSelectedBankUserId] = useState(null);
   const cancelRef = React.useRef();
-  const deleteBank = async (bankId) => {
+  const deleteBankUser = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/addbankuser/deletebanks/${bankId}`);
+      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
       setBanks(banks.filter((bank) => bank.bank_id !== bankId));
       setIsDeleteDialogOpen(false);
       toast.success("Bank deleted successfully!");
@@ -126,7 +131,7 @@ function Tables() {
   };
 
   const handleDelete = (id) => {
-    setSelectedBankId(id);
+    setSelectedBankUserId(id);
     setIsDeleteDialogOpen(true);
   };
 
@@ -155,13 +160,19 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-
                 <Menu>
                   <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                    <Button
+                      onClick={navigateToAnotherPage}
+                      colorScheme="blue"
+                      style={{ marginRight: "10px" }}
+                    >
                       ...
                     </Button>
                   </MenuButton>
+                  <Button onClick={navigateToAssignFile} colorScheme="blue">
+                    Assign File
+                  </Button>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
                       <MenuItem
@@ -228,7 +239,7 @@ function Tables() {
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => deleteBank(selectedBankId)}
+                  onClick={() => deleteBankUser(selectedBankUserId)}
                   ml={3}
                 >
                   Delete

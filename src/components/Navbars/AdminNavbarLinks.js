@@ -30,39 +30,32 @@ import {
   ProfileIcon,
   SettingsIcon,
 } from "components/Icons/Icons";
-import { FaSignOutAlt } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaExclamationTriangle,
+  FaMailBulk,
+  FaMailchimp,
+  FaSignOutAlt,
+  FaUser,
+  FaVoicemail,
+} from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 // Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React,{useState, useEffect} from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
+import { jwtDecode } from "jwt-decode";
 
 export default function HeaderLinks(props) {
-
-  const [userdata, setuserdata] =useState([])
-  useEffect(() => {
-    const decodedToken = localStorage.getItem('decodedToken');
-    if (decodedToken) {
-      // console.log("objectttttttttt",parsedToken)
-      const parsedToken = JSON.parse(decodedToken);
-      const { superadmin_id } = parsedToken;
-
-      setuserdata({
-        firstname: parsedToken._id.firstname,
-        lastname: parsedToken._id.lastname,
-        email: parsedToken._id.email,
-      });
-    }
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
   }, []);
-
-  const getInitials = () => {
-    const { firstname, lastname } = userdata || {};
-    return `${firstname ? firstname.charAt(0) : ''}${lastname ? lastname.charAt(0) : ''}`;
-  };
 
   const {
     variant,
@@ -194,42 +187,23 @@ export default function HeaderLinks(props) {
         </MenuButton>
         <MenuList p="16px 8px" bg={menuBg} mt="10px">
           <Flex flexDirection="column">
-          <MenuGroup>
-        <Row>
-          <Col>
-          <Media className="align-items-center">
-                <span
-                  className="d-flex justify-content-center align-items-center p-1"
-                  style={{
-                    width: "40px",
-                    height: "45px",
-                    backgroundColor: "rgba(21, 43, 81, 1)",
-                    borderRadius: "12px",
-                    color: "#fff",
-                  }}
-                >   
-                  {`${userdata?.firstname
-                    ?.slice(0, 1)
-                    .toUpperCase()}${userdata?.lastname
-                    ?.slice(0, 1)
-                    .toUpperCase()}`}
-                </span>
-                </Media>
-          </Col>
-          <Col style={{marginBottom:"10px"}}>
-              <Text>
-                {userdata?.firstname} {userdata?.lastname}
-              </Text>
-              <Text style={{fontSize:"small"}}>
-                {userdata.email}
-              </Text>
-          </Col>
-        </Row>
-      </MenuGroup>
+            <MenuItem borderRadius="8px">
+              <Flex align="center" justifyContent="flex-start">
+                <FaUser color="currentColor" pr="20px" />
+                &nbsp; {accessType?.firstname} {accessType?.lastname} {accessType?.username} {" "}
+                {accessType?.full_name}
+              </Flex>
+            </MenuItem>
+            <MenuItem borderRadius="8px">
+              <Flex align="center" justifyContent="flex-start">
+                <FaEnvelope color="currentColor" pr="20px" />
+                &nbsp; {accessType?.email}
+              </Flex>
+            </MenuItem>
             <MenuItem borderRadius="8px" onClick={handleLogout}>
               <Flex align="center" justifyContent="flex-start">
                 <FaSignOutAlt color="currentColor" pr="20px" />
-                Logout
+                &nbsp; Logout
               </Flex>
             </MenuItem>
           </Flex>

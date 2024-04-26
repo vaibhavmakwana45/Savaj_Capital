@@ -1,5 +1,5 @@
 // import
-import React, { Component } from "react";
+import React from "react";
 import Dashboard from "views/Dashboard/Dashboard.js";
 import BankDashboard from "banksdashboard/BankDashboard";
 import UserDashboard from "userdashboard/UserDashboard";
@@ -34,12 +34,12 @@ import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
-import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
 import Document from "loan/Document";
 import ViewFile from "files/ViewFile";
 import EditFile from "files/EditFile";
+import BankAssignFile from "addbank/BankAssignFile";
 
 var dashRoutes = [
   //superadmin
@@ -184,14 +184,6 @@ var dashRoutes = [
     parent: "loan",
     key: "loantype",
   },
-  {
-    path: "/loandocument",
-    name: "Loan Document",
-    icon: <CreditIcon color="inherit" />,
-    component: LoanDocument,
-    hideInSidebar: true,
-    layout: "/superadmin",
-  },
   //sc branch
   {
     path: "/savajcapitalbranch",
@@ -294,6 +286,16 @@ var dashRoutes = [
     parent: "bank",
     key: "addbank",
   },
+  {
+    path: "/bankassignfile",
+    name: "Bank Assign File",
+    icon: <CreditIcon color="inherit" />,
+    component: BankAssignFile,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    parent: "bank",
+    key: "bankassignfile",
+  },
   //auth
   {
     name: "ACCOUNT PAGES",
@@ -346,7 +348,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
-    hideInSResponsiveSavajUser: true,
+    hideInSResponsivrUser:true
   },
   {
     path: "/userfile",
@@ -355,7 +357,7 @@ var dashRoutes = [
     component: UserFile,
     layout: "/savajcapitaluser",
     hideInSResponsive: false,
-    hideInSResponsiveSavajUser: true,
+    hideInSResponsivrUser:true
   },
   {
     path: "/adduserfile",
@@ -365,6 +367,7 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "adduserfile",
     key: "adduserfile",
+ 
   },
 
   //user
