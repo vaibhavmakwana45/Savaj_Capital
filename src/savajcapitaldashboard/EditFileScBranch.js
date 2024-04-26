@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
-import "./file.scss";
+import "./userfile.scss";
 import { useHistory, useLocation } from "react-router-dom";
 import {
   Button,
@@ -19,7 +19,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 
-function EditFile() {
+function EditFileScBranch() {
   const history = useHistory();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -33,23 +33,15 @@ function EditFile() {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
-  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState("");
-  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [selectedBranchUserId, setSelectedBranchUserId] = useState("");
   const [loanDocuments, setLoanDocuments] = useState([]);
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
-  // function to get extension
   function getFileExtension(url) {
-    // Split the URL by dot (.)
     if (url !== undefined) {
       const parts = url.split(".");
-      // Get the last part which should be the extension
       const extension = parts[parts.length - 1];
-      return extension.toLowerCase(); // Return extension in lowercase for consistency
+      return extension.toLowerCase();
     } else {
       return;
     }
@@ -66,8 +58,6 @@ function EditFile() {
           setSelectedLoanId(details.loan_id);
           setSelectedUser(details.user_id);
           setSelectedLoanSubtypeId(details.loantype_id);
-          setSelectedBranchId(details.branch_id);
-          setSelectedBranchUserId(details.branchuser_id);
           const documentsWithCDN = details.documents.map((doc) => ({
             ...doc,
             file_path: `${CDN_BASE_URL}${doc.file_path}`,
@@ -123,64 +113,10 @@ function EditFile() {
     fetchLoanType();
   }, []);
 
-  useEffect(() => {
-    const fetchSavajcapitalbranch = async () => {
-      try {
-        const response = await AxiosInstance.get("/branch");
-        setSavajcapitalbranch(response.data.data);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
-
-    fetchSavajcapitalbranch();
-    getRolesData();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedBranchId) {
-      setSavajcapitalbranchUser([]);
-      return;
-    }
-    const fetchSavajcapitalbranchUser = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/savaj_user/${selectedBranchId}`
-        );
-        setSavajcapitalbranchUser(response.data.data || []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching branch users:", error);
-      }
-    };
-    fetchSavajcapitalbranchUser();
-  }, [selectedBranchId]);
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
   const handleLoanTypeChange = (event) => {
     const loanId = event.target.value;
     const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
     setSelectedLoanType(selectedLoan || {});
-  };
-
-  const handleBranchChange = (event) => {
-    setSelectedBranchId(event.target.value);
-  };
-
-  const handleBranchUserChange = (event) => {
-    setSelectedBranchUserId(event.target.value);
   };
 
   useEffect(() => {
@@ -214,11 +150,6 @@ function EditFile() {
 
     fetchLoanSubtypes();
   }, [selectedLoanId, loanType]);
-
-  const getRoleName = (roleId) => {
-    const role = roles.find((role) => role.role_id === roleId);
-    return role ? role.role : "No role found";
-  };
 
   useEffect(() => {
     const fetchLoanDocuments = async () => {
@@ -340,8 +271,6 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
-        branchuser_id: selectedBranchUserId,
-        branch_id: selectedBranchId,
       };
 
       const finalResponse = await AxiosInstance.put(
@@ -525,48 +454,6 @@ function EditFile() {
                 </div>
               </div>
             </div>
-
-            <FormControl id="branch_id" mt={4} isRequired>
-              <FormLabel>Branch</FormLabel>
-              <Select
-                placeholder="Select branch"
-                onChange={handleBranchChange}
-                value={selectedBranchId}
-              >
-                {savajcapitalbranch.map((branch) => (
-                  <option key={branch.branch_id} value={branch.branch_id}>
-                    {`${branch.branch_name} (${branch.city})`}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-
-            {selectedBranchId && (
-              <FormControl id="branchuser_id" mt={4} isRequired>
-                <FormLabel>Branch User</FormLabel>
-                <Select
-                  placeholder="Select branch user"
-                  onChange={handleBranchUserChange}
-                  value={selectedBranchUserId}
-                >
-                  {savajcapitalbranchUser.length > 0 ? (
-                    savajcapitalbranchUser.map((branchUser) => (
-                      <option
-                        key={branchUser.branchuser_id}
-                        value={branchUser.branchuser_id}
-                      >
-                        {`${branchUser.full_name} (${getRoleName(
-                          branchUser.role_id
-                        )})`}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>No users available</option>
-                  )}
-                </Select>
-              </FormControl>
-            )}
-
             <Button
               mt={4}
               colorScheme="teal"
@@ -584,4 +471,4 @@ function EditFile() {
   );
 }
 
-export default EditFile;
+export default EditFileScBranch;

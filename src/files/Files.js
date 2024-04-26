@@ -46,22 +46,7 @@ function Row(props) {
   const { id, file, handleEditClick, handleDelete } = props;
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
-  const [files, setFiles] = useState([]);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get("/file_upload");
-        if (response.data.statusCode === 200) {
-          setFiles(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
-    };
-
-    fetchFiles();
-  }, []);
 
   return (
     <React.Fragment>

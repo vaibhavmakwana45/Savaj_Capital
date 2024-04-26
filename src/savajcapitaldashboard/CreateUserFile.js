@@ -224,74 +224,15 @@ function AddFiles() {
       fileInputRefs.current[index].value = "";
     }
   };
+  const [accessType, setAccessType] = useState("");
 
-  //   setdata
-
-  const [jwt, setJwt] = useState([null]);
-
-  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
-  React.useEffect(async () => {
-    const jwtCode = await localStorage.getItem("authToken");
-    const jwt = jwtDecode(jwtCode);
-
-    setJwt(jwt);
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
   }, []);
-  useEffect(() => {
-    const fetchSavajcapitalbranch = async () => {
-      try {
-        const response = await AxiosInstance.get("/branch");
-        setSavajcapitalbranch(response.data.data);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
+  
+  console.log("accessType", accessType);
 
-    fetchSavajcapitalbranch();
-    getRolesData();
-  }, []);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranchUser = async () => {
-      if (!selectedBranchId) {
-        setSavajcapitalbranchUser([]);
-        return;
-      }
-
-      try {
-        const response = await AxiosInstance.get(
-          `file_upload/get/${selectedBranchId}`
-        );
-        setSavajcapitalbranchUser(response.data.data || []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching branch users:", error);
-      }
-    };
-
-    fetchSavajcapitalbranchUser();
-  }, [selectedBranchId]);
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
-  const getRoleName = (roleId) => {
-    const role = roles.find((role) => role.role_id === roleId);
-    return role ? role.role : "No role found";
-  };
   const onSubmit = async (data) => {
     try {
       const wrappedData = { userDetails: data };
@@ -341,8 +282,8 @@ function AddFiles() {
       const payload = {
         user_id: selectedUser,
         loan_id: selectedLoanId,
-        branch_id: jwt._id.branch_id,
-        branchuser_id: jwt._id.branchuser_id,
+        branch_id: accessType.branch_id,
+        branchuser_id: accessType.branchuser_id,
         loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
@@ -350,10 +291,10 @@ function AddFiles() {
         })),
       };
 
-      // await AxiosInstance.post("/file_upload", payload);
+      await AxiosInstance.post("/file_upload", payload);
 
-      // history.push("/savajcapitaluser/userfile");
-      // toast.success("All data submitted successfully!");
+      history.push("/savajcapitaluser/userfile");
+      toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
       toast.error("Submission failed! Please try again.");
@@ -443,7 +384,15 @@ function AddFiles() {
                       selectedLoanType.loansubtype_id)) &&
                     loanDocuments.map((document, index) => (
                       <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor} style={{fontSize:"12px",textTransform:"capitalize"}}>
+                        <Text
+                          fontSize="xl"
+                          className="mx-3"
+                          color={textColor}
+                          style={{
+                            fontSize: "12px",
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {document.loan_document}
                         </Text>
                         <input
@@ -563,9 +512,9 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose} >
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent >
+        <ModalContent>
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>

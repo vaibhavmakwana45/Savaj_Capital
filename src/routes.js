@@ -42,6 +42,7 @@ import EditFile from "files/EditFile";
 import BankAssignFile from "addbank/BankAssignFile";
 import AllFiles from "banksdashboard/AllBankFiles/AllBankFiles";
 import BankFileDetailPage from "banksdashboard/AllBankFiles/BankFileDetailPage";
+import EditFileScBranch from "savajcapitaldashboard/EditFileScBranch";
 
 var dashRoutes = [
   //superadmin
@@ -394,7 +395,15 @@ var dashRoutes = [
     parent: "adduserfile",
     key: "adduserfile",
   },
-
+  {
+    path: "/edituserfile",
+    name: "Edit user file",
+    component: EditFileScBranch,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "edituserfile",
+    key: "edituserfile",
+  },
   //user
   {
     path: "/dashboard",
