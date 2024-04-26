@@ -291,22 +291,16 @@ function AddLoanType() {
 
               <div className="d-flex">
                 {loanSteps.map((step, index) => (
-                  <FormControl  
+                  <FormControl
                     key={step._id}
                     // display="flex"
                     alignItems="center"
                     mt="5"
                   >
-                      <Switch
-                      id={`email-alerts-${step._id}`}
-                      // onChange={handleSwitchChange}
-                      // isChecked={isSubtype}
-                    />
+                    <Switch id={`email-alerts-${step._id}`} />
                     <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
                       {step.loan_step}
                     </FormLabel>
-                    {/* <br />/ */}
-                  
                   </FormControl>
                 ))}
               </div>
