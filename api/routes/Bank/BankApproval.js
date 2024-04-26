@@ -91,15 +91,15 @@ router.get("/bank_user/:bankuser_id", async (req, res) => {
         file_id: file_id,
       });
 
-
-
       if (branchUserData) {
         const loan_id = branchUserData.loan_id;
-        const loantype_id = branchUserData?.loantype_id
-        const user_id = branchUserData?.user_id
+        const loantype_id = branchUserData?.loantype_id;
+        const user_id = branchUserData?.user_id;
         const loan_data = await Loan.findOne({ loan_id: loan_id });
-        const loan_type_data = await Loan_Type.findOne({ loantype_id: loantype_id });
-        const user_data = await User.findOne({user_id: user_id})
+        const loan_type_data = await Loan_Type.findOne({
+          loantype_id: loantype_id,
+        });
+        const user_data = await User.findOne({ user_id: user_id });
 
         if (loan_data) {
           data[i].loan = loan_data.loan;

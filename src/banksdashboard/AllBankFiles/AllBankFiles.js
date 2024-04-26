@@ -201,10 +201,9 @@ export default function CollapsibleTable() {
   };
 
   const [accessType, setAccessType] = useState("");
-
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id); // Set the entire jwt object instead of just jwt._id
+    setAccessType(jwt._id);
   }, []);
 
   const [loading, setLoading] = useState(true);
@@ -215,11 +214,6 @@ export default function CollapsibleTable() {
         try {
           const response = await AxiosInstance.get(
             `/bank_approval/bank_user/${accessType.bankuser_id}`
-          );
-          console.log(response.data.data, "shivam");
-          console.log(
-            `/file_upload/branch_user/${accessType.bankuser_id}`,
-            "shivam"
           );
           setFiles(response.data.data);
           setLoading(false);
