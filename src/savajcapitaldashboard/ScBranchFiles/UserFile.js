@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
-
+import toast, { Toaster } from "react-hot-toast";
 import {
   Table,
   TableBody,
@@ -15,10 +15,21 @@ import {
   Box,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
-import { Button, useColorModeValue, Input, Flex, Text } from "@chakra-ui/react";
+import {
+  Button,
+  useColorModeValue,
+  Input,
+  Flex,
+  Text,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
@@ -32,37 +43,16 @@ import AxiosInstance from "config/AxiosInstance";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick } = props;
-  const history = useHistory();
+  const { id, file, handleEditClick, handleDelete } = props;
   const [open, setOpen] = React.useState(false);
-  const [files, setFiles] = useState([]);
-
-  React.useEffect(() => {
-    const jwt = jwtDecode(localStorage?.getItem("authToken"));
-  }, []);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/file_upload/get/${jwt?._id?.branchuser_id}`
-        );
-        if (response.data.statusCode === 200) {
-          setFiles(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
-    };
-
-    fetchFiles();
-  }, []);
 
   return (
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() => props.handleRow("/superadmin/viewfile?id=" + id)}
+        onClick={() =>
+          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
+        }
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -102,7 +92,10 @@ function Row(props) {
         <TableCell align="">
           <Flex>
             <IconButton
-              // onClick={handleDelete()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(file.file_id);
+              }}
               aria-label="Delete bank"
               icon={<DeleteIcon />}
               style={{ marginRight: 15, fontSize: "20px" }}
@@ -227,7 +220,7 @@ export default function CollapsibleTable() {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
-  
+
   console.log("accessType", accessType);
 
   useEffect(() => {
@@ -288,6 +281,24 @@ export default function CollapsibleTable() {
   const handleEditClick = (id) => {
     history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const cancelRef = React.useRef();
+  const deletefile = async (fileId) => {
+    try {
+      await AxiosInstance.delete(`/file_upload/${fileId}`);
+      setFiles(files.filter((file) => file.file_id !== fileId));
+      setIsDeleteDialogOpen(false);
+      toast.success("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("file not delete");
+    }
+  };
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
+  };
 
   return (
     <>
@@ -333,10 +344,10 @@ export default function CollapsibleTable() {
               <Table aria-label="collapsible table">
                 <TableHead style={{ borderBottom: "1px solid red" }}>
                   <TableRow>
+                    <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       User
                     </TableCell>
-                    <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
                     </TableCell>
@@ -368,6 +379,7 @@ export default function CollapsibleTable() {
                       id={file.file_id}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
+                      handleDelete={handleDelete}
                     />
                   ))}
                 </TableBody>
@@ -376,7 +388,40 @@ export default function CollapsibleTable() {
           )}
         </ThemeProvider>
       </div>
-      {/* <div className="container-fluid progress-bar-area">
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete File
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => deletefile(selectedFileId)}
+                ml={3}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+      <div className="container-fluid progress-bar-area">
         <div className="row h-100 align-items-center">
           <div className="col">
             <ul className="progressbar">
@@ -427,7 +472,8 @@ export default function CollapsibleTable() {
             </ul>
           </div>
         </div>
-      </div> */}
+      </div>
+      <Toaster />
     </>
   );
 }

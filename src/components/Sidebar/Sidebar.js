@@ -1,5 +1,9 @@
 /*eslint-disable*/
-import { HamburgerIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  HamburgerIcon,
+} from "@chakra-ui/icons";
 // chakra imports
 import {
   Box,
@@ -27,29 +31,32 @@ import {
 } from "components/Scrollbar/Scrollbar";
 import { HSeparator } from "components/Separator/Separator";
 // import { SidebarHelp } from "components/Sidebar/SidebarHelp";
-import React from "react";
+import React, { useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
 import logo1 from "../../assets/svg/logo.svg";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "reactstrap";
+import { useHistory } from "react-router-dom";
 
 // FUNCTIONS
 
 function Sidebar(props) {
-  // to check for active links and opened collapses
   let location = useLocation();
-  // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
+  const history = useHistory();
   let variantChange = "0.2s linear";
-  // verifies if routeName is the one active (in browser input)
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const toggle = () => setIsOpenDropdown(!isOpenDropdown);
   const activeRoute = (routeName) => {
     return location.pathname === routeName ? "active" : "";
   };
-  const { colorMode } = useColorMode;
-  // this function creates the links and collapses that appear in the sidebar (left menu)
-  const { sidebarVariant } = props;
   const createLinks = (routes) => {
-    // Chakra Color Mode
     let activeBg = useColorModeValue("white", "navy.700");
     let inactiveBg = useColorModeValue("white", "navy.700");
     let activeColor = useColorModeValue("gray.700", "white");
@@ -86,8 +93,161 @@ function Sidebar(props) {
         );
       }
       return (
-        <NavLink to={prop.layout + prop.path} key={key}>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            history.push(prop.layout + prop.path);
+          }}
+          to={prop.layout + prop.path}
+          key={key}
+          style={{
+            background: "none",
+            border: "none",
+            marginTop: "20px",
+            outline: "none",
+          }}
+        >
           {activeRoute(prop.layout + prop.path) === "active" ? (
+            prop.isDropdown ? (
+              <Button
+                boxSize="initial"
+                justifyContent="flex-start"
+                alignItems="center"
+                boxShadow={sidebarActiveShadow}
+                bg={activeBg}
+                transition={variantChange}
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                _active={{
+                  bg: "inherit",
+                  transform: "none",
+                  borderColor: "transparent",
+                }}
+                _focus={{
+                  boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
+                }}
+              >
+                <Dropdown
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                  }}
+                  isOpen={isOpenDropdown}
+                  toggle={toggle}
+                >
+                  <DropdownToggle
+                    style={{
+                      background: "none",
+                      border: "none",
+                      outline: "none",
+                    }}
+                  >
+                    <Flex>
+                      {typeof prop.icon === "string" ? (
+                        <Icon>{prop.icon}</Icon>
+                      ) : (
+                        <IconBox
+                          bg="blue.500"
+                          color="white"
+                          h="30px"
+                          w="30px"
+                          me="12px"
+                          transition={variantChange}
+                        >
+                          {prop.icon}
+                        </IconBox>
+                      )}
+                      <Text color={activeColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}{" "}
+                        <ChevronDownIcon />
+                      </Text>
+                    </Flex>
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    {prop.childern.map((item, index) => (
+                      <DropdownItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          history.push(prop.layout + item.path);
+                        }}
+                        key={index}
+                      >
+                        {item.name}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </Dropdown>
+              </Button>
+            ) : (
+              <Button
+                boxSize="initial"
+                justifyContent="flex-start"
+                alignItems="center"
+                boxShadow={sidebarActiveShadow}
+                bg={activeBg}
+                transition={variantChange}
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                _active={{
+                  bg: "inherit",
+                  transform: "none",
+                  borderColor: "transparent",
+                }}
+                _focus={{
+                  boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
+                }}
+              >
+                <Flex>
+                  {typeof prop.icon === "string" ? (
+                    <Icon>{prop.icon}</Icon>
+                  ) : (
+                    <IconBox
+                      bg="blue.500"
+                      color="white"
+                      h="30px"
+                      w="30px"
+                      me="12px"
+                      transition={variantChange}
+                    >
+                      {prop.icon}
+                    </IconBox>
+                  )}
+                  <Text color={activeColor} my="auto" fontSize="sm">
+                    {document.documentElement.dir === "rtl"
+                      ? prop.rtlName
+                      : prop.name}
+                  </Text>
+                </Flex>
+              </Button>
+            )
+          ) : prop.isDropdown ? (
             <Button
               boxSize="initial"
               justifyContent="flex-start"
@@ -118,27 +278,55 @@ function Sidebar(props) {
                 boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
               }}
             >
-              <Flex>
-                {typeof prop.icon === "string" ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox
-                    bg="blue.500"
-                    color="white"
-                    h="30px"
-                    w="30px"
-                    me="12px"
-                    transition={variantChange}
-                  >
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={activeColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
-              </Flex>
+              <Dropdown
+                style={{ background: "none", border: "none", outline: "none" }}
+                isOpen={isOpenDropdown}
+                toggle={toggle}
+              >
+                <DropdownToggle
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                  }}
+                >
+                  <Flex>
+                    {typeof prop.icon === "string" ? (
+                      <Icon>{prop.icon}</Icon>
+                    ) : (
+                      <IconBox
+                        bg={inactiveBg}
+                        color="blue.500"
+                        h="30px"
+                        w="30px"
+                        me="12px"
+                        transition={variantChange}
+                      >
+                        {prop.icon}
+                      </IconBox>
+                    )}
+                    <Text color={inactiveColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}{" "}
+                      <ChevronDownIcon />
+                    </Text>
+                  </Flex>
+                </DropdownToggle>
+                <DropdownMenu>
+                  {prop.childern.map((item, index) => (
+                    <DropdownItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        history.push(prop.layout + item.path);
+                      }}
+                      key={index}
+                    >
+                      {item.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </Button>
           ) : (
             <Button
@@ -192,7 +380,7 @@ function Sidebar(props) {
               </Flex>
             </Button>
           )}
-        </NavLink>
+        </Button>
       );
     });
   };
@@ -254,7 +442,6 @@ function Sidebar(props) {
             <Stack direction="column" mb="40px">
               <Box>{links}</Box>
             </Stack>
-            {/* <SidebarHelp sidebarVariant={sidebarVariant} /> */}
           </Scrollbars>
         </Box>
       </Box>
