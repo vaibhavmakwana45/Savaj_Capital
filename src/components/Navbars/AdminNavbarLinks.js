@@ -67,7 +67,6 @@ export default function HeaderLinks(props) {
     name,
     ...rest
   } = props;
-  console.log("name", name);
   const { colorMode } = useColorMode();
 
   // Chakra Color Mode
@@ -190,8 +189,8 @@ export default function HeaderLinks(props) {
             <MenuItem borderRadius="8px">
               <Flex align="center" justifyContent="flex-start">
                 <FaUser color="currentColor" pr="20px" />
-                &nbsp; {accessType?.firstname} {accessType?.lastname} {accessType?.username} {" "}
-                {accessType?.full_name}
+                &nbsp; {accessType?.firstname} {accessType?.lastname}{" "}
+                {accessType?.username} {accessType?.full_name}
               </Flex>
             </MenuItem>
             <MenuItem borderRadius="8px">

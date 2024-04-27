@@ -47,22 +47,7 @@ function Row(props) {
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
   const [files, setFiles] = useState([]);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get("/file_upload");
-        if (response.data.statusCode === 200) {
-          setFiles(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
-    };
-
-    fetchFiles();
-  }, []);
-
+console.log("objectttttttttttt",file)
   return (
     <React.Fragment>
       <TableRow
@@ -149,6 +134,16 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                  {/* {file.length === 0 ? (
+                    <tbody>
+                      <tr className="text-center">
+                        <td colSpan="8" style={{ fontSize: "15px" }}>
+                          No Records Added
+                        </td>
+                      </tr>
+                    </tbody>
+                  ) : (
+                    <> */}
                     {file?.loan_document_ids?.map((documentRow) => (
                       <TableRow key={documentRow.loan_document_id}>
                         <TableCell component="th" scope="row">
@@ -173,6 +168,8 @@ function Row(props) {
                         </TableCell>
                       </TableRow>
                     ))}
+                    {/* </>
+                  )} */}
                   </TableBody>
                 </Table>
               </Paper>
@@ -366,6 +363,16 @@ export default function CollapsibleTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                {filteredUsers.length === 0 ? (
+                  
+                      <TableRow className="text-center" style={{marginLeft:"10%"}}>
+                        <td colSpan="8" style={{ fontSize: "15px" ,color: "#BEC7D4" }}>
+                          No Records Added
+                        </td>
+                      </TableRow>
+                   
+                  ) : (
+                    <>
                   {filteredUsers.map((file) => (
                     <Row
                       key={file._id}
@@ -376,6 +383,8 @@ export default function CollapsibleTable() {
                       handleDelete={handleDelete}
                     />
                   ))}
+                  </>
+                )}
                 </TableBody>
               </Table>
             </TableContainer>

@@ -78,7 +78,7 @@ function AddFiles() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
+  
   const fetchLoanType = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
@@ -90,12 +90,12 @@ function AddFiles() {
   useEffect(() => {
     fetchLoanType();
   }, []);
-
+  
   const handleLoanTypeChange = async (event) => {
     const loanId = event.target.value;
     const selectedType = loanType.find((loan) => loan.loan_id === loanId);
     setSelectedLoanType(selectedType || {});
-
+    
     if (selectedType && selectedType.is_subtype) {
       try {
         const response = await AxiosInstance.get(
@@ -110,32 +110,32 @@ function AddFiles() {
       setLoanSubType([]);
     }
   };
-
+  
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loanDocuments, setLoanDocuments] = useState([]);
-
+  
   const imagesTypes = ["jpeg", "png", "svg", "gif"];
-
+  
   const handleDragOver = (event) => {
     event.preventDefault();
     setIsDragging(true);
   };
-
+  
   const handleDragLeave = () => {
     setIsDragging(false);
   };
-
+  
   const handleDrop = (event) => {
     event.preventDefault();
     setIsDragging(false);
     const file = event.dataTransfer.files[0];
     uploadFile(file);
   };
-
+  
   const progressMove = () => {
     let counter = 0;
     setTimeout(() => {
@@ -149,7 +149,7 @@ function AddFiles() {
       }, 100);
     }, 600);
   };
-
+  
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
@@ -184,7 +184,7 @@ function AddFiles() {
   const fileInputRefs = useRef([]);
 
   useEffect(() => {
-    fileInputRefs.current = loanDocuments.map(
+    fileInputRefs.current = loanDocuments?.map(
       (_, index) => fileInputRefs.current[index] ?? createRef()
     );
   }, [loanDocuments]);
@@ -500,10 +500,10 @@ function AddFiles() {
             <div>
               <div className="d-flex ">
                 <div className="d-flex mainnnn">
-                  {(!selectedLoanType.is_subtype ||
-                    (selectedLoanType.is_subtype &&
-                      selectedLoanType.loansubtype_id)) &&
-                    loanDocuments.map((document, index) => (
+                  {(!selectedLoanType?.is_subtype ||
+                    (selectedLoanType?.is_subtype &&
+                      selectedLoanType?.loansubtype_id)) &&
+                    loanDocuments?.map((document, index) => (
                       <div
                         key={document._id}
                         className="upload-area col-xl-12 col-md-12 col-sm-12"
@@ -675,9 +675,9 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} >
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent style={{height:"80%",overflow:"scroll",scrollbarWidth:"thin"}}>
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -800,7 +800,7 @@ function AddFiles() {
                 {errors.dob && <p>{errors.dob.message}</p>}
               </FormControl>
 
-              <FormControl>
+              <FormControl className="my-2">
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   placeholder="Adhar Card"

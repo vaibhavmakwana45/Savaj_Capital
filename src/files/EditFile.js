@@ -42,6 +42,15 @@ function EditFile() {
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
+  // function to get extension
+  function getFileExtension(url) {
+    // Split the URL by dot (.)
+    const parts = url.split('.');
+    // Get the last part which should be the extension
+    const extension = parts[parts.length - 1];
+    return extension.toLowerCase(); // Return extension in lowercase for consistency
+  }
+
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -115,7 +124,6 @@ function EditFile() {
       try {
         const response = await AxiosInstance.get("/branch");
         setSavajcapitalbranch(response.data.data);
-        console.log("response", response);
       } catch (error) {
         console.error("Error fetching branches:", error);
       }
@@ -165,12 +173,10 @@ function EditFile() {
   };
 
   const handleBranchChange = (event) => {
-    console.log("Branch ID Selected:", event.target.value);
     setSelectedBranchId(event.target.value);
   };
 
   const handleBranchUserChange = (event) => {
-    console.log("Branch User ID Selected:", event.target.value);
     setSelectedBranchUserId(event.target.value);
   };
 
@@ -330,8 +336,8 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
-        branchuser_id: savajcapitalbranchUser,
-        branch_id: selectedBranchId,
+        branchuser_id:selectedBranchUserId,
+        branch_id:selectedBranchId,
       };
       
       const finalResponse = await AxiosInstance.put(
@@ -422,8 +428,16 @@ function EditFile() {
                     (!selectedLoanType.is_subtype || selectedLoanSubtypeId) &&
                     loanDocuments.length > 0 &&
                     loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6" >
-                        <Text fontSize="xl" className="mx-3" color={textColor} style={{fontSize:"12px",textTransform:"capitalize"}}>
+                      <div key={document._id} className="upload-area col-6">
+                        <Text
+                          fontSize="xl"
+                          className="mx-3"
+                          color={textColor}
+                          style={{
+                            fontSize: "12px",
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {document.loan_document}
                         </Text>
                         <input
@@ -440,9 +454,7 @@ function EditFile() {
                           <div
                             className="file-preview text-end"
                             style={{
-                              
                               marginTop: "15px",
-                              // alignItems: "center",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -450,16 +462,18 @@ function EditFile() {
                               backgroundColor: "#e8f0fe",
                               borderRadius: "8px",
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              overflow: "hidden",
                             }}
                           >
-                              <IconButton
+                            <IconButton
                               aria-label="Remove file"
                               icon={<CloseIcon />}
                               size="sm"
                               onClick={() => handleRemoveFile(index)}
                               style={{ margin: "0 10px" }}
                             />
-                            {fileData[index].type === "application/pdf" ? (
+                            
+                            {getFileExtension(fileData[index].url) === "pdf" ? (
                               <embed
                                 src={fileData[index].url}
                                 type="application/pdf"
@@ -470,17 +484,16 @@ function EditFile() {
                               />
                             ) : (
                               <img
+                                className="editimage"
                                 src={fileData[index].url}
                                 alt="Preview"
                                 style={{
-                                  width: 100,
-                                  height: 100,
-                                  margin: "auto",
+                                  width: "100%",
+                                  height: "100%",
                                   borderRadius: "4px",
                                 }}
                               />
                             )}
-                          
                           </div>
                         ) : (
                           <div

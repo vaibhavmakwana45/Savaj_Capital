@@ -38,7 +38,6 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 
 function LoanSubTypes() {
   const [users, setUsers] = useState([]);
-  console.log("users", users);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -112,8 +111,6 @@ function LoanSubTypes() {
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loantype_id === id);
-
-    console.log("Navigating to documents page with data:", data);
     if (data) {
       history.push("/superadmin/documents", {
         state: { loan_id: data.loan_id, loantype_id: data.loantype_id },

@@ -40,6 +40,8 @@ import Document from "loan/Document";
 import ViewFile from "files/ViewFile";
 import EditFile from "files/EditFile";
 import BankAssignFile from "addbank/BankAssignFile";
+import AllFiles from "banksdashboard/AllBankFiles/AllBankFiles";
+import BankFileDetailPage from "banksdashboard/AllBankFiles/BankFileDetailPage";
 
 var dashRoutes = [
   //superadmin
@@ -340,6 +342,30 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: BankDashboard,
     layout: "/bankuser",
+    hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "dashboard",
+  },
+  {
+    path: "/allfiles",
+    name: "All Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: AllFiles,
+    layout: "/bankuser",
+    hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "allfiles",
+  },
+  {
+    path: "/viewbankfile",
+    name: "View Bank Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: BankFileDetailPage,
+    layout: "/bankuser",
+    hideInSidebar: true,
+    // hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "viewbankfile",
   },
   //surajcapitaluser
   {
@@ -348,7 +374,7 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
-    hideInSResponsivrUser:true
+    hideInSResponsivrUser: true,
   },
   {
     path: "/userfile",
@@ -357,7 +383,7 @@ var dashRoutes = [
     component: UserFile,
     layout: "/savajcapitaluser",
     hideInSResponsive: false,
-    hideInSResponsivrUser:true
+    hideInSResponsivrUser: true,
   },
   {
     path: "/adduserfile",
@@ -367,11 +393,9 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "adduserfile",
     key: "adduserfile",
- 
   },
 
   //user
-
   {
     path: "/dashboard",
     name: "User Dashboard",

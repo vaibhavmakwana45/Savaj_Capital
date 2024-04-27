@@ -63,7 +63,6 @@ function Tables() {
     const fetchBanks = async () => {
       try {
         const response = await AxiosInstance.get("/addbankuser");
-        console.log(response.data.data);
         setBanks(response.data.data);
         setLoading(false);
       } catch (error) {
