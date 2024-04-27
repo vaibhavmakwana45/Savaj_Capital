@@ -33,10 +33,9 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
-
 import TableComponent from "TableComponent";
 
-function Tables() {
+function AssignBank() {
   const [banks, setBanks] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -75,22 +74,22 @@ function Tables() {
 
   const navigateToAnotherPage = (id) => {
     if (id) {
-      history.push("/superadmin/addbank?id=" + id);
+      //   history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    history.push("/superadmin/addbank");
+    // history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
     if (id) {
-      history.push("/superadmin/addbankuser?id=" + id);
+      //   history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
-    history.push("/superadmin/addbankuser");
+    // history.push("/superadmin/addbankuser");
   };
 
   const navigateToAssignFile = () => {
-    history.push("/superadmin/bankassignfile");
+    history.push("/savajcapitaluser/assignfile");
   };
 
   const allHeaders = [
@@ -139,7 +138,7 @@ function Tables() {
   };
 
   const handleRow = (id) => {
-    history.push("/superadmin/bankusers?id=" + id);
+    // history.push("/superadmin/bankusers?id=" + id);
   };
 
   return (
@@ -254,4 +253,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default AssignBank;

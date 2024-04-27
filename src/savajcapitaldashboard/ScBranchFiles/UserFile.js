@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
-
+import toast, { Toaster } from "react-hot-toast";
 import {
   Table,
   TableBody,
@@ -15,10 +15,21 @@ import {
   Box,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
-import { Button, useColorModeValue, Input, Flex, Text } from "@chakra-ui/react";
+import {
+  Button,
+  useColorModeValue,
+  Input,
+  Flex,
+  Text,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
@@ -32,37 +43,16 @@ import AxiosInstance from "config/AxiosInstance";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick } = props;
-  const history = useHistory();
+  const { id, file, handleEditClick, handleDelete } = props;
   const [open, setOpen] = React.useState(false);
-  const [files, setFiles] = useState([]);
-
-  React.useEffect(() => {
-    const jwt = jwtDecode(localStorage?.getItem("authToken"));
-  }, []);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/file_upload/get/${jwt?._id?.branchuser_id}`
-        );
-        if (response.data.statusCode === 200) {
-          setFiles(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
-    };
-
-    fetchFiles();
-  }, []);
 
   return (
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() => props.handleRow("/superadmin/viewfile?id=" + id)}
+        onClick={() =>
+          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
+        }
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -77,6 +67,7 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
+        <TableCell align="">{file?.user_username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
@@ -101,7 +92,10 @@ function Row(props) {
         <TableCell align="">
           <Flex>
             <IconButton
-              // onClick={handleDelete()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(file.file_id);
+              }}
               aria-label="Delete bank"
               icon={<DeleteIcon />}
               style={{ marginRight: 15, fontSize: "20px" }}
@@ -220,13 +214,23 @@ export default function CollapsibleTable() {
     history.push("/superadmin/adduser");
   };
 
+  const [accessType, setAccessType] = useState("");
+
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
+  console.log("accessType", accessType);
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
         const response = await AxiosInstance.get(
-          "/file_upload/get/1712915645772"
+          `/file_upload/get/${accessType.branchuser_id}`
         );
         setFiles(response.data.data);
+        console.log("first", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -234,7 +238,7 @@ export default function CollapsibleTable() {
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
   $(function () {
     $(".progress").each(function () {
@@ -275,7 +279,25 @@ export default function CollapsibleTable() {
     }
   });
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
+  };
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const cancelRef = React.useRef();
+  const deletefile = async (fileId) => {
+    try {
+      await AxiosInstance.delete(`/file_upload/${fileId}`);
+      setFiles(files.filter((file) => file.file_id !== fileId));
+      setIsDeleteDialogOpen(false);
+      toast.success("File deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("file not delete");
+    }
+  };
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -324,6 +346,9 @@ export default function CollapsibleTable() {
                   <TableRow>
                     <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      User
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
@@ -347,13 +372,14 @@ export default function CollapsibleTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((file) => (
+                  {filteredUsers?.map((file) => (
                     <Row
                       key={file._id}
                       file={file}
                       id={file.file_id}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
+                      handleDelete={handleDelete}
                     />
                   ))}
                 </TableBody>
@@ -362,6 +388,39 @@ export default function CollapsibleTable() {
           )}
         </ThemeProvider>
       </div>
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete File
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => deletefile(selectedFileId)}
+                ml={3}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
       <div className="container-fluid progress-bar-area">
         <div className="row h-100 align-items-center">
           <div className="col">
@@ -414,6 +473,7 @@ export default function CollapsibleTable() {
           </div>
         </div>
       </div>
+      <Toaster />
     </>
   );
 }
