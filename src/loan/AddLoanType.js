@@ -209,46 +209,6 @@ function AddLoanType() {
     }
   }, [formData.loan_subtype]);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-
-  //   try {
-  //     const data = {
-  //       loan: formData.loan_type,
-  //       is_subtype: isSubtype,
-  //       loan_type: formData.loan_subtype.slice(
-  //         0,
-  //         formData.loan_subtype.length - 1
-  //       ),
-  //       loan_step_id: formData.loan_step_id,
-  //     };
-
-  //     if (
-  //       isSubtype &&
-  //       formData.loan_subtype.slice(0, formData.loan_subtype.length - 1)
-  //         .length == 0
-  //     ) {
-  //       toast.error("please add subtypes");
-  //       return;
-  //     }
-
-  //     const response = await AxiosInstance.post(`/loan/`, data);
-  //     if (response.data.success) {
-  //       const msg = "Loan Added Successfully!";
-  //       toast.success(msg);
-  //       history.push("/superadmin/loan");
-  //     } else {
-  //       toast.error("Please try again later!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Submission error", error);
-  //     toast.error("Failed to add. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -261,7 +221,7 @@ function AddLoanType() {
           0,
           formData.loan_subtype.length - 1
         ),
-        loan_step_id: selectedLoanStepIds, // Include selectedLoanStepIds here
+        loan_step_id: selectedLoanStepIds, 
       };
 
       if (
@@ -316,10 +276,8 @@ function AddLoanType() {
     const index = updatedSelectedLoanStepIds.indexOf(stepId);
 
     if (event.target.checked && index === -1) {
-      // Add stepId to the array if the switch is checked and not already present
       updatedSelectedLoanStepIds.push(stepId);
     } else if (!event.target.checked && index !== -1) {
-      // Remove stepId from the array if the switch is unchecked and present
       updatedSelectedLoanStepIds.splice(index, 1);
     }
 
@@ -347,48 +305,35 @@ function AddLoanType() {
                   value={formData.loan_type}
                 />
               </FormControl>
-
-              {/* <div className="d-flex flex-wrap">
-                {loanSteps.map((step, index) => (
-                  <FormControl
-                    key={step._id}
-                    alignItems="center"
-                    mt="5"
-                    style={{ width: "25%" }}
-                  >
-                    <Switch id={`email-alerts-${step._id}`} />
-                    <FormLabel htmlFor={`email-alerts-${step._id}`} mb="0">
-                      {step.loan_step}
-                    </FormLabel>
-                  </FormControl>
-                ))}
-              </div> */}
-
-              <div className="d-flex flex-wrap">
-                {loanSteps.map((step) => (
-                  <FormControl
-                    key={step._id}
-                    alignItems="center"
-                    mt="5"
-                    style={{ width: "25%" }}
-                  >
-                    <Switch
-                      id={`email-alerts-${step.loan_step_id}`}
-                      isChecked={selectedLoanStepIds.includes(
-                        step.loan_step_id
-                      )}
-                      onChange={(event) =>
-                        handleSwitchToggle(event, step.loan_step_id)
-                      }
-                    />
-                    <FormLabel
-                      htmlFor={`email-alerts-${step.loan_step_id}`}
-                      mb="0"
+              <div className="card" style={{padding:"30px",borderRadius:"15px",marginTop:"30px",boxShadow: "rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px"}}>
+                <div className="d-flex flex-wrap">
+                  {loanSteps.map((step) => (
+                    <FormControl
+                      key={step._id}
+                      alignItems="center"
+                      mt="5"
+                      style={{ width: "25%" }}
                     >
-                      {step.loan_step}
-                    </FormLabel>
-                  </FormControl>
-                ))}
+                      <Switch
+                        id={`email-alerts-${step.loan_step_id}`}
+                        isChecked={selectedLoanStepIds.includes(
+                          step.loan_step_id
+                        )}
+                        onChange={(event) =>
+                          handleSwitchToggle(event, step.loan_step_id)
+                        }
+                        style={{boxShadow: "rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px",borderRadius:"30px",marginBottom:"10px"}}
+                      />
+                      <FormLabel
+                        htmlFor={`email-alerts-${step.loan_step_id}`}
+                        mb="0"
+                        style={{fontSize:"14px",fontWeight:600}}
+                      >
+                        <i>{step.loan_step}</i>
+                      </FormLabel>
+                    </FormControl>
+                  ))}
+                </div>
               </div>
 
               <FormControl display="flex" alignItems="center" mt="5">
@@ -414,7 +359,7 @@ function AddLoanType() {
                         ref={(inputRef) =>
                           (subtypeRefs.current[index] = inputRef)
                         }
-                        mr={2} // Add some margin to the right of the input
+                        mr={2} 
                       />
                       <Button
                         type="button"
