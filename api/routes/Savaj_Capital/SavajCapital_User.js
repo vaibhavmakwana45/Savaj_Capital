@@ -51,14 +51,13 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = moment()
       .utcOffset(330)
       .format("YYYY-MM-DD HH:mm:ss");
-    console.log("first");
 
     req.body.password = "";
 
     var data = await SavajCapital_User.create(req.body);
 
     const ApiResponse = await axios.post(
-      `http://192.168.1.7:4010/api/setpassword/passwordmail`,
+      `http://192.168.1.14:4010/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
