@@ -356,7 +356,7 @@ function EditFileScBranch() {
             )}
             <div>
               <div className="d-flex">
-                <div className="d-flex">
+                <div className="d-flex mainnnn">
                   {selectedLoanId &&
                     (!selectedLoanType.is_subtype || selectedLoanSubtypeId) &&
                     loanDocuments.length > 0 &&

@@ -1,0 +1,162 @@
+
+/* 1680 */
+@media (max-width: 1700px) {
+}
+
+/* 1500 */
+@media (max-width: 1680px) {
+}
+
+/* 1440 */
+@media (max-width: 1449px) {
+}
+
+/* 1280 */
+@media (max-width: 1439px) {
+}
+
+/* 992 */
+@media (max-width: 1279px) {
+}
+
+/* 768 */
+@media (max-width: 991px) {
+}
+
+/* 576 */
+@media (max-width: 767px) {
+}
+
+/* 525 */
+@media (max-width: 575px) {
+  .cardss {
+    padding: 0 !important;
+  }
+  .back-responsive{
+    display: flex !important;
+    margin-bottom: 1px;
+  }
+  .back-responsive b{
+    font-size: 16px;
+  }
+  .back-responsive .icon-button{
+    width: 30px;
+  }
+  .content {
+    flex-direction: column;
+  }
+  .content label {
+    font-size: 15px;
+  }
+  .content b {
+    font-size: 15px;
+  }
+  .card-bodyy {
+    flex: 1 1 auto;
+    padding: 1rem 0.1rem;
+  }
+  .image-responsive{
+    flex-direction: column !important;
+  }
+}
+
+/* 480 */
+@media (max-width: 524px) {
+}
+
+/* 425 */
+@media (max-width: 479px) {
+    .thead{
+        flex-direction: column;
+        text-align: left;
+      }
+      .thead input{
+        width: 181px;
+        margin-bottom: 15px;
+    
+      }
+    .ttext{
+      font-size: 18px !important;
+      margin-bottom: 15px;
+    }
+    .adduser-btn{
+        width: 100px !important;
+    }
+}
+
+/* 375 */
+@media (max-width: 424px) {
+  .mainnnn {
+    flex-direction: column !important;
+  }
+  .thead{
+    flex-direction: column;
+    text-align: left;
+  }
+  .thead input{
+    width: 181px;
+    margin-bottom: 15px;
+
+  }
+.ttext{
+  font-size: 18px !important;
+  margin-bottom: 15px;
+}
+.adduser-btn{
+    width: 100px !important;
+}
+}
+
+/* 320 */
+@media (max-width: 374px) {
+}
+
+/* 280 */
+@media (max-width: 319px) {
+  .cardss {
+    padding: 0 !important;
+  }
+  .back-responsive{
+    display: flex !important;
+    margin-bottom: 1px;
+  }
+  .back-responsive b{
+    font-size: 16px;
+  }
+  .back-responsive .icon-button{
+    width: 30px;
+  }
+  .content {
+    flex-direction: column;
+  }
+  .content label {
+    font-size: 15px;
+  }
+  .content b {
+    font-size: 15px;
+  }
+  .card-bodyy {
+    flex: 1 1 auto;
+    padding: 1rem 0.1rem;
+  }
+  .image-responsive{
+    flex-direction: column !important;
+  }
+  .thead{
+    flex-direction: column;
+    text-align: left;
+  }
+  .thead input{
+    width: 181px;
+    margin-bottom: 15px;
+
+  }
+.ttext{
+  font-size: 18px !important;
+  margin-bottom: 15px;
+}
+.adduser-btn{
+    width: 100px !important;
+}
+
+}

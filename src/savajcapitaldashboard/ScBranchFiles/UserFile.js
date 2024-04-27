@@ -307,8 +307,8 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontSize="xl" fontWeight="bold">
+          <Flex justifyContent="space-between" className="thead">
+            <Text fontSize="xl" fontWeight="bold" className="ttext d-flex" >
               Add File
             </Text>
             <div>

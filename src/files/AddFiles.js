@@ -498,7 +498,7 @@ function AddFiles() {
 
             <div>
               <div className="d-flex ">
-                <div className="d-flex mainnnn">
+                <div className="d-flex mainnnn" style={{overflow:"auto"}}>
                   {(!selectedLoanType?.is_subtype ||
                     (selectedLoanType?.is_subtype &&
                       selectedLoanType?.loansubtype_id)) &&

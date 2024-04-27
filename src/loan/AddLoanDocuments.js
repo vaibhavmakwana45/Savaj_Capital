@@ -218,7 +218,7 @@ function AddLoanDocuments() {
               {formData.loan_documents.map((subtype, index) => (
                 <FormControl key={index} id={`loan_document_${index}`} mt={8}>
                   <FormLabel>{`Loan Documents ${index + 1}`}</FormLabel>
-                  <Flex alignItems="center">
+                  <Flex className="remove-btn">
                     <Input
                       name={`loan_document_${index}`}
                       onChange={(e) => handleChangeSubtype(e, index)}
@@ -239,7 +239,7 @@ function AddLoanDocuments() {
                 </FormControl>
               ))}
 
-              <div>
+              <div className="d-flex">
                 <Button
                   mt={4}
                   colorScheme="teal"

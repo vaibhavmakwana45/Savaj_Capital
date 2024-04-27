@@ -415,6 +415,35 @@
   .image-responsive{
     flex-direction: column !important;
   }
+  .thead{
+    flex-direction: column;
+    text-align: left;
+  }
+  .thead input{
+    width: 181px;
+    margin-bottom: 15px;
+
+  }
+.ttext{
+  font-size: 18px !important;
+  margin-bottom: 15px;
+}
+.remove-btn{
+  flex-direction: column;
+}
+.remove-btn button{
+  width: 50%;
+  margin-top: 10px;
+}
+.ttextt{
+width: 100px !important;
+}
+.textt{
+  font-size: 17px !important;
+}
+.mainnnn {
+  flex-direction: column !important;
+}
 }
 
 .TableCell {
