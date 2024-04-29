@@ -89,9 +89,7 @@ function AddLoanDocuments() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await axios.get(
-          "http://192.168.1.14:4010/api/document"
-        );
+        const response = await AxiosInstance.get("/document");
         setCurrentDocs(response.data.data);
       } catch (error) {
         console.error("Error fetching documents", error);
@@ -147,7 +145,18 @@ function AddLoanDocuments() {
       setLoading(false);
     }
   };
+  const filterSelectedDocs = () => {
+    // Create a set of all selected documents
+    const selectedDocSet = new Set();
+    titles.forEach((title) => {
+      title.documents.forEach((doc) => {
+        selectedDocSet.add(doc.document);
+      });
+    });
 
+    // Filter out selected documents from currentDocs
+    return currentDocs.filter((doc) => !selectedDocSet.has(doc.document));
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -235,7 +244,7 @@ function AddLoanDocuments() {
                         onChange={(values) => setSelectedDocs(values)}
                       >
                         <Stack>
-                          {currentDocs.map((doc) => (
+                          {filterSelectedDocs().map((doc) => (
                             <Checkbox key={doc.id} value={doc.document}>
                               {doc.document}
                             </Checkbox>

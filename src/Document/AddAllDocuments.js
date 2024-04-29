@@ -35,7 +35,7 @@ function AddAllDocuments() {
 
   const getDocumentData = async () => {
     try {
-      const response = await axios.get("http://192.168.1.14:4010/api/document");
+      const response = await AxiosInstance.get("/document");
 
       if (response.data.success) {
         setDocuments(response.data.data);
@@ -75,7 +75,7 @@ function AddAllDocuments() {
   const deleteDocument = async (documentId) => {
     try {
       const response = await AxiosInstance.delete(
-        `http://192.168.1.14:4010/api/document/${documentId}`
+        `/document/${documentId}`
       );
       getDocumentData();
       setIsDeleteDialogOpen(false);
@@ -112,8 +112,8 @@ function AddAllDocuments() {
 
   const handleAddDocument = async (document) => {
     try {
-      const response = await axios.post(
-        "http://192.168.1.14:4010/api/document",
+      const response = await AxiosInstance.post(
+        "/document",
         { document }
       );
       console.log("response", response);
@@ -136,8 +136,8 @@ function AddAllDocuments() {
 
   const editDocument = async (document) => {
     try {
-      const response = await axios.put(
-        "http://192.168.1.14:4010/api/document/" + selectedDocumetId,
+      const response = await AxiosInstance.put(
+        "/document/" + selectedDocumetId,
         {
           document,
         }
