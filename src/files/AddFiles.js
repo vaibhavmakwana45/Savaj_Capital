@@ -150,13 +150,15 @@ function AddFiles() {
     }, 600);
   };
 
+  const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
+
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
         let url;
         if (selectedLoanType.is_subtype) {
           if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
-            url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+            url = `/loan_docs/documents/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
           }
         } else if (selectedLoanType.loan_id) {
           url = `/loan_docs/${selectedLoanType.loan_id}`;
@@ -164,7 +166,18 @@ function AddFiles() {
 
         if (url) {
           const response = await AxiosInstance.get(url);
-          setLoanDocuments(response.data.data);
+          const data = response.data.data;
+
+          // Group documents by title
+          const grouped = data.reduce((acc, document) => {
+            if (!acc[document.title]) {
+              acc[document.title] = [];
+            }
+            acc[document.title].push(document);
+            return acc;
+          }, {});
+
+          setGroupedLoanDocuments(grouped);
         }
       } catch (error) {
         console.error("Error fetching loan documents:", error);
@@ -177,7 +190,7 @@ function AddFiles() {
     ) {
       fetchLoanDocuments();
     } else {
-      setLoanDocuments([]);
+      setGroupedLoanDocuments({});
     }
   }, [selectedLoanType]);
 
@@ -497,12 +510,11 @@ function AddFiles() {
             )}
 
             <div>
-              <div className="d-flex ">
-                <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                  {(!selectedLoanType?.is_subtype ||
-                    (selectedLoanType?.is_subtype &&
-                      selectedLoanType?.loansubtype_id)) &&
-                    loanDocuments?.map((document, index) => (
+              {Object.keys(groupedLoanDocuments).map((title) => (
+                <div key={title}>
+                  <h2>{title}</h2>
+                  <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
+                    {groupedLoanDocuments[title].map((document, index) => (
                       <div
                         key={document._id}
                         className="upload-area col-xl-12 col-md-12 col-sm-12"
@@ -516,7 +528,7 @@ function AddFiles() {
                             textTransform: "capitalize",
                           }}
                         >
-                          {document.loan_document}
+                          {document.document_names}
                         </Text>
                         <input
                           type="file"
@@ -607,9 +619,11 @@ function AddFiles() {
                         )}
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
+
             <div>
               <FormControl id="branch_id" mt={4} isRequired>
                 <FormLabel>Savaj Capital Branch</FormLabel>
