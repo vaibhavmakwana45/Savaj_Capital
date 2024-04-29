@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flex,
   Text,
@@ -24,9 +24,9 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { CloseIcon } from "@chakra-ui/icons";
+import axios from "axios";
 
 function AddLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -35,7 +35,8 @@ function AddLoanDocuments() {
   const [formData, setFormData] = useState({
     loan_id: "",
     loantype_id: "",
-    loan_documents: [""],
+    title: "",
+    document_ids: [],
   });
   const [loandata, setLoanData] = useState([]);
   const [loanType, setLoanType] = useState([]);
@@ -99,45 +100,59 @@ function AddLoanDocuments() {
     fetchDocuments();
   }, []);
 
+  useEffect(() => {
+    setCurrentTitle("");
+    setSelectedDocs([]);
+  }, [formData.loan_id, formData.loantype_id]);
+
+  useEffect(() => {
+    setTitles([]);
+  }, [formData.loan_id, formData.loantype_id, loanName, subType]);
+
   const handleAddTitle = () => {
     if (!currentTitle || selectedDocs.length === 0) {
       toast.error("Please enter a title and select at least one document.");
       return;
     }
+  
     const newTitle = {
       title: currentTitle,
-      documents: selectedDocs.map((docName) =>
-        currentDocs.find((doc) => doc.document === docName)
-      ),
+      documents: selectedDocs.map((docName) => {
+        const selectedDoc = currentDocs.find((doc) => doc.document === docName);
+        return { document: selectedDoc.document, document_id: selectedDoc.document_id };
+      }),
     };
-    setTitles([...titles, newTitle]);
+  
+    const document_ids = newTitle.documents.map((doc) => doc.document_id);
+  
+    setTitles([...titles, { ...newTitle, document_ids }]);
     setCurrentTitle("");
     setSelectedDocs([]);
     toast.success("Title added successfully!");
   };
-
+  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
-      const data = {
-        loan_id: formData.loan_id,
-        loantype_id: formData.loantype_id,
-        loan_document: formData.loan_documents.slice(
-          0,
-          formData.loan_documents.length - 1
-        ),
-      };
-
-      const response = await AxiosInstance.post(`/loan_docs/`, data);
-      if (response.data.success) {
-        const msg = "Loan Added Successfully!";
-        toast.success(msg);
-        history.push("/superadmin/loan");
-      } else {
-        toast.error("Please try again later!");
+      for (const postData of titles) {
+        const { title: titleName, document_ids } = postData;
+        console.log('postData', postData)
+        const response = await axios.post(`http://192.168.1.19:4010/api/loan_docs`, {
+          loan_id: formData.loan_id,
+          loantype_id: formData.loantype_id,
+          title: titleName,
+          document_id: document_ids,
+        });
+  
+        console.log("Response:", response.data);
+        toast.success("Document created successfully");
       }
+  
+      toast.success("Loan Added Successfully!");
+      history.push("/superadmin/loan");
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -145,18 +160,28 @@ function AddLoanDocuments() {
       setLoading(false);
     }
   };
+  
+  
   const filterSelectedDocs = () => {
-    // Create a set of all selected documents
     const selectedDocSet = new Set();
     titles.forEach((title) => {
       title.documents.forEach((doc) => {
         selectedDocSet.add(doc.document);
       });
     });
-
-    // Filter out selected documents from currentDocs
     return currentDocs.filter((doc) => !selectedDocSet.has(doc.document));
   };
+
+  const handleRemoveDocument = (titleIndex, docIndexToRemove) => {
+    const updatedTitles = [...titles];
+    updatedTitles[titleIndex].documents.splice(docIndexToRemove, 1);
+    if (updatedTitles[titleIndex].documents.length === 0) {
+      updatedTitles.splice(titleIndex, 1);
+    }
+    setTitles(updatedTitles);
+    toast.success("Document removed successfully!");
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -219,7 +244,7 @@ function AddLoanDocuments() {
                 </FormControl>
               ) : null}
 
-              <FormControl isRequired mt={4}>
+              <FormControl mt={4}>
                 <FormLabel>Title</FormLabel>
                 <Input
                   placeholder="Enter title for the documents"
@@ -270,35 +295,38 @@ function AddLoanDocuments() {
                     Titles and Documents
                   </Text>
                 )}
-                <Flex direction="column" pt={{ base: "20px", md: "10px" }}>
+                <Flex direction="row" pt={{ base: "20px", md: "10px" }}>
                   {titles.map((title, index) => (
-                    <Card key={index} mt={2}>
-                      <CardHeader p="6px 0px 22px 0px">
-                        <Flex
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Text
-                            fontSize="md"
-                            color={textColor}
-                            fontWeight="bold"
-                          >
-                            {title.title}
-                          </Text>
-                        </Flex>
-                      </CardHeader>
-                      <CardBody>
+                    <Flex direction="column" key={index} mr={4}>
+                      <Text fontSize="lg" fontWeight="bold" mb={2}>
+                        {title.title}
+                      </Text>
+                      {title.documents.length > 0 ? (
                         <ul>
                           {title.documents.map((doc, docIndex) => (
-                            <li key={docIndex}>{doc.document}</li>
+                            <li
+                              key={docIndex}
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              {doc.document}
+                              <CloseIcon
+                                ml={2}
+                                color="red.500"
+                                cursor="pointer"
+                                onClick={() =>
+                                  handleRemoveDocument(index, docIndex)
+                                }
+                              />
+                            </li>
                           ))}
                         </ul>
-                      </CardBody>
-                    </Card>
+                      ) : (
+                        <Text>No documents added</Text>
+                      )}
+                    </Flex>
                   ))}
                 </Flex>
               </>
-
               <div className="d-flex">
                 <Button
                   mt={4}
