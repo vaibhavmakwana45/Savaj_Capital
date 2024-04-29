@@ -153,4 +153,66 @@ router.put("/:loan_document_id", async (req, res) => {
   }
 });
 
+router.post("/test", async (req, res) => {
+  try {
+    const { loan_id, loantype_id, title, document_id } = req.body;
+
+    // Find the existing document based on loan_id, loantype_id (if provided), and title
+    const existingDocument = await Loan_Documents.findOne({
+      loan_id,
+      ...(loantype_id && { loantype_id }),
+      title: { $regex: new RegExp(`^${title}$`, 'i') }
+    });
+
+    if (existingDocument) {
+      // Check if any of the new document_ids are already present in the existing document
+      const newDocumentIds = document_id.filter(id => !existingDocument.document_ids.includes(id));
+
+      // If there are new document_ids, push them to the existing document's document_ids array
+      if (newDocumentIds.length > 0) {
+        existingDocument.document_ids.push(...newDocumentIds);
+        existingDocument.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+        await existingDocument.save();
+      }
+
+      return res.json({
+        success: true,
+        data: existingDocument,
+        message: "Document updated successfully",
+      });
+    } else {
+      // If document does not exist, create a new document
+      const timestamp = Date.now();
+      const uniqueId = `${timestamp}`;
+
+      const newDocument = await Loan_Documents.create({
+        loan_document_id: uniqueId,
+        loan_id,
+        loantype_id,
+        title,
+        document_ids: document_id, // Pass document_id as a flat array of strings
+        createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      });
+
+      return res.json({
+        success: true,
+        data: newDocument,
+        message: "Document created successfully",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+
+
+
+
+
+
 module.exports = router;
