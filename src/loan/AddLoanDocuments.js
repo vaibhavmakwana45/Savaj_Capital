@@ -140,7 +140,7 @@ function AddLoanDocuments() {
       for (const postData of titles) {
         const { title: titleName, document_ids } = postData;
         console.log('postData', postData)
-        const response = await axios.post(`http://192.168.1.19:4010/api/loan_docs`, {
+        const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
           title: titleName,

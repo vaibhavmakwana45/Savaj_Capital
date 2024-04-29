@@ -514,111 +514,123 @@ function AddFiles() {
                 <div key={title}>
                   <h2>{title}</h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                    {groupedLoanDocuments[title].map((document, index) => (
-                      <div
-                        key={document._id}
-                        className="upload-area col-xl-12 col-md-12 col-sm-12"
-                      >
-                        <Text
-                          fontSize="xl"
-                          className="mx-3"
-                          color={textColor}
-                          style={{
-                            fontSize: "12px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {document.document_names}
-                        </Text>
-                        <input
-                          type="file"
-                          ref={(el) => (fileInputRefs.current[index] = el)}
-                          className="drop-zoon__file-input"
-                          onChange={(event) =>
-                            handleFileInputChange(event, index)
-                          }
-                          style={{ display: "none" }}
-                        />
-                        {fileData[index] ? (
-                          <div
-                            className="file-preview text-end"
-                            style={{
-                              // display: "flex",
-                              marginTop: "15px",
-                              // alignItems: "end",
-                              justifyContent: "space-between",
-                              width: "100%",
-                              padding: "10px",
-                              boxSizing: "border-box",
-                              backgroundColor: "#e8f0fe",
-                              borderRadius: "8px",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                            }}
-                          >
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
-                            {fileData[index].url ? (
-                              <img
-                                src={fileData[index].url}
-                                alt="Preview"
-                                style={{
-                                  width: 100,
-                                  height: 100,
-                                  margin: "auto",
-                                  borderRadius: "4px",
-                                }}
-                              />
-                            ) : (
-                              <span
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "100%",
-                                  padding: "20px",
-                                }}
+                    {groupedLoanDocuments[title].map(
+                      (documentGroup, groupIndex) => (
+                        <div key={groupIndex}>
+                          {documentGroup.document_names.map(
+                            (documentName, index) => (
+                              <div
+                                key={documentGroup.document_ids[index]}
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
-                                <FontAwesomeIcon
-                                  icon={faFile}
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
+                                  color={textColor}
                                   style={{
-                                    fontSize: "24px",
-                                    marginBottom: 10,
-                                    color: "#0056b3",
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
                                   }}
-                                />
-                                {fileData[index].name}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <div
-                            className={`upload-area__drop-zoon drop-zoon ${
-                              isDragging ? "drop-zoon--over" : ""
-                            }`}
-                            onClick={() => fileInputRefs.current[index].click()}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <span className="drop-zoon__icon">
-                              <i className="bx bxs-file-image"></i>
-                            </span>
-                            <p className="drop-zoon__paragraph">
-                              Drop your file here or click to browse
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    ref={(el) =>
+                                      (fileInputRefs.current[index] = el)
+                                    }
+                                    className="drop-zoon__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(event, index)
+                                    }
+                                    style={{ display: "none" }}
+                                  />
+                                  {fileData[index] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        boxSizing: "border-box",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() => handleRemoveFile(index)}
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[index].url ? (
+                                        <img
+                                          src={fileData[index].url}
+                                          alt="Preview"
+                                          style={{
+                                            width: 100,
+                                            height: 100,
+                                            margin: "auto",
+                                            borderRadius: "4px",
+                                          }}
+                                        />
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <FontAwesomeIcon
+                                            icon={faFile}
+                                            style={{
+                                              fontSize: "24px",
+                                              marginBottom: 10,
+                                              color: "#0056b3",
+                                            }}
+                                          />
+                                          {fileData[index].name}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zoon drop-zoon ${
+                                        isDragging ? "drop-zoon--over" : ""
+                                      }`}
+                                      onClick={() =>
+                                        fileInputRefs.current[index].click()
+                                      }
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                      }}
+                                    >
+                                      <span className="drop-zoon__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zoon__paragraph">
+                                        Drop your file here or click to browse
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               ))}
