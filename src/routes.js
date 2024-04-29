@@ -46,6 +46,8 @@ import EditFileScBranch from "savajcapitaldashboard/ScBranchFiles/EditFileScBran
 import DetailScFilePage from "savajcapitaldashboard/ScBranchFiles/DetailScFilePage";
 import AssignBank from "savajcapitaldashboard/AssignBank/AssignBank";
 import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
+import AddAllDocuments from "Document/AddAllDocuments";
+import AllStep from "Allstep/AllStep";
 
 var dashRoutes = [
   //superadmin
@@ -319,6 +321,24 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "bank",
     key: "bankassignfile",
+  },
+  //document
+  {
+    path: "/addalldocument",
+    name: "Documents",
+    icon: <DocumentIcon color="inherit" />,
+    component: AddAllDocuments,
+    layout: "/superadmin",
+    hideInSResponsive: true,
+  },
+  //document
+  {
+    path: "/addalldstep",
+    name: "Loan Step",
+    icon: <CreditIcon color="inherit" />,
+    component: AllStep,
+    layout: "/superadmin",
+    hideInSResponsive: true,
   },
   //auth
   {

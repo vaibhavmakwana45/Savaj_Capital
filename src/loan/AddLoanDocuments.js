@@ -1,3 +1,4 @@
+import React, { useEffect, useState, useRef } from "react";
 import {
   Flex,
   Text,
@@ -5,20 +6,25 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+  Checkbox,
+  CheckboxGroup,
+  Stack,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
-  Switch,
+  Select,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import React, { useEffect, useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Country, State, City } from "country-state-city";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
-import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
@@ -26,46 +32,45 @@ function AddLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-
-  const subtypeRefs = useRef([]);
   const [formData, setFormData] = useState({
-    loan_type: "",
+    loan_id: "",
+    loantype_id: "",
     loan_documents: [""],
   });
-
   const [loandata, setLoanData] = useState([]);
-  console.log(loandata, "loandata");
-
-  const getLoanData = async () => {
-    try {
-      const response = await AxiosInstance.get("/loan/loan");
-
-      if (response.data.success) {
-        setLoanData(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    getLoanData();
-  }, []);
-
   const [loanType, setLoanType] = useState([]);
   const [subType, setSubType] = useState(null);
   const [loanName, setLoanName] = useState("");
+  const [titles, setTitles] = useState([]);
+  const [currentTitle, setCurrentTitle] = useState("");
+  const [currentDocs, setCurrentDocs] = useState([]);
+  const [selectedDocs, setSelectedDocs] = useState([]);
+
+  useEffect(() => {
+    const getLoanData = async () => {
+      try {
+        const response = await AxiosInstance.get("/loan/loan");
+
+        if (response.data.success) {
+          setLoanData(response.data.data);
+        } else {
+          alert("Please try again later...!");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getLoanData();
+  }, []);
+
   const getData = async (loanId) => {
     try {
-      // Make the API call with the loan_id parameter
       const response = await AxiosInstance.get(
         `/loan_type/loan_type/${loanId}`
       );
 
       if (response.data.success) {
-        // Set the loanType state with the received data
         setLoanType(response.data.data);
         setLoanName(response?.data?.loan[0]?.loan);
         setSubType(response.data.loan[0].is_subtype);
@@ -78,52 +83,40 @@ function AddLoanDocuments() {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
-
-  const handleChangeSubtype = (e, index) => {
-    const { name, value } = e.target;
-    const subtypes = [...formData.loan_documents];
-    subtypes[index] = value;
-    setFormData({
-      ...formData,
-      loan_documents: subtypes,
-    });
-  };
-
-  const handleAddSubtype = () => {
-    setFormData({
-      ...formData,
-      loan_documents: [...formData.loan_documents, ""],
-    });
-  };
-
-  const handleRemoveSubtype = (index) => {
-    const subtypes = [...formData.loan_documents];
-    subtypes.splice(index, 1);
-
-    console.log("subtype.splice", subtypes.splice(index, 1));
-    setFormData({
-      ...formData,
-      loan_documents: subtypes,
-    });
-  };
+    getData(formData.loan_id);
+  }, [formData.loan_id]);
 
   useEffect(() => {
-    const secondLastSubtype =
-      formData.loan_documents[formData.loan_documents.length - 2];
-    const lastSubtype =
-      formData.loan_documents[formData.loan_documents.length - 1];
-    if (secondLastSubtype !== "" && lastSubtype !== "") {
-      handleAddSubtype();
-    } else if (
-      secondLastSubtype === "" &&
-      lastSubtype === "" &&
-      formData.loan_documents.length > 1
-    ) {
-      handleRemoveSubtype(formData.loan_documents.length - 1);
+    const fetchDocuments = async () => {
+      try {
+        const response = await axios.get(
+          "http://192.168.1.14:4010/api/document"
+        );
+        setCurrentDocs(response.data.data);
+      } catch (error) {
+        console.error("Error fetching documents", error);
+        toast.error("Failed to load documents.");
+      }
+    };
+    fetchDocuments();
+  }, []);
+
+  const handleAddTitle = () => {
+    if (!currentTitle || selectedDocs.length === 0) {
+      toast.error("Please enter a title and select at least one document.");
+      return;
     }
-  }, [formData.loan_documents]);
+    const newTitle = {
+      title: currentTitle,
+      documents: selectedDocs.map((docName) =>
+        currentDocs.find((doc) => doc.document === docName)
+      ),
+    };
+    setTitles([...titles, newTitle]);
+    setCurrentTitle("");
+    setSelectedDocs([]);
+    toast.success("Title added successfully!");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -176,8 +169,6 @@ function AddLoanDocuments() {
                   onChange={(e) => {
                     const selectedLoanId = e.target.value;
                     setFormData({ ...formData, loan_id: selectedLoanId });
-                    // Call getData with the selected loan_id
-                    getData(selectedLoanId);
                   }}
                 >
                   {loandata.map((index) => (
@@ -187,57 +178,117 @@ function AddLoanDocuments() {
                   ))}
                 </Select>
               </FormControl>
-              <FormControl id="savajcapitalbranch_name" mt={4}>
- 
-  {subType === true && (loanName !== 'Car' && loanName !== 'CRL-Car Loan' )? (
-    <>
-     <FormLabel>Select Loan-Type</FormLabel>
-    <Select
-      name="city"
-      placeholder="Select Loan-Type"
-      onChange={(e) =>
-        setFormData({ ...formData, loantype_id: e.target.value })
-      }
-    >
-      <option key="title" disabled style={{ fontWeight: 800 }}>
-        {loanName}
-      </option>
-      {loanType.map((index) => (
-        <option key={index.loantype_id} value={index.loantype_id}>
-          {index.loan_type}
-        </option>
-      ))}
-    </Select>
-    </>
-  ) : (
-    <></>
-  )}
-</FormControl>
-
-
-              {formData.loan_documents.map((subtype, index) => (
-                <FormControl key={index} id={`loan_document_${index}`} mt={8}>
-                  <FormLabel>{`Loan Documents ${index + 1}`}</FormLabel>
-                  <Flex className="remove-btn">
-                    <Input
-                      name={`loan_document_${index}`}
-                      onChange={(e) => handleChangeSubtype(e, index)}
-                      value={subtype}
-                      ref={(inputRef) =>
-                        (subtypeRefs.current[index] = inputRef)
+              {subType === true &&
+              loanName !== "Car" &&
+              loanName !== "CRL-Car Loan" ? (
+                <FormControl id="savajcapitalbranch_name" mt={4}>
+                  <>
+                    <FormLabel>Select Loan-Type</FormLabel>
+                    <Select
+                      name="city"
+                      placeholder="Select Loan-Type"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          loantype_id: e.target.value,
+                        })
                       }
-                      mr={2} // Add some margin to the right of the input
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveSubtype(index)}
-                      colorScheme="red"
                     >
-                      Remove
-                    </Button>
-                  </Flex>
+                      <option key="title" disabled style={{ fontWeight: 800 }}>
+                        {loanName}
+                      </option>
+                      {loanType.map((index) => (
+                        <option
+                          key={index.loantype_id}
+                          value={index.loantype_id}
+                        >
+                          {index.loan_type}
+                        </option>
+                      ))}
+                    </Select>
+                  </>
                 </FormControl>
-              ))}
+              ) : null}
+
+              <FormControl isRequired mt={4}>
+                <FormLabel>Title</FormLabel>
+                <Input
+                  placeholder="Enter title for the documents"
+                  value={currentTitle}
+                  onChange={(e) => setCurrentTitle(e.target.value)}
+                />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Documents</FormLabel>
+                <Popover>
+                  <PopoverTrigger>
+                    <Button>Select Documents</Button>
+                  </PopoverTrigger>
+                  <PopoverContent style={{ marginLeft: "15px" }}>
+                    <PopoverArrow />
+                    <PopoverCloseButton />
+                    <PopoverHeader>Select the documents:</PopoverHeader>
+                    <PopoverBody>
+                      <CheckboxGroup
+                        colorScheme="blue"
+                        value={selectedDocs}
+                        onChange={(values) => setSelectedDocs(values)}
+                      >
+                        <Stack>
+                          {currentDocs.map((doc) => (
+                            <Checkbox key={doc.id} value={doc.document}>
+                              {doc.document}
+                            </Checkbox>
+                          ))}
+                        </Stack>
+                      </CheckboxGroup>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+
+              <Button mt={4} colorScheme="blue" onClick={handleAddTitle}>
+                Add Title
+              </Button>
+              <>
+                {titles.length > 0 && (
+                  <Text
+                    fontSize="xl"
+                    color={textColor}
+                    fontWeight="bold"
+                    mt={4}
+                  >
+                    Titles and Documents
+                  </Text>
+                )}
+                <Flex direction="column" pt={{ base: "20px", md: "10px" }}>
+                  {titles.map((title, index) => (
+                    <Card key={index} mt={2}>
+                      <CardHeader p="6px 0px 22px 0px">
+                        <Flex
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Text
+                            fontSize="md"
+                            color={textColor}
+                            fontWeight="bold"
+                          >
+                            {title.title}
+                          </Text>
+                        </Flex>
+                      </CardHeader>
+                      <CardBody>
+                        <ul>
+                          {title.documents.map((doc, docIndex) => (
+                            <li key={docIndex}>{doc.document}</li>
+                          ))}
+                        </ul>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </Flex>
+              </>
 
               <div className="d-flex">
                 <Button
