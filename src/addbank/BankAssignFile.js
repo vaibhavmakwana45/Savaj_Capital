@@ -21,6 +21,9 @@ import axios from "axios";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
+import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 
 function BankAssignFile() {
   const history = useHistory();
@@ -102,6 +105,11 @@ function BankAssignFile() {
     }
   };
 
+  const [filteredData, setFilteredData] = useState("");
+  const [filterOpen, setFilterOpen] = useState("");
+  const filterToggle = () => setFilterOpen(!filterOpen);
+  const [selectedLoan, setSelectedLoan] = useState("");
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -128,7 +136,7 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl id="bank_id" mt={4} isRequired>
+            {/* <FormControl id="bank_id" mt={4} isRequired>
               <FormLabel>Select Bank</FormLabel>
 
               <Select
@@ -141,7 +149,74 @@ function BankAssignFile() {
                   </option>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl> */}
+              <div className="w-100 my-3">
+              <FormLabel>Select Bank</FormLabel>
+
+                <input
+                  style={{
+                    width: "100%",
+                    border: "0.5px solid #333",
+                    padding: "5px",
+                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right center",
+                    backgroundSize: "10px",
+                    backgroundPosition: "right 15px center",
+                    borderRadius:"5px",
+                    borderColor:"inherit"
+                  }}
+                  placeholder="Select Bank"
+                  onFocus={() => {
+                    setFilteredData(banks);
+                    setFilterOpen(true);
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value.length !== "") {
+                      setFilterOpen(true);
+                    } else {
+                      setFilterOpen(false);
+                    }
+                    const filterData = banks.filter((item) => {
+                      return item.bank_name
+                        .toLowerCase()
+                        .includes(e.target.value.toLowerCase());
+                    });
+                    setSelectedLoan(e.target.value);
+                    setFilteredData(filterData);
+                  }}
+                  value={selectedLoan}
+                />
+                <Dropdown
+                  className="w-100"
+                  isOpen={filterOpen}
+                  toggle={filterToggle}
+                >
+                  <DropdownMenu className="w-100">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={(e) => {
+                            setSelectedLoan(item.banks);
+                            setFilterOpen(false);
+                            const selectedLoanId = item.bank_id;
+                            setFormData({
+                              ...formData,
+                              loan_id: selectedLoanId,
+                            });
+                          }}
+                        >
+                          {/* {item.loan} */}
+                          {`${item.bank_name} (${item.branch_name})`}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No data found</DropdownItem>
+                    )}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
             {selectedBankId && (
               <FormControl id="bankuser_id" mt={4} isRequired>
                 <FormLabel>Bank User</FormLabel>

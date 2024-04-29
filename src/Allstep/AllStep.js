@@ -35,8 +35,8 @@ function AllStep() {
 
   const getStepData = async () => {
     try {
-      const response = await axios.get(
-        "http://192.168.1.14:4010/api/loan_step"
+      const response = await AxiosInstance.get(
+        "/loan_step"
       );
 
       if (response.data.success) {
@@ -78,7 +78,7 @@ function AllStep() {
   const deleteStep = async (documentId) => {
     try {
       const response = await AxiosInstance.delete(
-        `http://192.168.1.14:4010/api/loan_step/${documentId}`
+        `/loan_step/${documentId}`
       );
       getStepData();
       setIsDeleteDialogOpen(false);
@@ -115,8 +115,8 @@ function AllStep() {
 
   const handleAddStep = async (loan_step) => {
     try {
-      const response = await axios.post(
-        "http://192.168.1.14:4010/api/loan_step",
+      const response = await AxiosInstance.post(
+        "/loan_step",
         {
           loan_step,
         }
@@ -141,8 +141,8 @@ function AllStep() {
 
   const editStep = async (loan_step) => {
     try {
-      const response = await axios.put(
-        "http://192.168.1.14:4010/api/loan_step/" + selectedStepId,
+      const response = await AxiosInstance.put(
+        "/loan_step/" + selectedStepId,
         {
           loan_step,
         }

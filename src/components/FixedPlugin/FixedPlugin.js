@@ -17,7 +17,7 @@ export default function FixedPlugin(props) {
   const settingsRef = React.useRef();
   return (
     <>
-      <Button
+      {/* <Button
         h="52px"
         w="52px"
         onClick={props.onOpen}
@@ -37,7 +37,7 @@ export default function FixedPlugin(props) {
           w="20px"
           h="20px"
         />
-      </Button>
+      </Button> */}
     </>
   );
 }

@@ -27,6 +27,9 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
 
 function AddLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -89,9 +92,7 @@ function AddLoanDocuments() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await axios.get(
-          "http://192.168.1.14:4010/api/document"
-        );
+        const response = await AxiosInstance.get("/document");
         setCurrentDocs(response.data.data);
       } catch (error) {
         console.error("Error fetching documents", error);
@@ -141,12 +142,28 @@ function AddLoanDocuments() {
         toast.error("Please try again later!");
       }
     } catch (error) {
-      console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  const filterSelectedDocs = () => {
+    // Create a set of all selected documents
+    const selectedDocSet = new Set();
+    titles.forEach((title) => {
+      title.documents.forEach((doc) => {
+        selectedDocSet.add(doc.document);
+      });
+    });
+
+    // Filter out selected documents from currentDocs
+    return currentDocs.filter((doc) => !selectedDocSet.has(doc.document));
+  };
+
+  const [filteredData, setFilteredData] = useState("");
+  const [filterOpen, setFilterOpen] = useState("");
+  const filterToggle = () => setFilterOpen(!filterOpen);
+  const [selectedLoan, setSelectedLoan] = useState("");
 
   return (
     <>
@@ -161,7 +178,7 @@ function AddLoanDocuments() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Loan</FormLabel>
                 <Select
                   name="city"
@@ -177,7 +194,73 @@ function AddLoanDocuments() {
                     </option>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
+              <div className="w-100">
+              <FormLabel>Select Loan</FormLabel>
+
+                <input
+                  style={{
+                    width: "100%",
+                    border: "0.5px solid #333",
+                    padding: "5px",
+                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right center",
+                    backgroundSize: "10px",
+                    backgroundPosition: "right 15px center",
+                    borderRadius:"5px",
+                    borderColor:"inherit"
+                  }}
+                  placeholder="Select Loan-Type"
+                  onFocus={() => {
+                    setFilteredData(loandata);
+                    setFilterOpen(true);
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value.length !== "") {
+                      setFilterOpen(true);
+                    } else {
+                      setFilterOpen(false);
+                    }
+                    const filterData = loandata.filter((item) => {
+                      return item.loan
+                        .toLowerCase()
+                        .includes(e.target.value.toLowerCase());
+                    });
+                    setSelectedLoan(e.target.value);
+                    setFilteredData(filterData);
+                  }}
+                  value={selectedLoan}
+                />
+                <Dropdown
+                  className="w-100"
+                  isOpen={filterOpen}
+                  toggle={filterToggle}
+                >
+                  <DropdownMenu className="w-100">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={(e) => {
+                            setSelectedLoan(item.loan);
+                            setFilterOpen(false);
+                            const selectedLoanId = item.loan_id;
+                            setFormData({
+                              ...formData,
+                              loan_id: selectedLoanId,
+                            });
+                          }}
+                        >
+                          {item.loan}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No data found</DropdownItem>
+                    )}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
               {subType === true &&
               loanName !== "Car" &&
               loanName !== "CRL-Car Loan" ? (
@@ -235,7 +318,7 @@ function AddLoanDocuments() {
                         onChange={(values) => setSelectedDocs(values)}
                       >
                         <Stack>
-                          {currentDocs.map((doc) => (
+                          {filterSelectedDocs().map((doc) => (
                             <Checkbox key={doc.id} value={doc.document}>
                               {doc.document}
                             </Checkbox>
