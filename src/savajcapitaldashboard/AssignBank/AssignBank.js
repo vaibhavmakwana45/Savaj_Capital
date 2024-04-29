@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"; // Add axios to your imports// Add axios to your imports
+import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import axios from "axios";
 import {
   Flex,
@@ -22,11 +22,10 @@ import {
   AlertDialogOverlay,
   IconButton,
 } from "@chakra-ui/react";
-import { ArrowBackIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -34,48 +33,39 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
-
 import TableComponent from "TableComponent";
 
-function BankUsers() {
-  const [bankUsers, setBankUsers] = useState([]);
-  const [bank, setBank] = useState({});
+function AssignBank() {
+  const [banks, setBanks] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const menuBg = useColorModeValue("white", "navy.800");
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get("id");
+  let menuBg = useColorModeValue("white", "navy.800");
 
   const filteredUsers =
     searchTerm.length === 0
-      ? bankUsers
-      : bankUsers.filter(
+      ? banks
+      : banks.filter(
           (bank) =>
-            bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-            bank?.mobile
-              ?.toString()
-              ?.toLowerCase()
-              ?.includes(searchTerm?.toLowerCase()) ||
-            bank?.adhar
-              ?.toString()
-              ?.toLowerCase()
-              ?.includes(searchTerm?.toLowerCase()) ||
-            bank?.adress?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+            bank.bank_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bank.state.toLowerCase().includes(searchTerm.toLowerCase())
+          // bank.users.some((user) =>
+          //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
+          // )
         );
 
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const response = await AxiosInstance.get("/bank_user/" + id);
-        setBankUsers(response.data.data);
-        setBank(response.data.bank);
+        const response = await AxiosInstance.get("/addbankuser");
+        setBanks(response.data.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching bankUsers:", error);
+        console.error("Error fetching banks:", error);
       }
     };
 
@@ -84,41 +74,54 @@ function BankUsers() {
 
   const navigateToAnotherPage = (id) => {
     if (id) {
-      history.push("/superadmin/addbank?id=" + id);
+      //   history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    history.push("/superadmin/addbank");
+    // history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
     if (id) {
-      history.push("/superadmin/addbankuser?id=" + id);
+      //   history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
-    history.push("/superadmin/addbankuser");
+    // history.push("/superadmin/addbankuser");
   };
 
-  const allHeaders = ["email", "mobile", "aadhar", "address", "Action"];
+  const navigateToAssignFile = () => {
+    history.push("/savajcapitaluser/assignfile");
+  };
+
+  const allHeaders = [
+    "Bank Name",
+    "Branch Name",
+    "City",
+    "State",
+    "users",
+    "Action",
+  ];
 
   const formattedData = filteredUsers.map((bank) => [
-    bank.bankuser_id,
-    bank.email,
-    bank.mobile,
-    bank.adhar,
-    bank.adress,
+    bank.bank_id,
+    bank.bank_name,
+    bank.branch_name,
+    bank.city,
+    bank.state,
+    bank?.user_count,
   ]);
 
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedBankId, setSelectedBankId] = useState(null);
+
+  const [selectedBankUserId, setSelectedBankUserId] = useState(null);
   const cancelRef = React.useRef();
-  const deleteBank = async (bankId) => {
+  const deleteBankUser = async (bankId) => {
     try {
       await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
-      setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
+      setBanks(banks.filter((bank) => bank.bank_id !== bankId));
       setIsDeleteDialogOpen(false);
-      toast.success("Bank User deleted successfully!");
+      toast.success("Bank deleted successfully!");
     } catch (error) {
       console.error("Error deleting bank:", error);
       toast.error("bank not delete");
@@ -126,33 +129,28 @@ function BankUsers() {
   };
 
   const handleDelete = (id) => {
-    setSelectedBankId(id);
+    setSelectedBankUserId(id);
     setIsDeleteDialogOpen(true);
   };
 
   const handleEdit = (id) => {
-    navigateToAnotherPageUser(id);
+    navigateToAnotherPage(id);
   };
 
-  const handleRow = () => {};
+  const handleRow = (id) => {
+    // history.push("/superadmin/bankusers?id=" + id);
+  };
 
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
-                <IconButton
-                  icon={<ArrowBackIcon />}
-                  onClick={() => history.goBack()}
-                  aria-label="Back"
-                  mr="4"
-                />
-                {bank?.bank_name || "..."}{" "}
-                {bank?.state && " - " + bank?.state + "," + bank?.city}
+            <Flex justifyContent="space-between" alignItems="center">
+              <Text fontSize="xl" color={textColor} fontWeight="bold">
+                Banks and Users
               </Text>
-              <div className="thead">
+              <div>
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -160,13 +158,20 @@ function BankUsers() {
                   width="250px"
                   marginRight="10px"
                 />
-
                 <Menu>
                   <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                    <Button
+                      onClick={navigateToAnotherPage}
+                      colorScheme="blue"
+                      style={{ marginRight: "10px" }}
+                    >
                       ...
                     </Button>
                   </MenuButton>
+
+                  <Button onClick={navigateToAssignFile} colorScheme="blue">
+                    Assign File
+                  </Button>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
                       <MenuItem
@@ -197,7 +202,7 @@ function BankUsers() {
           </CardHeader>
           <CardBody>
             <TableComponent
-              bankUsers={bankUsers}
+              banks={banks}
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
@@ -233,7 +238,7 @@ function BankUsers() {
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => deleteBank(selectedBankId)}
+                  onClick={() => deleteBankUser(selectedBankUserId)}
                   ml={3}
                 >
                   Delete
@@ -248,4 +253,4 @@ function BankUsers() {
   );
 }
 
-export default BankUsers;
+export default AssignBank;

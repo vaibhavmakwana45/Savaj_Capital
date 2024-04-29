@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"; // Add axios to your imports// Add axios to your imports
+import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import axios from "axios";
 import {
   Flex,
@@ -147,11 +147,11 @@ function Tables() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex justifyContent="space-between" className="thead">
+              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
                 Banks and Users
               </Text>
-              <div>
+              <div className="thead">
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -164,11 +164,12 @@ function Tables() {
                     <Button
                       onClick={navigateToAnotherPage}
                       colorScheme="blue"
-                      style={{ marginRight: "10px" }}
+                      style={{ marginRight: "10px",marginBottom:"10px" }}
                     >
                       ...
                     </Button>
                   </MenuButton>
+
                   <Button onClick={navigateToAssignFile} colorScheme="blue">
                     Assign File
                   </Button>

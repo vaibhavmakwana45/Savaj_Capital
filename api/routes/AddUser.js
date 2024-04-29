@@ -112,7 +112,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://localhost:4010/api/setpassword/passwordmail`,
+      `http://192.168.1.19:4010/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }
@@ -314,7 +314,7 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
     if (!bankUser) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -323,7 +323,7 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
     if (!bankData) {
       return res.status(404).json({
         success: false,
-        message: "Bank details not found"
+        message: "Bank details not found",
       });
     }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
-import "./file.scss";
+import "./userfile.scss";
 import Loader from "react-js-loader";
 
 import {
@@ -31,30 +31,6 @@ const FileDisplay = ({ data }) => {
     return acc;
   }, {});
 
-  const basepath = "https://cdn.dohost.in/upload/";
-  const groupedfiles = data.reduce((acc, curr) => {
-    if (!acc[curr.loan_document]) {
-      acc[curr.loan_document] = [];
-    }
-    acc[curr.loan_document].push(curr);
-    return acc;
-  }, {});
-
-  const Basepath = "https://cdn.dohost.in/upload/";
-  // const files = data.reduce((acc, curr) => {
-  //   if (!acc[curr.loan_document]) {
-  //     acc[curr.loan_document] = [];
-  //   }
-  //   acc[curr.loan_document].push(curr);
-  //   return acc;
-  // }, {});
-
-  const openPdf = (e) => {
-    e.preventDefault(); // Prevent the default embed behavior
-    const pdfUrl = `${Basepath}${file.file_path}`;
-    window.open(pdfUrl, '_blank'); // Manually open the PDF in a new tab
-  };
-
   return (
     <div>
       <div className="d-flex flex-wrap justify-content-start image-responsive">
@@ -66,9 +42,8 @@ const FileDisplay = ({ data }) => {
             {files.map((file, idx) => (
               <div key={idx} className="d-flex mb-3">
                 {file.file_path.endsWith(".pdf") ? (
-                  <div onClick={openPdf} style={{ cursor: 'pointer' }}>
                   <embed
-                    src="https://cdn.dohost.in/upload/400NEW%20HOME%20LOAN%20REQUIRED%20DOCUMENT%20-%20SOFTWARE.pdf"
+                    src={`${basePath}${file.file_path}`}
                     type="application/pdf"
                     width="100%"
                     height="200"
@@ -77,37 +52,17 @@ const FileDisplay = ({ data }) => {
                       borderRadius: "12px",
                     }}
                   />
-                  </div>
-                  // <a
-                  //   href="https://cdn.dohost.in/upload/400NEW%20HOME%20LOAN%20REQUIRED%20DOCUMENT%20-%20SOFTWARE.pdf"
-                  //   target="_blank"
-                  //   rel="noopener noreferrer"
-                  // >
-                  //   <embed
-                  //     src="https://cdn.dohost.in/upload/400NEW%20HOME%20LOAN%20REQUIRED%20DOCUMENT%20-%20SOFTWARE.pdf"
-                  //     type="application/pdf"
-                  //     width="100%"
-                  //     height="200"
-                  //     style={{
-                  //       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                  //       borderRadius: "12px",
-                  //     }}
-                  //   />
-                  // </a>
                 ) : (
-                  <a href={`${basepath}${file.file_path}`} target="_blank">
-                   
-                    <img
-                      src={`${basePath}${file.file_path}`}
-                      alt={file.loan_document_id}
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        borderRadius: "12px",
-                        boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      }}
-                    />
-                  </a>
+                  <img
+                    src={`${basePath}${file.file_path}`}
+                    alt={file.loan_document_id}
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      borderRadius: "12px",
+                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                    }}
+                  />
                 )}
               </div>
             ))}
@@ -118,7 +73,7 @@ const FileDisplay = ({ data }) => {
   );
 };
 
-function ViewFile() {
+function DetailScFilePage() {
   const textColor = useColorModeValue("gray.700", "white");
   const [users, setUsers] = useState([]);
   const [loanType, setLoanType] = useState([]);
@@ -145,7 +100,6 @@ function ViewFile() {
           "/file_upload/file_upload/" + id
         );
         setFileData(response.data.data.file);
-        console.log("objecttttttttttttttttt", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching file data:", error);
@@ -352,4 +306,4 @@ function ViewFile() {
   );
 }
 
-export default ViewFile;
+export default DetailScFilePage;

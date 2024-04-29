@@ -46,8 +46,8 @@ function Row(props) {
   const { id, file, handleEditClick, handleDelete } = props;
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
-  const [files, setFiles] = useState([]);
-console.log("objectttttttttttt",file)
+
+
   return (
     <React.Fragment>
       <TableRow
@@ -67,6 +67,7 @@ console.log("objectttttttttttt",file)
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
+        <TableCell align="">{file?.user_username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
@@ -226,6 +227,7 @@ export default function CollapsibleTable() {
       try {
         const response = await AxiosInstance.get("/file_upload");
         setFiles(response.data.data);
+        console.log('first', response.data.data)
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -301,8 +303,8 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text fontSize="xl" fontWeight="bold">
+          <Flex justifyContent="space-between" className="thead" >
+            <Text fontSize="xl" fontWeight="bold" className="ttext">
               Add File
             </Text>
             <div>
@@ -339,6 +341,9 @@ export default function CollapsibleTable() {
                 <TableHead style={{ borderBottom: "1px solid red" }}>
                   <TableRow>
                     <TableCell />
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      User Name
+                    </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
                     </TableCell>

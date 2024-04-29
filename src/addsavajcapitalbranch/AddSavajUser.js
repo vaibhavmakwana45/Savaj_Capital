@@ -216,12 +216,12 @@ function AddSavajCapitalBranch() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex justifyContent="space-between"  className="thead">
+              <Text fontSize="xl" color={textColor} fontWeight="bold" className="textt">
                 Add Savaj Capital User
               </Text>
 
-              <Button
+              <Button className="ttextt"
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
                 }}
@@ -328,7 +328,7 @@ function AddSavajCapitalBranch() {
                 </FormControl>
               } */}
 
-              <div>
+              <div className="d-flex">
                 <Button
                   mt={4}
                   colorScheme="blue"

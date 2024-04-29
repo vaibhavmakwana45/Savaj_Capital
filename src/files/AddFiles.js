@@ -31,6 +31,9 @@ import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 import { Country, State, City } from "country-state-city";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 function AddFiles() {
   const history = useHistory();
@@ -46,6 +49,9 @@ function AddFiles() {
   const [selectedState, setSelectedState] = useState("");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+
+  const theme = createTheme();
+  
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -71,6 +77,7 @@ function AddFiles() {
     try {
       const response = await AxiosInstance.get("/addusers/getusers");
       setUsers(response.data.users);
+      console.log("mitali", response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -78,11 +85,12 @@ function AddFiles() {
   useEffect(() => {
     fetchUsers();
   }, []);
-  
+
   const fetchLoanType = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
       setLoanType(response.data.data);
+      // console.log("ttttttttttttttttttt", response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
     }
@@ -90,20 +98,46 @@ function AddFiles() {
   useEffect(() => {
     fetchLoanType();
   }, []);
-  
-  const handleLoanTypeChange = async (event) => {
-    const loanId = event.target.value;
-    const selectedType = loanType.find((loan) => loan.loan_id === loanId);
-    setSelectedLoanType(selectedType || {});
+
+  // const handleLoanTypeChange = async (value) => {
+  //   if (value) {
+  //     console.log("ttttttttttttttttttt",selectedLoanType)
+  //     setSelectedLoanType({});
+  //     setLoanSubType([]);
+  //     return;
+  //   }
+
+  //   const loanId = value.loan_id;
+  //   setSelectedLoanType(value);
+  //       // console.log("loanid",loanId)
+  //   const selectedType = loanType.find((loan) => loan.loan_id === loanId);
+  //   setSelectedLoanType(selectedType || {});
     
-    if (selectedType && selectedType.is_subtype) {
+  //   if (value.is_subtype) {
+  //     try {
+  //       const response = await AxiosInstance.get(`/loan_type/loan_type/${loanId}`);
+  //       console.log("loansubtype", response.data);
+  //       setLoanSubType(response.data.data); // Assuming 'data.data' holds the array of subtypes
+  //     } catch (error) {
+  //       console.error("Error fetching loan subtypes:", error);
+  //       setLoanSubType([]);
+  //     }
+  //   } else {
+  //     setLoanSubType([]);
+  //   }
+  // };
+
+
+  const handleLoanTypeChange = async (value) => {
+    console.log("Selected Loan Type:", value);
+    setSelectedLoanType(value);
+    if (value && value.is_subtype) {
       try {
-        const response = await AxiosInstance.get(
-          `/loan_type/loan_type/${loanId}`
-        );
+        const response = await AxiosInstance.get(`/loan_type/loan_type/${value.loan_id}`);
+        console.log("Subtypes Loaded:", response.data.data);
         setLoanSubType(response.data.data);
       } catch (error) {
-        console.error("Error fetching loan subtypes:", error);
+        console.error("Failed to fetch subtypes", error);
         setLoanSubType([]);
       }
     } else {
@@ -111,31 +145,32 @@ function AddFiles() {
     }
   };
   
+  
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loanDocuments, setLoanDocuments] = useState([]);
-  
+
   const imagesTypes = ["jpeg", "png", "svg", "gif"];
-  
+
   const handleDragOver = (event) => {
     event.preventDefault();
     setIsDragging(true);
   };
-  
+
   const handleDragLeave = () => {
     setIsDragging(false);
   };
-  
+
   const handleDrop = (event) => {
     event.preventDefault();
     setIsDragging(false);
     const file = event.dataTransfer.files[0];
     uploadFile(file);
   };
-  
+
   const progressMove = () => {
     let counter = 0;
     setTimeout(() => {
@@ -149,19 +184,21 @@ function AddFiles() {
       }, 100);
     }, 600);
   };
-  
+
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
         let url;
         if (selectedLoanType.is_subtype) {
+          console.log("1")
           if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
+            // console.log("loansubtype",loanSubType)
             url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
           }
         } else if (selectedLoanType.loan_id) {
+          console.log("2")
           url = `/loan_docs/${selectedLoanType.loan_id}`;
         }
-
         if (url) {
           const response = await AxiosInstance.get(url);
           setLoanDocuments(response.data.data);
@@ -193,12 +230,12 @@ function AddFiles() {
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
 
-  const handleUserChange = (event) => {
-    setSelectedUser(event.target.value);
+  const handleUserChange = (userId) => {
+    setSelectedUser(userId);
   };
 
-  const handleLoanChange = (event) => {
-    setSelectedLoanId(event.target.value);
+  const handleLoanChange = (loan_id) => {
+    setSelectedLoanId(loan_id);
   };
 
   const handleLoanSubtypeChange = (event) => {
@@ -270,7 +307,6 @@ function AddFiles() {
         setSavajcapitalbranchUser([]);
         return;
       }
-
       try {
         const response = await AxiosInstance.get(
           `/savaj_user/${selectedBranchId}`
@@ -290,6 +326,7 @@ function AddFiles() {
       const response = await AxiosInstance.get("/role/");
       if (response.data.success) {
         setRoles(response.data.data);
+        console.log("object", response.data.data);
       } else {
         alert("Please try again later...!");
       }
@@ -423,7 +460,8 @@ function AddFiles() {
       state: stateFullName,
     }));
   };
-
+  console.log("loantype",loanType)
+  const [search, setSearch] = useState("");
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -441,65 +479,199 @@ function AddFiles() {
           <CardBody>
             <FormControl id="user_id" mt={4} isRequired>
               <FormLabel>User</FormLabel>
-              <Select placeholder="Select user" onChange={handleUserChange}>
+              {/* <Autocomplete
+                className="form-control-alternative"
+                id="input-unitadd"
+                freeSolo
+                size="small"
+                options={users.map((option) => option)}
+                onChange={(event, newValue) => {
+                  setSearch(
+                    `residential[${username}].rental_bed`,
+                    newValue
+                  );
+                }}
+                renderInput={(params) => (
+                  <Text
+                    {...params}
+                    name={`residential[${username}].rental_bed`}
+                    id={`residential[${username}].rental_bed`}
+                    value={
+                      rentalsFormik.values.residential[username]
+                        .rental_bed
+                    }
+                    onChange={(e) => {
+                      setSearch(
+                        `residential[${username}].rental_bed`,
+                        e.target.value
+                      );
+                    }}
+                  />
+                )}
+              /> */}
+              {/* <Select placeholder="Select user" onChange={handleUserChange}>
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
                     {`${user.username} (${user.email})`}
                   </option>
                 ))}
-              </Select>
+              </Select> */}
+
+              <ThemeProvider theme={theme}>
+                <Autocomplete
+                  size="small"
+                  options={users} // Array of users
+                  getOptionLabel={(option) =>
+                    `${option.username} (${option.email})`
+                  } // Text to display for each option
+                  style={{ width: 1250 }} // Adjust width as needed
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select user"
+                      variant="outlined"
+                    />
+                  )}
+                  onChange={(event, value) => {
+                    // Call the passed onChange function with the user_id of the selected user or null if no selection
+                    handleUserChange(value ? value.user_id : null);
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.user_id === value.user_id
+                  } // Ensures correct option is selected
+                  noOptionsText="No users found" // Text to display when no options are found
+                />
+              </ThemeProvider>
             </FormControl>
 
             <FormControl
               id="loan_id"
               mt={4}
               isRequired
-              onChange={handleLoanChange}
+              // onChange={handleLoanChange}
             >
               <FormLabel>Loan Type</FormLabel>
-              <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
+              {/* <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
                 {loanType.map((loan) => (
                   <option key={loan.loan_id} value={loan.loan_id}>
                     {loan.loan}
                   </option>
                 ))}
-              </Select>
+              </Select> */}
+
+              {/* <ThemeProvider theme={theme}>
+                <Autocomplete
+                  options={loanType}
+                  getOptionLabel={(option) => `${option.loan}`}
+                  style={{ width: 300 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Loan"
+                      variant="outlined"
+                    />
+                  )}
+                  onChange={(event, value) => handleLoanTypeChange(value)} // Pass the selected value directly
+                  isOptionEqualToValue={(option, value) => option.loan_id === value.loan_id}
+                  noOptionsText="No loans found"
+                />
+              </ThemeProvider>
             </FormControl>
             {selectedLoanType.is_subtype && loanSubType.length > 0 && (
               <FormControl
                 id="loantype_id"
                 mt={4}
                 isRequired
-                onChange={handleLoanSubtypeChange}
+                // onChange={handleLoanSubtypeChange}
               >
                 <FormLabel>Loan Subtype</FormLabel>
-                <Select
-                  placeholder="Select Loan Subtype"
-                  onChange={(event) => {
-                    setSelectedLoanType({
-                      ...selectedLoanType,
-                      loansubtype_id: event.target.value,
-                    });
+                <Autocomplete
+                  options={loanSubType}
+                  getOptionLabel={(option) => option.loantype}
+                  style={{ width: 300 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Loan Subtype"
+                      variant="outlined"
+                    />
+                  )}
+                  onChange={(event, value) => {
+                    // Handle selection change
+                    if (value) {
+                      setSelectedLoanType({
+                        ...selectedLoanType,
+                        loansubtype_id: value.loantype_id,
+                      });
+                    } else {
+                      setSelectedLoanType({
+                        ...selectedLoanType,
+                        loansubtype_id: null,
+                      });
+                    }
                   }}
-                >
-                  <option key="title" disabled style={{ fontWeight: 800 }}>
-                    {selectedLoanType.loan}
-                  </option>
-                  {loanSubType.map((subType) => (
-                    <option
-                      key={subType.loantype_id}
-                      value={subType.loantype_id}
-                    >
-                      {subType.loan_type}
-                    </option>
-                  ))}
-                </Select>
+                  value={loanSubType.find(
+                    (subType) =>
+                      subType.loantype_id === selectedLoanType.loansubtype_id
+                  )}
+                  isOptionEqualToValue={(option, value) =>
+                    option.loantype_id === value.loantype_id
+                  }
+                  noOptionsText="No subtypes found"
+                /> */}
+
+<ThemeProvider theme={theme}>
+<Autocomplete
+  options={loanType}
+  getOptionLabel={(option) => `${option.loan}`}
+  renderInput={(params) => (
+    <TextField {...params} label="Select Loan" variant="outlined" />
+  )}
+  onChange={(event, value) => handleLoanTypeChange(value)}
+  isOptionEqualToValue={(option, value) => option.loan_id === value.loan_id}
+  noOptionsText="No loans found"
+/>
+
+{selectedLoanType && selectedLoanType.is_subtype && loanSubType.length > 0 && (
+  <Autocomplete
+    options={loanSubType}
+    getOptionLabel={(option) => option.loantype}
+    style={{ width: 300 }}
+    renderInput={(params) => (
+      <TextField {...params} label="Select Loan Subtype" variant="outlined" />
+    )}
+     onChange={(event, value) => {
+                    // Handle selection change
+                    if (value) {
+                      setSelectedLoanType({
+                        ...selectedLoanType,
+                        loansubtype_id: value.loantype_id,
+                      });
+                    } else {
+                      setSelectedLoanType({
+                        ...selectedLoanType,
+                        loansubtype_id: null,
+                      });
+                    }
+                  }}
+                  value={loanSubType.find(
+                    (subType) =>
+                      subType.loantype_id === selectedLoanType.loansubtype_id
+                  )}
+                  isOptionEqualToValue={(option, value) =>
+                    option.loantype_id === value.loantype_id
+                  }
+    noOptionsText="No subtypes found"
+  />
+)}
+
+</ThemeProvider>
               </FormControl>
-            )}
+          
 
             <div>
               <div className="d-flex ">
-                <div className="d-flex mainnnn">
+                <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                   {(!selectedLoanType?.is_subtype ||
                     (selectedLoanType?.is_subtype &&
                       selectedLoanType?.loansubtype_id)) &&
@@ -530,11 +702,11 @@ function AddFiles() {
                         />
                         {fileData[index] ? (
                           <div
-                            className="file-preview"
+                            className="file-preview text-end"
                             style={{
-                              display: "flex",
+                              // display: "flex",
                               marginTop: "15px",
-                              alignItems: "center",
+                              // alignItems: "end",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -544,6 +716,13 @@ function AddFiles() {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                             }}
                           >
+                            <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
                             {fileData[index].url ? (
                               <img
                                 src={fileData[index].url}
@@ -577,14 +756,6 @@ function AddFiles() {
                                 {fileData[index].name}
                               </span>
                             )}
-
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
                           </div>
                         ) : (
                           <div
@@ -675,9 +846,11 @@ function AddFiles() {
           </CardBody>
         </Card>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose} >
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent style={{height:"80%",overflow:"scroll",scrollbarWidth:"thin"}}>
+        <ModalContent
+          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
+        >
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>
