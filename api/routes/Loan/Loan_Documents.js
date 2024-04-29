@@ -157,6 +157,8 @@ router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
     const loan_id = req.params.loan_id;
     const loantype_id = req.params.loantype_id;
 
+    console.log(loan_id, loantype_id, "shivam")
+
     // Fetch loan documents
     const data = await Loan_Documents.aggregate([
       {

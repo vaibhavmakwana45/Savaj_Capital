@@ -49,6 +49,8 @@ import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
 import AddAllDocuments from "Document/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
 
+import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
+
 var dashRoutes = [
   //superadmin
   {
@@ -192,6 +194,18 @@ var dashRoutes = [
     parent: "loan",
     key: "loantype",
   },
+
+  {
+    path: "/assigned-file",
+    name: "Assigned File (Savaj User)",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignedSavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "superadmin",
+    key: "savajcapitalbranch",
+  },
+
   //sc branch
   {
     path: "/savajcapitalbranch",

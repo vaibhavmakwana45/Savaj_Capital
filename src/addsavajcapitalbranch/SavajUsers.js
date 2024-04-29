@@ -139,7 +139,9 @@ function Tables() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
+    history.push("/superadmin/assigned-file?id=" + id);
+
+
   };
 
   const handleAddRole = async (role) => {
@@ -166,8 +168,17 @@ function Tables() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}
