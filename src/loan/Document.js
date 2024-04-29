@@ -17,6 +17,7 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import TableComponent from "TableComponent";
 import AxiosInstance from "config/AxiosInstance";
+import axios from "axios";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -40,9 +41,9 @@ function Document() {
     setLoading(true);
     try {
       const url = loantype_id
-        ? `/loan_docs/loan_docs/${loan_id}/${loantype_id}`
+        ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
-      const response = await AxiosInstance.get(url);
+      const response = await axios.get("http://192.168.1.19:4010/api" + url);
       setDocuments(response.data.data || []);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -56,17 +57,34 @@ function Document() {
     fetchDocuments();
   }, [loan_id, loantype_id]);
 
-  const allHeaders = ["Document Name", "createdAt", "updatedAt", "Action"];
-  const filteredDocuments = documents.filter((doc) =>
-    doc.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
+  const allHeaders = [
+    "Title",
+    "Document Name",
+    "createdAt",
+    "updatedAt",
+    "Action",
+  ];
+
+  // const filteredDocuments = documents.filter((doc) =>
+  //   doc.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  console.log(documents, "documents")
+
+  const filteredDocuments = documents.filter(
+    (doc) =>
+      doc.title && doc.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formattedData = filteredDocuments.map((doc) => [
     doc.loan_document_id,
-    doc.loan_document,
+    doc.title,
+    doc.document_names.join(', '),
     doc.createdAt,
     doc.updatedAt,
   ]);
+
+  console.log(formattedData, "formattedData");
 
   const handleDelete = (id) => {
     setSelctedDocumentId(id);
@@ -162,8 +180,17 @@ function Document() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}

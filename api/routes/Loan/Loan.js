@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
         loan_id: uniqueId,
         loan: req.body.loan,
         is_subtype: req.body.is_subtype,
-        loan_step_id: req.body.loan_step_id, 
+        loan_step_id: req.body.loan_step_id,
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
         updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       };
@@ -173,7 +173,6 @@ router.delete("/:loan_id", async (req, res) => {
     });
   }
 });
-
 
 router.get("/loan", async (req, res) => {
   try {

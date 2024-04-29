@@ -498,7 +498,7 @@ function AddFiles() {
 
             <div>
               <div className="d-flex ">
-                <div className="d-flex mainnnn" style={{overflow:"auto"}}>
+                <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                   {(!selectedLoanType?.is_subtype ||
                     (selectedLoanType?.is_subtype &&
                       selectedLoanType?.loansubtype_id)) &&
@@ -543,7 +543,7 @@ function AddFiles() {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                             }}
                           >
-                                 <IconButton
+                            <IconButton
                               aria-label="Remove file"
                               icon={<CloseIcon />}
                               size="sm"
@@ -583,8 +583,6 @@ function AddFiles() {
                                 {fileData[index].name}
                               </span>
                             )}
-
-                       
                           </div>
                         ) : (
                           <div
