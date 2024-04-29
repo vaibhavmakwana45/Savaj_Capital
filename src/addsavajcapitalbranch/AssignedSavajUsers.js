@@ -37,7 +37,7 @@ import TableComponent from "TableComponent";
 
 function AssignedSavajUsers() {
   const [savajUserAssignedFile, setSavajUserAssignedFile] = useState([]);
-  const [savajUserName, setSavajUserName] = useState('')
+  const [savajUserName, setSavajUserName] = useState("");
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -51,7 +51,7 @@ function AssignedSavajUsers() {
     const fetchUsers = async () => {
       try {
         const response = await AxiosInstance.get(
-          `http://localhost:4010/api/savaj_user/assigned_file/${id}`
+          `/savaj_user/assigned_file/${id}`
         );
         setSavajUserAssignedFile(response.data.data);
         setSavajUserName(response?.data?.savajUserData?.full_name);
@@ -114,7 +114,6 @@ function AssignedSavajUsers() {
                 fontWeight="bold"
                 className="ttext"
               >
-                
                 {savajUserName ? savajUserName + "'s -" : ""} Assigned File
               </Text>
             </Flex>

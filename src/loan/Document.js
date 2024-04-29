@@ -43,7 +43,7 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
-      const response = await axios.get("http://192.168.1.19:4010/api" + url);
+      const response = await AxiosInstance.get(url);
       setDocuments(response.data.data || []);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -69,7 +69,7 @@ function Document() {
   //   doc.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
   // );
 
-  console.log(documents, "documents")
+  console.log(documents, "documents");
 
   const filteredDocuments = documents.filter(
     (doc) =>
@@ -79,7 +79,7 @@ function Document() {
   const formattedData = filteredDocuments.map((doc) => [
     doc.loan_document_id,
     doc.title,
-    doc.document_names.join(', '),
+    doc.document_names.join(", "),
     doc.createdAt,
     doc.updatedAt,
   ]);
