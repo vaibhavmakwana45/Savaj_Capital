@@ -161,17 +161,21 @@ router.post("/test", async (req, res) => {
     const existingDocument = await Loan_Documents.findOne({
       loan_id,
       ...(loantype_id && { loantype_id }),
-      title: { $regex: new RegExp(`^${title}$`, 'i') }
+      title: { $regex: new RegExp(`^${title}$`, "i") },
     });
 
     if (existingDocument) {
       // Check if any of the new document_ids are already present in the existing document
-      const newDocumentIds = document_id.filter(id => !existingDocument.document_ids.includes(id));
+      const newDocumentIds = document_id.filter(
+        (id) => !existingDocument.document_ids.includes(id)
+      );
 
       // If there are new document_ids, push them to the existing document's document_ids array
       if (newDocumentIds.length > 0) {
         existingDocument.document_ids.push(...newDocumentIds);
-        existingDocument.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+        existingDocument.updatedAt = moment()
+          .utcOffset(330)
+          .format("YYYY-MM-DD HH:mm:ss");
         await existingDocument.save();
       }
 
@@ -208,11 +212,5 @@ router.post("/test", async (req, res) => {
     });
   }
 });
-
-
-
-
-
-
 
 module.exports = router;
