@@ -53,7 +53,6 @@ function SignUp() {
       const response = await AxiosInstance.post("/addusers/adduser", {
         userDetails,
       });
-      console.log(response.data);
       toast.success("User added successfully!");
       history.push("/auth/signin");
     } catch (error) {

@@ -27,7 +27,6 @@ const tokenExpirationMap = new Map();
 function isTokenValid(email) {
   const token = encrypt(email);
   const isValid = tokenExpirationMap.has(token);
-  console.log(`Token: ${token}, Is valid: ${isValid}`);
 
   return isValid;
 }
@@ -113,7 +112,6 @@ router.post("/passwordmail", async (req, res) => {
 //     `;
 
 //     await emailService.sendWelcomeEmail(req.body.email, subject, text);
-//     console.log(emailService, "emailService");
 
 //     res.json({
 //       statusCode: 200,

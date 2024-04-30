@@ -307,7 +307,6 @@ router.get("/edit_file_upload/:file_id", async (req, res) => {
     const fileData = await File_Uplode.findOne({ file_id: file_id });
 
     if (!fileData) {
-      console.log("No file found with ID:", file_id);
       return res.status(404).json({
         statusCode: 404,
         message: "File not found",
@@ -340,14 +339,12 @@ router.delete("/:file_id", async (req, res) => {
     });
 
     if (!deletedFile) {
-      console.log(`No file found with ID: ${file_id}`);
       return res.status(404).json({
         success: false,
         message: "File not found",
       });
     }
 
-    console.log(`File deleted successfully: ${file_id}`);
     res.json({
       success: true,
       message: "File deleted successfully",
@@ -363,7 +360,6 @@ router.delete("/:file_id", async (req, res) => {
 });
 
 router.put("/:file_id", async (req, res) => {
-  console.log(req.params);
   try {
     const { file_id } = req.params;
     const updateData = req.body;
@@ -388,14 +384,12 @@ router.put("/:file_id", async (req, res) => {
     );
 
     if (!updatedFile) {
-      console.log(`No file found with ID: ${file_id}`);
       return res.status(404).json({
         statusCode: 404,
         message: "File not found",
       });
     }
 
-    console.log(`File updated successfully: ${file_id}`);
     res.json({
       statusCode: 200,
       success: true,
@@ -553,7 +547,6 @@ router.get("/testfile/:file_id", async (req, res) => {
         title_id: item.title_id,
       };
     });
-    // console.log(loanIds, "1--------");
 
     const { loan_id, loantype_id } = data;
     const data2 = await Loan_Documents.find({ loan_id, loantype_id });
@@ -566,7 +559,6 @@ router.get("/testfile/:file_id", async (req, res) => {
       });
     });
 
-    // console.log(loanDocumentIds, "2---------");
 
     const commonIds = loanIds.filter((id) =>
       loanDocumentIds.some(
@@ -585,7 +577,6 @@ router.get("/testfile/:file_id", async (req, res) => {
         )
     );
 
-    // console.log(commonIds, differentIds, "3--------");
 
     const approvedObject = [];
     const pendingObject = [];

@@ -221,8 +221,6 @@ export default function CollapsibleTable() {
     setAccessType(jwt._id);
   }, []);
 
-  console.log("accessType", accessType);
-
   useEffect(() => {
     const fetchFiles = async () => {
       try {
@@ -230,7 +228,6 @@ export default function CollapsibleTable() {
           `/file_upload/get/${accessType.branchuser_id}`
         );
         setFiles(response.data.data);
-        console.log("first", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);

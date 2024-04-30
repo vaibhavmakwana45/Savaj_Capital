@@ -110,7 +110,6 @@ function AllStep() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   const handleAddStep = async (loan_step) => {
@@ -121,7 +120,6 @@ function AllStep() {
           loan_step,
         }
       );
-      console.log("response", response);
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsStep(false);

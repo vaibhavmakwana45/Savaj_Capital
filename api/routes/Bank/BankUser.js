@@ -245,7 +245,6 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
         username: userData ? userData.username : null,
       };
 
-      // Check if any essential detail is missing
       const hasMissingDetail = !fileData || !loanData || !loanTypeData || !userData;
       if (hasMissingDetail) {
         console.log("Missing detail for BankApproval with file_id:", approval.file_id);

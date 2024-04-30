@@ -99,7 +99,6 @@ function AddSavajCapitalBranch() {
           password: "",
         };
 
-        console.log(submissionData);
 
         setFormData(submissionData);
       } else {
@@ -198,7 +197,6 @@ function AddSavajCapitalBranch() {
         }
       } else {
         const response = await AxiosInstance.post("/savaj_user", formData);
-        console.log(response.data, "shivam");
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.success) {

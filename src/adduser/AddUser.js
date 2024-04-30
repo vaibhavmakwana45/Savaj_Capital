@@ -141,7 +141,6 @@ function AddUser(props) {
           formData
         );
 
-        console.log(formData, "formData");
 
         if (response.data.success) {
           toast.success("User Updated successfully!");

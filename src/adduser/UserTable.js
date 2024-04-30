@@ -100,7 +100,6 @@ function UserTable() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

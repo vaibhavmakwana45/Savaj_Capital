@@ -99,7 +99,6 @@ function AssignedBankUsers() {
   ]);
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   return (

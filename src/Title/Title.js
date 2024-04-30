@@ -104,13 +104,11 @@ function Title() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   const handleAddDocument = async (title) => {
     try {
       const response = await AxiosInstance.post("/title", { title });
-      console.log("response", response);
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsTitle(false);

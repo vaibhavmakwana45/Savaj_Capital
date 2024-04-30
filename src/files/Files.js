@@ -238,7 +238,6 @@ export default function CollapsibleTable() {
       try {
         const response = await AxiosInstance.get("/file_upload");
         setFiles(response.data.data);
-        console.log("first", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);

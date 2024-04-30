@@ -187,7 +187,6 @@ function AddLoanType() {
     const subtypes = [...formData.loan_subtype];
     subtypes.splice(index, 1);
 
-    console.log("subtype.splice", subtypes.splice(index, 1));
     setFormData({
       ...formData,
       loan_subtype: subtypes,

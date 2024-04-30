@@ -99,7 +99,6 @@ function AssignedSavajUsers() {
   ]);
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   return (

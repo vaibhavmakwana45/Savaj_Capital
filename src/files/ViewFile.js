@@ -107,7 +107,6 @@ const FileDisplay = ({ groupedFiles }) => {
 //       await writableStream.write(blob);
 //       await writableStream.close();
 
-//       console.log("File downloaded successfully.");
 //     } catch (error) {
 //       console.error("Error downloading file:", error);
 //     }

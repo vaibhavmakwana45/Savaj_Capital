@@ -119,7 +119,6 @@ function CreateUserFile() {
 
   const handleFileInputChange = (event, title_id, index, innerIndex) => {
     const file = event.target.files[0];
-    console.log("File input changed:", file);
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][index].document_ids[innerIndex];
@@ -268,7 +267,6 @@ function CreateUserFile() {
     setAccessType(jwt._id);
   }, []);
 
-  console.log("accessType", accessType);
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -314,9 +312,7 @@ function CreateUserFile() {
           title_id: file.title_id,
         })),
       };
-      console.log("uploadedFiles", uploadedFiles);
       await AxiosInstance.post("/file_upload", payload);
-      console.log("payload", payload);
 
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");

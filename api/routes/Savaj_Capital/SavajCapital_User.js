@@ -67,7 +67,6 @@ router.post("/", async (req, res) => {
     );
 
     if (ApiResponse.status === 200) {
-      console.log("Password mail sent successfully");
       res.json({
         success: true,
         data: data,

@@ -149,7 +149,6 @@ function SavajUsersRole() {
     
 
     const handleRow = (id) => {
-        console.log(id)
     }
 
     const handleAddRole = async (role) => {

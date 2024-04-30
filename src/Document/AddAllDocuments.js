@@ -107,7 +107,6 @@ function AddAllDocuments() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
   };
 
   const handleAddDocument = async (document) => {
@@ -116,7 +115,6 @@ function AddAllDocuments() {
         "/document",
         { document }
       );
-      console.log("response", response);
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsDocument(false);

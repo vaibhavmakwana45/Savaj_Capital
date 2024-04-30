@@ -426,7 +426,6 @@ function EditFile() {
                 </Select>
               </FormControl>
             )}
-            {console.log(loanDocuments, "yash", fileData)}
             <div>
               <div className="d-flex">
                 <div className="d-flex">

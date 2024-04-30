@@ -94,7 +94,6 @@ function SignIn() {
         email,
         password,
       });
-      console.log(response.data, "shivam");
       if (response.data.statusCode === 201) {
         toast.error("user not exists");
       } else if (response.data.statuscode === 202) {

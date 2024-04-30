@@ -406,8 +406,6 @@ function EditFileScBranch() {
                               style={{ margin: "0 10px" }}
                             />
 
-                            {console.log(fileData, "fileData[index].type")}
-
                             {getFileExtension(fileData[index].url) === "pdf" ||
                             getFileExtension(fileData[index].name) === "pdf" ? (
                               <embed

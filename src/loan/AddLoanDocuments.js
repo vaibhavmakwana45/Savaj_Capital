@@ -44,7 +44,6 @@ function AddLoanDocuments() {
   });
   const [loandata, setLoanData] = useState([]);
   const [titleData, setTitleData] = useState([]);
-  console.log(titleData, "titleData");
   const [loanType, setLoanType] = useState([]);
   const [subType, setSubType] = useState(null);
   const [loanName, setLoanName] = useState("");
@@ -198,7 +197,6 @@ function AddLoanDocuments() {
     try {
       for (const postData of titles) {
         const { title_id: title_id, document_ids } = postData;
-        console.log("postData", postData);
         const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
@@ -208,7 +206,6 @@ function AddLoanDocuments() {
           document_id: document_ids,
         });
 
-        console.log("Response:", response.data);
         toast.success("Document created successfully");
       }
 

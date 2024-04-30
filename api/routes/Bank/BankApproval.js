@@ -77,7 +77,6 @@ router.put("/:bank_assign_id", async (req, res) => {
 router.get("/bank_user/:bankuser_id", async (req, res) => {
   try {
     const bankuser_id = req.params.bankuser_id;
-    console.log(bankuser_id, "bankuser_id");
     var data = await BankApproval.aggregate([
       {
         $match: { bankuser_id: bankuser_id },
