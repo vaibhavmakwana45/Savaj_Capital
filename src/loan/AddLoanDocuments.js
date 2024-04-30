@@ -234,6 +234,12 @@ function AddLoanDocuments() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
+
+  const [filtereedData, setFiltereedData] = useState("");
+  const [filteerOpen, setFilteerOpen] = useState("");
+  const filteerToggle = () => setFilteerOpen(!filteerOpen);
+  const [selecteedLoan, setSelecteedLoan] = useState("");
+
   const handleRemoveDocument = (titleIndex, docIndexToRemove) => {
     const updatedTitles = [...titles];
     updatedTitles[titleIndex].documents.splice(docIndexToRemove, 1);
@@ -382,7 +388,7 @@ function AddLoanDocuments() {
 
               {/*======================  Title Dropdawn  ======================= */}
 
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Title</FormLabel>
                 <Select
                   name="title"
@@ -398,8 +404,81 @@ function AddLoanDocuments() {
                     </option>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
+<div className="w-100">
+                <FormLabel>Select Loan</FormLabel>
+
+                <input
+                  style={{
+                    width: "100%",
+                    border: "0.5px solid #333",
+                    padding: "5px",
+                    backgroundImage: `url(${filteerOpen ? upArrow : downArrow})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right center",
+                    backgroundSize: "10px",
+                    backgroundPosition: "right 15px center",
+                    borderRadius: "5px",
+                    borderColor: "inherit",
+                  }}
+                  placeholder="Select Loan-Type"
+                  onFocus={() => {
+                    setFiltereedData(titleData);
+                    filteerToggle();
+                  }}
+                  onBlur={() => {
+                    // Delay the filterToggle call to allow time for the click event
+                    setTimeout(() => {
+                      filteerToggle();
+                    }, 200); // Adjust the delay as needed
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value.length !== "") {
+                      setFilteerOpen(true);
+                    } else {
+                      setFilteerOpen(false);
+                    }
+                    const filterData = titleData.filter((item) => {
+                      return item.title
+                        .toLowerCase()
+                        .includes(e.target.value.toLowerCase());
+                    });
+                    setSelecteedLoan(e.target.value);
+                    setFiltereedData(filterData);
+                  }}
+                  value={selecteedLoan}
+                />
+                <Dropdown
+                  className="w-100"
+                  isOpen={filteerOpen}
+                  toggle={filteerToggle}
+                >
+                  <DropdownMenu className="w-100">
+                    {filtereedData.length > 0 ? (
+                      filtereedData.map((item, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelecteedLoan(item.title);
+                            setFilteerOpen(false);
+                            const selectedLoanId = item.title_id;
+                            setFormData({
+                              ...formData,
+                              title_id: selectedLoanId,
+                            });
+                          }}
+                        >
+                          {item.title}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No data found</DropdownItem>
+                    )}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
               <FormControl mt={4}>
                 <FormLabel>Documents</FormLabel>
                 <Popover>
