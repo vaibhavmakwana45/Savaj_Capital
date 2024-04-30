@@ -50,6 +50,7 @@ import AddAllDocuments from "Document/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
 
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
+import AssignedBankUsers from "addbank/AssignedBankUsers";
 
 var dashRoutes = [
   //superadmin
@@ -195,16 +196,7 @@ var dashRoutes = [
     key: "loantype",
   },
 
-  {
-    path: "/assigned-file",
-    name: "Assigned File (Savaj User)",
-    icon: <CreditIcon color="inherit" />,
-    component: AssignedSavajUsers,
-    hideInSidebar: true,
-    layout: "/superadmin",
-    parent: "superadmin",
-    key: "savajcapitalbranch",
-  },
+ 
 
   //sc branch
   {
@@ -285,6 +277,16 @@ var dashRoutes = [
     parent: "savajcapitalbranch",
     key: "editsavajcapitalbranch",
   },
+  {
+    path: "/assigned-file",
+    name: "Assigned File (Savaj User)",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignedSavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "superadmin",
+    key: "savajcapitalbranch",
+  },
   //bank
   {
     path: "/bank",
@@ -314,7 +316,7 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "bank",
-    key: "addbank",
+    key: "addbankuser",
   },
   {
     path: "/bankusers",
@@ -324,7 +326,7 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "bank",
-    key: "addbank",
+    key: "bankusers",
   },
   {
     path: "/bankassignfile",
@@ -335,6 +337,16 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "bank",
     key: "bankassignfile",
+  },
+  {
+    path: "/bank-assigned-file",
+    name: "Assigned File (Bank User)",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignedBankUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "bankusers",
+    key: "bank-assigned-file",
   },
   //document
   {

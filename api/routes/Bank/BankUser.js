@@ -10,6 +10,8 @@ const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
 const axios = require("axios");
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+const BankApproval = require("../../models/Bank/BankApproval");
+const File_Uplode = require("../../models/File/File_Uplode");
 
 router.post("/", async (req, res) => {
   try {
@@ -200,6 +202,53 @@ router.delete("/deletebankuser/:bankId", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/assigned_file/:bankuser_id", async (req, res) => {
+  try {
+    const bankuser_id = req.params.bankuser_id;
+
+    const bankApprovals = await BankApproval.find({
+      bankuser_id: bankuser_id,
+    }).sort({ updatedAt: -1 });
+
+    if (!bankApprovals || bankApprovals.length === 0) {
+      return res.json({
+        success: false,
+        message: "No bank approvals found for the specified bank user.",
+        data: [],
+      });
+    }
+
+    const fileIds = bankApprovals.map((approval) => approval.file_id);
+
+    const fileDetails = await File_Uplode.find({ file_id: { $in: fileIds } });
+
+    const fileDetailsMap = {};
+    fileDetails.forEach((detail) => {
+      fileDetailsMap[detail.file_id] = detail;
+    });
+
+    const augmentedData = bankApprovals.map((approval) => {
+      const fileData = fileDetailsMap[approval.file_id];
+      return {
+        ...approval.toObject(),
+        file_data: fileData || null,
+      };
+    });
+
+    res.json({
+      success: true,
+      data: augmentedData,
+      count: augmentedData.length,
+      message: "Bank approvals data with file details retrieved successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 });

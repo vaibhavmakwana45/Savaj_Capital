@@ -140,8 +140,6 @@ function Tables() {
 
   const handleRow = (id) => {
     history.push("/superadmin/assigned-file?id=" + id);
-
-
   };
 
   const handleAddRole = async (role) => {
