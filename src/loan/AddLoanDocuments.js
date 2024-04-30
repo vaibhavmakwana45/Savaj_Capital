@@ -292,7 +292,13 @@ function AddLoanDocuments() {
                   placeholder="Select Loan-Type"
                   onFocus={() => {
                     setFilteredData(loandata);
-                    setFilterOpen(true);
+                    filterToggle();
+                  }}
+                  onBlur={() => {
+                    // Delay the filterToggle call to allow time for the click event
+                    setTimeout(() => {
+                      filterToggle();
+                    }, 200); // Adjust the delay as needed
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
@@ -321,6 +327,7 @@ function AddLoanDocuments() {
                         <DropdownItem
                           key={index}
                           onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedLoan(item.loan);
                             setFilterOpen(false);
                             const selectedLoanId = item.loan_id;

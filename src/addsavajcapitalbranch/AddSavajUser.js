@@ -287,6 +287,14 @@ function AddSavajCapitalBranch() {
                   onFocus={() => {
                     setFilteredData(branches);
                     setFilterOpen(true);
+                    filterToggle();
+
+                  }}
+                  onBlur={() => {
+                    // Delay the filterToggle call to allow time for the click event
+                    setTimeout(() => {
+                      filterToggle();
+                    }, 200); // Adjust the delay as needed
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
