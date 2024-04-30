@@ -42,14 +42,11 @@ function EditFile() {
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
-  // function to get extension
   function getFileExtension(url) {
-    // Split the URL by dot (.)
     if (url !== undefined) {
       const parts = url.split(".");
-      // Get the last part which should be the extension
       const extension = parts[parts.length - 1];
-      return extension.toLowerCase(); // Return extension in lowercase for consistency
+      return extension.toLowerCase();
     } else {
       return;
     }
@@ -58,34 +55,38 @@ function EditFile() {
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await AxiosInstance.get(
-          `/file_upload/edit_file_upload/${id}`
+        const response = await axios.get(
+          `http://192.168.1.19:4010/api/file_upload/file_upload/${id}`
         );
         if (response.data && response.data.statusCode === 200) {
-          const details = response.data.data.fileDetails;
+          const details = response.data.data.file;
           setSelectedLoanId(details.loan_id);
           setSelectedUser(details.user_id);
           setSelectedLoanSubtypeId(details.loantype_id);
           setSelectedBranchId(details.branch_id);
           setSelectedBranchUserId(details.branchuser_id);
-          const documentsWithCDN = details.documents.map((doc) => ({
-            ...doc,
-            file_path: `${CDN_BASE_URL}${doc.file_path}`,
-          }));
-          setLoanDocuments(documentsWithCDN);
-
-          const initialFileData = documentsWithCDN.reduce(
-            (acc, doc, index) => ({
-              ...acc,
-              [index]: {
-                url: doc.file_path,
-                name: doc.file_name,
-                type: "application/pdf",
-                new: false,
-              },
-            }),
-            {}
+          const documentsWithCDN = Object.entries(details.documents).map(
+            ([key, value]) => {
+              return value.map((item) => ({
+                ...item,
+                file_path: `${CDN_BASE_URL}${item.file_path}`,
+              }));
+            }
           );
+
+          const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
+            return {
+              ...acc,
+              [`${doc[0].title}`]: doc.map((item) => {
+                return {
+                  url: item.file_path,
+                  name: item.title,
+                  type: "application/pdf",
+                  new: false,
+                };
+              }),
+            };
+          }, {});
           setFileData(initialFileData);
         } else {
           throw new Error("Failed to fetch file details");
@@ -425,6 +426,7 @@ function EditFile() {
                 </Select>
               </FormControl>
             )}
+            {console.log(loanDocuments, "yash", fileData)}
             <div>
               <div className="d-flex">
                 <div className="d-flex">
@@ -476,9 +478,6 @@ function EditFile() {
                               onClick={() => handleRemoveFile(index)}
                               style={{ margin: "0 10px" }}
                             />
-
-                            {console.log(fileData, "fileData[index].type")}
-
                             {getFileExtension(fileData[index].url) === "pdf" ||
                             getFileExtension(fileData[index].name) === "pdf" ? (
                               <embed

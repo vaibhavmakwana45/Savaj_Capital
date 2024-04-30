@@ -8,7 +8,9 @@ const Loan_Type = require("../../models/Loan/Loan_Type");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const AddUser = require("../../models/AddUser");
+const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
+const Title = require("../../models/AddDocuments/Title");
 
 router.post("/", async (req, res) => {
   try {
@@ -240,6 +242,7 @@ router.get("/edit_file_upload/:file_id", async (req, res) => {
     });
   }
 });
+
 router.delete("/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -442,6 +445,101 @@ router.get("/allfiles", async (req, res) => {
       statusCode: 200,
       data: data,
       count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/testfile/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const data = await File_Uplode.findOne({ file_id });
+    const loanIds = data.documents.map((item) => {
+      return {
+        loan_document_id: item.loan_document_id,
+        title_id: item.title_id,
+      };
+    });
+    // console.log(loanIds, "1--------");
+
+    const { loan_id, loantype_id } = data;
+    const data2 = await Loan_Documents.find({ loan_id, loantype_id });
+    const loanDocumentIds = data2.flatMap((item) => {
+      return item.document_ids.map((loan_document_id) => {
+        return {
+          loan_document_id,
+          title_id: item.title_id,
+        };
+      });
+    });
+
+    // console.log(loanDocumentIds, "2---------");
+
+    const commonIds = loanIds.filter((id) =>
+      loanDocumentIds.some(
+        (docId) =>
+          docId.loan_document_id === id.loan_document_id &&
+          docId.title_id === id.title_id
+      )
+    );
+
+    const differentIds = loanDocumentIds.filter(
+      (id) =>
+        !loanIds.some(
+          (docId) =>
+            docId.loan_document_id === id.loan_document_id &&
+            docId.title_id === id.title_id
+        )
+    );
+
+    // console.log(commonIds, differentIds, "3--------");
+
+    const approvedObject = [];
+    const pendingObject = [];
+
+    for (const item of commonIds) {
+      const document = await AddDocuments.findOne({
+        document_id: item.loan_document_id,
+      });
+      const title = await Title.findOne({
+        title_id: item.title_id,
+      });
+      approvedObject.push({
+        name: document.document,
+        status: "Uploaded",
+        title: title.title,
+      });
+    }
+
+    for (const item of differentIds) {
+      const document = await AddDocuments.findOne({
+        document_id: item.loan_document_id,
+      });
+      const title = await Title.findOne({
+        title_id: item.title_id,
+      });
+      pendingObject.push({
+        name: document.document,
+        status: "Pending",
+        title: title.title,
+      });
+    }
+
+    const diff = (approvedObject.length * 100) / loanDocumentIds.length;
+
+    res.json({
+      statusCode: 200,
+      data: {
+        approvedData: approvedObject,
+        pendingData: pendingObject,
+        file_id: file_id,
+        document_percentage: parseInt(diff),
+      },
       message: "Read All Request",
     });
   } catch (error) {
