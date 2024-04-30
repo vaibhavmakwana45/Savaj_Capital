@@ -672,3 +672,13 @@ div.h4 {
 }
 
 
+button.chakra-button.css-1sd9pju {
+  // padding: 0 !important;
+}
+button.btn.btn-secondary {
+  padding: 0;
+}
+button.btn.btn-secondary:focus {
+  box-shadow: none;
+  background-color: none;
+}

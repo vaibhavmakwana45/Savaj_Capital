@@ -30,7 +30,6 @@ import {
   renderViewRTL,
 } from "components/Scrollbar/Scrollbar";
 import { HSeparator } from "components/Separator/Separator";
-// import { SidebarHelp } from "components/Sidebar/SidebarHelp";
 import React, { useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
@@ -110,12 +109,7 @@ function Sidebar(props) {
           {activeRoute(prop.layout + prop.path) === "active" ? (
             prop.isDropdown ? (
               <Button
-                boxSize="initial"
-                justifyContent="flex-start"
                 alignItems="center"
-                boxShadow={sidebarActiveShadow}
-                bg={activeBg}
-                transition={variantChange}
                 mb={{
                   xl: "6px",
                 }}
@@ -130,15 +124,8 @@ function Sidebar(props) {
                 borderRadius="15px"
                 _hover="none"
                 w="100%"
-                _active={{
-                  bg: "inherit",
-                  transform: "none",
-                  borderColor: "transparent",
-                }}
-                _focus={{
-                  boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
-                }}
-              >
+                style={{backgroundColor:"#FFF"}}
+              > 
                 <Dropdown
                   style={{
                     background: "none",
@@ -199,7 +186,6 @@ function Sidebar(props) {
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
-                boxShadow={sidebarActiveShadow}
                 bg={activeBg}
                 transition={variantChange}
                 mb={{
@@ -253,7 +239,6 @@ function Sidebar(props) {
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
-              boxShadow={sidebarActiveShadow}
               bg={activeBg}
               transition={variantChange}
               mb={{
