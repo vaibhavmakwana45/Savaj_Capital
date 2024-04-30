@@ -25,8 +25,10 @@ import CardHeader from "components/Card/CardHeader.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { CloseIcon } from "@chakra-ui/icons";
-import axios from "axios";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
 
 function AddLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -114,54 +116,54 @@ function AddLoanDocuments() {
       toast.error("Please enter a title and select at least one document.");
       return;
     }
-  
+
     const newTitle = {
       title: currentTitle,
       documents: selectedDocs.map((docName) => {
         const selectedDoc = currentDocs.find((doc) => doc.document === docName);
-        return { document: selectedDoc.document, document_id: selectedDoc.document_id };
+        return {
+          document: selectedDoc.document,
+          document_id: selectedDoc.document_id,
+        };
       }),
     };
-  
+
     const document_ids = newTitle.documents.map((doc) => doc.document_id);
-  
+
     setTitles([...titles, { ...newTitle, document_ids }]);
     setCurrentTitle("");
     setSelectedDocs([]);
     toast.success("Title added successfully!");
   };
-  
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       for (const postData of titles) {
         const { title: titleName, document_ids } = postData;
-        console.log('postData', postData)
+        console.log("postData", postData);
         const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
           title: titleName,
           document_id: document_ids,
         });
-  
+
         console.log("Response:", response.data);
         toast.success("Document created successfully");
       }
-  
+
       toast.success("Loan Added Successfully!");
       history.push("/superadmin/loan");
     } catch (error) {
-      console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  
-  
+
   const filterSelectedDocs = () => {
     const selectedDocSet = new Set();
     titles.forEach((title) => {
@@ -171,6 +173,11 @@ function AddLoanDocuments() {
     });
     return currentDocs.filter((doc) => !selectedDocSet.has(doc.document));
   };
+
+  const [filteredData, setFilteredData] = useState("");
+  const [filterOpen, setFilterOpen] = useState("");
+  const filterToggle = () => setFilterOpen(!filterOpen);
+  const [selectedLoan, setSelectedLoan] = useState("");
 
   const handleRemoveDocument = (titleIndex, docIndexToRemove) => {
     const updatedTitles = [...titles];
@@ -195,7 +202,7 @@ function AddLoanDocuments() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Loan</FormLabel>
                 <Select
                   name="city"
@@ -211,7 +218,73 @@ function AddLoanDocuments() {
                     </option>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
+              <div className="w-100">
+                <FormLabel>Select Loan</FormLabel>
+
+                <input
+                  style={{
+                    width: "100%",
+                    border: "0.5px solid #333",
+                    padding: "5px",
+                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right center",
+                    backgroundSize: "10px",
+                    backgroundPosition: "right 15px center",
+                    borderRadius: "5px",
+                    borderColor: "inherit",
+                  }}
+                  placeholder="Select Loan-Type"
+                  onFocus={() => {
+                    setFilteredData(loandata);
+                    setFilterOpen(true);
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value.length !== "") {
+                      setFilterOpen(true);
+                    } else {
+                      setFilterOpen(false);
+                    }
+                    const filterData = loandata.filter((item) => {
+                      return item.loan
+                        .toLowerCase()
+                        .includes(e.target.value.toLowerCase());
+                    });
+                    setSelectedLoan(e.target.value);
+                    setFilteredData(filterData);
+                  }}
+                  value={selectedLoan}
+                />
+                <Dropdown
+                  className="w-100"
+                  isOpen={filterOpen}
+                  toggle={filterToggle}
+                >
+                  <DropdownMenu className="w-100">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={(e) => {
+                            setSelectedLoan(item.loan);
+                            setFilterOpen(false);
+                            const selectedLoanId = item.loan_id;
+                            setFormData({
+                              ...formData,
+                              loan_id: selectedLoanId,
+                            });
+                          }}
+                        >
+                          {item.loan}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No data found</DropdownItem>
+                    )}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
               {subType === true &&
               loanName !== "Car" &&
               loanName !== "CRL-Car Loan" ? (
