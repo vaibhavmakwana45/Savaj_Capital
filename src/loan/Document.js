@@ -43,7 +43,7 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
-      const response = await axios.get("http://localhost:4010/api" + url);
+      const response = await AxiosInstance.get(url);
       setDocuments(response.data.data || []);
     } catch (error) {
       console.error("Error fetching documents:", error);

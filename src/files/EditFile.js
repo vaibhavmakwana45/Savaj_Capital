@@ -55,8 +55,8 @@ function EditFile() {
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await axios.get(
-          `http://192.168.1.19:4010/api/file_upload/file_upload/${id}`
+        const response = await AxiosInstance.get(
+          `/file_upload/file_upload/${id}`
         );
         if (response.data && response.data.statusCode === 200) {
           const details = response.data.data.file;
