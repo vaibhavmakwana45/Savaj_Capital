@@ -134,7 +134,9 @@ function BankUsers() {
     navigateToAnotherPageUser(id);
   };
 
-  const handleRow = () => {};
+  const handleRow = (id) => {
+    history.push("/superadmin/bank-assigned-file?id=" + id);
+  };
 
   return (
     <>
