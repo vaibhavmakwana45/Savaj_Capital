@@ -174,6 +174,7 @@ function AddLoanDocuments() {
 
     const newTitle = {
       title: selectedTitle.title,
+      title_id: selectedTitle.title_id,
       documents: selectedDocs.map((docName) => {
         const selectedDoc = currentDocs.find((doc) => doc.document === docName);
         return {
@@ -196,12 +197,13 @@ function AddLoanDocuments() {
 
     try {
       for (const postData of titles) {
-        const { document_ids } = postData;
+        const { title_id: title_id, document_ids } = postData;
         console.log("postData", postData);
         const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
-          title_id: formData.title_id,
+          title_id: title_id,
+          // title_id: formData.title_id,
           // title: titleName,
           document_id: document_ids,
         });

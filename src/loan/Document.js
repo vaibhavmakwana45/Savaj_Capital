@@ -25,7 +25,6 @@ function Document() {
   const location = useLocation();
   const history = useHistory();
   const { loan_id, loantype_id } = location?.state?.state || {};
-  console.log(loan_id, "loan_id");
   const [documents, setDocuments] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -46,7 +45,6 @@ function Document() {
         : `/loan_docs/${loan_id}`;
       const response = await axios.get("http://localhost:4010/api" + url);
       setDocuments(response.data.data || []);
-      console.log(response.data.data, "response.data.data");
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast.error("Failed to fetch documents.");
@@ -59,7 +57,7 @@ function Document() {
     fetchDocuments();
   }, [loan_id, loantype_id]);
 
-  const allHeaders = [
+  const allHeadersWithoutDocNames = [
     "Title",
     "Document Name",
     "createdAt",
@@ -67,27 +65,18 @@ function Document() {
     "Action",
   ];
 
-  // const filteredDocuments = documents.filter((doc) =>
-  //   doc.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
-
-  console.log(documents, "documents");
-
   const filteredDocuments = documents.filter(
     (doc) =>
       doc?.title && doc?.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const formattedData = filteredDocuments.map((doc) => [
+  const formattedDataWithoutDocNames = filteredDocuments.map((doc) => [
     doc.loan_document_id,
     doc.title,
     doc.document_names.join(", "),
     doc.createdAt,
     doc.updatedAt,
   ]);
-
-  console.log(filteredDocuments, "filteredDocuments");
-  console.log(formattedData, "formattedData");
 
   const handleDelete = (id) => {
     setSelctedDocumentId(id);
@@ -211,7 +200,8 @@ function Document() {
                   marginRight="10px"
                 />
                 <Button
-                  onClick={() => setIsEditDocument(true)}
+                  // onClick={() => setIsEditDocument(true)}
+                  onClick={() => history.push("/superadmin/addloandocs")}
                   colorScheme="blue"
                 >
                   Add Document
@@ -222,14 +212,16 @@ function Document() {
           <CardBody>
             <TableComponent
               documents={documents}
-              data={formattedData}
+              data={formattedDataWithoutDocNames}
               textColor={textColor}
               borderColor={borderColor}
               loading={loading}
-              allHeaders={allHeaders}
+              allHeaders={allHeadersWithoutDocNames}
               handleRow={handleRow}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
+              collapse={true}
+              documentIndex={2}
             />
           </CardBody>
         </Card>

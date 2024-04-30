@@ -293,7 +293,7 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "30px" }}>
           <Flex justifyContent="space-between" className="thead" >
             <Text fontSize="xl" fontWeight="bold" className="ttext">
-              Add File
+              Add Files
             </Text>
             <div>
               <Input
@@ -308,7 +308,7 @@ export default function CollapsibleTable() {
                 onClick={() => history.push("/superadmin/addfile")}
                 colorScheme="blue"
               >
-                Add Files
+                Add File
               </Button>
             </div>
           </Flex>
