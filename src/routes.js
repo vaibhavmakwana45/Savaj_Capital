@@ -50,6 +50,7 @@ import AddAllDocuments from "Document/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
 
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
+import Title from "./Title/Title"; // Assignes file (savaj user)
 
 var dashRoutes = [
   //superadmin
@@ -496,5 +497,18 @@ var dashRoutes = [
     component: UserDashboard,
     layout: "/user",
   },
+
+
+  // Title
+  {
+    path: "/title",
+    name: "Title",
+    icon: <DocumentIcon color="inherit" />,
+    component: Title,
+    layout: "/superadmin",
+    hideInSResponsive: true,
+  },
+
+  
 ];
 export default dashRoutes;
