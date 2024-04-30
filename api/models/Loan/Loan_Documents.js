@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 
 const LoanTypeSchema = new mongoose.Schema({
   loan_document_id: { type: String },
+  title_id: { type: String },
   loan_id: { type: String },
   loantype_id: { type: String },
   title: { type: String },

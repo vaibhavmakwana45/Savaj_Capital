@@ -29,6 +29,7 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 import upArrow from "../assets/svg/uparrow.svg";
 import downArrow from "../assets/svg/downarrow.svg";
+import { CloseIcon } from "@chakra-ui/icons";
 
 function AddLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -41,6 +42,8 @@ function AddLoanDocuments() {
     document_ids: [],
   });
   const [loandata, setLoanData] = useState([]);
+  const [titleData, setTitleData] = useState([]);
+  console.log(titleData, "titleData");
   const [loanType, setLoanType] = useState([]);
   const [subType, setSubType] = useState(null);
   const [loanName, setLoanName] = useState("");
@@ -65,6 +68,24 @@ function AddLoanDocuments() {
     };
 
     getLoanData();
+  }, []);
+
+  useEffect(() => {
+    const getTitleData = async () => {
+      try {
+        const response = await AxiosInstance.get("/title");
+
+        if (response.data.success) {
+          setTitleData(response.data.data);
+        } else {
+          alert("Please try again later...!");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getTitleData();
   }, []);
 
   const getData = async (loanId) => {
@@ -111,14 +132,45 @@ function AddLoanDocuments() {
     setTitles([]);
   }, [formData.loan_id, formData.loantype_id, loanName, subType]);
 
+  // const handleAddTitle = () => {
+  //   if (!currentTitle || selectedDocs.length === 0) {
+  //     toast.error("Please enter a title and select at least one document.");
+  //     return;
+  //   }
+
+  //   const newTitle = {
+  //     title: currentTitle,
+  //     documents: selectedDocs.map((docName) => {
+  //       const selectedDoc = currentDocs.find((doc) => doc.document === docName);
+  //       return {
+  //         document: selectedDoc.document,
+  //         document_id: selectedDoc.document_id,
+  //       };
+  //     }),
+  //   };
+
+  //   const document_ids = newTitle.documents.map((doc) => doc.document_id);
+
+  //   setTitles([...titles, { ...newTitle, document_ids }]);
+  //   setCurrentTitle("");
+  //   setSelectedDocs([]);
+  //   toast.success("Title added successfully!");
+  // };
+
   const handleAddTitle = () => {
-    if (!currentTitle || selectedDocs.length === 0) {
-      toast.error("Please enter a title and select at least one document.");
+    if (selectedDocs.length === 0) {
+      toast.error("Please select at least one document.");
       return;
     }
-
+  
+    const selectedTitle = titleData.find((title) => title.title_id === formData.title_id);
+    if (!selectedTitle) {
+      toast.error("Please select a title.");
+      return;
+    }
+  
     const newTitle = {
-      title: currentTitle,
+      title: selectedTitle.title,
       documents: selectedDocs.map((docName) => {
         const selectedDoc = currentDocs.find((doc) => doc.document === docName);
         return {
@@ -127,14 +179,14 @@ function AddLoanDocuments() {
         };
       }),
     };
-
+  
     const document_ids = newTitle.documents.map((doc) => doc.document_id);
-
+  
     setTitles([...titles, { ...newTitle, document_ids }]);
-    setCurrentTitle("");
     setSelectedDocs([]);
     toast.success("Title added successfully!");
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,6 +199,7 @@ function AddLoanDocuments() {
         const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
+          title_id: selectedTitleId,
           title: titleName,
           document_id: document_ids,
         });
@@ -219,6 +272,7 @@ function AddLoanDocuments() {
                   ))}
                 </Select>
               </FormControl> */}
+
               <div className="w-100">
                 <FormLabel>Select Loan</FormLabel>
 
@@ -317,14 +371,26 @@ function AddLoanDocuments() {
                 </FormControl>
               ) : null}
 
-              <FormControl mt={4}>
-                <FormLabel>Title</FormLabel>
-                <Input
-                  placeholder="Enter title for the documents"
-                  value={currentTitle}
-                  onChange={(e) => setCurrentTitle(e.target.value)}
-                />
+              {/*======================  Title Dropdawn  ======================= */}
+
+              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+                <FormLabel>Select Title</FormLabel>
+                <Select
+                  name="title"
+                  placeholder="Select Title"
+                  onChange={(e) => {
+                    const selectedTitleId = e.target.value;
+                    setFormData({ ...formData, title_id: selectedTitleId });
+                  }}
+                >
+                  {titleData.map((index) => (
+                    <option key={index.title_id} value={index.title_id}>
+                      {index.title}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
+
               <FormControl mt={4}>
                 <FormLabel>Documents</FormLabel>
                 <Popover>

@@ -24,21 +24,21 @@ import TableComponent from "TableComponent";
 import axios from "axios";
 
 function Title() {
-  const [documents, setDocuments] = useState([]);
+  const [titles, setTitles] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const [loading, setLoading] = useState(true);
-  const [document, setDocument] = useState("");
+  const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDocumetId, setSelectedDocumetId] = useState("");
-  const [selectedDocument, setSelectedDocument] = useState("");
+  const [selectedTitleId, setSelectedTitleId] = useState("");
+  const [selectedTitle, setSelectedTitle] = useState("");
 
-  const getDocumentData = async () => {
+  const getTitleData = async () => {
     try {
-      const response = await AxiosInstance.get("/document");
+      const response = await AxiosInstance.get("/title");
 
       if (response.data.success) {
-        setDocuments(response.data.data);
+        setTitles(response.data.data);
         setLoading(false);
       } else {
         alert("Please try again later...!");
@@ -51,34 +51,33 @@ function Title() {
 
   const fllteredDocument =
     searchTerm.length === 0
-      ? documents
-      : documents.filter((doc) =>
-          doc.document.toLowerCase().includes(searchTerm.toLowerCase())
+      ? titles
+      : titles.filter((doc) =>
+          doc.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
   useEffect(() => {
-    getDocumentData();
+    getTitleData();
   }, []);
 
   const allHeaders = ["Document", "create date", "update date", "Action"];
 
   const formattedData = fllteredDocument.map((bank) => [
-    bank.document_id,
-    bank.document,
+    bank.title_id,
+    bank.title,
     bank.createdAt,
     bank.updatedAt,
   ]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDocument, setIsDocument] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+  const [isTitle, setIsTitle] = useState(false);
   const cancelRef = React.useRef();
-  const deleteDocument = async (documentId) => {
+  const deleteTitle = async (titleId) => {
     try {
-      const response = await AxiosInstance.delete(`/document/${documentId}`);
-      getDocumentData();
+      const response = await AxiosInstance.delete(`/title/${titleId}`);
+      getTitleData();
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
-        toast.success("Document deleted successfully!");
+        toast.success("Title deleted successfully!");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -89,16 +88,16 @@ function Title() {
   };
 
   const handleDelete = (id) => {
-    setSelectedDocumentId(id);
+    setSelectedTitleId(id);
     setIsDeleteDialogOpen(true);
   };
 
   const handleEdit = (id) => {
-    setSelectedDocumetId(id);
-    setIsDocument(true);
-    const doc = documents.find((doc) => doc.document_id === id);
+    setSelectedTitleId(id);
+    setIsTitle(true);
+    const doc = titles.find((doc) => doc.title_id === id);
     if (doc) {
-      setSelectedDocument(doc.document);
+      setSelectedTitle(doc.title);
     } else {
       console.error("Document not found for id:", id);
     }
@@ -108,16 +107,16 @@ function Title() {
     console.log(id);
   };
 
-  const handleAddDocument = async (document) => {
+  const handleAddDocument = async (title) => {
     try {
-      const response = await AxiosInstance.post("/document", { document });
+      const response = await AxiosInstance.post("/title", { title });
       console.log("response", response);
       if (response.data.success) {
         toast.success("Document added successfully!");
-        setIsDocument(false);
-        setSelectedDocumetId("");
-        getDocumentData();
-        setDocument("");
+        setIsTitle(false);
+        setSelectedTitleId("");
+        getTitleData();
+        setTitle("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -129,21 +128,18 @@ function Title() {
     }
   };
 
-  const editDocument = async (document) => {
+  const editDocument = async (title) => {
     try {
-      const response = await AxiosInstance.put(
-        "/document/" + selectedDocumetId,
-        {
-          document,
-        }
-      );
+      const response = await AxiosInstance.put("/title/" + selectedTitleId, {
+        title,
+      });
 
       if (response.data.success) {
         toast.success("Document Updated successfully!");
-        setIsDocument(false);
-        setSelectedDocumetId("");
-        getDocumentData();
-        setDocument("");
+        setIsTitle(false);
+        setSelectedTitleId("");
+        getTitleData();
+        setTitle("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -183,7 +179,7 @@ function Title() {
                 />
                 <Button
                   onClick={() => {
-                    setIsDocument(true);
+                    setIsTitle(true);
                   }}
                   colorScheme="blue"
                 >
@@ -194,7 +190,7 @@ function Title() {
           </CardHeader>
           <CardBody>
             <TableComponent
-              documents={documents}
+              titles={titles}
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
@@ -230,7 +226,7 @@ function Title() {
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => deleteDocument(selectedDocumentId)}
+                  onClick={() => deleteTitle(selectedTitleId)}
                   ml={3}
                 >
                   Delete
@@ -240,11 +236,11 @@ function Title() {
           </AlertDialogOverlay>
         </AlertDialog>
         <AlertDialog
-          isOpen={isDocument}
+          isOpen={isTitle}
           leastDestructiveRef={cancelRef}
           onClose={() => {
-            setIsDocument(false);
-            setSelectedDocumetId("");
+            setIsTitle(false);
+            setSelectedTitleId("");
           }}
         >
           <AlertDialogOverlay>
@@ -254,25 +250,23 @@ function Title() {
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                <FormControl id="document" isRequired>
+                <FormControl id="title" isRequired>
                   <Input
-                    name="document"
+                    name="title"
                     onChange={(e) => {
-                      selectedDocumetId == ""
-                        ? setDocument(e.target.value)
-                        : setSelectedDocument(e.target.value);
+                      selectedTitleId == ""
+                        ? setTitle(e.target.value)
+                        : setSelectedTitle(e.target.value);
                     }}
-                    value={
-                      selectedDocumetId == "" ? document : selectedDocument
-                    }
-                    placeholder="Add document"
+                    value={selectedTitleId == "" ? title : selectedTitle}
+                    placeholder="Add title"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        if (selectedDocumetId) {
-                          editDocument(selectedDocument);
+                        if (selectedTitleId) {
+                          editDocument(selectedTitle);
                         } else {
-                          handleAddDocument(document);
+                          handleAddDocument(title);
                         }
                       }
                     }}
@@ -284,8 +278,8 @@ function Title() {
                 <Button
                   ref={cancelRef}
                   onClick={() => {
-                    setIsDocument(false);
-                    setSelectedDocumetId("");
+                    setIsTitle(false);
+                    setSelectedTitleId("");
                   }}
                 >
                   Cancel
@@ -293,16 +287,16 @@ function Title() {
                 <Button
                   colorScheme="blue"
                   onClick={() => {
-                    if (selectedDocumetId) {
-                      editDocument(selectedDocument);
+                    if (selectedTitleId) {
+                      editDocument(selectedTitle);
                     } else {
-                      handleAddDocument(document);
+                      handleAddDocument(title);
                     }
                   }}
                   ml={3}
                   type="submit"
                 >
-                  {selectedDocumetId ? "Update Now" : "Add Now"}
+                  {selectedTitleId ? "Update Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
