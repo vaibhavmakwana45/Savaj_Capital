@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import {
   Button,
   Select,
@@ -31,8 +30,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
+import { Country, State, City } from "country-state-city";
 
-function AddFiles() {
+function CreateUserFile() {
   const history = useHistory();
   const textColor = useColorModeValue("gray.700", "white");
   const [loading, setLoading] = useState(false);
@@ -41,6 +41,25 @@ function AddFiles() {
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCountry, setSelectedCountry] = useState("IN");
+  const [countries, setCountries] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [formData, setFormData] = useState({
+    user_id: "",
+    username: "",
+    number: "",
+    email: "",
+    pan_card: "",
+    aadhar_card: "",
+    dob: "",
+    country: "India",
+    state: "",
+    city: "",
+  });
+
   const {
     register,
     handleSubmit,
@@ -93,42 +112,50 @@ function AddFiles() {
   };
 
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [loanDocuments, setLoanDocuments] = useState([]);
 
-  const imagesTypes = ["jpeg", "png", "svg", "gif"];
+  const [fileData, setFileData] = useState({});
+  const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    setIsDragging(true);
+  const handleFileInputChange = (event, title_id, index, innerIndex) => {
+    const file = event.target.files[0];
+    console.log("File input changed:", file);
+    if (file) {
+      const documentId =
+        groupedLoanDocuments[title_id][index].document_ids[innerIndex];
+      const key = `${title_id}-${index}-${innerIndex}`;
+      const filePreview = {
+        name: file.name,
+        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+        type: file.type,
+        documentId: documentId,
+        key: key,
+      };
+
+      setFileData((prevData) => ({
+        ...prevData,
+        [key]: filePreview,
+      }));
+
+      setUploadedFileName((prevUploadedFiles) => [
+        ...prevUploadedFiles,
+        { file: file, documentId: documentId, title_id: title_id, key: key },
+      ]);
+    }
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+  const handleRemoveFile = (key) => {
+    setFileData((prevData) => {
+      const newData = { ...prevData };
+      delete newData[key];
+      return newData;
+    });
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files[0];
-    uploadFile(file);
-  };
-
-  const progressMove = () => {
-    let counter = 0;
-    setTimeout(() => {
-      const counterIncrease = setInterval(() => {
-        if (counter === 100) {
-          clearInterval(counterIncrease);
-        } else {
-          counter += 10;
-          setUploadProgress(counter);
-        }
-      }, 100);
-    }, 600);
+    setUploadedFileName((prevUploadedFiles) => {
+      return prevUploadedFiles.filter(
+        (uploadedFile) => uploadedFile.key !== key
+      );
+    });
   };
 
   useEffect(() => {
@@ -137,7 +164,7 @@ function AddFiles() {
         let url;
         if (selectedLoanType.is_subtype) {
           if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
-            url = `/loan_docs/loan_docs/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+            url = `/loan_docs/documents/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
           }
         } else if (selectedLoanType.loan_id) {
           url = `/loan_docs/${selectedLoanType.loan_id}`;
@@ -145,7 +172,17 @@ function AddFiles() {
 
         if (url) {
           const response = await AxiosInstance.get(url);
-          setLoanDocuments(response.data.data);
+          const data = response.data.data;
+
+          const grouped = data.reduce((acc, document) => {
+            if (!acc[document.title_id]) {
+              acc[document.title_id] = [];
+            }
+            acc[document.title_id].push(document);
+            return acc;
+          }, {});
+
+          setGroupedLoanDocuments(grouped);
         }
       } catch (error) {
         console.error("Error fetching loan documents:", error);
@@ -158,17 +195,33 @@ function AddFiles() {
     ) {
       fetchLoanDocuments();
     } else {
-      setLoanDocuments([]);
+      setGroupedLoanDocuments({});
     }
   }, [selectedLoanType]);
 
-  const fileInputRefs = useRef([]);
+  const fileInputRefs = useRef({});
 
   useEffect(() => {
-    fileInputRefs.current = loanDocuments.map(
-      (_, index) => fileInputRefs.current[index] ?? createRef()
-    );
-  }, [loanDocuments]);
+    const newFileInputRefs = {};
+    Object.keys(groupedLoanDocuments).forEach((title_id) => {
+      groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
+        documentGroup.document_ids.forEach((documentId, innerIndex) => {
+          const refKey = `${title_id}-${index}-${innerIndex}`;
+          newFileInputRefs[refKey] = () => {
+            const element = document.getElementById(
+              `fileInput-${title_id}-${index}-${innerIndex}`
+            );
+            if (element) {
+              element.click();
+            } else {
+              console.error("Ref or current element is null or undefined");
+            }
+          };
+        });
+      });
+    });
+    fileInputRefs.current = newFileInputRefs;
+  }, [groupedLoanDocuments]);
 
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
@@ -186,56 +239,18 @@ function AddFiles() {
     setSelectedLoanSubtypeId(event.target.value);
   };
 
-  const [fileData, setFileData] = useState([]);
-
-  const handleFileInputChange = (event, index) => {
-    const file = event.target.files[0];
-    if (file) {
-      const filePreview = {
-        name: file.name,
-        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
-        type: file.type,
-        documentId: loanDocuments[index].loan_document_id,
-      };
-      setFileData((prevData) => {
-        const newData = prevData.slice();
-        newData[index] = filePreview;
-        return newData;
-      });
-      setUploadedFileName((prevFiles) => [
-        ...prevFiles,
-        {
-          file,
-          name: file.name,
-          documentId: loanDocuments[index].loan_document_id,
-        },
-      ]);
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setFileData((prevData) => {
-      const newData = [...prevData];
-      newData[index] = undefined;
-      return newData;
-    });
-
-    if (fileInputRefs.current[index]) {
-      fileInputRefs.current[index].value = "";
-    }
-  };
-  const [accessType, setAccessType] = useState("");
-
-  React.useEffect(() => {
-    const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id);
-  }, []);
-  
-  console.log("accessType", accessType);
-
   const onSubmit = async (data) => {
     try {
-      const wrappedData = { userDetails: data };
+      const wrappedData = {
+        userDetails: {
+          ...data,
+          country: formData.country,
+          state: formData.state,
+          city: formData.city,
+          state_code: selectedState,
+          country_code: selectedCountry,
+        },
+      };
       await AxiosInstance.post("/addusers/adduser", wrappedData);
       toast.success("User Added Successfully!");
       onClose();
@@ -246,6 +261,14 @@ function AddFiles() {
       toast.error("Please try again later!");
     }
   };
+  const [accessType, setAccessType] = useState("");
+
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
+  console.log("accessType", accessType);
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -288,12 +311,14 @@ function AddFiles() {
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
           loan_document_id: file.documentId,
+          title_id: file.title_id,
         })),
       };
-
+      console.log("uploadedFiles", uploadedFiles);
       await AxiosInstance.post("/file_upload", payload);
+      console.log("payload", payload);
 
-      history.push("/savajcapitaluser/userfile");
+      history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
@@ -301,6 +326,40 @@ function AddFiles() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+    setStates(State.getStatesOfCountry("IN"));
+  }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
+      setStates(statesOfSelectedCountry);
+      setSelectedState("");
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    const citiesOfState = City.getCitiesOfState(selectedCountry, selectedState);
+    setCities(citiesOfState);
+  }, [selectedState, selectedCountry]);
+
+  const handleCountryChange = (event) => {
+    setSelectedCountry(event.target.value);
+  };
+
+  const handleStateChange = (event) => {
+    const stateCode = event.target.value;
+    const stateObj = states.find((state) => state.isoCode === stateCode);
+    const stateFullName = stateObj ? stateObj.name : "";
+
+    setSelectedState(stateCode);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: stateFullName,
+    }));
   };
 
   return (
@@ -375,118 +434,171 @@ function AddFiles() {
                 </Select>
               </FormControl>
             )}
-
             <div>
-              <div className="d-flex ">
-                <div className="d-flex mainnnn">
-                  {(!selectedLoanType.is_subtype ||
-                    (selectedLoanType.is_subtype &&
-                      selectedLoanType.loansubtype_id)) &&
-                    loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6">
-                        <Text
-                          fontSize="xl"
-                          className="mx-3"
-                          color={textColor}
-                          style={{
-                            fontSize: "12px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {document.loan_document}
-                        </Text>
-                        <input
-                          type="file"
-                          ref={(el) => (fileInputRefs.current[index] = el)}
-                          className="drop-zoon__file-input"
-                          onChange={(event) =>
-                            handleFileInputChange(event, index)
-                          }
-                          style={{ display: "none" }}
-                        />
-                        {fileData[index] ? (
-                          <div
-                            className="file-preview"
-                            style={{
-                              display: "flex",
-                              marginTop: "15px",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              width: "100%",
-                              padding: "10px",
-                              boxSizing: "border-box",
-                              backgroundColor: "#e8f0fe",
-                              borderRadius: "8px",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                            }}
-                          >
-                            {fileData[index].url ? (
-                              <img
-                                src={fileData[index].url}
-                                alt="Preview"
-                                style={{
-                                  width: 100,
-                                  height: 100,
-                                  margin: "auto",
-                                  borderRadius: "4px",
-                                }}
-                              />
-                            ) : (
-                              <span
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "100%",
-                                  padding: "20px",
-                                }}
+              {Object.keys(groupedLoanDocuments).map((title_id) => (
+                <div key={title_id}>
+                  <h2>{groupedLoanDocuments[title_id][0].title}</h2>
+                  <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
+                    {groupedLoanDocuments[title_id].map(
+                      (documentGroup, index) => (
+                        <div key={`${title_id}-${index}`}>
+                          {documentGroup.document_names.map(
+                            (documentName, innerIndex) => (
+                              <div
+                                key={`${title_id}-${index}-${innerIndex}`} // Ensure unique key
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
-                                <FontAwesomeIcon
-                                  icon={faFile}
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
                                   style={{
-                                    fontSize: "24px",
-                                    marginBottom: 10,
-                                    color: "#0056b3",
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
                                   }}
-                                />
-                                {fileData[index].name}
-                              </span>
-                            )}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    id={`fileInput-${title_id}-${index}-${innerIndex}`}
+                                    className="drop-zoon__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(
+                                        event,
+                                        title_id,
+                                        index,
+                                        innerIndex
+                                      )
+                                    }
+                                    style={{ display: "none" }}
+                                  />
 
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            className={`upload-area__drop-zoon drop-zoon ${
-                              isDragging ? "drop-zoon--over" : ""
-                            }`}
-                            onClick={() => fileInputRefs.current[index].click()}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <span className="drop-zoon__icon">
-                              <i className="bx bxs-file-image"></i>
-                            </span>
-                            <p className="drop-zoon__paragraph">
-                              Drop your file here or click to browse
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                                  {fileData[
+                                    `${title_id}-${index}-${innerIndex}`
+                                  ] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        boxSizing: "border-box",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() =>
+                                          handleRemoveFile(
+                                            `${title_id}-${index}-${innerIndex}`
+                                          )
+                                        }
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[
+                                        `${title_id}-${index}-${innerIndex}`
+                                      ].url ? (
+                                        fileData[
+                                          `${title_id}-${index}-${innerIndex}`
+                                        ].type === "application/pdf" ? (
+                                          <embed
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            type="application/pdf"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
+                                          />
+                                        )
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <i className="bx bxs-file"></i>
+                                          {
+                                            fileData[
+                                              `${title_id}-${index}-${innerIndex}`
+                                            ].name
+                                          }
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zoon drop-zoon ${
+                                        isDragging ? "drop-zoon--over" : ""
+                                      }`}
+                                      onClick={() => {
+                                        const refKey = `${title_id}-${index}-${innerIndex}`;
+                                        const clickFunction =
+                                          fileInputRefs.current[refKey];
+                                        if (
+                                          typeof clickFunction === "function"
+                                        ) {
+                                          clickFunction();
+                                        } else {
+                                          console.error(
+                                            "Ref or current element is null or undefined, or click function is not available"
+                                          );
+                                        }
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                      }}
+                                    >
+                                      <span className="drop-zoon__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zoon__paragraph">
+                                        Drop your file here or click to browse
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
             <div>
               <Button
@@ -504,7 +616,7 @@ function AddFiles() {
                 mt={4}
                 colorScheme="yellow"
                 style={{ marginTop: 40, marginLeft: 8 }}
-                onClick={() => history.push("/savajcapitaluser/userfile")}
+                onClick={() => history.push("/superadmin/filetable")}
               >
                 Cancel
               </Button>
@@ -514,7 +626,9 @@ function AddFiles() {
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent
+          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
+        >
           <ModalHeader>Add New User</ModalHeader>
           <ModalCloseButton />
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -558,6 +672,108 @@ function AddFiles() {
                 />
                 {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
+
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
+
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl id="state" mt={4} isRequired>
+                <FormLabel>State</FormLabel>
+                <Select
+                  name="state"
+                  placeholder="Select state"
+                  onChange={handleStateChange}
+                  disabled={!selectedCountry}
+                  value={selectedState}
+                  // {...register("state", {
+                  //   required: "State is required",
+                  // })}
+                >
+                  {states.length ? (
+                    states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a country first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl id="city" mt={4} isRequired>
+                <FormLabel>City</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select city"
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  disabled={!selectedState}
+                  value={formData.city}
+                  // {...register("city", {
+                  //   required: "City is required",
+                  // })}
+                >
+                  {cities.length ? (
+                    cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a state first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Dob</FormLabel>
+                <Input
+                  placeholder="DOB"
+                  type="date"
+                  {...register("dob", {
+                    required: "DOB is required",
+                  })}
+                />
+                {errors.dob && <p>{errors.dob.message}</p>}
+              </FormControl>
+
+              <FormControl className="my-2">
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  placeholder="Adhar Card"
+                  type="number"
+                  {...register("aadhar_card", {
+                    required: "Aadhar card is required",
+                  })}
+                />
+                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  placeholder="Pan Card"
+                  type="string"
+                  {...register("pan_card", {
+                    required: "Pan card is required",
+                  })}
+                />
+                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+              </FormControl>
             </ModalBody>
 
             <ModalFooter>
@@ -573,5 +789,4 @@ function AddFiles() {
     </>
   );
 }
-
-export default AddFiles;
+export default CreateUserFile;

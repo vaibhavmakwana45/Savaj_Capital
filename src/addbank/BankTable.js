@@ -148,7 +148,12 @@ function Tables() {
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext"
+              >
                 Banks and Users
               </Text>
               <div className="thead">
@@ -159,7 +164,21 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Menu>
+                <Button
+                  onClick={navigateToAnotherPage}
+                  colorScheme="blue"
+                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                >
+                  Add Bank
+                </Button>{" "}
+                <Button
+                  onClick={navigateToAnotherPageUser}
+                  colorScheme="blue"
+                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                >
+                  Add Bank User
+                </Button>
+                {/* <Menu>
                   <MenuButton>
                     <Button
                       onClick={navigateToAnotherPage}
@@ -197,7 +216,7 @@ function Tables() {
                       </MenuItem>
                     </Flex>
                   </MenuList>
-                </Menu>
+                </Menu> */}
               </div>
             </Flex>
           </CardHeader>

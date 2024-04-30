@@ -50,17 +50,26 @@ function Sidebar(props) {
   const mainPanel = React.useRef();
   const history = useHistory();
   let variantChange = "0.2s linear";
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-  const toggle = () => setIsOpenDropdown(!isOpenDropdown);
   const activeRoute = (routeName) => {
     return location.pathname === routeName ? "active" : "";
   };
+
+  // Define separate state for dropdowns
+  const [dropdownStates, setDropdownStates] = useState({});
+
+  // Function to toggle dropdown state for a specific key
+  const toggleDropdown = (key) => {
+    setDropdownStates(prevStates => ({
+      ...prevStates,
+      [key]: !prevStates[key] // Toggle the state for the specified dropdown key
+    }));
+  };
+
   const createLinks = (routes) => {
     let activeBg = useColorModeValue("white", "navy.700");
     let inactiveBg = useColorModeValue("white", "navy.700");
     let activeColor = useColorModeValue("gray.700", "white");
     let inactiveColor = useColorModeValue("gray.400", "gray.400");
-    let sidebarActiveShadow = "0px 7px 11px rgba(0, 0, 0, 0.04)";
     return routes.map((prop, key) => {
       if (prop.redirect) {
         return null;
@@ -124,8 +133,8 @@ function Sidebar(props) {
                 borderRadius="15px"
                 _hover="none"
                 w="100%"
-                style={{backgroundColor:"#FFF"}}
-              > 
+                style={{ backgroundColor: "#FFF" }}
+              >
                 <Dropdown
                   style={{
                     background: "none",
@@ -133,8 +142,8 @@ function Sidebar(props) {
                     outline: "none",
                     boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
                   }}
-                  isOpen={isOpenDropdown}
-                  toggle={toggle}
+                  isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
+                  toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
                 >
                   <DropdownToggle
                     style={{
@@ -266,8 +275,8 @@ function Sidebar(props) {
             >
               <Dropdown
                 style={{ background: "none", border: "none", outline: "none" }}
-                isOpen={isOpenDropdown}
-                toggle={toggle}
+                isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
+                toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
               >
                 <DropdownToggle
                   style={{
@@ -435,6 +444,7 @@ function Sidebar(props) {
   );
 }
 
+
 // FUNCTIONS
 
 export function SidebarResponsive(props) {
@@ -527,7 +537,7 @@ export function SidebarResponsive(props) {
                 }}
               >
                 <Dropdown
-                  style={{ 
+                  style={{
                     border: "none",
                     outline: "none",
                     boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",

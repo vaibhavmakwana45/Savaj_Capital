@@ -54,7 +54,7 @@ function AssignedBankUsers() {
           `/bank_user/assigned_file/${id}`
         );
         setSavajUserAssignedFile(response.data.data);
-        setSavajUserName(response?.data?.savajUserData?.full_name);
+        setSavajUserName(response?.data?.bankUserData?.bankuser_name);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -94,8 +94,8 @@ function AssignedBankUsers() {
     item.username,
     item.loan,
     item.loan_type,
-    item.createdAt,
-    item.updatedAt,
+    item.file_data.createdAt,
+    item.file_data.updatedAt,
   ]);
 
   const handleRow = (id) => {

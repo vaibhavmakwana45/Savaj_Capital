@@ -194,12 +194,15 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Menu>
-                  <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                      ...
-                    </Button>
-                  </MenuButton>
+
+                <Button onClick={navigateToAnotherPageUser} colorScheme="blue" style={{marginRight:'10px'}}>
+                  Add User
+                </Button>
+                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                  Add Branch
+                </Button>
+                {/* <Menu>
+                  <MenuButton></MenuButton>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
                       <MenuItem
@@ -232,7 +235,7 @@ function Tables() {
                       </MenuItem>
                     </Flex>
                   </MenuList>
-                </Menu>
+                </Menu> */}
               </div>
             </Flex>
           </CardHeader>

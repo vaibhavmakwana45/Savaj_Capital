@@ -162,11 +162,19 @@ function SavajCapitalBranchTable() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Menu>
+
+                <Button
+                  onClick={navigateToAnotherPage}
+                  colorScheme="blue"
+                  style={{ marginRight: "10px" }}
+                >
+                  Add Branch
+                </Button>
+                <Button onClick={navigateToAnotherPageUser} colorScheme="blue">
+                  Add User
+                </Button>
+                {/* <Menu>
                   <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                      ...
-                    </Button>
                   </MenuButton>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
@@ -200,7 +208,7 @@ function SavajCapitalBranchTable() {
                       </MenuItem>
                     </Flex>
                   </MenuList>
-                </Menu>
+                </Menu> */}
               </div>
             </Flex>
           </CardHeader>

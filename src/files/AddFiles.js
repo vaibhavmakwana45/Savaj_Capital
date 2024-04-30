@@ -112,74 +112,51 @@ function AddFiles() {
   };
 
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const imagesTypes = ["jpeg", "png", "svg", "gif"];
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files[0];
-    uploadFile(file);
-  };
-
-  const progressMove = () => {
-    let counter = 0;
-    setTimeout(() => {
-      const counterIncrease = setInterval(() => {
-        if (counter === 100) {
-          clearInterval(counterIncrease);
-        } else {
-          counter += 10;
-          setUploadProgress(counter);
-        }
-      }, 100);
-    }, 600);
-  };
   const [fileData, setFileData] = useState({});
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const handleFileInputChange = (event, title, index, innerIndex) => {
+  const handleFileInputChange = (event, title_id, index, innerIndex) => {
     const file = event.target.files[0];
     console.log("File input changed:", file);
     if (file) {
       const documentId =
-        groupedLoanDocuments[title][index].document_ids[innerIndex];
-      const key = `${title}-${index}-${innerIndex}`; // Ensure unique key
+        groupedLoanDocuments[title_id][index].document_ids[innerIndex];
+      const key = `${title_id}-${index}-${innerIndex}`;
       const filePreview = {
         name: file.name,
         url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
         type: file.type,
         documentId: documentId,
+        key: key,
       };
-  
-      // Update file data with the correct key based on title, index, and innerIndex
+
       setFileData((prevData) => ({
         ...prevData,
         [key]: filePreview,
       }));
-  
-      // Update uploaded file names including title
+
       setUploadedFileName((prevUploadedFiles) => [
         ...prevUploadedFiles,
-        { file: file, documentId: documentId, title: title },
+        { file: file, documentId: documentId, title_id: title_id, key: key },
       ]);
     }
   };
-  
-  
+
+  const handleRemoveFile = (key) => {
+    setFileData((prevData) => {
+      const newData = { ...prevData };
+      delete newData[key];
+      return newData;
+    });
+
+    setUploadedFileName((prevUploadedFiles) => {
+      return prevUploadedFiles.filter(
+        (uploadedFile) => uploadedFile.key !== key
+      );
+    });
+  };
 
   useEffect(() => {
     const fetchLoanDocuments = async () => {
@@ -197,12 +174,11 @@ function AddFiles() {
           const response = await AxiosInstance.get(url);
           const data = response.data.data;
 
-          // Group documents by title
           const grouped = data.reduce((acc, document) => {
-            if (!acc[document.title]) {
-              acc[document.title] = [];
+            if (!acc[document.title_id]) {
+              acc[document.title_id] = [];
             }
-            acc[document.title].push(document);
+            acc[document.title_id].push(document);
             return acc;
           }, {});
 
@@ -227,13 +203,13 @@ function AddFiles() {
 
   useEffect(() => {
     const newFileInputRefs = {};
-    Object.keys(groupedLoanDocuments).forEach((title) => {
-      groupedLoanDocuments[title].forEach((documentGroup, index) => {
+    Object.keys(groupedLoanDocuments).forEach((title_id) => {
+      groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
         documentGroup.document_ids.forEach((documentId, innerIndex) => {
-          const refKey = `${title}-${index}-${innerIndex}`;
+          const refKey = `${title_id}-${index}-${innerIndex}`;
           newFileInputRefs[refKey] = () => {
             const element = document.getElementById(
-              `fileInput-${title}-${index}-${innerIndex}`
+              `fileInput-${title_id}-${index}-${innerIndex}`
             );
             if (element) {
               element.click();
@@ -261,36 +237,6 @@ function AddFiles() {
 
   const handleLoanSubtypeChange = (event) => {
     setSelectedLoanSubtypeId(event.target.value);
-  };
-
-  // const handleFileInputChange = (event, title, index) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     const filePreview = {
-  //       name: file.name,
-  //       url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
-  //       type: file.type,
-  //       documentId: groupedLoanDocuments[title][index].document_ids[index],
-  //     };
-  //     setFileData((prevData) => ({
-  //       ...prevData,
-  //       [`${title}-${index}`]: filePreview
-  //     }));
-  //   }
-  // };
-
-  const handleRemoveFile = (key) => {
-    setFileData((prevData) => {
-      const newData = { ...prevData };
-      delete newData[key];
-      return newData;
-    });
-
-    // Clear the file input value
-    const [title, index, innerIndex] = key.split("-");
-    if (fileInputRefs.current[`${title}-${index}-${innerIndex}`]) {
-      fileInputRefs.current[`${title}-${index}-${innerIndex}`].value = "";
-    }
   };
 
   const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
@@ -416,12 +362,12 @@ function AddFiles() {
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
           loan_document_id: file.documentId,
-          title: file.title,
+          title_id: file.title_id,
         })),
       };
-      console.log('uploadedFiles', uploadedFiles)
+      console.log("uploadedFiles", uploadedFiles);
       await AxiosInstance.post("/file_upload", payload);
-      console.log('payload', payload)
+      console.log("payload", payload);
 
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
@@ -434,9 +380,6 @@ function AddFiles() {
   };
 
   useEffect(() => {
-    // if (id) {
-    //   getData();
-    // }
     setCountries(Country.getAllCountries());
     setStates(State.getStatesOfCountry("IN"));
   }, []);
@@ -445,17 +388,13 @@ function AddFiles() {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
   useEffect(() => {
-    // if (selectedState) {
     const citiesOfState = City.getCitiesOfState(selectedCountry, selectedState);
     setCities(citiesOfState);
-    // } else {
-    //   setCities([]); // Clear cities if no state is selected
-    // }
   }, [selectedState, selectedCountry]);
 
   const handleCountryChange = (event) => {
@@ -547,160 +486,167 @@ function AddFiles() {
               </FormControl>
             )}
             <div>
-              {Object.keys(groupedLoanDocuments).map((title) => (
-                <div key={title}>
-                  <h2>{title}</h2>
+              {Object.keys(groupedLoanDocuments).map((title_id) => (
+                <div key={title_id}>
+                  <h2>{groupedLoanDocuments[title_id][0].title}</h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                    {groupedLoanDocuments[title].map((documentGroup, index) => (
-                      <div key={`${title}-${index}`}>
-                        {documentGroup.document_names.map(
-                          (documentName, innerIndex) => (
-                            <div
-                              key={`${title}-${index}-${innerIndex}`} // Ensure unique key
-                              className="upload-area col-xl-12 col-md-12 col-sm-12"
-                            >
-                              <Text
-                                fontSize="xl"
-                                className="mx-3"
-                                style={{
-                                  fontSize: "12px",
-                                  textTransform: "capitalize",
-                                }}
+                    {groupedLoanDocuments[title_id].map(
+                      (documentGroup, index) => (
+                        <div key={`${title_id}-${index}`}>
+                          {documentGroup.document_names.map(
+                            (documentName, innerIndex) => (
+                              <div
+                                key={`${title_id}-${index}-${innerIndex}`} // Ensure unique key
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
-                                {documentName}
-                              </Text>
-                              <div className="upload-option">
-                                <input
-                                  type="file"
-                                  id={`fileInput-${title}-${index}-${innerIndex}`} // Append innerIndex to ID
-                                  className="drop-zoon__file-input"
-                                  onChange={(event) =>
-                                    handleFileInputChange(
-                                      event,
-                                      title,
-                                      index,
-                                      innerIndex
-                                    )
-                                  }
-                                  style={{ display: "none" }}
-                                />
-
-                                {fileData[`${title}-${index}-${innerIndex}`] ? (
-                                  <div
-                                    className="file-preview text-end"
-                                    style={{
-                                      marginTop: "15px",
-                                      justifyContent: "space-between",
-                                      width: "100%",
-                                      padding: "10px",
-                                      boxSizing: "border-box",
-                                      backgroundColor: "#e8f0fe",
-                                      borderRadius: "8px",
-                                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                    }}
-                                  >
-                                    <IconButton
-                                      aria-label="Remove file"
-                                      icon={<CloseIcon />}
-                                      size="sm"
-                                      onClick={() =>
-                                        handleRemoveFile(
-                                          `${title}-${index}-${innerIndex}`
-                                        )
-                                      }
-                                      style={{ margin: "0 10px" }}
-                                    />
-                                    {fileData[`${title}-${index}-${innerIndex}`]
-                                      .url ? (
-                                      fileData[
-                                        `${title}-${index}-${innerIndex}`
-                                      ].type === "application/pdf" ? (
-                                        <embed
-                                          src={
-                                            fileData[
-                                              `${title}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          type="application/pdf"
-                                          style={{
-                                            width: "100%",
-                                            minHeight: "100px",
-                                          }}
-                                        />
-                                      ) : (
-                                        <img
-                                          src={
-                                            fileData[
-                                              `${title}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          alt="Preview"
-                                          style={{
-                                            width: 100,
-                                            height: 100,
-                                            margin: "auto",
-                                            borderRadius: "4px",
-                                          }}
-                                        />
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
+                                  style={{
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    id={`fileInput-${title_id}-${index}-${innerIndex}`}
+                                    className="drop-zoon__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(
+                                        event,
+                                        title_id,
+                                        index,
+                                        innerIndex
                                       )
-                                    ) : (
-                                      <span
-                                        style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          width: "100%",
-                                          padding: "20px",
-                                        }}
-                                      >
-                                        <i className="bx bxs-file"></i>
-                                        {
-                                          fileData[
-                                            `${title}-${index}-${innerIndex}`
-                                          ].name
+                                    }
+                                    style={{ display: "none" }}
+                                  />
+
+                                  {fileData[
+                                    `${title_id}-${index}-${innerIndex}`
+                                  ] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        boxSizing: "border-box",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() =>
+                                          handleRemoveFile(
+                                            `${title_id}-${index}-${innerIndex}`
+                                          )
                                         }
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[
+                                        `${title_id}-${index}-${innerIndex}`
+                                      ].url ? (
+                                        fileData[
+                                          `${title_id}-${index}-${innerIndex}`
+                                        ].type === "application/pdf" ? (
+                                          <embed
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            type="application/pdf"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
+                                          />
+                                        )
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <i className="bx bxs-file"></i>
+                                          {
+                                            fileData[
+                                              `${title_id}-${index}-${innerIndex}`
+                                            ].name
+                                          }
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zoon drop-zoon ${
+                                        isDragging ? "drop-zoon--over" : ""
+                                      }`}
+                                      onClick={() => {
+                                        const refKey = `${title_id}-${index}-${innerIndex}`;
+                                        const clickFunction =
+                                          fileInputRefs.current[refKey];
+                                        if (
+                                          typeof clickFunction === "function"
+                                        ) {
+                                          clickFunction();
+                                        } else {
+                                          console.error(
+                                            "Ref or current element is null or undefined, or click function is not available"
+                                          );
+                                        }
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                      }}
+                                    >
+                                      <span className="drop-zoon__icon">
+                                        <i className="bx bxs-file-image"></i>
                                       </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div
-                                    className={`upload-area__drop-zoon drop-zoon ${
-                                      isDragging ? "drop-zoon--over" : ""
-                                    }`}
-                                    onClick={() => {
-                                      const refKey = `${title}-${index}-${innerIndex}`;
-                                      const clickFunction =
-                                        fileInputRefs.current[refKey];
-                                      if (typeof clickFunction === "function") {
-                                        clickFunction();
-                                      } else {
-                                        console.error(
-                                          "Ref or current element is null or undefined, or click function is not available"
-                                        );
-                                      }
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      flexDirection: "column",
-                                    }}
-                                  >
-                                    <span className="drop-zoon__icon">
-                                      <i className="bx bxs-file-image"></i>
-                                    </span>
-                                    <p className="drop-zoon__paragraph">
-                                      Drop your file here or click to browse
-                                    </p>
-                                  </div>
-                                )}
+                                      <p className="drop-zoon__paragraph">
+                                        Drop your file here or click to browse
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    ))}
+                            )
+                          )}
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               ))}

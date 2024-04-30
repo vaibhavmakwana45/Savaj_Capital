@@ -63,6 +63,16 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSResponsive: true,
   },
+  {
+    path: "/alluser",
+    name: "Customers",
+    icon: <PersonIcon color="inherit" />,
+    component: UserTable,
+    layout: "/superadmin",
+    parent: "superadmin",
+    key: "alluser",
+    hideInSResponsive: true,
+  },
   //files
   {
     path: "/filetable",
@@ -105,16 +115,7 @@ var dashRoutes = [
     key: "editfile",
   },
   //users
-  {
-    path: "/alluser",
-    name: "Customers",
-    icon: <PersonIcon color="inherit" />,
-    component: UserTable,
-    layout: "/superadmin",
-    parent: "superadmin",
-    key: "alluser",
-    hideInSResponsive: true,
-  },
+ 
   {
     path: "/adduser",
     name: "Add Customer",
@@ -145,6 +146,34 @@ var dashRoutes = [
     hideInSResponsive: true,
     parent: "superadmin",
     key: "loan",
+    isDropdown: true,
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/title",
+        name: "Add Title",
+      },
+      {
+        path: "/addalldocument",
+        name: "Documents",
+        layout: "/superadmin",
+      },
+      {
+        path: "/addalldstep",
+        name: "Loan Step",
+        layout: "/superadmin",
+      },
+      // {
+      //   path: "/addloantype",
+      //   name: "Add Loan",
+      //   layout: "/superadmin",
+      // },
+      // {
+      //   path: "/addloantype",
+      //   name: "Add Document With Title",
+      //   layout: "/superadmin",
+      // },
+    ],
   },
   {
     path: "/addloantype",
@@ -196,8 +225,6 @@ var dashRoutes = [
     parent: "loan",
     key: "loantype",
   },
-
- 
 
   //sc branch
   {
@@ -298,6 +325,24 @@ var dashRoutes = [
     hideInSResponsive: true,
     parent: "superadmin",
     key: "bank",
+    isDropdown: true,
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/addbank",
+        name: "Add Bank",
+      },
+      {
+        path: "/addbankuser",
+        name: "Add Bank User",
+        layout: "/superadmin",
+      },
+      {
+        path: "/bankassignfile",
+        name: "Assign File",
+        layout: "/superadmin",
+      },
+    ],
   },
   {
     path: "/addbank",
@@ -356,7 +401,7 @@ var dashRoutes = [
     icon: <DocumentIcon color="inherit" />,
     component: AddAllDocuments,
     layout: "/superadmin",
-    hideInSResponsive: true,
+    hideInSidebar: true,
   },
   //document
   {
@@ -365,7 +410,8 @@ var dashRoutes = [
     icon: <CreditIcon color="inherit" />,
     component: AllStep,
     layout: "/superadmin",
-    hideInSResponsive: true,
+    hideInSidebar: true,
+    // hideInSResponsive: true,
   },
   //auth
   {
@@ -510,7 +556,6 @@ var dashRoutes = [
     layout: "/user",
   },
 
-
   // Title
   {
     path: "/title",
@@ -519,8 +564,7 @@ var dashRoutes = [
     component: Title,
     layout: "/superadmin",
     hideInSResponsive: true,
+    hideInSidebar: true,
   },
-
-  
 ];
 export default dashRoutes;
