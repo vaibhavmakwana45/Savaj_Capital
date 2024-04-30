@@ -45,8 +45,29 @@ const theme = createTheme();
 function Row(props) {
   const { id, file, handleEditClick, handleDelete } = props;
   const history = useHistory();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
+  const [fileData, setFileData] = useState([]);
+  const [filePercentageData, setFilePercentageData] = useState("");
+  const fetchFileData = async () => {
+    try {
+      const file_id = file.file_id;
+      const response = await AxiosInstance.get(
+        `/file_upload/testfile/${file_id}`
+      );
+      setFileData([
+        ...response.data.data.approvedData,
+        ...response.data.data.pendingData,
+      ]);
+      setFilePercentageData(response.data.data.document_percentage);
+    } catch (error) {
+      console.log("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchFileData();
+  }, [file]);
 
   return (
     <React.Fragment>
@@ -74,20 +95,22 @@ function Row(props) {
         <TableCell align="">{file?.createdAt}</TableCell>
         <TableCell align="">{file?.updatedAt}</TableCell>
         <TableCell align="center">
-          <div class="progress " data-value={file?.document_percentage}>
-            <span class="progress-left">
-              <span class="progress-bar"></span>
-            </span>
-            <span class="progress-right">
-              <span class="progress-bar"></span>
-            </span>
-            <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-              <div class="font-weight-bold">
-                {file?.document_percentage}
-                <sup class="small">%</sup>
+          {filePercentageData && (
+            <div class="progress " data-value={Number(filePercentageData)}>
+              <span class="progress-left">
+                <span class="progress-bar"></span>
+              </span>
+              <span class="progress-right">
+                <span class="progress-bar"></span>
+              </span>
+              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                <div class="font-weight-bold">
+                  {Number(filePercentageData)}
+                  <sup class="small">%</sup>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </TableCell>
         <TableCell align="">
           <Flex>
@@ -135,13 +158,13 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {file?.loan_document_ids?.map((documentRow) => (
-                      <TableRow key={documentRow.loan_document_id}>
+                    {fileData?.map((documentRow, index) => (
+                      <TableRow key={index}>
                         <TableCell component="th" scope="row">
-                          {documentRow.loan_document}
+                          {documentRow?.name} ({documentRow?.title})
                         </TableCell>
                         <TableCell>
-                          {documentRow.is_uploaded ? (
+                          {documentRow?.status === "Uploaded" ? (
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
                             >
@@ -215,7 +238,7 @@ export default function CollapsibleTable() {
       try {
         const response = await AxiosInstance.get("/file_upload");
         setFiles(response.data.data);
-        console.log('first', response.data.data)
+        console.log("first", response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -291,7 +314,7 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" className="thead" >
+          <Flex justifyContent="space-between" className="thead">
             <Text fontSize="xl" fontWeight="bold" className="ttext">
               Add Files
             </Text>
