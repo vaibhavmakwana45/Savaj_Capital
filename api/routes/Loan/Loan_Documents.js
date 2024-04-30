@@ -5,44 +5,9 @@ const Loan_Documents = require("../../models/Loan/Loan_Documents");
 const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
+const Title = require("../../models/AddDocuments/Title");
 
 let loanTypeCounter = 0;
-
-// router.post("/", async (req, res) => {
-//   try {
-//     const { loan_id, loantype_id, loan_document } = req.body;
-
-//     const timestamp = Date.now();
-//     const createdAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-//     const updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-
-//     const loanDocumentsData = loan_document.map((document, index) => {
-//       const uniqueId = `${timestamp}_${index + 1}`;
-//       loanTypeCounter++;
-//       return {
-//         loan_document_id: uniqueId,
-//         loan_id: loan_id,
-//         loantype_id: loantype_id,
-//         loan_document: document,
-//         createdAt: createdAt,
-//         updatedAt: updatedAt,
-//       };
-//     });
-
-//     const createdDocuments = await Loan_Documents.insertMany(loanDocumentsData);
-
-//     res.json({
-//       success: true,
-//       data: createdDocuments,
-//       message: "Loan documents added successfully",
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       statusCode: 500,
-//       message: error.message,
-//     });
-//   }
-// });
 
 router.get("/:loan_id", async (req, res) => {
   try {
@@ -82,6 +47,13 @@ router.get("/:loan_id", async (req, res) => {
       return { ...doc, document_names: documentNames };
     });
 
+    for (let i = 0; i < enrichedData.length; i++) {
+      const title_id = enrichedData[i].title_id;
+
+      const titleData = await Title.findOne({ title_id: title_id });
+      enrichedData[i].title = titleData.title;
+    }
+
     const count = enrichedData.length;
 
     res.json({
@@ -99,31 +71,6 @@ router.get("/:loan_id", async (req, res) => {
   }
 });
 
-// router.get("/:loan_id", async (req, res) => {
-//   try {
-//     const { loan_id } = req.params;
-
-//     const data = await Loan_Documents.find({ loan_id });
-
-//     if (data.length === 0) {
-//       return res.status(201).json({
-//         statusCode: 201,
-//         message: "Documents not found",
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Internal Server Error",
-//     });
-//   }
-// });
 router.get("/loan_docs/:loan_id/:loantype_id", async (req, res) => {
   try {
     const { loan_id, loantype_id } = req.params;
@@ -190,6 +137,13 @@ router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
       });
       return { ...doc, document_names: documentNames };
     });
+
+    for (let i = 0; i < enrichedData.length; i++) {
+      const title_id = enrichedData[i].title_id;
+
+      const titleData = await Title.findOne({ title_id: title_id });
+      enrichedData[i].title = titleData.title;
+    }
 
     const count = enrichedData.length;
 

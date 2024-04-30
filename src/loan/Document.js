@@ -25,6 +25,7 @@ function Document() {
   const location = useLocation();
   const history = useHistory();
   const { loan_id, loantype_id } = location?.state?.state || {};
+  console.log(loan_id, "loan_id");
   const [documents, setDocuments] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -43,8 +44,9 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
-      const response = await AxiosInstance.get(url);
+      const response = await axios.get("http://localhost:4010/api" + url);
       setDocuments(response.data.data || []);
+      console.log(response.data.data, "response.data.data");
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast.error("Failed to fetch documents.");
@@ -73,7 +75,7 @@ function Document() {
 
   const filteredDocuments = documents.filter(
     (doc) =>
-      doc.title && doc.title.toLowerCase().includes(searchTerm.toLowerCase())
+      doc?.title && doc?.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formattedData = filteredDocuments.map((doc) => [
@@ -84,6 +86,7 @@ function Document() {
     doc.updatedAt,
   ]);
 
+  console.log(filteredDocuments, "filteredDocuments");
   console.log(formattedData, "formattedData");
 
   const handleDelete = (id) => {

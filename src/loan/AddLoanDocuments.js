@@ -234,7 +234,6 @@ function AddLoanDocuments() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
-
   const [filtereedData, setFiltereedData] = useState("");
   const [filteerOpen, setFilteerOpen] = useState("");
   const filteerToggle = () => setFilteerOpen(!filteerOpen);
@@ -406,7 +405,7 @@ function AddLoanDocuments() {
                 </Select>
               </FormControl> */}
 
-<div className="w-100">
+              <div className="w-100">
                 <FormLabel>Select Loan</FormLabel>
 
                 <input
@@ -414,7 +413,9 @@ function AddLoanDocuments() {
                     width: "100%",
                     border: "0.5px solid #333",
                     padding: "5px",
-                    backgroundImage: `url(${filteerOpen ? upArrow : downArrow})`,
+                    backgroundImage: `url(${
+                      filteerOpen ? upArrow : downArrow
+                    })`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right center",
                     backgroundSize: "10px",
