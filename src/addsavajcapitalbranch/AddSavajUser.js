@@ -30,6 +30,9 @@ import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
+import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 function AddSavajCapitalBranch() {
   const textColor = useColorModeValue("gray.700", "white");
   const [states, setStates] = useState([]);
@@ -96,7 +99,6 @@ function AddSavajCapitalBranch() {
           password: "",
         };
 
-        console.log(submissionData);
 
         setFormData(submissionData);
       } else {
@@ -150,8 +152,6 @@ function AddSavajCapitalBranch() {
     password: "",
   });
 
-  console.log(formData);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -172,6 +172,7 @@ function AddSavajCapitalBranch() {
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
+      setLoading(true);
     } catch (error) {
       console.error("Submission error", error);
       toast.error("Failed to add. Please try again.");
@@ -187,8 +188,6 @@ function AddSavajCapitalBranch() {
     try {
       if (id) {
         const response = await AxiosInstance.put("/savaj_user/" + id, formData);
-
-        console.log(response.data);
 
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
@@ -212,18 +211,28 @@ function AddSavajCapitalBranch() {
       setLoading(false);
     }
   };
+  const [filteredData, setFilteredData] = useState("");
+  const [filterOpen, setFilterOpen] = useState("");
+  const filterToggle = () => setFilterOpen(!filterOpen);
+  const [selectedLoan, setSelectedLoan] = useState("");
 
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex justifyContent="space-between" className="thead">
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="textt"
+              >
                 Add Savaj Capital User
               </Text>
 
               <Button
+                className="ttextt"
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
                 }}
@@ -235,7 +244,7 @@ function AddSavajCapitalBranch() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Select
                   name="city"
@@ -255,7 +264,94 @@ function AddSavajCapitalBranch() {
                     </option>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
+              <div className="w-100">
+                <FormLabel>Select Loan</FormLabel>
+
+                <input
+                  style={{
+                    width: "100%",
+                    border: "0.5px solid #333",
+                    padding: "5px",
+                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right center",
+                    backgroundSize: "10px",
+                    backgroundPosition: "right 15px center",
+                    borderRadius: "5px",
+                    borderColor: "inherit",
+                  }}
+                  placeholder="Select Loan-Type"
+                  onFocus={() => {
+                    setFilteredData(branches);
+                    setFilterOpen(true);
+                    filterToggle();
+
+                  }}
+                  onBlur={() => {
+                    // Delay the filterToggle call to allow time for the click event
+                    setTimeout(() => {
+                      filterToggle();
+                    }, 200); // Adjust the delay as needed
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value.length !== "") {
+                      setFilterOpen(true);
+                    } else {
+                      setFilterOpen(false);
+                    }
+                    const filterData = branches.filter((item) => {
+                      return (
+                        item.branch_name
+                          .toLowerCase()
+                          .includes(e.target.value.toLowerCase()) ||
+                        item.city
+                          .toLowerCase()
+                          .includes(e.target.value.toLowerCase()) ||
+                        item.state
+                          .toLowerCase()
+                          .includes(e.target.value.toLowerCase())
+                      );
+                    });
+                    setSelectedLoan(e.target.value);
+                    setFilteredData(filterData);
+                  }}
+                  value={selectedLoan}
+                />
+                <Dropdown
+                  className="w-100"
+                  isOpen={filterOpen}
+                  toggle={filterToggle}
+                >
+                  <DropdownMenu className="w-100">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={(e) => {
+                            setSelectedLoan(
+                              item.branch_name +
+                                ` (${item.city + ", " + item.state})`
+                            );
+                            setFilterOpen(false);
+                            const selectedLoanId = item.branch_id;
+                            setFormData({
+                              ...formData,
+                              loan_id: selectedLoanId,
+                            });
+                          }}
+                        >
+                          {/* {item.branches} */}
+                          {item.branch_name +
+                            ` (${item.city + ", " + item.state})`}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No data found</DropdownItem>
+                    )}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
               <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Role</FormLabel>
                 <Select
@@ -330,12 +426,13 @@ function AddSavajCapitalBranch() {
                 </FormControl>
               } */}
 
-              <div>
+              <div className="d-flex">
                 <Button
                   mt={4}
                   colorScheme="blue"
                   type="submit"
-                  // isLoading={loading}
+                  isLoading={loading}
+                  loadingText="Add..."
                 >
                   {id ? "Update User now" : "Add User"}
                 </Button>
@@ -395,6 +492,7 @@ function AddSavajCapitalBranch() {
                 onClick={() => handleAddRole(role)}
                 ml={3}
                 type="submit"
+                isLoading={loading}
               >
                 Add Now
               </Button>

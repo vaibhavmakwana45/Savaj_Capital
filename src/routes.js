@@ -1,9 +1,11 @@
 // import
-import React, { Component } from "react";
+import React from "react";
 import Dashboard from "views/Dashboard/Dashboard.js";
 import BankDashboard from "banksdashboard/BankDashboard";
 import UserDashboard from "userdashboard/UserDashboard";
 import SavajCapitalBranchDashboard from "savajcapitaldashboard/SavajCapitalDashboard";
+import UserFile from "savajcapitaldashboard/ScBranchFiles/UserFile";
+import adduserfile from "savajcapitaldashboard/ScBranchFiles/CreateUserFile";
 import BankTable from "addbank/BankTable";
 import SavajCapitalBranchTable from "addsavajcapitalbranch/SavajCapitalBranchTable";
 import EditSavajCapitalBranch from "addsavajcapitalbranch/EditSavajCapitalBranch";
@@ -32,12 +34,24 @@ import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
-import LoanDocument from "loan/LoanDocument";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
 import Document from "loan/Document";
 import ViewFile from "files/ViewFile";
 import EditFile from "files/EditFile";
+import BankAssignFile from "addbank/BankAssignFile";
+import AllFiles from "banksdashboard/AllBankFiles/AllBankFiles";
+import BankFileDetailPage from "banksdashboard/AllBankFiles/BankFileDetailPage";
+import EditFileScBranch from "savajcapitaldashboard/ScBranchFiles/EditFileScBranch";
+import DetailScFilePage from "savajcapitaldashboard/ScBranchFiles/DetailScFilePage";
+import AssignBank from "savajcapitaldashboard/AssignBank/AssignBank";
+import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
+import AddAllDocuments from "Document/AddAllDocuments";
+import AllStep from "Allstep/AllStep";
+
+import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
+import AssignedBankUsers from "addbank/AssignedBankUsers";
+import Title from "./Title/Title"; // Assignes file (savaj user)
 
 var dashRoutes = [
   //superadmin
@@ -47,6 +61,16 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
     layout: "/superadmin",
+    hideInSResponsive: true,
+  },
+  {
+    path: "/alluser",
+    name: "Customers",
+    icon: <PersonIcon color="inherit" />,
+    component: UserTable,
+    layout: "/superadmin",
+    parent: "superadmin",
+    key: "alluser",
     hideInSResponsive: true,
   },
   //files
@@ -91,16 +115,7 @@ var dashRoutes = [
     key: "editfile",
   },
   //users
-  {
-    path: "/alluser",
-    name: "Customers",
-    icon: <PersonIcon color="inherit" />,
-    component: UserTable,
-    layout: "/superadmin",
-    parent: "superadmin",
-    key: "alluser",
-    hideInSResponsive: true,
-  },
+ 
   {
     path: "/adduser",
     name: "Add Customer",
@@ -131,6 +146,34 @@ var dashRoutes = [
     hideInSResponsive: true,
     parent: "superadmin",
     key: "loan",
+    isDropdown: true,
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/title",
+        name: "Add Title",
+      },
+      {
+        path: "/addalldocument",
+        name: "Documents",
+        layout: "/superadmin",
+      },
+      {
+        path: "/addalldstep",
+        name: "Loan Step",
+        layout: "/superadmin",
+      },
+      // {
+      //   path: "/addloantype",
+      //   name: "Add Loan",
+      //   layout: "/superadmin",
+      // },
+      // {
+      //   path: "/addloantype",
+      //   name: "Add Document With Title",
+      //   layout: "/superadmin",
+      // },
+    ],
   },
   {
     path: "/addloantype",
@@ -182,14 +225,7 @@ var dashRoutes = [
     parent: "loan",
     key: "loantype",
   },
-  {
-    path: "/loandocument",
-    name: "Loan Document",
-    icon: <CreditIcon color="inherit" />,
-    component: LoanDocument,
-    hideInSidebar: true,
-    layout: "/superadmin",
-  },
+
   //sc branch
   {
     path: "/savajcapitalbranch",
@@ -200,6 +236,24 @@ var dashRoutes = [
     hideInSResponsive: true,
     parent: "superadmin",
     key: "savajcapitalbranch",
+    isDropdown: true,
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/addsavajcapitalbranch",
+        name: "Add Branch",
+      },
+      {
+        layout: "/superadmin",
+        path: "/addsavajcapitaluser",
+        name: "Add User",
+      },
+      {
+        layout: "/superadmin",
+        path: "/savajuserroles",
+        name: "Add Roles",
+      },
+    ],
   },
   {
     path: "/addsavajcapitalbranch",
@@ -251,6 +305,16 @@ var dashRoutes = [
     parent: "savajcapitalbranch",
     key: "editsavajcapitalbranch",
   },
+  {
+    path: "/assigned-file",
+    name: "Assigned File (Savaj User)",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignedSavajUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "superadmin",
+    key: "savajcapitalbranch",
+  },
   //bank
   {
     path: "/bank",
@@ -261,6 +325,24 @@ var dashRoutes = [
     hideInSResponsive: true,
     parent: "superadmin",
     key: "bank",
+    isDropdown: true,
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/addbank",
+        name: "Add Bank",
+      },
+      {
+        path: "/addbankuser",
+        name: "Add Bank User",
+        layout: "/superadmin",
+      },
+      {
+        path: "/bankassignfile",
+        name: "Assign File",
+        layout: "/superadmin",
+      },
+    ],
   },
   {
     path: "/addbank",
@@ -280,7 +362,7 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "bank",
-    key: "addbank",
+    key: "addbankuser",
   },
   {
     path: "/bankusers",
@@ -290,7 +372,46 @@ var dashRoutes = [
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "bank",
-    key: "addbank",
+    key: "bankusers",
+  },
+  {
+    path: "/bankassignfile",
+    name: "Bank Assign File",
+    icon: <CreditIcon color="inherit" />,
+    component: BankAssignFile,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    parent: "bank",
+    key: "bankassignfile",
+  },
+  {
+    path: "/bank-assigned-file",
+    name: "Assigned File (Bank User)",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignedBankUsers,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "bankusers",
+    key: "bank-assigned-file",
+  },
+  //document
+  {
+    path: "/addalldocument",
+    name: "Documents",
+    icon: <DocumentIcon color="inherit" />,
+    component: AddAllDocuments,
+    layout: "/superadmin",
+    hideInSidebar: true,
+  },
+  //document
+  {
+    path: "/addalldstep",
+    name: "Loan Step",
+    icon: <CreditIcon color="inherit" />,
+    component: AllStep,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    // hideInSResponsive: true,
   },
   //auth
   {
@@ -336,6 +457,30 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: BankDashboard,
     layout: "/bankuser",
+    hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "dashboard",
+  },
+  {
+    path: "/allfiles",
+    name: "All Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: AllFiles,
+    layout: "/bankuser",
+    hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "allfiles",
+  },
+  {
+    path: "/viewbankfile",
+    name: "View Bank Files",
+    icon: <DocumentIcon color="inherit" />,
+    component: BankFileDetailPage,
+    layout: "/bankuser",
+    hideInSidebar: true,
+    // hideInBResponsivrUser: true,
+    parent: "bankuser",
+    key: "viewbankfile",
   },
   //surajcapitaluser
   {
@@ -344,6 +489,63 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: SavajCapitalBranchDashboard,
     layout: "/savajcapitaluser",
+    hideInSResponsivrUser: true,
+  },
+  {
+    path: "/userfile",
+    name: "User File",
+    icon: <PersonIcon color="inherit" />,
+    component: UserFile,
+    layout: "/savajcapitaluser",
+    hideInSResponsive: false,
+    hideInSResponsivrUser: true,
+  },
+  {
+    path: "/adduserfile",
+    name: "Add user file",
+    component: adduserfile,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "adduserfile",
+  },
+  {
+    path: "/edituserfile",
+    name: "Edit user file",
+    component: EditFileScBranch,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "edituserfile",
+  },
+  {
+    path: "/viewuserfile",
+    name: "View user file",
+    component: DetailScFilePage,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "viewuserfile",
+  },
+  {
+    path: "/assignbank",
+    name: "Assign Bank",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignBank,
+    layout: "/savajcapitaluser",
+    hideInSResponsivrUser: true,
+    parent: "savajcapitaluser",
+    key: "assignbank",
+  },
+  {
+    path: "/assignfile",
+    name: "Assign File",
+    icon: <CreditIcon color="inherit" />,
+    component: AssignFile,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "assignbank",
+    key: "assignfile",
   },
   //user
   {
@@ -352,6 +554,17 @@ var dashRoutes = [
     icon: <HomeIcon color="inherit" />,
     component: UserDashboard,
     layout: "/user",
+  },
+
+  // Title
+  {
+    path: "/title",
+    name: "Title",
+    icon: <DocumentIcon color="inherit" />,
+    component: Title,
+    layout: "/superadmin",
+    hideInSResponsive: true,
+    hideInSidebar: true,
   },
 ];
 export default dashRoutes;

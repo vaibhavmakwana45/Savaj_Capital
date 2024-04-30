@@ -10,6 +10,10 @@ const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
 const axios = require("axios");
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+const BankApproval = require("../../models/Bank/BankApproval");
+const File_Uplode = require("../../models/File/File_Uplode");
+const Loan = require("../../models/Loan/Loan");
+const Loan_Type = require("../../models/Loan/Loan_Type");
 
 router.post("/", async (req, res) => {
   try {
@@ -41,7 +45,6 @@ router.post("/", async (req, res) => {
         email: req.body.email,
       }
     );
-    console.log(ApiResponse);
 
     if (ApiResponse.status === 200) {
       res.json({
@@ -176,5 +179,100 @@ router.get("/:bank_id", async (req, res) => {
     });
   }
 });
+
+router.delete("/deletebankuser/:bankId", async (req, res) => {
+  try {
+    const { bankId } = req.params;
+
+    const deletedBankUser = await BankUser.findOneAndDelete({
+      bankuser_id: bankId,
+    });
+
+    if (!deletedBankUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Bank User deleted successfully",
+      deletedBankUserId: bankId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/assigned_file/:bankuser_id", async (req, res) => {
+  try {
+    const bankuser_id = req.params.bankuser_id;
+
+    const bankApprovals = await BankApproval.find({
+      bankuser_id: bankuser_id,
+    }).sort({ updatedAt: -1 });
+
+    if (!bankApprovals || bankApprovals.length === 0) {
+      return res.json({
+        success: false,
+        message: "No bank approvals found for the specified bank user.",
+        data: [],
+      });
+    }
+    const bankUserData = await BankUser.findOne({bankuser_id: bankuser_id})
+
+    const fileIds = bankApprovals.map((approval) => approval.file_id);
+
+    const fileDetails = await File_Uplode.find({ file_id: { $in: fileIds } });
+
+    const augmentedData = await Promise.all(bankApprovals.map(async (approval) => {
+      const fileData = fileDetails.find((detail) => detail.file_id === approval.file_id);
+      if (!fileData) return null;
+
+      const loanData = await Loan.findOne({ loan_id: fileData.loan_id });
+      const loanTypeData = await Loan_Type.findOne({ loantype_id: fileData.loantype_id });
+      const userData = await AddUser.findOne({ user_id: fileData.user_id });
+
+      const entry = {
+        ...approval.toObject(),
+        file_data: fileData,
+        loan: loanData ? loanData.loan : null,
+        loan_type: loanTypeData ? loanTypeData.loan_type : null,
+        username: userData ? userData.username : null,
+      };
+
+      const hasMissingDetail = !fileData || !loanData || !loanTypeData || !userData;
+      if (hasMissingDetail) {
+        console.log("Missing detail for BankApproval with file_id:", approval.file_id);
+        console.log("File data:", fileData);
+        console.log("Loan data:", loanData);
+        console.log("Loan type data:", loanTypeData);
+        console.log("User data:", userData);
+      }
+
+      return entry;
+    }));
+
+    res.json({
+      success: true,
+      data: augmentedData,
+      count: augmentedData.length,
+      bankUserData : bankUserData,
+      message: "Bank approvals data with all details retrieved successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+
+
 
 module.exports = router;

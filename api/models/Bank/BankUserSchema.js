@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const BankUserSchema = new mongoose.Schema({
   bankuser_id: { type: String },
+  bankuser_name: { type: String },
   bank_id: { type: String },
   email: { type: String },
   password: { type: String, default: "" },

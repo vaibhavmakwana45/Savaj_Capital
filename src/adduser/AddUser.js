@@ -9,6 +9,7 @@ import {
   useColorModeValue,
   InputGroup,
   InputRightElement,
+  useDisclosure,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -42,6 +43,12 @@ function AddUser(props) {
     username: "",
     number: "",
     email: "",
+    pan_card: "",
+    aadhar_card: "",
+    dob: "",
+    country: "India",
+    state: "",
+    city: "",
     password: "",
   });
 
@@ -51,6 +58,25 @@ function AddUser(props) {
 
       if (response.data.success) {
         const { user } = response.data;
+
+        const submissionData = {
+          user_id: id,
+          username: user.username,
+          email: user.email,
+          number: user.number,
+          country: user.country,
+          state: user.state,
+          city: user.city,
+          pan_card: user.pan_card,
+          aadhar_card: user.aadhar_card,
+          dob: user.dob,
+          country_code: user.country_code,
+          state_code: user.state_code,
+          password: "",
+        };
+        setSelectedState(user.state_code);
+        setSelectedCountry(user.country_code);
+        setFormData(submissionData);
 
         setFormData(user);
       } else {
@@ -86,7 +112,15 @@ function AddUser(props) {
             username: formData.username,
             number: formData.number,
             email: formData.email,
+            pan_card: formData.pan_card,
+            aadhar_card: formData.aadhar_card,
+            dob: formData.dob,
             password: formData.password,
+            country: formData.country,
+            state: formData.state,
+            city: formData.city,
+            state_code: selectedState,
+            country_code: selectedCountry,
           },
         };
 
@@ -107,7 +141,6 @@ function AddUser(props) {
           formData
         );
 
-        console.log(formData, "formData");
 
         if (response.data.success) {
           toast.success("User Updated successfully!");
@@ -122,6 +155,50 @@ function AddUser(props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (id) {
+      getData();
+    }
+    setCountries(Country.getAllCountries());
+    setStates(State.getStatesOfCountry("IN"));
+  }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
+      setStates(statesOfSelectedCountry);
+      setSelectedState(""); // Reset selected state when country changes
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState) {
+      const citiesOfState = City.getCitiesOfState(
+        selectedCountry,
+        selectedState
+      );
+      setCities(citiesOfState);
+    } else {
+      setCities([]); // Clear cities if no state is selected
+    }
+  }, [selectedState, selectedCountry]);
+
+  const handleCountryChange = (event) => {
+    setSelectedCountry(event.target.value);
+  };
+
+  const handleStateChange = (event) => {
+    const stateCode = event.target.value;
+    const stateObj = states.find((state) => state.isoCode === stateCode);
+    const stateFullName = stateObj ? stateObj.name : "";
+
+    setSelectedState(stateCode);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: stateFullName,
+    }));
   };
 
   return (
@@ -165,6 +242,96 @@ function AddUser(props) {
                   type="email"
                   onChange={handleChange}
                   value={formData.email}
+                />
+              </FormControl>
+
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
+
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl id="state" mt={4} isRequired>
+                <FormLabel>State</FormLabel>
+                <Select
+                  name="state"
+                  placeholder="Select state"
+                  onChange={handleStateChange}
+                  disabled={!selectedCountry}
+                  value={selectedState}
+                >
+                  {states.length ? (
+                    states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a country first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl id="city" mt={4} isRequired>
+                <FormLabel>City</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select city"
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  disabled={!selectedState}
+                  value={formData.city}
+                >
+                  {cities.length ? (
+                    cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a state first</option>
+                  )}
+                </Select>
+              </FormControl>
+
+              <FormControl id="dob" mt={4} isRequired>
+                <FormLabel>DOB</FormLabel>
+                <Input
+                  name="dob"
+                  type="date"
+                  onChange={handleChange}
+                  value={formData.dob}
+                />
+              </FormControl>
+
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pancard</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.pan_card}
+                />
+              </FormControl>
+
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadarcard</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleChange}
+                  value={formData.aadhar_card}
                 />
               </FormControl>
 

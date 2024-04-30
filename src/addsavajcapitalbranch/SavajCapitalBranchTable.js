@@ -18,7 +18,7 @@ import {
   Td,
   useColorModeValue,
   Button,
-  Input
+  Input,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -45,52 +45,48 @@ function SavajCapitalBranchTable() {
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers =
     searchTerm.length === 0
       ? savajcapitalbranch
-      : savajcapitalbranch.filter((user) =>
-          user.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.state.toLowerCase().includes(searchTerm.toLowerCase())
+      : savajcapitalbranch.filter(
+          (user) =>
+            user.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.state.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
   const allHeaders = ["Savaj Capital Branch", "City", "State", "Action"];
 
-  
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
 
-  const formattedData = filteredUsers?.map(item => ([
+  const formattedData = filteredUsers?.map((item) => [
     item.branch_id,
     item.branch_name,
     item.city,
     item.state,
-  ]));
+  ]);
 
   const handleDelete = (id) => {
-    setSelectedBranchId(
-      id
-    );
+    setSelectedBranchId(id);
     setIsDeleteDialogOpen(true);
-  }
+  };
 
   const handleEdit = (id) => {
-    navigateToEditPage(id)
-  }
+    navigateToEditPage(id);
+  };
 
   const handleRow = (id) => {
-    history.push("savajusers?id=" + id)
-  }
+    history.push("savajusers?id=" + id);
+  };
 
   const fetchSavajcapitalbranch = async () => {
     try {
-      const response = await AxiosInstance.get(
-        "/branch"
-      );
-      setLoading(false)
+      const response = await AxiosInstance.get("/branch");
+      setLoading(false);
       setSavajcapitalbranch(response.data.data);
     } catch (error) {
       console.error("Error fetching savajcapitalbranch:", error);
@@ -98,7 +94,6 @@ function SavajCapitalBranchTable() {
   };
 
   useEffect(() => {
-
     fetchSavajcapitalbranch();
   }, []);
 
@@ -115,9 +110,7 @@ function SavajCapitalBranchTable() {
   const cancelRef = React.useRef();
   const deletebranch = async (branchId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/branch/${branchId}`
-      );
+      const response = await AxiosInstance.delete(`/branch/${branchId}`);
       setSavajcapitalbranch(
         savajcapitalbranch.filter(
           (branch) => branch.savajcapitalbranch_id !== branchId
@@ -127,11 +120,11 @@ function SavajCapitalBranchTable() {
       if (response.data.success) {
         fetchBanks();
         toast.success("Branch deleted Successfully!", {
-          duration: 800 // Time in milliseconds (3 seconds in this example)
+          duration: 800, // Time in milliseconds (3 seconds in this example)
         });
       } else if (response.data) {
         toast.error(response.data.message || "please try again later!", {
-          duration: 800 // Time in milliseconds (3 seconds in this example)
+          duration: 800, // Time in milliseconds (3 seconds in this example)
         });
       }
     } catch (error) {
@@ -148,11 +141,20 @@ function SavajCapitalBranchTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext"
+              >
                 Savaj Capital Branches
               </Text>
-              <div>
+              <div className="thead">
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -160,37 +162,57 @@ function SavajCapitalBranchTable() {
                   width="250px"
                   marginRight="10px"
                 />
-                                <Menu>
-                                    <MenuButton>
-                                        <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                                            ...
-                                        </Button>
-                                    </MenuButton>
-                                    <MenuList p="16px 8px" bg={menuBg} mt="10px">
-                                        <Flex flexDirection="column" style={{ gap: 10 }}>
-                                            <MenuItem borderRadius="8px" onClick={() => { navigateToAnotherPage() }}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Add Branch
-                                                </Flex>
-                                            </MenuItem>
-                                            <MenuItem borderRadius="8px" onClick={navigateToAnotherPageUser}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Add User
-                                                </Flex>
-                                            </MenuItem>
-                                            <MenuItem borderRadius="8px" onClick={() => { history.push("/superadmin/savajuserroles") }}>
-                                                <Flex align="center" justifyContent="flex-start">
-                                                    Role
-                                                </Flex>
-                                            </MenuItem>
-                                        </Flex>
-                                    </MenuList>
-                                </Menu>
-                            </div>
+
+                <Button
+                  onClick={navigateToAnotherPage}
+                  colorScheme="blue"
+                  style={{ marginRight: "10px" }}
+                >
+                  Add Branch
+                </Button>
+                <Button onClick={navigateToAnotherPageUser} colorScheme="blue">
+                  Add User
+                </Button>
+                {/* <Menu>
+                  <MenuButton>
+                  </MenuButton>
+                  <MenuList p="16px 8px" bg={menuBg} mt="10px">
+                    <Flex flexDirection="column" style={{ gap: 10 }}>
+                      <MenuItem
+                        borderRadius="8px"
+                        onClick={() => {
+                          navigateToAnotherPage();
+                        }}
+                      >
+                        <Flex align="center" justifyContent="flex-start">
+                          Add Branch
+                        </Flex>
+                      </MenuItem>
+                      <MenuItem
+                        borderRadius="8px"
+                        onClick={navigateToAnotherPageUser}
+                      >
+                        <Flex align="center" justifyContent="flex-start">
+                          Add User
+                        </Flex>
+                      </MenuItem>
+                      <MenuItem
+                        borderRadius="8px"
+                        onClick={() => {
+                          history.push("/superadmin/savajuserroles");
+                        }}
+                      >
+                        <Flex align="center" justifyContent="flex-start">
+                          Role
+                        </Flex>
+                      </MenuItem>
+                    </Flex>
+                  </MenuList>
+                </Menu> */}
+              </div>
             </Flex>
           </CardHeader>
           <CardBody>
-
             <TableComponent
               data={formattedData}
               loading={loading}
@@ -199,7 +221,6 @@ function SavajCapitalBranchTable() {
               handleEdit={handleEdit}
               handleRow={handleRow}
             />
-
           </CardBody>
         </Card>
         <AlertDialog

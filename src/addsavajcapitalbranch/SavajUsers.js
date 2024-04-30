@@ -139,7 +139,7 @@ function Tables() {
   };
 
   const handleRow = (id) => {
-    console.log(id);
+    history.push("/superadmin/assigned-file?id=" + id);
   };
 
   const handleAddRole = async (role) => {
@@ -166,8 +166,17 @@ function Tables() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}
@@ -177,7 +186,7 @@ function Tables() {
                 {branch?.branch_name || "..."}{" "}
                 {branch?.state && " - " + branch?.state + "," + branch?.city}
               </Text>
-              <div>
+              <div className="thead">
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -185,12 +194,15 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Menu>
-                  <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
-                      ...
-                    </Button>
-                  </MenuButton>
+
+                <Button onClick={navigateToAnotherPageUser} colorScheme="blue" style={{marginRight:'10px'}}>
+                  Add User
+                </Button>
+                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                  Add Branch
+                </Button>
+                {/* <Menu>
+                  <MenuButton></MenuButton>
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
                       <MenuItem
@@ -223,7 +235,7 @@ function Tables() {
                       </MenuItem>
                     </Flex>
                   </MenuList>
-                </Menu>
+                </Menu> */}
               </div>
             </Flex>
           </CardHeader>

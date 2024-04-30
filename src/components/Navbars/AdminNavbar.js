@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
 import routes from "../../routes";
+import "./navbar-responsive.css"
 
 const filteredRoutes = routes.filter((route) => route.layout !== "/auth");
 
@@ -96,21 +97,20 @@ export default function AdminNavbar(props) {
     filteredRoutes.find((route) => route.key === key);
 
   const generateBreadcrumbItems = (currentRoute, items = []) => {
-    console.log("Generating breadcrumbs for: ", currentRoute);
     if (!currentRoute) return items;
 
     const parentRoute = currentRoute.parent
       ? findRouteByKey(currentRoute.parent)
       : null;
 
-    if (parentRoute) {
-      generateBreadcrumbItems(parentRoute, items);
-    }
+    // if (parentRoute) {
+    //   generateBreadcrumbItems(parentRoute, items);
+    // }
 
     if (items.length === 0) {
       items.push(
         <BreadcrumbItem key="superadmin">
-          <BreadcrumbLink href="/superadmin" color="white">
+          <BreadcrumbLink href="/superadmin" color="white"   _hover={{ color:"white" }}>
             Superadmin
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -145,7 +145,7 @@ export default function AdminNavbar(props) {
   };
 
   return (
-    <Flex
+    <Flex className="navbar-responsive"
       position={navbarPosition}
       boxShadow={navbarShadow}
       bg={navbarBg}
@@ -190,7 +190,7 @@ export default function AdminNavbar(props) {
         alignItems={{ xl: "center" }}
       >
         <Box mb={{ sm: "8px", md: "0px" }}>
-          <Breadcrumb separator=">">{generateBreadcrumbs()}</Breadcrumb>
+          <Breadcrumb separator=">" style={{color:"white"}}>{generateBreadcrumbs()}</Breadcrumb>
           <Link
             pt="20px"
             color={mainText}
@@ -198,11 +198,12 @@ export default function AdminNavbar(props) {
             bg="inherit"
             borderRadius="inherit"
             fontWeight="bold"
-            _hover={{ color: { mainText } }}
+            _hover={{ color:"white",borderBottom:"1px solid white" }}
             _active={{
               bg: "inherit",
               transform: "none",
               borderColor: "transparent",
+              
             }}
             _focus={{
               boxShadow: "none",

@@ -111,7 +111,6 @@ function SavajUsersRole() {
         try {
             const response = await AxiosInstance.delete(`/role/${bankId}`);
             getRolesData();
-            console.log(response.data);
             setIsDeleteDialogOpen(false);
             if (response.data.success) {
 
@@ -135,7 +134,6 @@ function SavajUsersRole() {
     const handleEdit = (id) => {
         setSelectedRoleId(id);
         setIsAddRole(true);
-        console.log(banks);
         
         // Filter out the role based on its role_id
         const role = banks.find((bank) => bank.role_id === id);
@@ -151,7 +149,6 @@ function SavajUsersRole() {
     
 
     const handleRow = (id) => {
-        console.log(id)
     }
 
     const handleAddRole = async (role) => {
@@ -209,8 +206,8 @@ function SavajUsersRole() {
             <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
                 <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
                     <CardHeader p="6px 0px 22px 0px">
-                        <Flex justifyContent="space-between" alignItems="center">
-                            <Text fontSize="xl" color={textColor} fontWeight="bold">
+                        <Flex justifyContent="space-between" alignItems="center" className="thead">
+                            <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
                                 Savaj Capital User Roles
                             </Text>
                             <div>

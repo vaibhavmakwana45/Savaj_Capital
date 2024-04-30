@@ -31,9 +31,7 @@ function AddBankUser() {
   const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [branches, setBranches] = useState([]);
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
@@ -73,8 +71,9 @@ function AddBankUser() {
   const [formData, setFormData] = useState({
     bank_id: "",
     user_id: "",
+    bankuser_name: "",
     bank_name: "",
-    country: "India", // Default to India
+    country: "India",
     state: "",
     city: "",
     branch_name: "",
@@ -84,16 +83,18 @@ function AddBankUser() {
 
   const getData = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/bankuser/" + id);
-
+      const response = await AxiosInstance.get(
+        "/addusers/bankuser/by-user-id/" + id
+      );
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 
         const submissionData = {
-          bank_id: id,
-          user_id: "",
+          bank_id: bankDetails.bank_id,
+          bankuser_name: bankDetails.bankuser_name,
+          user_id: userDetails.user_id,
           bank_name: bankDetails.bank_name,
-          country: bankDetails.country, // Default to India
+          country: bankDetails.country,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
@@ -106,6 +107,11 @@ function AddBankUser() {
         setSelectedState(bankDetails.state_code);
         setSelectedCountry(bankDetails.country_code);
         setFormData(submissionData);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          bank_id: bankDetails.bank_id,
+        }));
+        getBranches(bankDetails.bank_name, bankDetails.city);
       } else {
         alert("Please try again later...!");
       }
@@ -144,7 +150,7 @@ function AddBankUser() {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
@@ -156,7 +162,7 @@ function AddBankUser() {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); // Clear cities if no state is selected
+      setCities([]);
     }
   }, [selectedState, selectedCountry]);
 
@@ -197,6 +203,7 @@ function AddBankUser() {
       branch_name: formData.branch_name,
       state_code: selectedState,
       country_code: selectedCountry,
+      bankuser_name: formData.bankuser_name,
       email: formData.email,
       adress: formData.adress,
       dob: formData.dob,
@@ -333,25 +340,40 @@ function AddBankUser() {
               <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Select
-                  disabled={branches.length == 0}
+                  // disabled={branches.length === 0}
                   name="branch_name"
-                  placeholder="Select Bank"
+                  placeholder="Select Bank Branch"
                   onChange={(e) => {
                     setFormData({ ...formData, bank_id: e.target.value });
                   }}
                   value={formData.bank_id}
                 >
-                  {branches.map((city) => (
-                    <option key={city.bank_id} value={city.bank_id}>
-                      {city.branch_name}
+                  {branches.length > 0 ? (
+                    branches.map((branch) => (
+                      <option key={branch.bank_id} value={branch.bank_id}>
+                        {branch.branch_name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value="">
+                      PLease add a branch for this city and bank
                     </option>
-                  ))}
+                  )}
                 </Select>
               </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 User Data
               </Text>
+              <FormControl id="bankuser_name" mt={4} isRequired>
+                <FormLabel>Full Name</FormLabel>
+                <Input
+                  name="bankuser_name"
+                  type="text"
+                  onChange={handleChange}
+                  value={formData.bankuser_name}
+                />
+              </FormControl>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
@@ -365,7 +387,7 @@ function AddBankUser() {
                 <FormLabel>Address</FormLabel>
                 <Input
                   name="adress"
-                  type="adress"
+                  type="textarea"
                   onChange={handleChange}
                   value={formData.adress}
                 />
@@ -374,7 +396,7 @@ function AddBankUser() {
                 <FormLabel>Date of Birth</FormLabel>
                 <Input
                   name="dob"
-                  type="dob"
+                  type="date"
                   onChange={handleChange}
                   value={formData.dob}
                 />
@@ -383,7 +405,7 @@ function AddBankUser() {
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
                   name="mobile"
-                  type="mobile"
+                  type="number"
                   onChange={handleChange}
                   value={formData.mobile}
                 />
@@ -392,7 +414,7 @@ function AddBankUser() {
                 <FormLabel>Aadhar Number</FormLabel>
                 <Input
                   name="adhar"
-                  type="adhar"
+                  type="number"
                   onChange={handleChange}
                   value={formData.adhar}
                 />
@@ -401,7 +423,7 @@ function AddBankUser() {
                 <FormLabel>Emergency Contact</FormLabel>
                 <Input
                   name="emergancy_contact"
-                  type="emergancy_contact"
+                  type="number"
                   onChange={handleChange}
                   value={formData.emergancy_contact}
                 />

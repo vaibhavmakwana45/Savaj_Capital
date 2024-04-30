@@ -7,6 +7,9 @@ const SuperAdmin = require("../../models/SuperAdminSignupSchema");
 const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
+const File_Uplode = require("../../models/File/File_Uplode");
+const Loan = require("../../models/Loan/Loan");
+const Loan_Type = require("../../models/Loan/Loan_Type");
 const crypto = require("crypto");
 const axios = require("axios");
 
@@ -51,7 +54,6 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = moment()
       .utcOffset(330)
       .format("YYYY-MM-DD HH:mm:ss");
-    console.log("first");
 
     req.body.password = "";
 
@@ -65,7 +67,6 @@ router.post("/", async (req, res) => {
     );
 
     if (ApiResponse.status === 200) {
-      console.log("Password mail sent successfully");
       res.json({
         success: true,
         data: data,
@@ -230,6 +231,67 @@ router.get("/user/:branchuser_id", async (req, res) => {
     res.json({
       success: true,
       branch,
+      data: data,
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/assigned_file/:branchuser_id", async (req, res) => {
+  try {
+    const branchuser_id = req.params.branchuser_id;
+
+    const data = await File_Uplode.aggregate([
+      {
+        $match: { branchuser_id: branchuser_id },
+      },
+      {
+        $sort: { updatedAt: -1 },
+      },
+    ]);
+
+    const savajUserData = await SavajCapital_User.findOne({branchuser_id: branchuser_id})
+
+    for (let i = 0; i < data.length; i++) {
+      const loan_id = data[i]?.loan_id;
+      const loantype_id = data[i]?.loantype_id;
+      const user_id = data[i]?.user_id;
+
+      const loanData = await Loan.findOne({
+        loan_id: loan_id,
+      });
+
+      const loanTypeData = await Loan_Type.findOne({
+        loantype_id: loantype_id,
+      });
+
+      const userData = await AddUser.findOne({ user_id: user_id });
+
+      if (loanData) {
+        data[i].loan = loanData.loan;
+      }
+
+      if (loanTypeData) {
+        data[i].loan_type = loanTypeData.loan_type;
+      }
+
+      if(userData){
+        data[i].username = userData.username
+      }
+    }
+
+    const count = data.length;
+
+    res.json({
+      // statusCode: 200,
+      success: true,
+      savajUserData,
       data: data,
       count: count,
       message: "Read All Request",

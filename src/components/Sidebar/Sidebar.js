@@ -1,5 +1,9 @@
 /*eslint-disable*/
-import { HamburgerIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  HamburgerIcon,
+} from "@chakra-ui/icons";
 // chakra imports
 import {
   Box,
@@ -26,35 +30,46 @@ import {
   renderViewRTL,
 } from "components/Scrollbar/Scrollbar";
 import { HSeparator } from "components/Separator/Separator";
-// import { SidebarHelp } from "components/Sidebar/SidebarHelp";
-import React from "react";
+import React, { useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
 import logo1 from "../../assets/svg/logo.svg";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "reactstrap";
+import { useHistory } from "react-router-dom";
 
 // FUNCTIONS
 
 function Sidebar(props) {
-  // to check for active links and opened collapses
   let location = useLocation();
-  // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
+  const history = useHistory();
   let variantChange = "0.2s linear";
-  // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
     return location.pathname === routeName ? "active" : "";
   };
-  const { colorMode } = useColorMode;
-  // this function creates the links and collapses that appear in the sidebar (left menu)
-  const { sidebarVariant } = props;
+
+  // Define separate state for dropdowns
+  const [dropdownStates, setDropdownStates] = useState({});
+
+  // Function to toggle dropdown state for a specific key
+  const toggleDropdown = (key) => {
+    setDropdownStates(prevStates => ({
+      ...prevStates,
+      [key]: !prevStates[key] // Toggle the state for the specified dropdown key
+    }));
+  };
+
   const createLinks = (routes) => {
-    // Chakra Color Mode
     let activeBg = useColorModeValue("white", "navy.700");
     let inactiveBg = useColorModeValue("white", "navy.700");
     let activeColor = useColorModeValue("gray.700", "white");
     let inactiveColor = useColorModeValue("gray.400", "gray.400");
-    let sidebarActiveShadow = "0px 7px 11px rgba(0, 0, 0, 0.04)";
     return routes.map((prop, key) => {
       if (prop.redirect) {
         return null;
@@ -86,13 +101,153 @@ function Sidebar(props) {
         );
       }
       return (
-        <NavLink to={prop.layout + prop.path} key={key}>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            history.push(prop.layout + prop.path);
+          }}
+          to={prop.layout + prop.path}
+          key={key}
+          style={{
+            background: "none",
+            border: "none",
+            marginTop: "20px",
+            outline: "none",
+          }}
+        >
           {activeRoute(prop.layout + prop.path) === "active" ? (
+            prop.isDropdown ? (
+              <Button
+                alignItems="center"
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                style={{ backgroundColor: "#FFF" }}
+              >
+                <Dropdown
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
+                  }}
+                  isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
+                  toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
+                >
+                  <DropdownToggle
+                    style={{
+                      background: "none",
+                      border: "none",
+                      outline: "none",
+                    }}
+                  >
+                    <Flex>
+                      {typeof prop.icon === "string" ? (
+                        <Icon>{prop.icon}</Icon>
+                      ) : (
+                        <IconBox
+                          bg="blue.500"
+                          color="white"
+                          h="30px"
+                          w="30px"
+                          me="12px"
+                          transition={variantChange}
+                        >
+                          {prop.icon}
+                        </IconBox>
+                      )}
+                      <Text color={activeColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}{" "}
+                        <ChevronDownIcon />
+                      </Text>
+                    </Flex>
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    {prop.childern.map((item, index) => (
+                      <DropdownItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          history.push(prop.layout + item.path);
+                        }}
+                        key={index}
+                      >
+                        {item.name}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </Dropdown>
+              </Button>
+            ) : (
+              <Button
+                boxSize="initial"
+                justifyContent="flex-start"
+                alignItems="center"
+                bg={activeBg}
+                transition={variantChange}
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                _active={{
+                  bg: "inherit",
+                  transform: "none",
+                  borderColor: "transparent",
+                }}
+                _focus={{
+                  boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
+                }}
+              >
+                <Flex>
+                  {typeof prop.icon === "string" ? (
+                    <Icon>{prop.icon}</Icon>
+                  ) : (
+                    <IconBox
+                      bg="blue.500"
+                      color="white"
+                      h="30px"
+                      w="30px"
+                      me="12px"
+                      transition={variantChange}
+                    >
+                      {prop.icon}
+                    </IconBox>
+                  )}
+                  <Text color={activeColor} my="auto" fontSize="sm">
+                    {document.documentElement.dir === "rtl"
+                      ? prop.rtlName
+                      : prop.name}
+                  </Text>
+                </Flex>
+              </Button>
+            )
+          ) : prop.isDropdown ? (
             <Button
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
-              boxShadow={sidebarActiveShadow}
               bg={activeBg}
               transition={variantChange}
               mb={{
@@ -118,27 +273,55 @@ function Sidebar(props) {
                 boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
               }}
             >
-              <Flex>
-                {typeof prop.icon === "string" ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox
-                    bg="blue.500"
-                    color="white"
-                    h="30px"
-                    w="30px"
-                    me="12px"
-                    transition={variantChange}
-                  >
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={activeColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
-              </Flex>
+              <Dropdown
+                style={{ background: "none", border: "none", outline: "none" }}
+                isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
+                toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
+              >
+                <DropdownToggle
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                  }}
+                >
+                  <Flex>
+                    {typeof prop.icon === "string" ? (
+                      <Icon>{prop.icon}</Icon>
+                    ) : (
+                      <IconBox
+                        bg={inactiveBg}
+                        color="blue.500"
+                        h="30px"
+                        w="30px"
+                        me="12px"
+                        transition={variantChange}
+                      >
+                        {prop.icon}
+                      </IconBox>
+                    )}
+                    <Text color={inactiveColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}{" "}
+                      <ChevronDownIcon />
+                    </Text>
+                  </Flex>
+                </DropdownToggle>
+                <DropdownMenu>
+                  {prop.childern.map((item, index) => (
+                    <DropdownItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        history.push(prop.layout + item.path);
+                      }}
+                      key={index}
+                    >
+                      {item.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </Button>
           ) : (
             <Button
@@ -192,7 +375,7 @@ function Sidebar(props) {
               </Flex>
             </Button>
           )}
-        </NavLink>
+        </Button>
       );
     });
   };
@@ -254,7 +437,6 @@ function Sidebar(props) {
             <Stack direction="column" mb="40px">
               <Box>{links}</Box>
             </Stack>
-            {/* <SidebarHelp sidebarVariant={sidebarVariant} /> */}
           </Scrollbars>
         </Box>
       </Box>
@@ -262,13 +444,15 @@ function Sidebar(props) {
   );
 }
 
+
 // FUNCTIONS
 
 export function SidebarResponsive(props) {
   // to check for active links and opened collapses
   let location = useLocation();
   const { logo, routes, colorMode, hamburgerColor, ...rest } = props;
-
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const toggle = () => setIsOpenDropdown(!isOpenDropdown);
   // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
@@ -276,6 +460,7 @@ export function SidebarResponsive(props) {
   const activeRoute = (routeName) => {
     return location.pathname === routeName ? "active" : "";
   };
+
   // Chakra Color Mode
   let activeBg = useColorModeValue("white", "navy.700");
   let inactiveBg = useColorModeValue("white", "navy.700");
@@ -321,6 +506,163 @@ export function SidebarResponsive(props) {
       return (
         <NavLink to={prop.layout + prop.path} key={key}>
           {activeRoute(prop.layout + prop.path) === "active" ? (
+            prop.isDropdown ? (
+              <Button
+                boxSize="initial"
+                justifyContent="flex-start"
+                alignItems="center"
+                bg={activeBg}
+                boxShadow={sidebarActiveShadow}
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                _active={{
+                  bg: "inherit",
+                  transform: "none",
+                  borderColor: "transparent",
+                }}
+                _focus={{
+                  boxShadow: "none",
+                }}
+              >
+                <Dropdown
+                  style={{
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
+                  }}
+                  isOpen={isOpenDropdown}
+                  toggle={toggle}
+                >
+                  <DropdownToggle
+                    style={{
+                      background: "none",
+                      border: "none",
+                      outline: "none",
+                    }}
+                  >
+                    {/* <Flex>
+                      {typeof prop.icon === "string" ? (
+                        <Icon>{prop.icon}</Icon>
+                      ) : (
+                        <IconBox
+                          bg="blue.500"
+                          color="white"
+                          h="30px"
+                          w="30px"
+                          me="12px"
+                          transition={variantChange}
+                        >
+                          {prop.icon}
+                        </IconBox>
+                      )}
+                      <Text color={activeColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}{" "}
+                        <ChevronDownIcon />
+                      </Text>
+                    </Flex> */}
+                    <Flex>
+                      {typeof prop.icon === "string" ? (
+                        <Icon>{prop.icon}</Icon>
+                      ) : (
+                        <IconBox
+                          bg={inactiveBg}
+                          color="blue.500"
+                          h="30px"
+                          w="30px"
+                          me="12px"
+                        >
+                          {prop.icon}
+                        </IconBox>
+                      )}
+                      <Text color={inactiveColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}
+                      </Text>
+                    </Flex>
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    {prop.childern.map((item, index) => (
+                      <DropdownItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          history.push(prop.layout + item.path);
+                        }}
+                        key={index}
+                      >
+                        {item.name}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </Dropdown>
+              </Button>
+            ) : (
+              <Button
+                boxSize="initial"
+                justifyContent="flex-start"
+                alignItems="center"
+                bg={activeBg}
+                boxShadow={sidebarActiveShadow}
+                mb={{
+                  xl: "6px",
+                }}
+                mx={{
+                  xl: "auto",
+                }}
+                ps={{
+                  sm: "10px",
+                  xl: "16px",
+                }}
+                py="12px"
+                borderRadius="15px"
+                _hover="none"
+                w="100%"
+                _active={{
+                  bg: "inherit",
+                  transform: "none",
+                  borderColor: "transparent",
+                }}
+                _focus={{
+                  boxShadow: "none",
+                }}
+              >
+                <Flex>
+                  {typeof prop.icon === "string" ? (
+                    <Icon>{prop.icon}</Icon>
+                  ) : (
+                    <IconBox
+                      bg="blue.500"
+                      color="white"
+                      h="30px"
+                      w="30px"
+                      me="12px"
+                    >
+                      {prop.icon}
+                    </IconBox>
+                  )}
+                  <Text color={activeColor} my="auto" fontSize="sm">
+                    {document.documentElement.dir === "rtl"
+                      ? prop.rtlName
+                      : prop.name}
+                  </Text>
+                </Flex>
+              </Button>
+            )
+          ) : prop.isDropdown ? (
             <Button
               boxSize="initial"
               justifyContent="flex-start"
@@ -350,26 +692,75 @@ export function SidebarResponsive(props) {
                 boxShadow: "none",
               }}
             >
-              <Flex>
-                {typeof prop.icon === "string" ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox
-                    bg="blue.500"
-                    color="white"
-                    h="30px"
-                    w="30px"
-                    me="12px"
-                  >
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={activeColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
-              </Flex>
+              <Dropdown
+                style={{ background: "none", border: "none", outline: "none" }}
+                isOpen={isOpenDropdown}
+                toggle={toggle}
+              >
+                <DropdownToggle
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                  }}
+                >
+                  {/* <Flex>
+                    {typeof prop.icon === "string" ? (
+                      <Icon>{prop.icon}</Icon>
+                    ) : (
+                      <IconBox
+                        bg={inactiveBg}
+                        color="blue.500"
+                        h="30px"
+                        w="30px"
+                        me="12px"
+                        transition={variantChange}
+                      >
+                        {prop.icon}
+                      </IconBox>
+                    )}
+                    <Text color={inactiveColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}{" "}
+                      <ChevronDownIcon />
+                    </Text>
+                  </Flex> */}
+                  <Flex>
+                    {typeof prop.icon === "string" ? (
+                      <Icon>{prop.icon}</Icon>
+                    ) : (
+                      <IconBox
+                        bg={inactiveBg}
+                        color="blue.500"
+                        h="30px"
+                        w="30px"
+                        me="12px"
+                      >
+                        {prop.icon}
+                      </IconBox>
+                    )}
+                    <Text color={inactiveColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}
+                    </Text>
+                  </Flex>
+                </DropdownToggle>
+                <DropdownMenu>
+                  {prop.childern.map((item, index) => (
+                    <DropdownItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        history.push(prop.layout + item.path);
+                      }}
+                      key={index}
+                    >
+                      {item.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
             </Button>
           ) : (
             <Button
@@ -428,10 +819,14 @@ export function SidebarResponsive(props) {
   };
 
   const newroutes = routes.filter((route) => route.hideInSResponsive);
-
-  // console.log(newroutes)
+  const bankUser = routes.filter((route) => route.hideInBResponsivrUser);
+  const hideInSResponsivrUser = routes.filter(
+    (route) => route.hideInSResponsivrUser
+  );
 
   var links = <>{createLinks(newroutes)}</>;
+  var scbranchlink = <>{createLinks(hideInSResponsivrUser)}</>;
+  var banklink = <>{createLinks(bankUser)}</>;
 
   //  BRAND
 
@@ -486,7 +881,15 @@ export function SidebarResponsive(props) {
             <Box maxW="100%" h="100vh">
               <Box>{brand}</Box>
               <Stack direction="column" mb="40px">
-                <Box>{links}</Box>
+                {location.pathname.includes("/superadmin") && (
+                  <Box>{links}</Box>
+                )}
+                {location.pathname.includes("/savajcapitaluser") && (
+                  <Box>{scbranchlink}</Box>
+                )}
+                {location.pathname.includes("/bankuser") && (
+                  <Box>{banklink}</Box>
+                )}
               </Stack>
             </Box>
           </DrawerBody>

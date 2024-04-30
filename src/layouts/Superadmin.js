@@ -29,10 +29,8 @@ import bgAdmin from "assets/img/admin-background.png";
 
 export default function Dashboard(props) {
   const { name } = props;
-  // states and functions
   const [fixed, setFixed] = useState(false);
   const { colorMode } = useColorMode();
-  // functions for changing the states from components
   const getRoute = () => {
     return window.location.pathname !== `${name}/full-screen-maps`;
   };
@@ -59,7 +57,6 @@ export default function Dashboard(props) {
     }
     return activeRoute;
   };
-  // This changes navbar state(fixed or not)
   const getActiveNavbar = (routes) => {
     let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
@@ -95,12 +92,12 @@ export default function Dashboard(props) {
           />
         );
       }
-      return null; // Exclude routes that do not match the condition
+      return null;
     });
   };
   const { isOpen, onOpen, onClose } = useDisclosure();
   document.documentElement.dir = "ltr";
-  // Chakra Color Mode
+
   return (
     <Box>
       <Box

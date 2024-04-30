@@ -34,7 +34,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-// import "style.css"
+import "./loan.css"
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -108,14 +108,12 @@ function UserTable() {
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loan_id === id);
-    console.log("data", data);
     if (!data) {
       console.error("No data found for loan with ID:", id);
       return;
     }
 
     if (data.loantype_count === 0) {
-      console.log("Pushing state:", { loan_id: data.loan_id });
       history.push("/superadmin/documents", {
         state: { loan_id: data.loan_id },
       });
@@ -173,11 +171,11 @@ function UserTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
+            <Flex justifyContent="space-between" className="thead">
+              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
                 All Loan
               </Text>
-              <Flex>
+              <Flex className="thead">
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -189,10 +187,12 @@ function UserTable() {
                   <Button
                     onClick={() => history.push("/superadmin/addloantype")}
                     colorScheme="blue"
+                    className="adduser-btn mb-1"
                   >
                     Add Loan
                   </Button>
-                  <Button
+                  <Button 
+                  className="loanuser-btn mb-1"
                     style={{ marginLeft: "10px" }}
                     onClick={() => history.push("/superadmin/addloandocs")}
                     colorScheme="blue"

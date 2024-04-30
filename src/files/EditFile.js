@@ -42,37 +42,51 @@ function EditFile() {
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
 
+  function getFileExtension(url) {
+    if (url !== undefined) {
+      const parts = url.split(".");
+      const extension = parts[parts.length - 1];
+      return extension.toLowerCase();
+    } else {
+      return;
+    }
+  }
+
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
         const response = await AxiosInstance.get(
-          `/file_upload/edit_file_upload/${id}`
+          `/file_upload/file_upload/${id}`
         );
         if (response.data && response.data.statusCode === 200) {
-          const details = response.data.data.fileDetails;
+          const details = response.data.data.file;
           setSelectedLoanId(details.loan_id);
           setSelectedUser(details.user_id);
           setSelectedLoanSubtypeId(details.loantype_id);
           setSelectedBranchId(details.branch_id);
           setSelectedBranchUserId(details.branchuser_id);
-          const documentsWithCDN = details.documents.map((doc) => ({
-            ...doc,
-            file_path: `${CDN_BASE_URL}${doc.file_path}`,
-          }));
-          setLoanDocuments(documentsWithCDN);
-
-          const initialFileData = documentsWithCDN.reduce(
-            (acc, doc, index) => ({
-              ...acc,
-              [index]: {
-                url: doc.file_path,
-                name: doc.file_name,
-                type: "application/pdf",
-                new: false,
-              },
-            }),
-            {}
+          const documentsWithCDN = Object.entries(details.documents).map(
+            ([key, value]) => {
+              return value.map((item) => ({
+                ...item,
+                file_path: `${CDN_BASE_URL}${item.file_path}`,
+              }));
+            }
           );
+
+          const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
+            return {
+              ...acc,
+              [`${doc[0].title}`]: doc.map((item) => {
+                return {
+                  url: item.file_path,
+                  name: item.title,
+                  type: "application/pdf",
+                  new: false,
+                };
+              }),
+            };
+          }, {});
           setFileData(initialFileData);
         } else {
           throw new Error("Failed to fetch file details");
@@ -115,7 +129,6 @@ function EditFile() {
       try {
         const response = await AxiosInstance.get("/branch");
         setSavajcapitalbranch(response.data.data);
-        console.log("response", response);
       } catch (error) {
         console.error("Error fetching branches:", error);
       }
@@ -164,12 +177,10 @@ function EditFile() {
   };
 
   const handleBranchChange = (event) => {
-    console.log("Branch ID Selected:", event.target.value);
     setSelectedBranchId(event.target.value);
   };
 
   const handleBranchUserChange = (event) => {
-    console.log("Branch User ID Selected:", event.target.value);
     setSelectedBranchUserId(event.target.value);
   };
 
@@ -330,6 +341,8 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
+        branchuser_id: selectedBranchUserId,
+        branch_id: selectedBranchId,
       };
 
       const finalResponse = await AxiosInstance.put(
@@ -421,7 +434,15 @@ function EditFile() {
                     loanDocuments.length > 0 &&
                     loanDocuments.map((document, index) => (
                       <div key={document._id} className="upload-area col-6">
-                        <Text fontSize="xl" className="mx-3" color={textColor}>
+                        <Text
+                          fontSize="xl"
+                          className="mx-3"
+                          color={textColor}
+                          style={{
+                            fontSize: "12px",
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {document.loan_document}
                         </Text>
                         <input
@@ -436,11 +457,9 @@ function EditFile() {
                         />
                         {fileData[index] ? (
                           <div
-                            className="file-preview"
+                            className="file-preview text-end"
                             style={{
-                              display: "flex",
                               marginTop: "15px",
-                              alignItems: "center",
                               justifyContent: "space-between",
                               width: "100%",
                               padding: "10px",
@@ -448,9 +467,18 @@ function EditFile() {
                               backgroundColor: "#e8f0fe",
                               borderRadius: "8px",
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              overflow: "hidden",
                             }}
                           >
-                            {fileData[index].type === "application/pdf" ? (
+                            <IconButton
+                              aria-label="Remove file"
+                              icon={<CloseIcon />}
+                              size="sm"
+                              onClick={() => handleRemoveFile(index)}
+                              style={{ margin: "0 10px" }}
+                            />
+                            {getFileExtension(fileData[index].url) === "pdf" ||
+                            getFileExtension(fileData[index].name) === "pdf" ? (
                               <embed
                                 src={fileData[index].url}
                                 type="application/pdf"
@@ -461,23 +489,16 @@ function EditFile() {
                               />
                             ) : (
                               <img
+                                className="editimage"
                                 src={fileData[index].url}
                                 alt="Preview"
                                 style={{
-                                  width: 100,
-                                  height: 100,
-                                  margin: "auto",
+                                  width: "100%",
+                                  height: "100%",
                                   borderRadius: "4px",
                                 }}
                               />
                             )}
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
                           </div>
                         ) : (
                           <div

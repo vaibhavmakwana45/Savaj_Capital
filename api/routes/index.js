@@ -74,7 +74,6 @@ router.post("/login", async (req, res) => {
       role = "user";
       ({ token, expiresIn } = await userToken(userForToken));
     }
-
     res.json({
       success: true,
       data: userForToken,

@@ -94,8 +94,6 @@ function AddSavajCapitalBranch() {
     try {
       const response = await AxiosInstance.post("/branch", formData);
 
-      console.log(response.data, "response.data");
-
       if (response.data.success) {
         toast.success("Branch and User added successfully!");
         history.push("/superadmin/savajcapitalbranch");
@@ -174,12 +172,13 @@ function AddSavajCapitalBranch() {
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl> */}
               {/* User Details */}
-              <div>
+              <div className="d-flex">
                 <Button
                   mt={4}
                   colorScheme="blue"
                   type="submit"
                   isLoading={loading}
+                  loadingText="Add...."
                   style={{ marginTop: 30 }}
                 >
                   Add Branch

@@ -1,17 +1,10 @@
-// Add axios to your imports
-import axios from "axios";
 import {
-  Flex,
-  Table,
-  Tbody,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  Td,
-  useColorModeValue,
-  FormControl,
   Button,
+  Flex,
+  FormControl,
+  Text,
+  useColorModeValue,
+  Input,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -20,111 +13,114 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
-  Input,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
+import axios from "axios";
 
-function LoanDocument() {
-  const [document, setDocument] = useState([]);
+function AddAllDocuments() {
+  const [documents, setDocuments] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const [loading, setLoading] = useState(true);
+  const [document, setDocument] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get("id");
+  const [selectedDocumetId, setSelectedDocumetId] = useState("");
   const [selectedDocument, setSelectedDocument] = useState("");
-  const [selectedDocumentId, setSelectedDocumentId] = useState("");
-  const [isEditDocument, setisEditDocument] = useState(false);
 
-  const fetchDocument = async () => {
+  const getDocumentData = async () => {
     try {
-      const response = await AxiosInstance.get("/loan_docs/" + id);
-      setDocument(response.data.data);
-      setLoading(false);
+      const response = await AxiosInstance.get("/document");
+
+      if (response.data.success) {
+        setDocuments(response.data.data);
+        setLoading(false);
+      } else {
+        alert("Please try again later...!");
+      }
     } catch (error) {
       setLoading(false);
-      console.error("Error fetching document:", error);
+      console.error(error);
     }
   };
 
+  const fllteredDocument =
+    searchTerm.length === 0
+      ? documents
+      : documents.filter((doc) =>
+          doc.document.toLowerCase().includes(searchTerm.toLowerCase())
+        );
   useEffect(() => {
-    fetchDocument();
+    getDocumentData();
   }, []);
 
-  const filteredUsers =
-    searchTerm.length === 0
-      ? document
-      : document.filter((user) =>
-          user.loan_document.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+  const allHeaders = ["Document", "create date", "update date", "Action"];
 
-  const allHeaders = ["Loan Document", "Created At", "Updated At", "Action"];
-  const formattedData = filteredUsers?.map((item) => [
-    item.loan_document_id,
-    item.loan_document,
-    item.createdAt,
-    item.updatedAt,
+  const formattedData = fllteredDocument.map((bank) => [
+    bank.document_id,
+    bank.document,
+    bank.createdAt,
+    bank.updatedAt,
   ]);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDocument, setIsDocument] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+  const cancelRef = React.useRef();
+  const deleteDocument = async (documentId) => {
+    try {
+      const response = await AxiosInstance.delete(
+        `/document/${documentId}`
+      );
+      getDocumentData();
+      setIsDeleteDialogOpen(false);
+      if (response.data.success) {
+        toast.success("Document deleted successfully!");
+      } else {
+        toast.error(response.data.message || "Please try again later!");
+      }
+    } catch (error) {
+      console.error("Error deleting bank:", error);
+      toast.error("Role not delete");
+    }
+  };
+
   const handleDelete = (id) => {
-    setSelectedUserId(id);
+    setSelectedDocumentId(id);
     setIsDeleteDialogOpen(true);
   };
 
   const handleEdit = (id) => {
-    setisEditDocument(true);
-    setSelectedDocumentId(id);
-    const data = document.find((user) => user.loan_document_id == id);
-    if (data) {
-      setSelectedDocument(data.loan_document);
+    setSelectedDocumetId(id);
+    setIsDocument(true);
+    const doc = documents.find((doc) => doc.document_id === id);
+    if (doc) {
+      setSelectedDocument(doc.document);
     } else {
-      console.error("Data not found for id:", id);
+      console.error("Document not found for id:", id);
     }
   };
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const cancelRef = React.useRef();
+  const handleRow = (id) => {
+  };
 
-  const deletebranch = async (documentId) => {
+  const handleAddDocument = async (document) => {
     try {
-      const response = await AxiosInstance.delete(`/loan_docs/${documentId}`);
-      setDocument(
-        document.filter((user) => user.loan_document_id !== documentId)
+      const response = await AxiosInstance.post(
+        "/document",
+        { document }
       );
-      setIsDeleteDialogOpen(false);
-      toast.success("Document deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("user not delete");
-    }
-  };
-
-  const AddDocument = async (loan_document) => {
-    try {
-      const response = await AxiosInstance.post("/loan_docs/", {
-        loan_document: [loan_document], // Modify this line if necessary
-        loantype_id: id,
-      });
-      console.log("response", response);
       if (response.data.success) {
-        toast.success("Document Added successfully!");
-        setisEditDocument(false);
-        setSelectedDocument("");
-        fetchDocument();
-        setSelectedDocumentId("");
+        toast.success("Document added successfully!");
+        setIsDocument(false);
+        setSelectedDocumetId("");
+        getDocumentData();
+        setDocument("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -136,21 +132,21 @@ function LoanDocument() {
     }
   };
 
-  const editDocument = async (loan_document) => {
+  const editDocument = async (document) => {
     try {
       const response = await AxiosInstance.put(
-        "/loan_docs/" + selectedDocumentId,
+        "/document/" + selectedDocumetId,
         {
-          loan_document,
+          document,
         }
       );
 
       if (response.data.success) {
-        toast.success("Document Name Updated successfully!");
-        setisEditDocument(false);
-        setSelectedDocument("");
-        fetchDocument();
-        setSelectedDocumentId("");
+        toast.success("Document Updated successfully!");
+        setIsDocument(false);
+        setSelectedDocumetId("");
+        getDocumentData();
+        setDocument("");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -167,11 +163,20 @@ function LoanDocument() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
-                {document[0]?.loan_type || "..."}
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
+                All Documents
               </Text>
-              <Flex>
+              <div>
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -180,16 +185,19 @@ function LoanDocument() {
                   marginRight="10px"
                 />
                 <Button
-                  onClick={() => setisEditDocument(true)}
+                  onClick={() => {
+                    setIsDocument(true);
+                  }}
                   colorScheme="blue"
                 >
-                  Add Document
+                  Add Documents
                 </Button>
-              </Flex>
+              </div>
             </Flex>
           </CardHeader>
           <CardBody>
             <TableComponent
+              documents={documents}
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
@@ -197,7 +205,7 @@ function LoanDocument() {
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
-              //   handleRow={handleRow}
+              handleRow={handleRow}
             />
           </CardBody>
         </Card>
@@ -209,7 +217,7 @@ function LoanDocument() {
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Delete User
+                Delete Document
               </AlertDialogHeader>
 
               <AlertDialogBody>
@@ -225,7 +233,7 @@ function LoanDocument() {
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => deletebranch(selectedUserId)}
+                  onClick={() => deleteDocument(selectedDocumentId)}
                   ml={3}
                 >
                   Delete
@@ -234,41 +242,41 @@ function LoanDocument() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
-
-        {/* edit */}
         <AlertDialog
-          isOpen={isEditDocument}
+          isOpen={isDocument}
           leastDestructiveRef={cancelRef}
           onClose={() => {
-            setisEditDocument(false);
-            setSelectedDocument("");
+            setIsDocument(false);
+            setSelectedDocumetId("");
           }}
         >
           <AlertDialogOverlay>
             <AlertDialogContent>
               <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                {selectedDocumentId != "" ? "Edit Document" : "Add Document"}
+                Add Document
               </AlertDialogHeader>
 
               <AlertDialogBody>
-                <FormControl id="loan_document" isRequired>
+                <FormControl id="document" isRequired>
                   <Input
-                    name="loan_document"
+                    name="document"
                     onChange={(e) => {
-                      setSelectedDocument(e.target.value);
+                      selectedDocumetId == ""
+                        ? setDocument(e.target.value)
+                        : setSelectedDocument(e.target.value);
                     }}
-                    value={selectedDocument}
-                    placeholder={
-                      selectedDocumentId != ""
-                        ? "Edit Document"
-                        : "Add Document"
+                    value={
+                      selectedDocumetId == "" ? document : selectedDocument
                     }
+                    placeholder="Add document"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        selectedDocumentId != ""
-                          ? editDocument(selectedDocument)
-                          : AddDocument(selectedDocument);
+                        if (selectedDocumetId) {
+                          editDocument(selectedDocument);
+                        } else {
+                          handleAddDocument(document);
+                        }
                       }
                     }}
                   />
@@ -279,8 +287,8 @@ function LoanDocument() {
                 <Button
                   ref={cancelRef}
                   onClick={() => {
-                    setisEditDocument(false);
-                    setSelectedDocument("");
+                    setIsDocument(false);
+                    setSelectedDocumetId("");
                   }}
                 >
                   Cancel
@@ -288,16 +296,16 @@ function LoanDocument() {
                 <Button
                   colorScheme="blue"
                   onClick={() => {
-                    if (selectedDocumentId !== "") {
+                    if (selectedDocumetId) {
                       editDocument(selectedDocument);
                     } else {
-                      AddDocument(selectedDocument);
+                      handleAddDocument(document);
                     }
                   }}
                   ml={3}
                   type="submit"
                 >
-                  {selectedDocumentId != "" ? "Updated Now" : "Add Now"}
+                  {selectedDocumetId ? "Update Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -309,4 +317,4 @@ function LoanDocument() {
   );
 }
 
-export default LoanDocument;
+export default AddAllDocuments;
