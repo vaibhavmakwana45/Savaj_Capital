@@ -22,39 +22,25 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { saveAs } from "file-saver";
 
-const FileDisplay = ({ data }) => {
+// FileDisplay component
+
+const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
-  const groupedFiles = data.reduce((acc, curr) => {
-    if (!acc[curr.loan_document]) {
-      acc[curr.loan_document] = [];
-    }
-    acc[curr.loan_document].push(curr);
-    return acc;
-  }, {});
 
-  const handleDownload = async (filePath, fileName) => {
-    try {
-      const fileHandle = await window.showSaveFilePicker();
-      const writableStream = await fileHandle.createWritable();
-
-      const response = await fetch(filePath);
-      const blob = await response.blob();
-
-      await writableStream.write(blob);
-      await writableStream.close();
-
-      console.log("File downloaded successfully.");
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
+  // Check if groupedFiles is undefined or null
+  if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
+    return <div>No documents available</div>;
+  }
 
   return (
     <div>
       <div className="d-flex flex-wrap justify-content-start image-responsive">
         {Object.entries(groupedFiles).map(([title, files], index) => (
           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
-            <h2 className="my-4">
+            <h2
+              className="my-4"
+              style={{ fontSize: "20px", fontWeight: "bold", color: "#333" }}
+            >
               <i>{title}</i>
             </h2>
             {files.map((file, idx) => (
@@ -99,6 +85,84 @@ const FileDisplay = ({ data }) => {
     </div>
   );
 };
+
+// const FileDisplay = ({ data }) => {
+//   const basePath = "https://cdn.dohost.in/upload/";
+//   const groupedFiles = data.reduce((acc, curr) => {
+//     if (!acc[curr.loan_document]) {
+//       acc[curr.loan_document] = [];
+//     }
+//     acc[curr.loan_document].push(curr);
+//     return acc;
+//   }, {});
+
+//   const handleDownload = async (filePath, fileName) => {
+//     try {
+//       const fileHandle = await window.showSaveFilePicker();
+//       const writableStream = await fileHandle.createWritable();
+
+//       const response = await fetch(filePath);
+//       const blob = await response.blob();
+
+//       await writableStream.write(blob);
+//       await writableStream.close();
+
+//       console.log("File downloaded successfully.");
+//     } catch (error) {
+//       console.error("Error downloading file:", error);
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <div className="d-flex flex-wrap justify-content-start image-responsive">
+//         {Object.entries(groupedFiles).map(([title, files], index) => (
+//           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
+//             <h2 className="my-4">
+//               <i>{title}</i>
+//             </h2>
+//             {files.map((file, idx) => (
+//               <div key={idx} className="d-flex mb-3">
+//                 {file.file_path.endsWith(".pdf") ? (
+//                   <iframe
+//                     src={`${basePath}${file.file_path}`}
+//                     type="application/pdf"
+//                     width="100%"
+//                     height="260" // Adjust height as needed
+//                     style={{
+//                       border: "none",
+//                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+//                       borderRadius: "12px",
+//                     }}
+//                     title="PDF Viewer"
+//                   />
+//                 ) : (
+//                   <img
+//                     src={`${basePath}${file.file_path}`}
+//                     alt={file.loan_document_id}
+//                     style={{
+//                       width: "100%",
+//                       height: "260px",
+//                       borderRadius: "12px",
+//                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+//                       cursor: "pointer",
+//                     }}
+//                     onClick={() =>
+//                       handleDownload(
+//                         `${basePath}${file.file_path}`,
+//                         file.loan_document_id
+//                       )
+//                     }
+//                   />
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
 
 function ViewFile() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -322,8 +386,11 @@ function ViewFile() {
                     </div>
                   </div>
                   <div>
-                    {fileData?.documents && (
+                    {/* {fileData?.documents && (
                       <FileDisplay data={fileData?.documents} />
+                    )} */}
+                    {fileData?.documents && (
+                      <FileDisplay groupedFiles={fileData?.documents} />
                     )}
                   </div>
                 </FormControl>

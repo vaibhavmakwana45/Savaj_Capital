@@ -9,6 +9,7 @@ const Loan_Documents = require("../../models/Loan/Loan_Documents");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const AddUser = require("../../models/AddUser");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
+const Title = require("../../models/AddDocuments/Title");
 
 router.post("/", async (req, res) => {
   try {
@@ -142,6 +143,8 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Assuming Title model is imported and available
+
 router.get("/file_upload/:file_id", async (req, res) => {
   try {
     const file_id = req.params.file_id;
@@ -169,20 +172,37 @@ router.get("/file_upload/:file_id", async (req, res) => {
         const loanDocument = await Loan_Documents.findOne({
           loan_document_id: doc.loan_document_id,
         });
+
+        // Fetch title name using title_id
+        const title = await Title.findOne({ title_id: doc.title_id });
+
         return {
           file_path: doc.file_path,
           loan_document_id: doc.loan_document_id,
           doc_id: doc.doc_id,
+          title_id: doc.title_id,
           loan_document: loanDocument
             ? loanDocument.loan_document
             : "Document name not found",
+          title: title ? title.title : "Title not found",
         };
       })
     );
 
+    // Group documents by title names
+    const groupedFiles = documentDetails.reduce((acc, curr) => {
+      if (!acc[curr.title]) {
+        acc[curr.title] = [];
+      }
+      acc[curr.title].push(curr);
+      return acc;
+    }, {});
+
     const responseData = {
       file: {
         _id: fileData._id,
+        branch_id: fileData.branch_id,
+        branchuser_id: fileData.branchuser_id,
         user_id: fileData.user_id,
         loan_id: fileData.loan_id,
         loantype_id: fileData?.loantype_id,
@@ -192,7 +212,7 @@ router.get("/file_upload/:file_id", async (req, res) => {
         username: user?.username,
         branch_name: savajcapitalbranch.branch_name,
         full_name: savajcapitalbranchuser.full_name,
-        documents: documentDetails,
+        documents: groupedFiles, // Include grouped documents
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,
         __v: fileData.__v,
@@ -209,6 +229,75 @@ router.get("/file_upload/:file_id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// router.get("/file_upload/:file_id", async (req, res) => {
+//   try {
+//     const file_id = req.params.file_id;
+
+//     const fileData = await File_Uplode.findOne({ file_id: file_id });
+
+//     const loan = await Loan.findOne({ loan_id: fileData.loan_id });
+
+//     const user = await AddUser.findOne({ user_id: fileData.user_id });
+
+//     const loanType = await Loan_Type.findOne({
+//       loantype_id: fileData?.loantype_id,
+//     });
+
+//     const savajcapitalbranch = await SavajCapital_Branch.findOne({
+//       branch_id: fileData.branch_id,
+//     });
+
+//     const savajcapitalbranchuser = await SavajCapital_User.findOne({
+//       branchuser_id: fileData.branchuser_id,
+//     });
+
+//     const documentDetails = await Promise.all(
+//       fileData.documents.map(async (doc) => {
+//         const loanDocument = await Loan_Documents.findOne({
+//           loan_document_id: doc.loan_document_id,
+//         });
+//         return {
+//           file_path: doc.file_path,
+//           loan_document_id: doc.loan_document_id,
+//           doc_id: doc.doc_id,
+//           title_id: doc.title_id,
+//           loan_document: loanDocument
+//             ? loanDocument.loan_document
+//             : "Document name not found",
+//         };
+//       })
+//     );
+
+//     const responseData = {
+//       file: {
+//         _id: fileData._id,
+//         user_id: fileData.user_id,
+//         loan_id: fileData.loan_id,
+//         loantype_id: fileData?.loantype_id,
+//         file_id: fileData.file_id,
+//         loan: loan.loan,
+//         loan_type: loanType?.loan_type,
+//         username: user?.username,
+//         branch_name: savajcapitalbranch.branch_name,
+//         full_name: savajcapitalbranchuser.full_name,
+//         documents: documentDetails,
+//         createdAt: fileData.createdAt,
+//         updatedAt: fileData.updatedAt,
+//         __v: fileData.__v,
+//       },
+//     };
+
+//     res.json({
+//       statusCode: 200,
+//       data: responseData,
+//       message: "Loan details retrieved successfully",
+//     });
+//   } catch (error) {
+//     console.error("Error during data retrieval:", error);
+//     res.status(500).json({ message: error.message });
+//   }
+// });
 
 router.get("/edit_file_upload/:file_id", async (req, res) => {
   try {
