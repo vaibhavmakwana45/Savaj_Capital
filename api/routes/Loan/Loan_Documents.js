@@ -44,7 +44,6 @@ let loanTypeCounter = 0;
 //   }
 // });
 
-
 router.get("/:loan_id", async (req, res) => {
   try {
     const loan_id = req.params.loan_id;
@@ -151,13 +150,12 @@ router.get("/loan_docs/:loan_id/:loantype_id", async (req, res) => {
   }
 });
 
-
 router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
   try {
     const loan_id = req.params.loan_id;
     const loantype_id = req.params.loantype_id;
 
-    console.log(loan_id, loantype_id, "shivam")
+    console.log(loan_id, loantype_id, "shivam");
 
     // Fetch loan documents
     const data = await Loan_Documents.aggregate([
@@ -272,13 +270,13 @@ router.put("/:loan_document_id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { loan_id, loantype_id, title, document_id } = req.body;
+    const { loan_id, loantype_id, document_id, title_id } = req.body;
 
     // Find the existing document based on loan_id, loantype_id (if provided), and title
     const existingDocument = await Loan_Documents.findOne({
       loan_id,
       ...(loantype_id && { loantype_id }),
-      title: { $regex: new RegExp(`^${title}$`, "i") },
+      title_id: { $regex: new RegExp(`^${title_id}$`, "i") },
     });
 
     if (existingDocument) {
@@ -310,7 +308,7 @@ router.post("/", async (req, res) => {
         loan_document_id: uniqueId,
         loan_id,
         loantype_id,
-        title,
+        title_id,
         document_ids: document_id, // Pass document_id as a flat array of strings
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
         updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),

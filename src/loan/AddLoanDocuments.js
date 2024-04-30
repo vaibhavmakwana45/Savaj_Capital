@@ -37,6 +37,7 @@ function AddLoanDocuments() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     loan_id: "",
+    title_id: "",
     loantype_id: "",
     title: "",
     document_ids: [],
@@ -162,13 +163,15 @@ function AddLoanDocuments() {
       toast.error("Please select at least one document.");
       return;
     }
-  
-    const selectedTitle = titleData.find((title) => title.title_id === formData.title_id);
+
+    const selectedTitle = titleData.find(
+      (title) => title.title_id === formData.title_id
+    );
     if (!selectedTitle) {
       toast.error("Please select a title.");
       return;
     }
-  
+
     const newTitle = {
       title: selectedTitle.title,
       documents: selectedDocs.map((docName) => {
@@ -179,14 +182,13 @@ function AddLoanDocuments() {
         };
       }),
     };
-  
+
     const document_ids = newTitle.documents.map((doc) => doc.document_id);
-  
+
     setTitles([...titles, { ...newTitle, document_ids }]);
     setSelectedDocs([]);
     toast.success("Title added successfully!");
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,13 +196,13 @@ function AddLoanDocuments() {
 
     try {
       for (const postData of titles) {
-        const { title: titleName, document_ids } = postData;
+        const { document_ids } = postData;
         console.log("postData", postData);
         const response = await AxiosInstance.post(`/loan_docs`, {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
-          title_id: selectedTitleId,
-          title: titleName,
+          title_id: formData.title_id,
+          // title: titleName,
           document_id: document_ids,
         });
 
