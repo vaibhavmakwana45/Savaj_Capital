@@ -38,13 +38,13 @@ const FileDisplay = ({ groupedFiles }) => {
         {Object.entries(groupedFiles).map(([title, files], index) => (
           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
             <h2
-              className="my-4"
-              style={{ fontSize: "20px", fontWeight: "bold", color: "#333" }}
+              className="my-4 text-center"
+              style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
             >
-              <i>{title}</i>
+             <u><i>{title}</i></u>
             </h2>
             {files.map((file, idx) => (
-              <div key={idx} className="d-flex mb-3">
+              <div key={idx} className="d-flex mb-5">
                 {file.file_path.endsWith(".pdf") ? (
                   <iframe
                     src={`${basePath}${file.file_path}`}

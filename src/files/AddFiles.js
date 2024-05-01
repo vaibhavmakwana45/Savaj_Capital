@@ -484,12 +484,12 @@ function AddFiles() {
             )}
             <div>
               {Object.keys(groupedLoanDocuments).map((title_id) => (
-                <div key={title_id}>
-                  <h2>{groupedLoanDocuments[title_id][0].title}</h2>
+                <div key={title_id} className="my-3">
+                  <h2 className="mx-4"><i><u><b>{groupedLoanDocuments[title_id][0].title}</b></u></i></h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                     {groupedLoanDocuments[title_id].map(
                       (documentGroup, index) => (
-                        <div key={`${title_id}-${index}`}>
+                        <div key={`${title_id}-${index}`} className="d-flex ">
                           {documentGroup.document_names.map(
                             (documentName, innerIndex) => (
                               <div
