@@ -177,14 +177,21 @@ router.get("/file_upload/:file_id", async (req, res) => {
         // Fetch title name using title_id
         const title = await Title.findOne({ title_id: doc.title_id });
 
+        const documentName = await AddDocuments.findOne({
+          document_id: doc.loan_document_id,
+        });
+
         return {
           file_path: doc.file_path,
           loan_document_id: doc.loan_document_id,
+          document_name: documentName
+            ? documentName.document
+            : "Document name not found",
           doc_id: doc.doc_id,
           title_id: doc.title_id,
-          loan_document: loanDocument
-            ? loanDocument.loan_document
-            : "Document name not found",
+          // loan_document: loanDocument
+          //   ? loanDocument.loan_document
+          //   : "Document name not found",
           title: title ? title.title : "Title not found",
         };
       })
@@ -559,7 +566,6 @@ router.get("/testfile/:file_id", async (req, res) => {
       });
     });
 
-
     const commonIds = loanIds.filter((id) =>
       loanDocumentIds.some(
         (docId) =>
@@ -576,7 +582,6 @@ router.get("/testfile/:file_id", async (req, res) => {
             docId.title_id === id.title_id
         )
     );
-
 
     const approvedObject = [];
     const pendingObject = [];

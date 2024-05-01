@@ -30,6 +30,10 @@ function BankAssignFile() {
   const textColor = useColorModeValue("gray.700", "white");
   const [files, setFiles] = useState([]);
 
+  const [formData, setFormData] = useState({
+    loan_id: "",
+  });
+
   const fetchFiles = async () => {
     try {
       const response = await AxiosInstance.get("/file_upload/allfiles");
