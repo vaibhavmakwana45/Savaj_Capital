@@ -110,6 +110,14 @@ function BankAssignFile() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Assuming you have bankUser and selectedBankId defined somewhere
+  
+  const filteredUsers = bankUser.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -150,81 +158,76 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl> */}
-              <div className="w-100 my-3">
+            <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
-
-                <input
-                  style={{
-                    width: "100%",
-                    border: "0.5px solid #333",
-                    padding: "5px",
-                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right center",
-                    backgroundSize: "10px",
-                    backgroundPosition: "right 15px center",
-                    borderRadius:"5px",
-                    borderColor:"inherit"
-                  }}
-                  placeholder="Select Bank"
-                  onFocus={() => {
-                    setFilteredData(banks);
-                    setFilterOpen(true);
+              <input
+                style={{
+                  width: "100%",
+                  border: "0.5px solid #333",
+                  padding: "5px",
+                  backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right center",
+                  backgroundSize: "10px",
+                  backgroundPosition: "right 15px center",
+                  borderRadius: "5px",
+                  borderColor: "inherit",
+                }}
+                placeholder="Select Bank"
+                onFocus={() => {
+                  setFilteredData(banks);
+                  setFilterOpen(true);
+                  filterToggle();
+                }}
+                onBlur={() => {
+                  setTimeout(() => {
                     filterToggle();
+                  }, 200);
+                }}
+                onChange={(e) => {
+                  if (e.target.value.length !== "") {
+                    setFilterOpen(true);
+                  } else {
+                    setFilterOpen(false);
+                  }
+                  const filterData = banks.filter((item) => {
+                    return item.bank_name
+                      .toLowerCase()
+                      .includes(e.target.value.toLowerCase());
+                  });
+                  setSelectedLoan(e.target.value);
+                  setFilteredData(filterData);
+                }}
+                value={selectedLoan}
+              />
+              <Dropdown
+                className="w-100"
+                isOpen={filterOpen}
+                toggle={filterToggle}
+              >
+                <DropdownMenu className="w-100">
+                  {filteredData.length > 0 ? (
+                    filteredData.map((item, index) => (
+                      <DropdownItem
+                        key={index}
+                        onClick={(e) => {
+                          setSelectedLoan(
+                            `${item.bank_name} (${item.branch_name})`
+                          ); // Update selectedLoan
+                          setSelectedBankId(item.bank_id);
+                          setFilterOpen(false);
+                        }}
+                      >
+                        {`${item.bank_name} (${item.branch_name})`}
+                      </DropdownItem>
+                    ))
+                  ) : (
+                    <DropdownItem>No data found</DropdownItem>
+                  )}
+                </DropdownMenu>
+              </Dropdown>
+            </div>
 
-                  }}
-                  onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
-                    setTimeout(() => {
-                      filterToggle();
-                    }, 200); // Adjust the delay as needed
-                  }}
-                  onChange={(e) => {
-                    if (e.target.value.length !== "") {
-                      setFilterOpen(true);
-                    } else {
-                      setFilterOpen(false);
-                    }
-                    const filterData = banks.filter((item) => {
-                      return item.bank_name
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase());
-                    });
-                    setSelectedLoan(e.target.value);
-                    setFilteredData(filterData);
-                  }}
-                  value={selectedLoan}
-                />
-                <Dropdown
-                  className="w-100"
-                  isOpen={filterOpen}
-                  toggle={filterToggle}
-                >
-                  <DropdownMenu className="w-100">
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={(e) => {
-                            setSelectedLoan(item.banks);
-                            setFilterOpen(false);
-                            const selectedLoanId = item.bank_id;
-                            setFormData({
-                              ...formData,
-                              loan_id: selectedLoanId,
-                            });
-                          }}
-                        >
-                          {/* {item.loan} */}
-                          {`${item.bank_name} (${item.branch_name})`}
-                        </DropdownItem>
-                      ))
-                    ) : (
-                      <DropdownItem>No data found</DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
             {selectedBankId && (
               <FormControl id="bankuser_id" mt={4} isRequired>
                 <FormLabel>Bank User</FormLabel>

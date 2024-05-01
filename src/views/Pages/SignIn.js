@@ -121,8 +121,8 @@ function SignIn() {
               break;
           }
         } else {
-          console.error("No token received");
-          toast.error("No token received");
+          console.error("No user found");
+          toast.error("No user found");
         }
       }
       setLoading(false);
