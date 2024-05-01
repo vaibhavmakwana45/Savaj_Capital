@@ -330,7 +330,7 @@ export default function Dashboard() {
             </Text> */}
           </Flex>
         </Card>
-        
+
         <Card
           minH="125px"
           style={{ cursor: "pointer" }}

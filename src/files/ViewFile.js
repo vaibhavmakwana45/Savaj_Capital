@@ -32,6 +32,21 @@ const FileDisplay = ({ groupedFiles }) => {
     return <div>No documents available</div>;
   }
 
+  const handleDownload = async (filePath, fileName) => {
+    try {
+      const fileHandle = await window.showSaveFilePicker();
+      const writableStream = await fileHandle.createWritable();
+
+      const response = await fetch(filePath);
+      const blob = await response.blob();
+
+      await writableStream.write(blob);
+      await writableStream.close();
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
   return (
     <div>
       <div className="d-flex flex-wrap justify-content-start image-responsive">
@@ -45,6 +60,7 @@ const FileDisplay = ({ groupedFiles }) => {
             </h2>
             {files.map((file, idx) => (
               <div key={idx} className="d-flex mb-3">
+                {file.document_name}
                 {file.file_path.endsWith(".pdf") ? (
                   <iframe
                     src={`${basePath}${file.file_path}`}
