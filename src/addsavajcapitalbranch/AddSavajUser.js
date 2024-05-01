@@ -145,6 +145,7 @@ function AddSavajCapitalBranch() {
     savajcapitalbranch_id: "",
     savajcapitaluser_id: "",
     savajcapitalbranch_name: "",
+    branch_id: "",
     state: "",
     city: "",
     full_name: "",
@@ -244,7 +245,7 @@ function AddSavajCapitalBranch() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Select
                   name="city"
@@ -264,8 +265,8 @@ function AddSavajCapitalBranch() {
                     </option>
                   ))}
                 </Select>
-              </FormControl> */}
-              <div className="w-100">
+              </FormControl>
+              {/* <div className="w-100">
                 <FormLabel>Select Loan</FormLabel>
 
                 <input
@@ -341,7 +342,7 @@ function AddSavajCapitalBranch() {
                             });
                           }}
                         >
-                          {/* {item.branches} */}
+   
                           {item.branch_name +
                             ` (${item.city + ", " + item.state})`}
                         </DropdownItem>
@@ -351,7 +352,7 @@ function AddSavajCapitalBranch() {
                     )}
                   </DropdownMenu>
                 </Dropdown>
-              </div>
+              </div> */}
               <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Role</FormLabel>
                 <Select
