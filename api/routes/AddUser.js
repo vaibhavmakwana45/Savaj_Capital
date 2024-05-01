@@ -43,7 +43,7 @@ router.post("/adduser", async (req, res) => {
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
-    // const hashedPassword = encrypt(userDetails.password);
+    const hashedPassword = encrypt(userDetails.password);
 
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
@@ -57,7 +57,7 @@ router.post("/adduser", async (req, res) => {
       user_id: userId,
       createdAt: currentDate,
       updatedAt: currentDate,
-      password: "",
+      password: hashedPassword,
     });
 
     await newUser.save();
@@ -112,7 +112,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://192.168.1.19:5882/api/setpassword/passwordmail`,
+      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }

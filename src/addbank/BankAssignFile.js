@@ -114,6 +114,14 @@ function BankAssignFile() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Assuming you have bankUser and selectedBankId defined somewhere
+  
+  const filteredUsers = bankUser.filter(user =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -154,9 +162,9 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl> */}
+  
             <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
-
               <input
                 style={{
                   width: "100%",
@@ -177,10 +185,9 @@ function BankAssignFile() {
                   filterToggle();
                 }}
                 onBlur={() => {
-                  // Delay the filterToggle call to allow time for the click event
                   setTimeout(() => {
                     filterToggle();
-                  }, 200); // Adjust the delay as needed
+                  }, 200);
                 }}
                 onChange={(e) => {
                   if (e.target.value.length !== "") {
@@ -209,13 +216,11 @@ function BankAssignFile() {
                       <DropdownItem
                         key={index}
                         onClick={(e) => {
-                          setSelectedLoan(item.banks);
+                          setSelectedLoan(
+                            `${item.bank_name} (${item.branch_name})`
+                          ); // Update selectedLoan
+                          setSelectedBankId(item.bank_id);
                           setFilterOpen(false);
-                          const selectedLoanId = item.bank_id;
-                          setFormData({
-                            ...formData,
-                            loan_id: selectedLoanId,
-                          });
                         }}
                       >
                         {`${item.bank_name} (${item.branch_name})`}
@@ -227,6 +232,7 @@ function BankAssignFile() {
                 </DropdownMenu>
               </Dropdown>
             </div>
+
             {selectedBankId && (
               <FormControl id="bankuser_id" mt={4} isRequired>
                 <FormLabel>Bank User</FormLabel>

@@ -88,14 +88,14 @@ function AssignedBankUsers() {
     "CreatedAt",
     "UpdatedAt",
   ];
-  const formattedData = filteredUsers.map((item) => [
-    item.user_id,
-    item.file_id,
-    item.username,
-    item.loan,
-    item.loan_type,
-    item.file_data.createdAt,
-    item.file_data.updatedAt,
+  const formattedData = filteredUsers?.map((item) => [
+    item?.user_id,
+    item?.file_id,
+    item?.username,
+    item?.loan,
+    item?.loan_type,
+    item?.file_data.createdAt,
+    item?.file_data.updatedAt,
   ]);
 
   const handleRow = (id) => {

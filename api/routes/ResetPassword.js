@@ -81,8 +81,8 @@ function isTokenValid(email) {
 
 //     scheduleTokenCleanup();
 //   } catch (error) {
-//     res.status(500).json({
-//       statusCode: 500,
+//     res.json({
+//       statusCode: false,
 //       message: error.message,
 //     });
 //   }
@@ -104,7 +104,7 @@ router.post("/passwordmail", async (req, res) => {
 
         <p>Set your password now:</p>
         <p><a href="${
-          `http://localhost:3000/auth/setpassword?token=` + token
+          `https://admin.savajcapital.com/auth/setpassword?token=` + token
         }" style="text-decoration: none;">Set Password Link</a></p>
 
         <p>Best regards,<br>
