@@ -30,6 +30,10 @@ function BankAssignFile() {
   const textColor = useColorModeValue("gray.700", "white");
   const [files, setFiles] = useState([]);
 
+  const [formData, setFormData] = useState({
+    loan_id: "",
+  });
+
   const fetchFiles = async () => {
     try {
       const response = await AxiosInstance.get("/file_upload/allfiles");
@@ -158,6 +162,7 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl> */}
+  
             <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
               <input
