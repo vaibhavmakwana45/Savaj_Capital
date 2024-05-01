@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./userfile.scss";
 import Loader from "react-js-loader";
 
@@ -20,37 +20,61 @@ import { useLocation } from "react-router-dom";
 import { Spinner } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { saveAs } from "file-saver";
 
-const FileDisplay = ({ data }) => {
+// FileDisplay component
+
+const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
-  const groupedFiles = data.reduce((acc, curr) => {
-    if (!acc[curr.loan_document]) {
-      acc[curr.loan_document] = [];
+
+  // Check if groupedFiles is undefined or null
+  if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
+    return <div>No documents available</div>;
+  }
+
+  const handleDownload = async (filePath, fileName) => {
+    try {
+      const fileHandle = await window.showSaveFilePicker();
+      const writableStream = await fileHandle.createWritable();
+
+      const response = await fetch(filePath);
+      const blob = await response.blob();
+
+      await writableStream.write(blob);
+      await writableStream.close();
+    } catch (error) {
+      console.error("Error downloading file:", error);
     }
-    acc[curr.loan_document].push(curr);
-    return acc;
-  }, {});
+  };
 
   return (
     <div>
       <div className="d-flex flex-wrap justify-content-start image-responsive">
         {Object.entries(groupedFiles).map(([title, files], index) => (
           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
-            <h2 className="my-4">
-              <i>{title}</i>
+            <h2
+              className="my-4"
+              style={{ fontSize: "20px", fontWeight: 700, color: "#333" }}
+            >
+              <u>
+                {title} documents
+              </u>
             </h2>
             {files.map((file, idx) => (
-              <div key={idx} className="d-flex mb-3">
+              <div key={idx} className="mb-3">
+                <p className="mb-3">{file.document_name}</p>
                 {file.file_path.endsWith(".pdf") ? (
-                  <embed
+                  <iframe
                     src={`${basePath}${file.file_path}`}
                     type="application/pdf"
                     width="100%"
-                    height="200"
+                    height="260" // Adjust height as needed
                     style={{
+                      border: "none",
                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
                       borderRadius: "12px",
                     }}
+                    title="PDF Viewer"
                   />
                 ) : (
                   <img
@@ -58,10 +82,17 @@ const FileDisplay = ({ data }) => {
                     alt={file.loan_document_id}
                     style={{
                       width: "100%",
-                      height: "200px",
+                      height: "260px",
                       borderRadius: "12px",
                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                      cursor: "pointer",
                     }}
+                    onClick={() =>
+                      handleDownload(
+                        `${basePath}${file.file_path}`,
+                        file.loan_document_id
+                      )
+                    }
                   />
                 )}
               </div>
@@ -72,6 +103,83 @@ const FileDisplay = ({ data }) => {
     </div>
   );
 };
+
+// const FileDisplay = ({ data }) => {
+//   const basePath = "https://cdn.dohost.in/upload/";
+//   const groupedFiles = data.reduce((acc, curr) => {
+//     if (!acc[curr.loan_document]) {
+//       acc[curr.loan_document] = [];
+//     }
+//     acc[curr.loan_document].push(curr);
+//     return acc;
+//   }, {});
+
+//   const handleDownload = async (filePath, fileName) => {
+//     try {
+//       const fileHandle = await window.showSaveFilePicker();
+//       const writableStream = await fileHandle.createWritable();
+
+//       const response = await fetch(filePath);
+//       const blob = await response.blob();
+
+//       await writableStream.write(blob);
+//       await writableStream.close();
+
+//     } catch (error) {
+//       console.error("Error downloading file:", error);
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <div className="d-flex flex-wrap justify-content-start image-responsive">
+//         {Object.entries(groupedFiles).map(([title, files], index) => (
+//           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
+//             <h2 className="my-4">
+//               <i>{title}</i>
+//             </h2>
+//             {files.map((file, idx) => (
+//               <div key={idx} className="d-flex mb-3">
+//                 {file.file_path.endsWith(".pdf") ? (
+//                   <iframe
+//                     src={`${basePath}${file.file_path}`}
+//                     type="application/pdf"
+//                     width="100%"
+//                     height="260" // Adjust height as needed
+//                     style={{
+//                       border: "none",
+//                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+//                       borderRadius: "12px",
+//                     }}
+//                     title="PDF Viewer"
+//                   />
+//                 ) : (
+//                   <img
+//                     src={`${basePath}${file.file_path}`}
+//                     alt={file.loan_document_id}
+//                     style={{
+//                       width: "100%",
+//                       height: "260px",
+//                       borderRadius: "12px",
+//                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+//                       cursor: "pointer",
+//                     }}
+//                     onClick={() =>
+//                       handleDownload(
+//                         `${basePath}${file.file_path}`,
+//                         file.loan_document_id
+//                       )
+//                     }
+//                   />
+//                 )}
+//               </div>
+//             ))}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
 
 function DetailScFilePage() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -213,7 +321,10 @@ function DetailScFilePage() {
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
             <CardBody style={{ padding: "40px" }} className="cardss">
-              <FormLabel className="mb-2 back-responsive" style={{ fontSize: "25px" }}>
+              <FormLabel
+                className="mb-2 back-responsive"
+                style={{ fontSize: "25px" }}
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}
@@ -292,8 +403,11 @@ function DetailScFilePage() {
                     </div>
                   </div>
                   <div>
-                    {fileData?.documents && (
+                    {/* {fileData?.documents && (
                       <FileDisplay data={fileData?.documents} />
+                    )} */}
+                    {fileData?.documents && (
+                      <FileDisplay groupedFiles={fileData?.documents} />
                     )}
                   </div>
                 </FormControl>

@@ -92,7 +92,7 @@ import {
   
         await AxiosInstance.post("/bank_approval", payload);
   
-        history.push("/superadmin/filetable");
+        history.push("/savajcapitaluser/assignbank");
         toast.success("All data submitted successfully!");
       } catch (error) {
         console.error("Error while uploading files or submitting data:", error);
