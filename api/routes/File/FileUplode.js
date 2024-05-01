@@ -219,7 +219,7 @@ router.get("/file_upload/:file_id", async (req, res) => {
         loan_type: loanType?.loan_type,
         username: user?.username,
         branch_name: savajcapitalbranch.branch_name,
-        full_name: savajcapitalbranchuser.full_name,
+        full_name: savajcapitalbranchuser?.full_name,
         documents: groupedFiles, // Include grouped documents
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,
