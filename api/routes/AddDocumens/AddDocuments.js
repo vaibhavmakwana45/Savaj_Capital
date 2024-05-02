@@ -43,7 +43,7 @@ router.post("/", async (req, res) => {
 // Get Documents
 router.get("/", async (req, res) => {
   try {
-    const data = await AddDocuments.find({});
+    const data = await AddDocuments.find({}).sort({updatedAt: -1});
     if (data.length === 0) {
       // If no data found
       return res.status(201).json({

@@ -238,64 +238,6 @@ function AddFiles() {
     setSelectedLoanSubtypeId(event.target.value);
   };
 
-  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranch = async () => {
-      try {
-        const response = await AxiosInstance.get("/branch");
-        setSavajcapitalbranch(response.data.data);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
-
-    fetchSavajcapitalbranch();
-    getRolesData();
-  }, []);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranchUser = async () => {
-      if (!selectedBranchId) {
-        setSavajcapitalbranchUser([]);
-        return;
-      }
-      try {
-        const response = await AxiosInstance.get(
-          `/savaj_user/${selectedBranchId}`
-        );
-        setSavajcapitalbranchUser(response.data.data || []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching branch users:", error);
-      }
-    };
-
-    fetchSavajcapitalbranchUser();
-  }, [selectedBranchId]);
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
-  const getRoleName = (roleId) => {
-    const role = roles.find((role) => role.role_id === roleId);
-    return role ? role.role : "No role found";
-  };
-
   const onSubmit = async (data) => {
     try {
       const wrappedData = {
@@ -355,8 +297,6 @@ function AddFiles() {
       const payload = {
         user_id: selectedUser,
         loan_id: selectedLoanId,
-        branch_id: selectedBranchId,
-        branchuser_id: selectedBranchUserId,
         loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
@@ -485,7 +425,13 @@ function AddFiles() {
             <div>
               {Object.keys(groupedLoanDocuments).map((title_id) => (
                 <div key={title_id} className="my-3">
-                  <h2 className="mx-4"><i><u><b>{groupedLoanDocuments[title_id][0].title}</b></u></i></h2>
+                  <h2 className="mx-4">
+                    <i>
+                      <u>
+                        <b>{groupedLoanDocuments[title_id][0].title}</b>
+                      </u>
+                    </i>
+                  </h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                     {groupedLoanDocuments[title_id].map(
                       (documentGroup, index) => (
@@ -648,45 +594,6 @@ function AddFiles() {
                 </div>
               ))}
             </div>
-            <div>
-              <FormControl id="branch_id" mt={4} isRequired>
-                <FormLabel>Savaj Capital Branch</FormLabel>
-                <Select
-                  placeholder="Select Branch"
-                  onChange={(e) => setSelectedBranchId(e.target.value)}
-                >
-                  {savajcapitalbranch.map((branch) => (
-                    <option key={branch.branch_id} value={branch.branch_id}>
-                      {`${branch.branch_name} (${branch.city})`}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {selectedBranchId && (
-                <FormControl id="branchuser_id" mt={4} isRequired>
-                  <FormLabel>Branch User</FormLabel>
-                  {savajcapitalbranchUser.length > 0 ? (
-                    <Select
-                      placeholder="Select User"
-                      onChange={(e) => setSelectedBranchUserId(e.target.value)}
-                    >
-                      {savajcapitalbranchUser.map((user) => (
-                        <option
-                          key={user.branchuser_id}
-                          value={user.branchuser_id}
-                        >
-                          {`${user.full_name} (${getRoleName(user.role_id)})`}
-                        </option>
-                      ))}
-                    </Select>
-                  ) : (
-                    <Text>No users available for this branch.</Text>
-                  )}
-                </FormControl>
-              )}
-            </div>
-
             <div>
               <Button
                 mt={4}

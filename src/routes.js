@@ -52,6 +52,7 @@ import AllStep from "Allstep/AllStep";
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
 import AssignedBankUsers from "addbank/AssignedBankUsers";
 import Title from "./Title/Title"; // Assignes file (savaj user)
+import SavajAssignFile from "addsavajcapitalbranch/SavajAssignFile";
 
 var dashRoutes = [
   //superadmin
@@ -115,7 +116,7 @@ var dashRoutes = [
     key: "editfile",
   },
   //users
- 
+
   {
     path: "/adduser",
     name: "Add Customer",
@@ -253,6 +254,11 @@ var dashRoutes = [
         path: "/savajuserroles",
         name: "Add Roles",
       },
+      {
+        layout: "/superadmin",
+        path: "/branch-assigned-file",
+        name: "Assigned File",
+      },
     ],
   },
   {
@@ -314,6 +320,16 @@ var dashRoutes = [
     layout: "/superadmin",
     parent: "superadmin",
     key: "savajcapitalbranch",
+  },
+  {
+    path: "/branch-assigned-file",
+    name: "Assigned File (Savaj User)",
+    icon: <CreditIcon color="inherit" />,
+    component: SavajAssignFile,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "savajcapitalbranch",
+    key: "branch-assigned-file",
   },
   //bank
   {

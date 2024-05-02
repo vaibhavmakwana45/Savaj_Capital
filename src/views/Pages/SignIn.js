@@ -94,12 +94,12 @@ function SignIn() {
         email,
         password,
       });
+      // console.log(response.data.message, "abc")
+      // console.log(response.data.statusCode  , "statuscode")
       if (response.data.statusCode === 201) {
         toast.error("user not exists");
-      } else if (response.data.statuscode === 202) {
-        setTimeout(() => {
-          toast.error("user not exists");
-        }, 1000);
+      } else if (response.data.statusCode === 202) {
+        toast.error(response.data.message)
       } else if (response.data.success) {
         const { token, role } = response.data;
         if (token) {

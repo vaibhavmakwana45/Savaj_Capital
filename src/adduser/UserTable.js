@@ -33,7 +33,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-import "./user.css"
+import "./user.css";
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -99,8 +99,7 @@ function UserTable() {
     history.push("/superadmin/adduser?id=" + id);
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -122,9 +121,14 @@ function UserTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between"  className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
-                All Users
+            <Flex justifyContent="space-between" className="thead">
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext"
+              >
+                All Customers
               </Text>
               <Flex className="thead">
                 <Input
@@ -139,7 +143,7 @@ function UserTable() {
                   colorScheme="blue"
                   className="adduser-btn"
                 >
-                  Add User
+                  Add Customer
                 </Button>
               </Flex>
             </Flex>

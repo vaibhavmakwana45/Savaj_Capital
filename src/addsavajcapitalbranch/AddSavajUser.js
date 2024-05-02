@@ -99,7 +99,6 @@ function AddSavajCapitalBranch() {
           password: "",
         };
 
-
         setFormData(submissionData);
       } else {
         alert("Please try again later...!");
@@ -149,6 +148,7 @@ function AddSavajCapitalBranch() {
     state: "",
     city: "",
     full_name: "",
+    branch_id: "",
     email: "",
     password: "",
   });
