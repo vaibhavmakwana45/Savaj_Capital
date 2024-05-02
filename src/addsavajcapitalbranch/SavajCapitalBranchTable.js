@@ -120,13 +120,13 @@ function SavajCapitalBranchTable() {
       if (response.data.success) {
         fetchSavajcapitalbranch();
         toast.success("Branch deleted Successfully!", {
-          duration: 800, // Time in milliseconds (3 seconds in this example)
+          duration: 800,
         });
       } else if (response.data.statusCode === 201) {
         toast.error(response.data.message);
       } else if (response.data) {
         toast.error(response.data.message || "please try again later!", {
-          duration: 800, // Time in milliseconds (3 seconds in this example)
+          duration: 800,  
         });
       }
     } catch (error) {

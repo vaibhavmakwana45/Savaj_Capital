@@ -79,18 +79,6 @@ function AddSavajCapitalBranch() {
     e.preventDefault();
     setLoading(true);
 
-    // const submissionData = {
-    //   savajCapitalBranchDetails: {
-    //     state: formData.state,
-    //     city: formData.city,
-    //     branch_name: formData.branch_name,
-    //   },
-    //   savajCapitalUserDetails: {
-    //     email: formData.email,
-    //     password: formData.password,
-    //   },
-    // };
-
     try {
       const response = await AxiosInstance.post("/branch", formData);
 
@@ -167,11 +155,6 @@ function AddSavajCapitalBranch() {
                 <FormLabel>Branch Address</FormLabel>
                 <Input name="adress" onChange={handleChange} />
               </FormControl>
-              {/* <FormControl id="branch_name" mt={4} isRequired>
-                <FormLabel>Branch Name</FormLabel>
-                <Input name="branch_name" onChange={handleChange} />
-              </FormControl> */}
-              {/* User Details */}
               <div className="d-flex">
                 <Button
                   mt={4}
