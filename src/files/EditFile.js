@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
+import { IconButton } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -159,19 +160,18 @@ function EditFile() {
         documentId: documentId,
         key: key,
       };
-      console.log('filePreview', filePreview)
+      console.log("filePreview", filePreview);
       setFileData((prevData) => ({
         ...prevData,
         [key]: filePreview,
       }));
-  
+
       setUploadedFileName((prevUploadedFiles) => [
         ...prevUploadedFiles,
         { file: file, documentId: documentId, title_id: title_id, key: key },
       ]);
     }
   };
-  
 
   const handleRemoveFile = (key) => {
     setFileData((prevData) => {

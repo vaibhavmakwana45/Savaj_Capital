@@ -129,8 +129,16 @@ function AddUser(props) {
           submissionData
         );
 
+        console.log(response.data, "shivam");
+
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
+        } else if (response.data.statusCode === 202) {
+          toast.error(response.data.message);
+        } else if (response.data.statusCode === 203) {
+          toast.error(response.data.message);
+        } else if (response.data.statusCode === 204) {
+          toast.error(response.data.message);
         } else if (response.data.success) {
           toast.success("User added successfully!");
           history.push("/superadmin/alluser");
@@ -140,7 +148,6 @@ function AddUser(props) {
           "/addusers/edituser/" + id,
           formData
         );
-
 
         if (response.data.success) {
           toast.success("User Updated successfully!");
