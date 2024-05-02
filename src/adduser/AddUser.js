@@ -141,7 +141,6 @@ function AddUser(props) {
           formData
         );
 
-
         if (response.data.success) {
           toast.success("User Updated successfully!");
           history.push("/superadmin/alluser");
@@ -169,7 +168,7 @@ function AddUser(props) {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); 
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
@@ -181,7 +180,7 @@ function AddUser(props) {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); 
+      setCities([]);
     }
   }, [selectedState, selectedCountry]);
 
@@ -199,6 +198,26 @@ function AddUser(props) {
       ...prevFormData,
       state: stateFullName,
     }));
+  };
+
+  const handleeChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && value.length <= 12) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   return (
@@ -220,6 +239,7 @@ function AddUser(props) {
                   name="username"
                   onChange={handleChange}
                   value={formData.username}
+                  placeholder="Enter your Name"
                 />
               </FormControl>
 
@@ -229,6 +249,7 @@ function AddUser(props) {
                   name="number"
                   onChange={handleChange}
                   value={formData.number}
+                  placeholder="Enter your Number"
                 />
               </FormControl>
 
@@ -242,6 +263,7 @@ function AddUser(props) {
                   type="email"
                   onChange={handleChange}
                   value={formData.email}
+                  placeholder="Enter your E-mail"
                 />
               </FormControl>
 
@@ -314,50 +336,26 @@ function AddUser(props) {
                   value={formData.dob}
                 />
               </FormControl>
-
               <FormControl id="pancard" mt={4} isRequired>
                 <FormLabel>Pancard</FormLabel>
                 <Input
                   name="pan_card"
-                  type="string"
-                  onChange={handleChange}
+                  type="text"
+                  onChange={handleeChange}
                   value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
                 />
               </FormControl>
-
               <FormControl id="aadharcard" mt={4} isRequired>
                 <FormLabel>Aadarcard</FormLabel>
                 <Input
                   name="aadhar_card"
                   type="number"
-                  onChange={handleChange}
+                  onChange={handleadharChange}
                   value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
                 />
               </FormControl>
-
-              {/* {
-                !id &&
-                <FormControl id="password" mt={4} isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      onChange={handleChange}
-                    />
-                    <InputRightElement width="4.5rem">
-                      <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              } */}
 
               <div>
                 <Button

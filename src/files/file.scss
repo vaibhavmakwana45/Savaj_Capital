@@ -329,6 +329,13 @@
 
 /* 576 */
 @media (max-width: 767px) {
+  .navbar-responsive{
+    display: flex !important;
+  }
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+    margin-top: 15px !important;
+   }
 }
 
 /* 525 */
@@ -346,6 +353,10 @@
   .back-responsive .icon-button{
     width: 30px;
   }
+ .bradcrub-navbar{
+    margin-left: 1px !important;
+    margin-top: 15px !important;
+   }
   .content {
     flex-direction: column;
   }
@@ -362,14 +373,23 @@
   .image-responsive{
     flex-direction: column !important;
   }
+ 
 }
 
 /* 480 */
 @media (max-width: 524px) {
+ .bradcrub-navbar{
+    margin-left: 1px !important;
+    margin-top: 15px !important;
+   }
 }
 
 /* 425 */
 @media (max-width: 479px) {
+ .bradcrub-navbar{
+    margin-left: 1px !important;
+    margin-top: 15px !important;
+   }
 }
 
 /* 375 */
@@ -377,11 +397,17 @@
   .mainnnn {
     flex-direction: column !important;
   }
- 
+ .bradcrub-navbar{
+  margin-left: 1px !important;
+ }
 }
 
 /* 320 */
 @media (max-width: 374px) {
+ .bradcrub-navbar{
+    margin-left: 1px !important;
+    margin-top: 15px !important;
+   }
 }
 
 /* 280 */
@@ -444,6 +470,9 @@ width: 100px !important;
 .mainnnn {
   flex-direction: column !important;
 }
+.bradcrub-navbar{
+  margin-left: 1px !important;
+ }
 }
 
 .TableCell {

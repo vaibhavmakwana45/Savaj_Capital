@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
 import "./file.scss";
-import { useHistory, useLocation } from "react-router-dom";
 import {
   Button,
   Select,
@@ -10,7 +9,7 @@ import {
   Flex,
   Text,
 } from "@chakra-ui/react";
-import { IconButton } from "@chakra-ui/react";
+import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
@@ -26,68 +25,65 @@ function EditFile() {
   const id = searchParams.get("id");
   const textColor = useColorModeValue("gray.700", "white");
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]);
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
-  const [selectedUser, setSelectedUser] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
-  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState("");
-  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [selectedBranchUserId, setSelectedBranchUserId] = useState("");
-  const [loanDocuments, setLoanDocuments] = useState([]);
   const [fileData, setFileData] = useState([]);
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
-
-  function getFileExtension(url) {
-    if (url !== undefined) {
-      const parts = url.split(".");
-      const extension = parts[parts.length - 1];
-      return extension.toLowerCase();
-    } else {
-      return;
-    }
-  }
-
+  const fileInputRefs = useRef({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState([]);
+  const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
         const response = await AxiosInstance.get(
-          `/file_upload/file_upload/${id}`
+          `/file_upload/edit_file_upload/${id}`
         );
+        console.log(response.data);
+
         if (response.data && response.data.statusCode === 200) {
-          const details = response.data.data.file;
+          const details = response.data.data.fileDetails;
           setSelectedLoanId(details.loan_id);
-          setSelectedUser(details.user_id);
           setSelectedLoanSubtypeId(details.loantype_id);
-          setSelectedBranchId(details.branch_id);
-          setSelectedBranchUserId(details.branchuser_id);
-          const documentsWithCDN = Object.entries(details.documents).map(
-            ([key, value]) => {
-              return value.map((item) => ({
-                ...item,
-                file_path: `${CDN_BASE_URL}${item.file_path}`,
-              }));
-            }
-          );
+          const documentsWithCDN = details.documents.map((document) => ({
+            ...document,
+            file_path: `${CDN_BASE_URL}${document.file_path}`,
+          }));
 
           const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
             return {
               ...acc,
-              [`${doc[0].title}`]: doc.map((item) => {
-                return {
-                  url: item.file_path,
-                  name: item.title,
+              [`${doc.title_id}`]: [
+                {
+                  url: doc.file_path,
+                  name: doc.title_id,
                   type: "application/pdf",
                   new: false,
-                };
-              }),
+                },
+              ],
             };
           }, {});
           setFileData(initialFileData);
+
+          const selectedLoan = loanType.find(
+            (loan) => loan.loan_id === details.loan_id
+          );
+          setSelectedLoanType(selectedLoan || {});
+
+          if (selectedLoan && selectedLoan.is_subtype) {
+            const selectedSubtype = loanSubType.find(
+              (subtype) => subtype.loantype_id === details.loantype_id
+            );
+            if (selectedSubtype) {
+              setSelectedLoanType({
+                ...selectedLoan,
+                loansubtype_id: selectedSubtype.loantype_id,
+              });
+            }
+          }
         } else {
           throw new Error("Failed to fetch file details");
         }
@@ -98,19 +94,7 @@ function EditFile() {
     };
 
     fetchFileDetails();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await AxiosInstance.get("/addusers/getusers");
-        setUsers(response.data.users);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    fetchUsers();
-  }, []);
+  }, [id, loanType, loanSubType]);
 
   useEffect(() => {
     const fetchLoanType = async () => {
@@ -123,66 +107,6 @@ function EditFile() {
     };
     fetchLoanType();
   }, []);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranch = async () => {
-      try {
-        const response = await AxiosInstance.get("/branch");
-        setSavajcapitalbranch(response.data.data);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
-
-    fetchSavajcapitalbranch();
-    getRolesData();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedBranchId) {
-      setSavajcapitalbranchUser([]);
-      return;
-    }
-    const fetchSavajcapitalbranchUser = async () => {
-      try {
-        const response = await AxiosInstance.get(
-          `/savaj_user/${selectedBranchId}`
-        );
-        setSavajcapitalbranchUser(response.data.data || []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching branch users:", error);
-      }
-    };
-    fetchSavajcapitalbranchUser();
-  }, [selectedBranchId]);
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
-  const handleLoanTypeChange = (event) => {
-    const loanId = event.target.value;
-    const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
-    setSelectedLoanType(selectedLoan || {});
-  };
-
-  const handleBranchChange = (event) => {
-    setSelectedBranchId(event.target.value);
-  };
-
-  const handleBranchUserChange = (event) => {
-    setSelectedBranchUserId(event.target.value);
-  };
 
   useEffect(() => {
     const fetchLoanSubtypes = async () => {
@@ -216,79 +140,115 @@ function EditFile() {
     fetchLoanSubtypes();
   }, [selectedLoanId, loanType]);
 
-  const getRoleName = (roleId) => {
-    const role = roles.find((role) => role.role_id === roleId);
-    return role ? role.role : "No role found";
+  const handleLoanTypeChange = (event) => {
+    const loanId = event.target.value;
+    const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
+    setSelectedLoanType(selectedLoan || {});
+  };
+
+  const handleFileInputChange = (event, title_id, index, innerIndex) => {
+    const file = event.target.files[0];
+    if (file) {
+      const documentId =
+        groupedLoanDocuments[title_id][index].document_ids[innerIndex];
+      const key = `${title_id}-${index}-${innerIndex}`;
+      const filePreview = {
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: file.type,
+        documentId: documentId,
+        key: key,
+      };
+      console.log('filePreview', filePreview)
+      setFileData((prevData) => ({
+        ...prevData,
+        [key]: filePreview,
+      }));
+  
+      setUploadedFileName((prevUploadedFiles) => [
+        ...prevUploadedFiles,
+        { file: file, documentId: documentId, title_id: title_id, key: key },
+      ]);
+    }
+  };
+  
+
+  const handleRemoveFile = (key) => {
+    setFileData((prevData) => {
+      const newData = { ...prevData };
+      delete newData[key];
+      return newData;
+    });
+
+    setUploadedFileName((prevUploadedFiles) => {
+      return prevUploadedFiles.filter(
+        (uploadedFile) => uploadedFile.key !== key
+      );
+    });
   };
 
   useEffect(() => {
     const fetchLoanDocuments = async () => {
-      if (
-        !selectedLoanId ||
-        (selectedLoanType.is_subtype && !selectedLoanSubtypeId)
-      ) {
-        setLoanDocuments([]);
-        return;
-      }
-      let url = selectedLoanType.is_subtype
-        ? `/loan_docs/loan_docs/${selectedLoanId}/${selectedLoanSubtypeId}`
-        : `/loan_docs/${selectedLoanId}`;
-
       try {
-        const response = await AxiosInstance.get(url);
-        setLoanDocuments(response.data.data || []);
+        let url;
+        if (selectedLoanType.is_subtype) {
+          if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
+            url = `/loan_docs/documents/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
+          }
+        } else if (selectedLoanType.loan_id) {
+          url = `/loan_docs/${selectedLoanType.loan_id}`;
+        }
+
+        if (url) {
+          const response = await AxiosInstance.get(url);
+          const data = response.data.data;
+
+          const grouped = data.reduce((acc, document) => {
+            if (!acc[document.title_id]) {
+              acc[document.title_id] = [];
+            }
+            acc[document.title_id].push(document);
+            return acc;
+          }, {});
+
+          setGroupedLoanDocuments(grouped);
+        }
       } catch (error) {
-        toast.error("Error fetching loan documents.");
-        setLoanDocuments([]);
+        console.error("Error fetching loan documents:", error);
       }
     };
 
-    fetchLoanDocuments();
-  }, [selectedLoanId, selectedLoanSubtypeId, selectedLoanType]);
-
-  const fileInputRefs = useRef([]);
+    if (
+      (selectedLoanType.is_subtype && selectedLoanType.loansubtype_id) ||
+      !selectedLoanType.is_subtype
+    ) {
+      fetchLoanDocuments();
+    } else {
+      setGroupedLoanDocuments({});
+    }
+  }, [selectedLoanType]);
 
   useEffect(() => {
-    fileInputRefs.current = loanDocuments.map(
-      (_, index) => fileInputRefs.current[index] ?? createRef()
-    );
-  }, [loanDocuments]);
-
-  const handleFileInputChange = (event, index) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setFileData((prevFileData) => {
-      const safePrevFileData = { ...prevFileData };
-      const url = URL.createObjectURL(file);
-
-      const loanDocumentId =
-        prevFileData[index]?.loan_document_id ||
-        loanDocuments[index]?.loan_document_id;
-
-      safePrevFileData[index] = {
-        url,
-        name: file.name,
-        type: file.type,
-        file,
-        new: true,
-        loan_document_id: loanDocumentId,
-      };
-      return safePrevFileData;
+    const newFileInputRefs = {};
+    Object.keys(groupedLoanDocuments).forEach((title_id) => {
+      groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
+        documentGroup.document_ids.forEach((documentId, innerIndex) => {
+          const refKey = `${title_id}-${index}-${innerIndex}`;
+          newFileInputRefs[refKey] = () => {
+            const element = document.getElementById(
+              `fileInput-${title_id}-${index}-${innerIndex}`
+            );
+            if (element) {
+              element.click();
+            } else {
+              console.error("Ref or current element is null or undefined");
+            }
+          };
+        });
+      });
     });
-  };
-
-  const handleRemoveFile = (index) => {
-    if (fileData[index]) {
-      const updatedFileData = { ...fileData };
-      delete updatedFileData[index];
-      setFileData(updatedFileData);
-
-      if (fileInputRefs.current && fileInputRefs.current[index]) {
-        fileInputRefs.current[index].value = "";
-      }
-    }
-  };
+    fileInputRefs.current = newFileInputRefs;
+  }, [groupedLoanDocuments]);
 
   const handleSubmitData = async (e) => {
     e.preventDefault();
@@ -341,14 +301,9 @@ function EditFile() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         documents: documents,
-        branchuser_id: selectedBranchUserId,
-        branch_id: selectedBranchId,
       };
 
-      const finalResponse = await AxiosInstance.put(
-        `/file_upload/${id}`,
-        payload
-      );
+      await AxiosInstance.put(`/file_upload/${id}`, payload);
 
       history.push("/superadmin/filetable");
       toast.success("All data updated successfully!");
@@ -372,21 +327,6 @@ function EditFile() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <FormControl id="user_id" mt={4} isRequired>
-              <FormLabel>User</FormLabel>
-              <Select
-                placeholder="Select user"
-                onChange={(event) => setSelectedUser(event.target.value)}
-                value={selectedUser}
-              >
-                {users.map((user) => (
-                  <option key={user.user_id} value={user.user_id}>
-                    {`${user.username} (${user.email})`}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-
             <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
               <Select
@@ -427,159 +367,204 @@ function EditFile() {
               </FormControl>
             )}
             <div>
-              <div className="d-flex">
-                <div className="d-flex">
-                  {selectedLoanId &&
-                    (!selectedLoanType.is_subtype || selectedLoanSubtypeId) &&
-                    loanDocuments.length > 0 &&
-                    loanDocuments.map((document, index) => (
-                      <div key={document._id} className="upload-area col-6">
-                        <Text
-                          fontSize="xl"
-                          className="mx-3"
-                          color={textColor}
-                          style={{
-                            fontSize: "12px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {document.loan_document}
-                        </Text>
-                        <input
-                          type="file"
-                          ref={(el) => (fileInputRefs.current[index] = el)}
-                          className="drop-zoon__file-input"
-                          onChange={(event) =>
-                            handleFileInputChange(event, index)
-                          }
-                          accept="image/*,application/pdf"
-                          style={{ display: "none" }}
-                        />
-                        {fileData[index] ? (
-                          <div
-                            className="file-preview text-end"
-                            style={{
-                              marginTop: "15px",
-                              justifyContent: "space-between",
-                              width: "100%",
-                              padding: "10px",
-                              boxSizing: "border-box",
-                              backgroundColor: "#e8f0fe",
-                              borderRadius: "8px",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                              overflow: "hidden",
-                            }}
-                          >
-                            <IconButton
-                              aria-label="Remove file"
-                              icon={<CloseIcon />}
-                              size="sm"
-                              onClick={() => handleRemoveFile(index)}
-                              style={{ margin: "0 10px" }}
-                            />
-                            {getFileExtension(fileData[index].url) === "pdf" ||
-                            getFileExtension(fileData[index].name) === "pdf" ? (
-                              <embed
-                                src={fileData[index].url}
-                                type="application/pdf"
-                                style={{
-                                  width: "100%",
-                                  minHeight: "100px",
-                                }}
-                              />
-                            ) : (
-                              <img
-                                className="editimage"
-                                src={fileData[index].url}
-                                alt="Preview"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  borderRadius: "4px",
-                                }}
-                              />
-                            )}
-                          </div>
-                        ) : (
-                          <div
-                            onClick={() => fileInputRefs.current[index].click()}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <span className="drop-zoon__icon">
-                              <i className="bx bxs-file-image"></i>
-                            </span>
-                            <p className="drop-zoon__paragraph">
-                              Drop your file here or click to browse
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+              {Object.keys(groupedLoanDocuments).map((title_id) => (
+                <div key={title_id} className="my-3">
+                  <h2 className="mx-4">
+                    <i>
+                      <u>
+                        <b>{groupedLoanDocuments[title_id][0].title}</b>
+                      </u>
+                    </i>
+                  </h2>
+                  <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
+                    {groupedLoanDocuments[title_id].map(
+                      (documentGroup, index) => (
+                        <div key={`${title_id}-${index}`} className="d-flex ">
+                          {documentGroup.document_names.map(
+                            (documentName, innerIndex) => (
+                              <div
+                                key={`${title_id}-${index}-${innerIndex}`}
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
+                              >
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
+                                  style={{
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    id={`fileInput-${title_id}-${index}-${innerIndex}`}
+                                    className="drop-zoon__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(
+                                        event,
+                                        title_id,
+                                        index,
+                                        innerIndex
+                                      )
+                                    }
+                                    style={{ display: "none" }}
+                                  />
+
+                                  {fileData[
+                                    `${title_id}-${index}-${innerIndex}`
+                                  ] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        boxSizing: "border-box",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() =>
+                                          handleRemoveFile(
+                                            `${title_id}-${index}-${innerIndex}`
+                                          )
+                                        }
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[
+                                        `${title_id}-${index}-${innerIndex}`
+                                      ].url ? (
+                                        fileData[
+                                          `${title_id}-${index}-${innerIndex}`
+                                        ].type === "application/pdf" ? (
+                                          <embed
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            type="application/pdf"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={
+                                              fileData[
+                                                `${title_id}-${index}-${innerIndex}`
+                                              ].url
+                                            }
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
+                                          />
+                                        )
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <i className="bx bxs-file"></i>
+                                          {
+                                            fileData[
+                                              `${title_id}-${index}-${innerIndex}`
+                                            ].name
+                                          }
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zoon drop-zoon ${
+                                        isDragging ? "drop-zoon--over" : ""
+                                      }`}
+                                      onClick={() => {
+                                        const refKey = `${title_id}-${index}-${innerIndex}`;
+                                        const clickFunction =
+                                          fileInputRefs.current[refKey];
+                                        if (
+                                          typeof clickFunction === "function"
+                                        ) {
+                                          clickFunction();
+                                        } else {
+                                          console.error(
+                                            "Ref or current element is null or undefined, or click function is not available"
+                                          );
+                                        }
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                      }}
+                                    >
+                                      <span className="drop-zoon__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zoon__paragraph">
+                                        Drop your file here or click to browse
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-
-            <FormControl id="branch_id" mt={4} isRequired>
-              <FormLabel>Branch</FormLabel>
-              <Select
-                placeholder="Select branch"
-                onChange={handleBranchChange}
-                value={selectedBranchId}
+            <div>
+              <Button
+                mt={4}
+                colorScheme="teal"
+                onClick={handleSubmitData}
+                isLoading={loading}
+                loadingText="Submitting"
+                style={{ marginTop: 40 }}
               >
-                {savajcapitalbranch.map((branch) => (
-                  <option key={branch.branch_id} value={branch.branch_id}>
-                    {`${branch.branch_name} (${branch.city})`}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
+                Submit
+              </Button>
 
-            {selectedBranchId && (
-              <FormControl id="branchuser_id" mt={4} isRequired>
-                <FormLabel>Branch User</FormLabel>
-                <Select
-                  placeholder="Select branch user"
-                  onChange={handleBranchUserChange}
-                  value={selectedBranchUserId}
-                >
-                  {savajcapitalbranchUser.length > 0 ? (
-                    savajcapitalbranchUser.map((branchUser) => (
-                      <option
-                        key={branchUser.branchuser_id}
-                        value={branchUser.branchuser_id}
-                      >
-                        {`${branchUser.full_name} (${getRoleName(
-                          branchUser.role_id
-                        )})`}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>No users available</option>
-                  )}
-                </Select>
-              </FormControl>
-            )}
-
-            <Button
-              mt={4}
-              colorScheme="teal"
-              onClick={handleSubmitData}
-              isLoading={loading}
-              loadingText="Submitting"
-            >
-              Submit
-            </Button>
+              <Button
+                mt={4}
+                colorScheme="yellow"
+                style={{ marginTop: 40, marginLeft: 8 }}
+                onClick={() => history.push("/superadmin/filetable")}
+              >
+                Cancel
+              </Button>
+            </div>
           </CardBody>
         </Card>
       </Flex>
+
       <Toaster />
     </>
   );
 }
-
 export default EditFile;

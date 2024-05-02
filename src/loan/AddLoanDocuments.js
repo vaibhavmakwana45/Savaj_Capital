@@ -249,7 +249,7 @@ function AddLoanDocuments() {
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-        <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+        <Card overflowX={{ xl: "hidden",scrollbarWidth:"thin" }}>
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -402,7 +402,7 @@ function AddLoanDocuments() {
               </FormControl> */}
 
               <div className="w-100">
-                <FormLabel>Select Loan</FormLabel>
+                <FormLabel>Select Title</FormLabel>
 
                 <input
                   style={{
@@ -419,7 +419,7 @@ function AddLoanDocuments() {
                     borderRadius: "5px",
                     borderColor: "inherit",
                   }}
-                  placeholder="Select Loan-Type"
+                  placeholder="Select Title"
                   onFocus={() => {
                     setFiltereedData(titleData);
                     filteerToggle();
@@ -476,13 +476,13 @@ function AddLoanDocuments() {
                   </DropdownMenu>
                 </Dropdown>
               </div>
-              <FormControl mt={4}>
+              <FormControl mt={4} >
                 <FormLabel>Documents</FormLabel>
-                <Popover>
+                <Popover >
                   <PopoverTrigger>
                     <Button>Select Documents</Button>
                   </PopoverTrigger>
-                  <PopoverContent style={{ marginLeft: "15px" }}>
+                  <PopoverContent className="mx-5" style={{ marginLeft: "15px" ,height:"250px",overflow:"auto",scrollbarWidth:"thin"}}>
                     <PopoverArrow />
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>

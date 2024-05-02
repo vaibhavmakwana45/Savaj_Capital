@@ -90,7 +90,7 @@ function AssignBank() {
     "Branch Name",
     "City",
     "State",
-    "users",
+    // "users",
     "Action",
   ];
 
@@ -100,7 +100,7 @@ function AssignBank() {
     bank.branch_name,
     bank.city,
     bank.state,
-    bank?.user_count,
+    // bank?.user_count,
   ]);
 
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
@@ -140,7 +140,7 @@ function AssignBank() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Banks and Users
+                Banks
               </Text>
               <div>
                 <Input
@@ -150,7 +150,10 @@ function AssignBank() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Menu>
+                    <Button onClick={navigateToAssignFile} colorScheme="blue">
+                    Assign File
+                  </Button>
+                {/* <Menu>
                   <MenuButton>
                     <Button
                       onClick={navigateToAnotherPage}
@@ -161,9 +164,7 @@ function AssignBank() {
                     </Button>
                   </MenuButton>
 
-                  <Button onClick={navigateToAssignFile} colorScheme="blue">
-                    Assign File
-                  </Button>
+              
                   <MenuList p="16px 8px" bg={menuBg} mt="10px">
                     <Flex flexDirection="column" style={{ gap: 10 }}>
                       <MenuItem
@@ -188,7 +189,7 @@ function AssignBank() {
                       </MenuItem>
                     </Flex>
                   </MenuList>
-                </Menu>
+                </Menu> */}
               </div>
             </Flex>
           </CardHeader>

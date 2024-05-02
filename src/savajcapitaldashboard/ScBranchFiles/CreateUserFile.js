@@ -19,6 +19,7 @@ import {
   Input,
   ModalFooter,
 } from "@chakra-ui/react";
+import { jwtDecode } from "jwt-decode";
 import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -314,7 +315,7 @@ function CreateUserFile() {
       };
       await AxiosInstance.post("/file_upload", payload);
 
-      history.push("/superadmin/filetable");
+      history.push("/savajcapitaluser/userfile");
       toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
@@ -432,12 +433,12 @@ function CreateUserFile() {
             )}
             <div>
               {Object.keys(groupedLoanDocuments).map((title_id) => (
-                <div key={title_id}>
-                  <h2>{groupedLoanDocuments[title_id][0].title}</h2>
+                <div key={title_id} className="my-3">
+                  <h2 className="mx-4"><i><u><b>{groupedLoanDocuments[title_id][0].title}</b></u></i></h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                     {groupedLoanDocuments[title_id].map(
                       (documentGroup, index) => (
-                        <div key={`${title_id}-${index}`}>
+                        <div key={`${title_id}-${index}`} className="d-flex ">
                           {documentGroup.document_names.map(
                             (documentName, innerIndex) => (
                               <div
@@ -596,6 +597,8 @@ function CreateUserFile() {
                 </div>
               ))}
             </div>
+     
+
             <div>
               <Button
                 mt={4}

@@ -161,20 +161,20 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button
+                {/* <Button
                   onClick={navigateToAnotherPage}
                   colorScheme="blue"
                   style={{ marginRight: "10px", marginBottom: "10px" }}
                 >
                   Add Bank
-                </Button>{" "}
-                <Button
+                </Button>{" "} */}
+                {/* <Button
                   onClick={navigateToAnotherPageUser}
                   colorScheme="blue"
                   style={{ marginRight: "10px", marginBottom: "10px" }}
                 >
                   Add Bank User
-                </Button>
+                </Button> */}
                 {/* <Menu>
                   <MenuButton>
                     <Button
