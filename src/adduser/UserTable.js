@@ -136,7 +136,7 @@ function UserTable() {
                 fontWeight="bold"
                 className="ttext"
               >
-                All Users
+                All Customers
               </Text>
               <Flex className="thead">
                 <Input
@@ -151,7 +151,7 @@ function UserTable() {
                   colorScheme="blue"
                   className="adduser-btn"
                 >
-                  Add User
+                  Add Customer
                 </Button>
               </Flex>
             </Flex>

@@ -12,6 +12,7 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const crypto = require("crypto");
 const axios = require("axios");
+const BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -243,62 +244,137 @@ router.get("/user/:branchuser_id", async (req, res) => {
   }
 });
 
+// router.get("/assigned_file/:branchuser_id", async (req, res) => {
+//   try {
+//     const branchuser_id = req.params.branchuser_id;
+
+//     const data = await File_Uplode.aggregate([
+//       {
+//         $match: { branchuser_id: branchuser_id },
+//       },
+//       {
+//         $sort: { updatedAt: -1 },
+//       },
+//     ]);
+
+//     const savajUserData = await SavajCapital_User.findOne({branchuser_id: branchuser_id})
+
+//     for (let i = 0; i < data.length; i++) {
+//       const loan_id = data[i]?.loan_id;
+//       const loantype_id = data[i]?.loantype_id;
+//       const user_id = data[i]?.user_id;
+
+//       const loanData = await Loan.findOne({
+//         loan_id: loan_id,
+//       });
+
+//       const loanTypeData = await Loan_Type.findOne({
+//         loantype_id: loantype_id,
+//       });
+
+//       const userData = await AddUser.findOne({ user_id: user_id });
+
+//       if (loanData) {
+//         data[i].loan = loanData.loan;
+//       }
+
+//       if (loanTypeData) {
+//         data[i].loan_type = loanTypeData.loan_type;
+//       }
+
+//       if(userData){
+//         data[i].username = userData.username
+//       }
+//     }
+
+//     const count = data.length;
+
+//     res.json({
+//       // statusCode: 200,
+//       success: true,
+//       savajUserData,
+//       data: data,
+//       count: count,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 router.get("/assigned_file/:branchuser_id", async (req, res) => {
   try {
     const branchuser_id = req.params.branchuser_id;
 
-    const data = await File_Uplode.aggregate([
-      {
-        $match: { branchuser_id: branchuser_id },
-      },
-      {
-        $sort: { updatedAt: -1 },
-      },
-    ]);
+    const branchAssign = await BranchAssign.find({
+      branchuser_id: branchuser_id,
+    }).sort({ updatedAt: -1 });
 
-    const savajUserData = await SavajCapital_User.findOne({branchuser_id: branchuser_id})
-
-    for (let i = 0; i < data.length; i++) {
-      const loan_id = data[i]?.loan_id;
-      const loantype_id = data[i]?.loantype_id;
-      const user_id = data[i]?.user_id;
-
-      const loanData = await Loan.findOne({
-        loan_id: loan_id,
+    if (!branchAssign || branchAssign.length === 0) {
+      return res.json({
+        success: false,
+        message: "No branch assign found for the specified branch user.",
+        data: [],
       });
-
-      const loanTypeData = await Loan_Type.findOne({
-        loantype_id: loantype_id,
-      });
-
-      const userData = await AddUser.findOne({ user_id: user_id });
-
-      if (loanData) {
-        data[i].loan = loanData.loan;
-      }
-
-      if (loanTypeData) {
-        data[i].loan_type = loanTypeData.loan_type;
-      }
-
-      if(userData){
-        data[i].username = userData.username
-      }
     }
+    const branchUserData = await SavajCapital_User.findOne({
+      branchuser_id: branchuser_id,
+    });
 
-    const count = data.length;
+    const fileIds = branchAssign.map((approval) => approval.file_id);
+
+    const fileDetails = await File_Uplode.find({ file_id: { $in: fileIds } });
+
+    const augmentedData = await Promise.all(
+      branchAssign.map(async (approval) => {
+        const fileData = fileDetails.find(
+          (detail) => detail.file_id === approval.file_id
+        );
+        if (!fileData) return null;
+
+        const loanData = await Loan.findOne({ loan_id: fileData.loan_id });
+        const loanTypeData = await Loan_Type.findOne({
+          loantype_id: fileData.loantype_id,
+        });
+        const userData = await AddUser.findOne({ user_id: fileData.user_id });
+
+        const entry = {
+          ...approval.toObject(),
+          file_data: fileData,
+          loan: loanData ? loanData.loan : null,
+          loan_type: loanTypeData ? loanTypeData.loan_type : null,
+          username: userData ? userData.username : null,
+        };
+
+        const hasMissingDetail =
+          !fileData || !loanData || !loanTypeData || !userData;
+        if (hasMissingDetail) {
+          console.log(
+            "Missing detail for BankApproval with file_id:",
+            approval.file_id
+          );
+          console.log("File data:", fileData);
+          console.log("Loan data:", loanData);
+          console.log("Loan type data:", loanTypeData);
+          console.log("User data:", userData);
+        }
+
+        return entry;
+      })
+    );
 
     res.json({
-      // statusCode: 200,
       success: true,
-      savajUserData,
-      data: data,
-      count: count,
-      message: "Read All Request",
+      data: augmentedData,
+      count: augmentedData.length,
+      branchUserData: branchUserData,
+      message: "Bank approvals data with all details retrieved successfully.",
     });
   } catch (error) {
-    res.json({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }

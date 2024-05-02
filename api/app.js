@@ -20,7 +20,6 @@ const SavajCapital_BranchRoutes = require("./routes/Savaj_Capital/SavajCapital_B
 const SavajCapital_Role = require("./routes/Savaj_Capital/SavajCapital_Role"); // Role
 const SavajCapital_UserRoutes = require("./routes/Savaj_Capital/SavajCapital_User"); // Role
 const CountRoutes = require("./routes/Count"); // Role
-
 const LoanRoutes = require("./routes/Loan/Loan"); // Loan
 const Loan_Type = require("./routes/Loan/Loan_Type"); // Loan-Type
 const Loan_Documents = require("./routes/Loan/Loan_Documents"); // Loan-Type
@@ -30,6 +29,7 @@ const BankApprovalRoutes = require("./routes/Bank/BankApproval");
 const LoanStepRoutes = require("./routes/Loan_Step/Loan_Step"); // Loan-Step
 const AddDocumentsRoutes = require("./routes/AddDocumens/AddDocuments"); // Add-Documents
 const TitleRoutes = require("./routes/AddDocumens/Title"); // Title
+const BranchAssignRoutes = require("./routes/Savaj_Capital/Branch_Assign");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -61,6 +61,7 @@ app.use("/api/bank_approval", BankApprovalRoutes);
 app.use("/api/loan_step", LoanStepRoutes);
 app.use("/api/document", AddDocumentsRoutes);
 app.use("/api/title", TitleRoutes);
+app.use("/api/branch_assign", BranchAssignRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

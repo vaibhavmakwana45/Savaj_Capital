@@ -74,7 +74,9 @@ function Row(props) {
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() => props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)}
+        onClick={() =>
+          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
+        }
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -232,21 +234,32 @@ export default function CollapsibleTable() {
   const handleRow = (url) => {
     history.push(url);
   };
+
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get("/file_upload");
-        setFiles(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching files:", error);
+      if (accessType.branchuser_id) {
+        try {
+          const response = await AxiosInstance.get(
+            `/branch_assign/branch_user/${accessType.branchuser_id}`
+          );
+          setFiles(response.data.data);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching files:", error);
+        }
       }
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
   $(function () {
     $(".progress").each(function () {

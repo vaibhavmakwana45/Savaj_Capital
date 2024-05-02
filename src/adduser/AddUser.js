@@ -215,14 +215,14 @@ function AddUser(props) {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
-                Add User
+                Add Customer
               </Text>
             </Flex>
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
               <FormControl id="username" isRequired>
-                <FormLabel>User Name</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <Input
                   name="username"
                   onChange={handleChange}
