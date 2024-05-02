@@ -61,17 +61,30 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/:bankuser_id", async (req, res) => {
+// Bank Delete
+router.delete("/:bank_id", async (req, res) => {
   try {
-    const { bankuser_id } = req.params;
+    const { bank_id } = req.params;
 
-    const deletedUser = await BankUser.findOneAndDelete({
-      bankuser_id: bankuser_id,
+    const bankExistsInBankUser = await BankUser.findOne({ bank_id: bank_id });
+    const bankExistsInBankApproval = await BankApproval.findOne({
+      bank_id: bank_id,
+    });
+
+    if (bankExistsInBankUser || bankExistsInBankApproval) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "Bank cannot be deleted because it is currently assigned.",
+      });
+    }
+
+    const deletedUser = await Bank.findOneAndDelete({
+      bank_id: bank_id,
     });
 
     if (!deletedUser) {
       return res.status(200).json({
-        statusCode: 201,
+        statusCode: 202,
         message: "User not found",
       });
     }
@@ -79,7 +92,7 @@ router.delete("/:bankuser_id", async (req, res) => {
     res.json({
       success: true,
       message: "User deleted successfully",
-      deletedRoleId: bankuser_id,
+      deletedBankId: bank_id,
     });
   } catch (error) {
     console.error(error);
@@ -180,9 +193,22 @@ router.get("/:bank_id", async (req, res) => {
   }
 });
 
+// Bank User Delete
 router.delete("/deletebankuser/:bankId", async (req, res) => {
   try {
     const { bankId } = req.params;
+
+    const bankUserExistsInBankApproval = await BankApproval.findOne({
+      bankuser_id: bankId,
+    });
+
+    if (bankUserExistsInBankApproval) {
+      return res.status(200).json({
+        statusCode: 201,
+        message:
+          "Bank-user cannot be deleted because it is currently assigned.",
+      });
+    }
 
     const deletedBankUser = await BankUser.findOneAndDelete({
       bankuser_id: bankId,

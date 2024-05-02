@@ -33,6 +33,7 @@ import LoanTypes from "loan/LoanTypes";
 import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
+import EditLoanDocuments from "loan/EditLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
@@ -191,6 +192,16 @@ var dashRoutes = [
     name: "Add Document",
     icon: <CreditIcon color="inherit" />,
     component: AddLoanDocuments,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    parent: "loan",
+    key: "addloandocs",
+  },
+  {
+    path: "/editloandocs",
+    name: "Edit Document",
+    icon: <CreditIcon color="inherit" />,
+    component: EditLoanDocuments,
     layout: "/superadmin",
     hideInSidebar: true,
     parent: "loan",

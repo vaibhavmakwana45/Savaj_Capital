@@ -119,13 +119,20 @@ function Tables() {
   const cancelRef = React.useRef();
   const deleteBankUser = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
-      setBanks(banks.filter((bank) => bank.bank_id !== bankId));
-      setIsDeleteDialogOpen(false);
-      toast.success("Bank deleted successfully!");
+      const response = await AxiosInstance.delete(`/bank_user/${bankId}`);
+      console.log(response.data, "shivam")
+
+      if (response.data.success) {
+        setIsDeleteDialogOpen(false);
+        toast.success("Bank deleted successfully!");
+        setBanks(banks.filter((bank) => bank.bank_id !== bankId));
+      } else if (response.data.statusCode === 201) {
+        setIsDeleteDialogOpen(false);
+        toast.error(response.data.message);
+      }
     } catch (error) {
       console.error("Error deleting bank:", error);
-      toast.error("bank not delete");
+      toast.error(error);
     }
   };
 

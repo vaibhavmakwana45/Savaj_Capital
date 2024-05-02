@@ -120,6 +120,18 @@ router.delete("/:role_id", async (req, res) => {
   try {
     const { role_id } = req.params;
 
+    const roleExistsInSavajUser = await SavajCapital_User.findOne({
+      role_id: role_id,
+    });
+
+    if (roleExistsInSavajUser) {
+      return res.status(200).json({
+        statusCode: 201,
+        message:
+          "Role cannot be deleted because it is currently assigned to a SC-User.",
+      });
+    }
+
     const user = await SavajCapital_User.findOne({
       role_id: role_id,
     });

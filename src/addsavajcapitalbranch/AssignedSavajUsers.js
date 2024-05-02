@@ -89,17 +89,16 @@ function AssignedSavajUsers() {
     "UpdatedAt",
   ];
   const formattedData = filteredUsers.map((item) => [
-    item.user_id,
-    item.file_id,
-    item.username,
-    item.loan,
-    item.loan_type,
-    item.createdAt,
-    item.updatedAt,
+    item?.user_id,
+    item?.file_id,
+    item?.username,
+    item?.loan,
+    item?.loan_type,
+    item?.createdAt,
+    item?.updatedAt,
   ]);
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   return (
     <>
