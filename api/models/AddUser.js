@@ -14,10 +14,20 @@ const UserSchema = new mongoose.Schema({
   number: {
     type: String,
   },
+  cibil_score: {
+    type: String,
+  },
   password: {
     type: String,
   },
   country: {
+    type: String,
+  },
+
+  unit_address: {
+    type: String,
+  },
+  gst_number: {
     type: String,
   },
   state: {

@@ -34,7 +34,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-import "./loan.css"
+import "./loan.css";
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -172,7 +172,12 @@ function UserTable() {
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext"
+              >
                 All Loan
               </Text>
               <Flex className="thead">
@@ -191,8 +196,8 @@ function UserTable() {
                   >
                     Add Loan
                   </Button>
-                  <Button 
-                  className="loanuser-btn mb-1"
+                  <Button
+                    className="loanuser-btn mb-1"
                     style={{ marginLeft: "10px" }}
                     onClick={() => history.push("/superadmin/addloandocs")}
                     colorScheme="blue"
@@ -296,11 +301,15 @@ function UserTable() {
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => handleAddRole(role)}
+                  onClick={() =>
+                    selectedLoanId !== ""
+                      ? editRole(selectedLoan)
+                      : AddRole(selectedLoan)
+                  }
                   ml={3}
                   type="submit"
                 >
-                  {selectedLoanId != "" ? "Updated Now" : "Add Now"}
+                  {selectedLoanId !== "" ? "Update Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
