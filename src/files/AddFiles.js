@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
 import {
@@ -26,8 +26,6 @@ import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 import { Country, State, City } from "country-state-city";
@@ -493,7 +491,7 @@ function AddFiles() {
                           {documentGroup.document_names.map(
                             (documentName, innerIndex) => (
                               <div
-                                key={`${title_id}-${index}-${innerIndex}`} // Ensure unique key
+                                key={`${title_id}-${index}-${innerIndex}`} 
                                 className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
                                 <Text
@@ -810,9 +808,6 @@ function AddFiles() {
                   }
                   disabled={!selectedState}
                   value={formData.city}
-                  // {...register("city", {
-                  //   required: "City is required",
-                  // })}
                 >
                   {cities.length ? (
                     cities.map((city) => (

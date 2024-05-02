@@ -126,7 +126,7 @@ function AddLoanType() {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState("");
     }
   }, [selectedCountry]);
 
@@ -269,7 +269,6 @@ function AddLoanType() {
     getLoanStepsData();
   }, []);
 
-  // Function to handle switch toggle
   const handleSwitchToggle = (event, stepId) => {
     const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
     const index = updatedSelectedLoanStepIds.indexOf(stepId);

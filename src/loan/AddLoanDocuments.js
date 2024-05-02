@@ -201,8 +201,6 @@ function AddLoanDocuments() {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
           title_id: title_id,
-          // title_id: formData.title_id,
-          // title: titleName,
           document_id: document_ids,
         });
 
@@ -301,10 +299,9 @@ function AddLoanDocuments() {
                     filterToggle();
                   }}
                   onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
                     setTimeout(() => {
                       filterToggle();
-                    }, 200); // Adjust the delay as needed
+                    }, 200); 
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {

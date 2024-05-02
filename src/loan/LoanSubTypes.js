@@ -104,7 +104,6 @@ function LoanSubTypes() {
     if (data) {
       setSelectedLoan(data.loan_type);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Data not found for id:", id);
     }
   };

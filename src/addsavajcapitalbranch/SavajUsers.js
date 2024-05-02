@@ -6,7 +6,7 @@ import {
   ChakraLogoLight,
   ProfileIcon,
   SettingsIcon,
-} from "components/Icons/Icons"; // Chakra Imports
+} from "components/Icons/Icons"; 
 import {
   Box,
   Button,

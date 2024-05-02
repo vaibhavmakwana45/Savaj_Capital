@@ -53,9 +53,6 @@ function AssignBank() {
             bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.state.toLowerCase().includes(searchTerm.toLowerCase())
-          // bank.users.some((user) =>
-          //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
-          // )
         );
 
   useEffect(() => {
@@ -74,18 +71,14 @@ function AssignBank() {
 
   const navigateToAnotherPage = (id) => {
     if (id) {
-      //   history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    // history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
     if (id) {
-      //   history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
-    // history.push("/superadmin/addbankuser");
   };
 
   const navigateToAssignFile = () => {
@@ -138,7 +131,6 @@ function AssignBank() {
   };
 
   const handleRow = (id) => {
-    // history.push("/superadmin/bankusers?id=" + id);
   };
 
   return (

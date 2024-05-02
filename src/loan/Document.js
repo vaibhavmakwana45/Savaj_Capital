@@ -200,7 +200,6 @@ function Document() {
                   marginRight="10px"
                 />
                 <Button
-                  // onClick={() => setIsEditDocument(true)}
                   onClick={() => history.push("/superadmin/addloandocs")}
                   colorScheme="blue"
                 >

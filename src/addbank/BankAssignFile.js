@@ -178,10 +178,9 @@ function BankAssignFile() {
 
                   }}
                   onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
                     setTimeout(() => {
                       filterToggle();
-                    }, 200); // Adjust the delay as needed
+                    }, 200); 
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {

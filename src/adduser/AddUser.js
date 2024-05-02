@@ -169,7 +169,7 @@ function AddUser(props) {
     if (selectedCountry) {
       const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
       setStates(statesOfSelectedCountry);
-      setSelectedState(""); // Reset selected state when country changes
+      setSelectedState(""); 
     }
   }, [selectedCountry]);
 
@@ -181,7 +181,7 @@ function AddUser(props) {
       );
       setCities(citiesOfState);
     } else {
-      setCities([]); // Clear cities if no state is selected
+      setCities([]); 
     }
   }, [selectedState, selectedCountry]);
 

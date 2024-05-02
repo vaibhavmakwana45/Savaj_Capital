@@ -26,8 +26,6 @@ import { saveAs } from "file-saver";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
-
-  // Check if groupedFiles is undefined or null
   if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
     return <div>No documents available</div>;
   }
@@ -68,7 +66,7 @@ const FileDisplay = ({ groupedFiles }) => {
                     src={`${basePath}${file.file_path}`}
                     type="application/pdf"
                     width="100%"
-                    height="260" // Adjust height as needed
+                    height="260" 
                     style={{
                       border: "none",
                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",

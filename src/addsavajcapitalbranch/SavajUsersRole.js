@@ -6,7 +6,7 @@ import {
     ChakraLogoLight,
     ProfileIcon,
     SettingsIcon,
-} from "components/Icons/Icons";// Chakra Imports
+} from "components/Icons/Icons";
 import {
     Box,
     Button,
@@ -21,7 +21,7 @@ import {
     useColorMode,
     useColorModeValue,
     Input
-} from "@chakra-ui/react";// Add axios to your imports
+} from "@chakra-ui/react";
 import axios from "axios";
 import {
     AlertDialog,
@@ -134,15 +134,10 @@ function SavajUsersRole() {
     const handleEdit = (id) => {
         setSelectedRoleId(id);
         setIsAddRole(true);
-        
-        // Filter out the role based on its role_id
         const role = banks.find((bank) => bank.role_id === id);
-    
-        // Check if role exists before accessing its properties
         if (role) {
             setSelectedRole(role.role);
         } else {
-            // Handle the case where the role with the specified id is not found
             console.error("Role not found for id:", id);
         }
     }
@@ -294,9 +289,9 @@ function SavajUsersRole() {
                                         placeholder="Add role"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
-                                                e.preventDefault(); // Prevent the default behavior of Enter key
+                                                e.preventDefault(); 
                                                 if (selectedRoleId == "") {
-                                                    handleAddRole(role); // Call the addRole function
+                                                    handleAddRole(role); 
                                                 }else{
                                                     editRole(selectedRole)
                                                 }

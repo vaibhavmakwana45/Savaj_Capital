@@ -85,7 +85,7 @@ function EditSavajCapitalBranch() {
     setDetails((prevDetails) => ({
       ...prevDetails,
       state: stateObj.name,
-      city: "", // Reset city when state changes
+      city: "", 
     }));
   };
 
