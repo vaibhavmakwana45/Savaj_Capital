@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
@@ -14,9 +15,9 @@ import {
   Collapse,
   Box,
 } from "@mui/material";
-import { jwtDecode } from "jwt-decode";
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
+
 import {
   Button,
   useColorModeValue,
@@ -44,15 +45,36 @@ const theme = createTheme();
 
 function Row(props) {
   const { id, file, handleEditClick, handleDelete } = props;
-  const [open, setOpen] = React.useState(false);
+  const history = useHistory();
+  const [open, setOpen] = useState(false);
+
+  const [fileData, setFileData] = useState([]);
+  const [filePercentageData, setFilePercentageData] = useState("");
+  const fetchFileData = async () => {
+    try {
+      const file_id = file.file_id;
+      const response = await AxiosInstance.get(
+        `/file_upload/testfile/${file_id}`
+      );
+      setFileData([
+        ...response.data.data.approvedData,
+        ...response.data.data.pendingData,
+      ]);
+      setFilePercentageData(response.data.data.document_percentage);
+    } catch (error) {
+      console.log("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchFileData();
+  }, [file]);
 
   return (
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() =>
-          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
-        }
+        onClick={() => props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -74,20 +96,22 @@ function Row(props) {
         <TableCell align="">{file?.createdAt}</TableCell>
         <TableCell align="">{file?.updatedAt}</TableCell>
         <TableCell align="center">
-          <div className="progress " data-value={file?.document_percentage}>
-            <span className="progress-left">
-              <span className="progress-bar"></span>
-            </span>
-            <span className="progress-right">
-              <span className="progress-bar"></span>
-            </span>
-            <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-              <div className="font-weight-bold">
-                {file?.document_percentage}
-                <sup className="small">%</sup>
+          {filePercentageData && (
+            <div class="progress " data-value={Number(filePercentageData)}>
+              <span class="progress-left">
+                <span class="progress-bar"></span>
+              </span>
+              <span class="progress-right">
+                <span class="progress-bar"></span>
+              </span>
+              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                <div class="font-weight-bold">
+                  {Number(filePercentageData)}
+                  <sup class="small">%</sup>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </TableCell>
         <TableCell align="">
           <Flex>
@@ -135,24 +159,24 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {file?.loan_document_ids?.map((documentRow) => (
-                      <TableRow key={documentRow.loan_document_id}>
+                    {fileData?.map((documentRow, index) => (
+                      <TableRow key={index}>
                         <TableCell component="th" scope="row">
-                          {documentRow.loan_document}
+                          {documentRow?.name} ({documentRow?.title})
                         </TableCell>
                         <TableCell>
-                          {documentRow.is_uploaded ? (
+                          {documentRow?.status === "Uploaded" ? (
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
                             >
-                              <i className="fa-regular fa-circle-check"></i>
+                              <i class="fa-regular fa-circle-check"></i>
                               &nbsp;&nbsp;Uploaded
                             </span>
                           ) : (
                             <span
                               style={{ color: "#FFB302 ", fontWeight: "bold" }}
                             >
-                              <i className="fa-regular fa-clock"></i>
+                              <i class="fa-regular fa-clock"></i>
                               &nbsp;&nbsp;Pending
                             </span>
                           )}
@@ -210,23 +234,10 @@ export default function CollapsibleTable() {
   };
   const [loading, setLoading] = useState(true);
 
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
-  };
-
-  const [accessType, setAccessType] = useState("");
-
-  React.useEffect(() => {
-    const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id);
-  }, []);
-
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await AxiosInstance.get(
-          `/file_upload/get/${accessType.branchuser_id}`
-        );
+        const response = await AxiosInstance.get("/file_upload");
         setFiles(response.data.data);
         setLoading(false);
       } catch (error) {
@@ -235,7 +246,7 @@ export default function CollapsibleTable() {
     };
 
     fetchFiles();
-  }, [accessType]);
+  }, []);
 
   $(function () {
     $(".progress").each(function () {
@@ -275,9 +286,6 @@ export default function CollapsibleTable() {
       return (percentage / 100) * 360;
     }
   });
-  const handleEditClick = (id) => {
-    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
-  };
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
@@ -292,11 +300,13 @@ export default function CollapsibleTable() {
       toast.error("file not delete");
     }
   };
+  const handleEditClick = (id) => {
+    history.push(`/superadmin/editfile?id=${id}`);
+  };
   const handleDelete = (id) => {
     setSelectedFileId(id);
     setIsDeleteDialogOpen(true);
   };
-
   return (
     <>
       <div
@@ -305,8 +315,8 @@ export default function CollapsibleTable() {
       >
         <CardHeader style={{ padding: "30px" }}>
           <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext d-flex" >
-              Add File
+            <Text fontSize="xl" fontWeight="bold" className="ttext">
+              Add Files
             </Text>
             <div>
               <Input
@@ -321,7 +331,7 @@ export default function CollapsibleTable() {
                 onClick={() => history.push("/savajcapitaluser/adduserfile")}
                 colorScheme="blue"
               >
-                Add Files
+                Add File
               </Button>
             </div>
           </Flex>
@@ -343,7 +353,7 @@ export default function CollapsibleTable() {
                   <TableRow>
                     <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      User
+                      User Name
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
@@ -369,7 +379,7 @@ export default function CollapsibleTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers?.map((file) => (
+                  {filteredUsers.map((file) => (
                     <Row
                       key={file._id}
                       file={file}
@@ -384,91 +394,39 @@ export default function CollapsibleTable() {
             </TableContainer>
           )}
         </ThemeProvider>
-      </div>
-      <AlertDialog
-        isOpen={isDeleteDialogOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={() => setIsDeleteDialogOpen(false)}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete File
-            </AlertDialogHeader>
+        <AlertDialog
+          isOpen={isDeleteDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Delete File
+              </AlertDialogHeader>
 
-            <AlertDialogBody>
-              Are you sure? You can't undo this action afterwards.
-            </AlertDialogBody>
+              <AlertDialogBody>
+                Are you sure? You can't undo this action afterwards.
+              </AlertDialogBody>
 
-            <AlertDialogFooter>
-              <Button
-                ref={cancelRef}
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={() => deletefile(selectedFileId)}
-                ml={3}
-              >
-                Delete
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-      <div className="container-fluid progress-bar-area">
-        <div className="row h-100 align-items-center">
-          <div className="col">
-            <ul className="progressbar">
-              <li id="step1" className="complete">
-                <div className="circle-container">
-                  <a href="#">
-                    <div className="circle-button"></div>
-                  </a>
-                </div>
-                Step 1
-              </li>
-
-              <li id="step2" className="complete">
-                <div className="circle-container">
-                  <a href="#">
-                    <div className="circle-button"></div>
-                  </a>
-                </div>
-                Step 2
-              </li>
-
-              <li id="step3" className="active">
-                <div className="circle-container">
-                  <a href="#">
-                    <div className="circle-button"></div>
-                  </a>
-                </div>
-                Step 3
-              </li>
-
-              <li id="step4">
-                <div className="circle-container">
-                  <a href="#">
-                    <div className="circle-button"></div>
-                  </a>
-                </div>
-                Step 4
-              </li>
-
-              <li id="step5">
-                <div className="circle-container">
-                  <a href="#">
-                    <div className="circle-button"></div>
-                  </a>
-                </div>
-                Step 5
-              </li>
-            </ul>
-          </div>
-        </div>
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => deletefile(selectedFileId)}
+                  ml={3}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </div>
       <Toaster />
     </>

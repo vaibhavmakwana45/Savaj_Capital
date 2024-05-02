@@ -6,6 +6,7 @@ const BankUser = require("../models/Bank/BankUserSchema");
 const BankSchema = require("../models/Bank/BankSchema");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
+const File_Uplode = require("../models/File/File_Uplode");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -105,8 +106,8 @@ router.post("/adduserbyadmin", async (req, res) => {
     const newUser = new AddUser({
       ...userDetails,
       user_id: userId,
-      createdAt: currentDate,
-      updatedAt: currentDate,
+      createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       password: "",
     });
 
@@ -135,7 +136,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
 router.get("/getusers", async (req, res) => {
   try {
-    const users = await AddUser.find({}, "-password");
+    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
     res.json({
       success: true,
       users,
@@ -175,16 +176,28 @@ router.get("/:user_id", async (req, res) => {
 
 router.delete("/deleteuser/:userId", async (req, res) => {
   try {
-    const { userId } = req.params;
+    // const { userId } = req.params;
+    const userId = req.params.userId
+    console.log(userId, "userId");
 
-    const deletedUser = await AddUser.findOneAndDelete({ user_id: userId });
+    const user = await File_Uplode.findOne({ user_id: userId });
+    console.log(user, "user");
 
-    if (!deletedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
+    if (user) {
+      return res.status(200).send({
+        statusCode: 201,
+        message: "This user apply for loan, so no delete",
       });
     }
+
+    // const deletedUser = await AddUser.findOneAndDelete({ user_id: userId });
+
+    // if (!deletedUser) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "User not found",
+    //   });
+    // }
 
     res.json({
       success: true,

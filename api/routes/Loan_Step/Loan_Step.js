@@ -43,7 +43,7 @@ router.post("/", async (req, res) => {
 // Get Loan-Step
 router.get("/", async (req, res) => {
   try {
-    const data = await Loan_Step.find({});
+    const data = await Loan_Step.find({}).sort({ updatedAt: -1 });
     if (data.length === 0) {
       // If no data found
       return res.status(201).json({

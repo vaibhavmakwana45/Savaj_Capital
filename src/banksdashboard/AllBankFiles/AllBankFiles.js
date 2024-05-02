@@ -205,6 +205,7 @@ export default function CollapsibleTable() {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
+  console.log(accessType.bankuser_id, "accessType.bankuser_id")
 
   const [loading, setLoading] = useState(true);
 
