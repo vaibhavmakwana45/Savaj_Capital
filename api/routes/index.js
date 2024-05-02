@@ -62,14 +62,32 @@ router.post("/login", async (req, res) => {
       role = "bankuser";
       ({ token, expiresIn } = await bankUserToken(userForToken));
     } else if (superAdmin) {
+      const decryptedPassword = decrypt(superAdmin.password);
+      if (req.body.password !== decryptedPassword) {
+        return res
+          .status(201)
+          .send({ statusCode: 202, message: "Password is incorrect." });
+      }
       userForToken = superAdmin;
       role = "superadmin";
       ({ token, expiresIn } = await superAdminToken(userForToken));
     } else if (savajCapitalUser) {
+      const decryptedPassword = decrypt(savajCapitalUser.password);
+      if (req.body.password !== decryptedPassword) {
+        return res
+          .status(201)
+          .send({ statusCode: 202, message: "Password is incorrect." });
+      }
       userForToken = savajCapitalUser;
       role = "savajcapitaluser";
       ({ token, expiresIn } = await savajCapitalUserToken(userForToken));
     } else if (user) {
+      const decryptedPassword = decrypt(user.password);
+      if (req.body.password !== decryptedPassword) {
+        return res
+          .status(201)
+          .send({ statusCode: 202, message: "Password is incorrect." });
+      }
       userForToken = user;
       role = "user";
       ({ token, expiresIn } = await userToken(userForToken));

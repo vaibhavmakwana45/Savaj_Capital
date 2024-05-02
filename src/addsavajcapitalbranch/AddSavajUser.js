@@ -144,6 +144,7 @@ function AddSavajCapitalBranch() {
     savajcapitalbranch_id: "",
     savajcapitaluser_id: "",
     savajcapitalbranch_name: "",
+    branch_id: "",
     state: "",
     city: "",
     full_name: "",
@@ -341,6 +342,7 @@ function AddSavajCapitalBranch() {
                             });
                           }}
                         >
+   
                           {item.branch_name +
                             ` (${item.city + ", " + item.state})`}
                         </DropdownItem>

@@ -286,6 +286,45 @@ export default function CollapsibleTable() {
       return (percentage / 100) * 360;
     }
   });
+
+  // $(function () {
+  //   $(".progress").each(function () {
+  //     var value = parseInt($(this).attr("data-value"));
+  //     var progressBars = $(this).find(".progress-bar");
+
+  //     progressBars.removeClass("red yellow purple blue green");
+
+  //     if (value >= 0 && value < 20) {
+  //       progressBars.addClass("red");
+  //     } else if (value >= 20 && value < 40) {
+  //       progressBars.addClass("yellow");
+  //     } else if (value >= 40 && value < 60) {
+  //       progressBars.addClass("purple");
+  //     } else if (value >= 60 && value < 80) {
+  //       progressBars.addClass("blue");
+  //     } else if (value >= 80 && value <= 100) {
+  //       progressBars.addClass("green");
+  //     }
+
+  //     if (value <= 50) {
+  //       progressBars
+  //         .eq(1)
+  //         .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+  //     } else {
+  //       progressBars.eq(1).css("transform", "rotate(180deg)");
+  //       progressBars
+  //         .eq(0)
+  //         .css(
+  //           "transform",
+  //           "rotate(" + percentageToDegrees(value - 50) + "deg)"
+  //         );
+  //     }
+  //   });
+
+  //   function percentageToDegrees(percentage) {
+  //     return (percentage / 100) * 360;
+  //   }
+  // });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
