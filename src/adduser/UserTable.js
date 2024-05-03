@@ -121,11 +121,11 @@ function UserTable() {
         return "transparent";
     }
   };
-  
+
   const getTextColor = (category) => {
     switch (category) {
       case "Poor":
-        return "#990000"; // Dark red
+        return "#990000";
       default:
         return "black";
     }
@@ -133,22 +133,24 @@ function UserTable() {
 
   const allHeaders = [
     "Name",
-    "Email",
     "Number",
     "Aadhar Card",
     "Pan Card",
     "Cibil Score",
+    "create",
+    "update",
     "CS Status",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
     item.username,
-    item.email,
     item.number,
     item.aadhar_card,
     item.pan_card,
     item.cibil_score,
+    item.createdAt,
+    item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -165,7 +167,7 @@ function UserTable() {
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
-    console.log('id', id)
+    console.log("id", id);
   };
 
   const handleEdit = (id) => {
@@ -230,7 +232,7 @@ function UserTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
@@ -239,6 +241,25 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              collapse={true}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
+              name={"Created At:"}
+              name2={"Updated At:"}
             />
           </CardBody>
         </Card>
