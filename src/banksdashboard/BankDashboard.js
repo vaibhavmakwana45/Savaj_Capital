@@ -19,12 +19,10 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-// Custom components
 import Card from "components/Card/Card.js";
 import BarChart from "components/Charts/BarChart";
 import LineChart from "components/Charts/LineChart";
 import IconBox from "components/Icons/IconBox";
-// Custom icons
 import {
   CartIcon,
   DocumentIcon,
@@ -32,7 +30,6 @@ import {
   WalletIcon,
 } from "components/Icons/Icons.js";
 import React from "react";
-// Variables
 import {
   barChartData,
   barChartOptions,
@@ -42,7 +39,6 @@ import {
 import { pageVisits, socialTraffic } from "variables/general";
 
 export default function BankDashboard() {
-  // Chakra Color Mode
   const iconBlue = useColorModeValue("blue.500", "blue.500");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");

@@ -3,6 +3,7 @@ const router = express.Router();
 const moment = require("moment");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
+const Branch_Assign = require("../../models/Savaj_Capital/Branch_Assign");
 const crypto = require("crypto");
 
 const generateToken = () => {
@@ -143,6 +144,20 @@ router.get("/:branch_id", async (req, res) => {
 router.delete("/:branch_id", async (req, res) => {
   try {
     const { branch_id } = req.params;
+
+    const savajBranchExistsInSavajUser = await SavajCapital_User.findOne({
+      branch_id: branch_id,
+    });
+    const savajBranchExistsInSavajBranchAssign = await Branch_Assign.findOne({
+      branch_id: branch_id,
+    });
+
+    if (savajBranchExistsInSavajUser || savajBranchExistsInSavajBranchAssign) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "Branch cannot be deleted because it is currently in use.",
+      });
+    }
 
     const branch = await SavajCapital_User.findOne({ branch_id });
 

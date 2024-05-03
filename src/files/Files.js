@@ -143,11 +143,11 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "50%" }}
+            style={{ width: "70%" }}
           >
-            <Box sx={{ margin: 1 }}>
-              <Paper elevation={3} sx={{ borderRadius: 3 }}>
-                <Table size="small" aria-label="documents">
+            <Box sx={{ margin: 1 }} >
+              <Paper elevation={3} sx={{ borderRadius: 3 }} style={{height:"104px" , overflow:"auto",scrollbarWidth:"thin"}}>
+                <Table size="small" aria-label="documents"  >
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>

@@ -101,7 +101,6 @@ function UserTable() {
     if (data) {
       setSelectedLoan(data.loan);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Data not found for id:", id);
     }
   };
@@ -254,8 +253,6 @@ function UserTable() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
-
-        {/* edit */}
         <AlertDialog
           isOpen={isEditLoan}
           leastDestructiveRef={cancelRef}

@@ -36,38 +36,61 @@ function EditFile() {
   const fileInputRefs = useRef({});
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
-  console.log('groupedLoanDocuments', groupedLoanDocuments)
-  console.log('fileData', fileData)
+
+  const [datachanged, setDataChanged] = useState(false)
 
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await AxiosInstance.get(`/file_upload/edit_file_upload/${id}`);
+        const response = await AxiosInstance.get(
+          `/file_upload/edit_file_upload/${id}`
+        );
+        console.log(response.data);
+
         if (response.data && response.data.statusCode === 200) {
           const details = response.data.data.fileDetails;
           setSelectedLoanId(details.loan_id);
           setSelectedLoanSubtypeId(details.loantype_id);
-  
-          // Log documents array to ensure correct data
-          console.log("Fetched documents:", details.documents);
-  
-          // Initialize fileData with existing files
-          const initialFileData = {};
-          if (Array.isArray(details.documents) && details.documents.length > 0) {
-            details.documents.forEach((document, index) => {
-              const key = `${document.title_id}-${index}`;
-              initialFileData[key] = {
-                url: `${CDN_BASE_URL}${document.file_path}`,
-                name: document.title_id,
-                type: document.file_path.endsWith(".pdf") ? "application/pdf" : "image",
+          const documentsWithCDN = details.documents.map((document) => ({
+            ...document,
+            file_path: `${CDN_BASE_URL}${document.file_path}`,
+          }));
+
+          const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
+            const key = `${doc.title_id}-${index}`;
+            return {
+              ...acc,
+              [key]: {
+                url: doc.file_path,
+                name: doc.title_id,
+                type: doc.file_path.endsWith(".pdf")
+                  ? "application/pdf"
+                  : "image",
                 new: false,
-              };
-            });
-          }
-          console.log("initialFileData:", initialFileData); // Log initialFileData
+              },
+            };
+          }, {});
+
           setFileData(initialFileData);
-  
-          // Other code...
+          setDataChanged(true)
+          
+
+          const selectedLoan = loanType.find(
+            (loan) => loan.loan_id === details.loan_id
+          );
+          setSelectedLoanType(selectedLoan || {});
+
+          if (selectedLoan && selectedLoan.is_subtype) {
+            const selectedSubtype = loanSubType.find(
+              (subtype) => subtype.loantype_id === details.loantype_id
+            );
+            if (selectedSubtype) {
+              setSelectedLoanType({
+                ...selectedLoan,
+                loansubtype_id: selectedSubtype.loantype_id,
+              });
+            }
+          }
         } else {
           throw new Error("Failed to fetch file details");
         }
@@ -76,13 +99,43 @@ function EditFile() {
         toast.error("Failed to load file details.");
       }
     };
-  
+
     fetchFileDetails();
-  }, [id]);
-  
-  
-  
-  
+  }, [loanType]);
+
+  useEffect(()=>{
+
+    setTimeout(() => {
+      
+
+    const keys = Object.keys(fileData);
+
+    if (keys.length != 0) {
+      // Get the keys of fileData
+      const keys = Object.keys(fileData);
+
+      // // Iterate over the keys and run processURL for each URL
+
+      keys.forEach((key) => {
+        const url = fileData[key]?.url;
+        const name = fileData[key]?.name;
+        const type = fileData[key]?.type;
+
+        const event = {
+          url: url,
+          name: name,
+          type: type
+        };
+
+        const innerIndex = key.split("-")[1];
+
+        handleFileInputChange(event, event.name, undefined, innerIndex, true );
+      });
+    }
+
+  }, 500);
+
+  }, [datachanged])
 
   useEffect(() => {
     const fetchLoanType = async () => {
@@ -128,6 +181,58 @@ function EditFile() {
     fetchLoanSubtypes();
   }, [selectedLoanId, loanType]);
 
+  const handleLoanTypeChange = (event) => {
+    const loanId = event.target.value;
+    const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
+    setSelectedLoanType(selectedLoan || {});
+  };
+
+  const handleFileInputChange = (event, title_id, index, innerIndex, edit) => {
+
+    console.log(event, title_id, index, innerIndex, edit, "+++++")
+
+    const file = edit == undefined ? event.target.files[0] : event;
+    if (file) {
+      const documentId = edit == undefined ? groupedLoanDocuments[title_id][index].document_ids[innerIndex] : title_id;
+      const key = `${title_id}-${index || 0}-${innerIndex}`;
+      const filePreview = {
+        name: file.name,
+        url:  edit == undefined ? URL.createObjectURL(file) : file.url,
+        type: file.type,
+        documentId: documentId,
+        key: key,
+      };
+
+      console.log(filePreview, "filePreview");
+
+      setFileData((prevData) => ({
+        ...prevData,
+        [key]: filePreview,
+      }));
+
+      setUploadedFileName((prevUploadedFiles) => [
+        ...prevUploadedFiles,
+        { file: file, documentId: documentId, title_id: title_id, key: key },
+      ]);
+    }
+  };
+
+  console.log(fileData, "afsdkjaldskfldkfjldkfj")
+
+  const handleRemoveFile = (key) => {
+    setFileData((prevData) => {
+      const newData = { ...prevData };
+      delete newData[key];
+      return newData;
+    });
+
+    setUploadedFileName((prevUploadedFiles) => {
+      return prevUploadedFiles.filter(
+        (uploadedFile) => uploadedFile.key !== key
+      );
+    });
+  };
+
   useEffect(() => {
     const fetchLoanDocuments = async () => {
       try {
@@ -172,6 +277,7 @@ function EditFile() {
   useEffect(() => {
     const newFileInputRefs = {};
     Object.keys(groupedLoanDocuments).forEach((title_id) => {
+      console.log(groupedLoanDocuments[title_id], "groupedLoanDocuments[title_id]")
       groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
         documentGroup.document_ids.forEach((documentId, innerIndex) => {
           const refKey = `${title_id}-${index}-${innerIndex}`;
@@ -190,54 +296,6 @@ function EditFile() {
     });
     fileInputRefs.current = newFileInputRefs;
   }, [groupedLoanDocuments]);
-
-  const handleLoanTypeChange = (event) => {
-    const loanId = event.target.value;
-    const selectedLoan = loanType.find((loan) => loan.loan_id === loanId);
-    setSelectedLoanType(selectedLoan || {});
-  };
-
-  const handleFileInputChange = (event, title_id, index, innerIndex, doc_id) => {
-    const file = event.target.files[0];
-    if (file) {
-      const key = `${title_id}-${index}-${innerIndex}-${doc_id}`; // Append doc_id to ensure uniqueness
-      const filePreview = {
-        name: file.name,
-        url: URL.createObjectURL(file),
-        type: file.type,
-        documentId: doc_id, // Use doc_id instead of groupedLoanDocuments[title_id][index].document_ids[innerIndex]
-        key: key,
-        new: true, // Indicate that this file is newly uploaded
-      };
-  
-      setFileData((prevData) => ({
-        ...prevData,
-        [key]: filePreview,
-      }));
-  
-      // Ensure unique key for each uploaded file
-      const newKey = `${title_id}-${index}-${innerIndex}-${doc_id}-${Date.now()}`;
-      setUploadedFileName((prevUploadedFiles) => [
-        ...prevUploadedFiles,
-        { file: file, documentId: doc_id, title_id: title_id, key: newKey, new: true },
-      ]);
-    }
-  };
-  
-
-  const handleRemoveFile = (key) => {
-    setFileData((prevData) => {
-      const newData = { ...prevData };
-      delete newData[key];
-      return newData;
-    });
-
-    setUploadedFileName((prevUploadedFiles) => {
-      return prevUploadedFiles.filter(
-        (uploadedFile) => uploadedFile.key !== key
-      );
-    });
-  };
 
   const handleSubmitData = async (e) => {
     e.preventDefault();
@@ -423,8 +481,10 @@ function EditFile() {
                                               ].url
                                             }
                                             type="application/pdf"
-                                            width="100%"
-                                            height="300"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
                                           />
                                         ) : (
                                           <img
@@ -433,33 +493,51 @@ function EditFile() {
                                                 `${title_id}-${index}-${innerIndex}`
                                               ].url
                                             }
-                                            alt="preview"
-                                            className="img-preview"
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
                                           />
                                         )
-                                      ) : null}
+                                      ) : (
+                                        <span>
+                                          {
+                                            fileData[
+                                              `${title_id}-${index}-${innerIndex}`
+                                            ].name
+                                          }
+                                        </span>
+                                      )}
                                       <IconButton
-                                        variant="outline"
-                                        colorScheme="red"
-                                        aria-label="Delete Image"
+                                        aria-label="Remove file"
                                         icon={<CloseIcon />}
+                                        size="sm"
                                         onClick={() =>
                                           handleRemoveFile(
                                             `${title_id}-${index}-${innerIndex}`
                                           )
                                         }
+                                        style={{ margin: "0 10px" }}
                                       />
                                     </div>
                                   ) : (
                                     <div
-                                      className="file-upload d-flex align-items-center justify-content-center"
+                                      className="upload-area__drop-zoon drop-zoon"
                                       onClick={
                                         fileInputRefs.current[
                                           `${title_id}-${index}-${innerIndex}`
                                         ]
                                       }
                                     >
-                                      <p>Upload</p>
+                                      <span className="drop-zoon__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zoon__paragraph">
+                                        Drop your file here or click to browse
+                                      </p>
                                     </div>
                                   )}
                                 </div>
@@ -473,19 +551,33 @@ function EditFile() {
                 </div>
               ))}
             </div>
+
+            {/* Submit and Cancel Buttons */}
+            <div>
+              <Button
+                mt={4}
+                colorScheme="teal"
+                onClick={handleSubmitData}
+                isLoading={loading}
+                loadingText="Submitting"
+                style={{ marginTop: 40 }}
+              >
+                Submit
+              </Button>
+              <Button
+                mt={4}
+                colorScheme="yellow"
+                style={{ marginTop: 40, marginLeft: 8 }}
+                onClick={() => history.push("/superadmin/filetable")}
+              >
+                Cancel
+              </Button>
+            </div>
           </CardBody>
         </Card>
       </Flex>
-      <Button
-        colorScheme="blue"
-        isLoading={loading}
-        loadingText="Updating..."
-        onClick={handleSubmitData}
-        mt="20px"
-      >
-        Update
-      </Button>
-      <Toaster position="top-right" />
+
+      <Toaster />
     </>
   );
 }

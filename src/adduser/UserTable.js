@@ -179,10 +179,18 @@ function UserTable() {
   const cancelRef = React.useRef();
   const deletebranch = async (userId) => {
     try {
-      await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
-      setUsers(users.filter((user) => user.user_id !== userId));
-      setIsDeleteDialogOpen(false);
-      toast.success("User deleted successfully!");
+      const response = await AxiosInstance.delete(
+        `/addusers/deleteuser/${userId}`
+      );
+
+      if (response.data.success) {
+        setIsDeleteDialogOpen(false);
+        toast.success("User deleted successfully!");
+        setUsers(users.filter((user) => user.user_id !== userId));
+      } else if (response.data.statusCode === 201) {
+        toast.error(response.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("user not delete");

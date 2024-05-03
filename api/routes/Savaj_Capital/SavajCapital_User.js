@@ -12,7 +12,7 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const crypto = require("crypto");
 const axios = require("axios");
-const BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
+const Branch_Assign = require("../../models/Savaj_Capital/Branch_Assign");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -175,6 +175,18 @@ router.delete("/:branchuser_id", async (req, res) => {
   try {
     const { branchuser_id } = req.params;
 
+    const savajUserExistsInSavajBranchAssign = await Branch_Assign.findOne({
+      branchuser_id: branchuser_id,
+    });
+
+    if (savajUserExistsInSavajBranchAssign) {
+      return res.status(200).json({
+        statusCode: 201,
+        message:
+          "Branch user cannot be deleted because it is currently assigned.",
+      });
+    }
+
     const deletedUser = await SavajCapital_User.findOneAndDelete({
       branchuser_id: branchuser_id,
     });
@@ -308,7 +320,7 @@ router.get("/assigned_file/:branchuser_id", async (req, res) => {
   try {
     const branchuser_id = req.params.branchuser_id;
 
-    const branchAssign = await BranchAssign.find({
+    const branchAssign = await Branch_Assign.find({
       branchuser_id: branchuser_id,
     }).sort({ updatedAt: -1 });
 

@@ -88,10 +88,40 @@ router.post("/adduserbyadmin", async (req, res) => {
       email: userDetails.email,
     });
 
+    const userNumberExists = await AddUser.findOne({
+      number: userDetails.number,
+    });
+
+    const userAdharExists = await AddUser.findOne({
+      aadhar_card: userDetails.aadhar_card,
+    });
+
+    const userPanExists = await AddUser.findOne({
+      pan_card: userDetails.pan_card,
+    });
+
     if (bankUser || superAdmin || user || savajCapital_user) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
+    }
+
+    if (userNumberExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 204, message: "Mobile number already in use" });
+    }
+
+    if (userPanExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 203, message: "Pan Card already in use" });
+    }
+
+    if (userAdharExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 202, message: "Aadhar Card already in use" });
     }
 
     // const hashedPassword = encrypt(userDetails.password);
@@ -177,27 +207,26 @@ router.get("/:user_id", async (req, res) => {
 router.delete("/deleteuser/:userId", async (req, res) => {
   try {
     // const { userId } = req.params;
-    const userId = req.params.userId
+    const userId = req.params.userId;
     console.log(userId, "userId");
 
     const user = await File_Uplode.findOne({ user_id: userId });
-    console.log(user, "user");
 
     if (user) {
       return res.status(200).send({
         statusCode: 201,
-        message: "This user apply for loan, so no delete",
+        message: "Loan application detected. Delete not allowed.",
       });
     }
 
-    // const deletedUser = await AddUser.findOneAndDelete({ user_id: userId });
+    const deletedUser = await AddUser.findOneAndDelete({ user_id: userId });
 
-    // if (!deletedUser) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     message: "User not found",
-    //   });
-    // }
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     res.json({
       success: true,

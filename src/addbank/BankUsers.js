@@ -115,13 +115,21 @@ function BankUsers() {
   const cancelRef = React.useRef();
   const deleteBank = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
-      setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
-      setIsDeleteDialogOpen(false);
-      toast.success("Bank User deleted successfully!");
+      const responce = await AxiosInstance.delete(
+        `/bank_user/deletebankuser/${bankId}`
+      );
+      
+      if (responce.data.success) {
+        setIsDeleteDialogOpen(false);
+        setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
+        toast.success("Bank User deleted successfully!");
+      } else if (responce.data.statusCode === 201) {
+        toast.error(responce.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting bank:", error);
-      toast.error("bank not delete");
+      toast.error(error);
     }
   };
 
@@ -143,8 +151,17 @@ function BankUsers() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}

@@ -23,7 +23,6 @@ import {
   Input,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-// import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
@@ -33,7 +32,6 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-// import "../adduser/user.css";
 
 function AssignedSavajUsers() {
   const [savajUserAssignedFile, setSavajUserAssignedFile] = useState([]);
@@ -89,17 +87,16 @@ function AssignedSavajUsers() {
     "UpdatedAt",
   ];
   const formattedData = filteredUsers.map((item) => [
-    item.user_id,
-    item.file_id,
-    item.username,
-    item.loan,
-    item.loan_type,
-    item.createdAt,
-    item.updatedAt,
+    item?.user_id,
+    item?.file_id,
+    item?.username,
+    item?.loan,
+    item?.loan_type,
+    item?.createdAt,
+    item?.updatedAt,
   ]);
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   return (
     <>
@@ -124,7 +121,7 @@ function AssignedSavajUsers() {
               borderColor={borderColor}
               loading={loading}
               allHeaders={allHeaders}
-              showDeleteButton={false} // Hide delete button
+              showDeleteButton={false} 
               showEditButton={false}
               handleRow={handleRow}
             />

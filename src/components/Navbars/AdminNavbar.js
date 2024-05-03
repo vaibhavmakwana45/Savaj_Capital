@@ -6,12 +6,19 @@ import {
   BreadcrumbLink,
   Flex,
   Link,
+  Stack,
   useColorModeValue,
+  useColorMode,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
 import routes from "../../routes";
-import "./navbar-responsive.css"
+import "./navbar-responsive.css";
+import { SidebarResponsive } from "components/Sidebar/Sidebar";
+import { ArgonLogoLight } from "components/Icons/Icons";
+import { ArgonLogoDark } from "components/Icons/Icons";
+import { ChakraLogoLight } from "components/Icons/Icons";
+import { ChakraLogoDark } from "components/Icons/Icons";
 
 const filteredRoutes = routes.filter((route) => route.layout !== "/auth");
 
@@ -110,7 +117,11 @@ export default function AdminNavbar(props) {
     if (items.length === 0) {
       items.push(
         <BreadcrumbItem key="superadmin">
-          <BreadcrumbLink href="/superadmin" color="white"   _hover={{ color:"white" }}>
+          <BreadcrumbLink
+            href="/superadmin"
+            color="white"
+            _hover={{ color: "white" }}
+          >
             Superadmin
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -144,8 +155,17 @@ export default function AdminNavbar(props) {
     return generateBreadcrumbItems(currentRoute);
   };
 
+  const { colorMode } = useColorMode();
+  // Chakra color mode
+  let bgButton = useColorModeValue("white", "navy.900");
+  let colorButton = useColorModeValue("gray.700", "white");
+  let hamburgerColor = {
+    base: useColorModeValue("gray.700", "white"),
+    md: "white",
+  };
   return (
-    <Flex className="navbar-responsive"
+    <Flex
+      className="navbar-responsive"
       position={navbarPosition}
       boxShadow={navbarShadow}
       bg={navbarBg}
@@ -179,7 +199,7 @@ export default function AdminNavbar(props) {
       pt="8px"
       top="18px"
       w={{ sm: "calc(100vw - 30px)", xl: "calc(100vw - 75px - 275px)" }}
-      style={{ position: "fixed", zIndex: "9", backgroundColor: "#3182CE" }}
+      style={{ zIndex: "9", backgroundColor: "#3182CE" }}
     >
       <Flex
         w="100%"
@@ -189,8 +209,41 @@ export default function AdminNavbar(props) {
         }}
         alignItems={{ xl: "center" }}
       >
-        <Box mb={{ sm: "8px", md: "0px" }}>
-          <Breadcrumb separator=">" style={{color:"white"}}>{generateBreadcrumbs()}</Breadcrumb>
+        <SidebarResponsive
+          hamburgerColor={"white"}
+          logo={
+            <Stack
+              direction="row"
+              spacing="12px"
+              align="center"
+              justify="center"
+            >
+              {colorMode === "dark" ? (
+                <ArgonLogoLight w="74px" h="27px" />
+              ) : (
+                <ArgonLogoDark w="74px" h="27px" />
+              )}
+              <Box
+                w="1px"
+                h="20px"
+                bg={colorMode === "dark" ? "white" : "gray.700"}
+              />
+              {colorMode === "dark" ? (
+                <ChakraLogoLight w="82px" h="21px" />
+              ) : (
+                <ChakraLogoDark w="82px" h="21px" />
+              )}
+            </Stack>
+          }
+          colorMode={colorMode}
+          secondary={props.secondary}
+          routes={routes}
+          {...rest}
+        />
+        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar" style={{ marginLeft: "30px" }}>
+          <Breadcrumb separator=">" style={{ color: "white" }}>
+            {generateBreadcrumbs()}
+          </Breadcrumb>
           <Link
             pt="20px"
             color={mainText}
@@ -198,12 +251,11 @@ export default function AdminNavbar(props) {
             bg="inherit"
             borderRadius="inherit"
             fontWeight="bold"
-            _hover={{ color:"white",borderBottom:"1px solid white" }}
+            _hover={{ color: "white", borderBottom: "1px solid white" }}
             _active={{
               bg: "inherit",
               transform: "none",
               borderColor: "transparent",
-              
             }}
             _focus={{
               boxShadow: "none",

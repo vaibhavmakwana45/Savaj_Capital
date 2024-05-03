@@ -144,8 +144,16 @@ function AddUser(props) {
           submissionData
         );
 
+        console.log(response.data, "shivam");
+
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
+        } else if (response.data.statusCode === 202) {
+          toast.error(response.data.message);
+        } else if (response.data.statusCode === 203) {
+          toast.error(response.data.message);
+        } else if (response.data.statusCode === 204) {
+          toast.error(response.data.message);
         } else if (response.data.success) {
           toast.success("User added successfully!");
           history.push("/superadmin/alluser");
@@ -215,6 +223,35 @@ function AddUser(props) {
     }));
   };
 
+  const handleeChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && value.length <= 12) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handleGstChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "gst_number" && value.length <= 15) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -234,6 +271,7 @@ function AddUser(props) {
                   name="username"
                   onChange={handleChange}
                   value={formData.username}
+                  placeholder="Enter your Name"
                 />
               </FormControl>
 
@@ -253,6 +291,7 @@ function AddUser(props) {
                   name="number"
                   onChange={handleChange}
                   value={formData.number}
+                  placeholder="Enter your Number"
                 />
               </FormControl>
 
@@ -262,26 +301,7 @@ function AddUser(props) {
                   name="cibil_score"
                   onChange={handleChange}
                   value={formData.cibil_score}
-                />
-              </FormControl>
-
-              <FormControl id="aadharcard" mt={4} isRequired>
-                <FormLabel>Aadarcard</FormLabel>
-                <Input
-                  name="aadhar_card"
-                  type="number"
-                  onChange={handleChange}
-                  value={formData.aadhar_card}
-                />
-              </FormControl>
-
-              <FormControl id="pancard" mt={4} isRequired>
-                <FormLabel>Pancard</FormLabel>
-                <Input
-                  name="pan_card"
-                  type="string"
-                  onChange={handleChange}
-                  value={formData.pan_card}
+                  placeholder="Enter your cibil score"
                 />
               </FormControl>
 
@@ -290,11 +310,31 @@ function AddUser(props) {
                 <Input
                   name="gst_number"
                   type="number"
-                  onChange={handleChange}
+                  onChange={handleGstChange}
                   value={formData.gst_number}
+                  placeholder="Enter gst number"
                 />
               </FormControl>
-
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pancard</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handleeChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
               <FormControl id="country" mt={4} isRequired>
                 <FormLabel>Country</FormLabel>
 
@@ -362,6 +402,7 @@ function AddUser(props) {
                   type="string"
                   onChange={handleChange}
                   value={formData.unit_address}
+                  placeholder="Enter unit address"
                 />
               </FormControl>
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
@@ -374,32 +415,9 @@ function AddUser(props) {
                   type="email"
                   onChange={handleChange}
                   value={formData.email}
+                  placeholder="Enter your email"
                 />
               </FormControl>
-
-              {/* {
-                !id &&
-                <FormControl id="password" mt={4} isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      onChange={handleChange}
-                    />
-                    <InputRightElement width="4.5rem">
-                      <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              } */}
 
               <div>
                 <Button

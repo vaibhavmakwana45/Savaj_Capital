@@ -26,8 +26,6 @@ import { saveAs } from "file-saver";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
-
-  // Check if groupedFiles is undefined or null
   if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
     return <div>No documents available</div>;
   }
@@ -49,16 +47,14 @@ const FileDisplay = ({ groupedFiles }) => {
 
   return (
     <div>
-      <div className="d-flex flex-wrap justify-content-start image-responsive">
+      <div className="d-flex flex-wrap justify-content-start image-responsive" style={{overflow:"auto"}}>
         {Object.entries(groupedFiles).map(([title, files], index) => (
           <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
             <h2
               className="my-4"
-              style={{ fontSize: "20px", fontWeight: 700, color: "#333" }}
+              style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
             >
-              <u>
-                {title} documents
-              </u>
+              <u>{title} documents</u>
             </h2>
             {files.map((file, idx) => (
               <div key={idx} className="mb-3">
@@ -68,7 +64,7 @@ const FileDisplay = ({ groupedFiles }) => {
                     src={`${basePath}${file.file_path}`}
                     type="application/pdf"
                     width="100%"
-                    height="260" // Adjust height as needed
+                    height="260"
                     style={{
                       border: "none",
                       boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
@@ -323,7 +319,7 @@ function ViewFile() {
             <CardBody style={{ padding: "40px" }} className="cardss">
               <FormLabel
                 className="mb-2 back-responsive"
-                style={{ fontSize: "25px" }}
+                style={{ fontSize: "20px" }}
               >
                 <IconButton
                   icon={<ArrowBackIcon />}
@@ -337,32 +333,28 @@ function ViewFile() {
               <div>
                 <FormControl id="user_id" mt={4}>
                   <div
-                    className="card"
+                    className="card col-xl-8 col-md-8 col-sm-12"
                     style={{
-                      borderRadius: "14px",
-                      boxShadow:
-                        "rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset",
+                      borderRadius: "10px",
+                      boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
                     }}
                   >
                     <div
                       className="card-header"
                       style={{
-                        fontSize: "20px",
-                        backgroundColor: "#6AA3DA",
-                        borderTopLeftRadius: "14px",
-                        borderTopRightRadius: "14px",
+                        fontSize: "15px",
+                        backgroundColor: "#3182CE",
+                        borderTopLeftRadius: "10px",
+                        borderTopRightRadius: "10px",
                         color: "white",
                       }}
                     >
-                      {fileData?.loan} File -{fileData?.loan_type}
+                      {fileData?.loan} File - {fileData?.loan_type}
                     </div>
                     <u>
                       <FormLabel
                         className="my-3"
-                        style={{
-                          fontSize: "18px",
-                          paddingLeft: "20px",
-                        }}
+                        style={{ fontSize: "14px", paddingLeft: "20px" }}
                       >
                         <b>Loan User : {fileData?.username}</b>
                       </FormLabel>
@@ -375,7 +367,7 @@ function ViewFile() {
                               <FormLabel
                                 className="my-3 content"
                                 style={{
-                                  fontSize: "18px",
+                                  fontSize: "14px",
                                   paddingLeft: "20px",
                                   justifyContent: "space-between",
                                   display: "flex",
@@ -387,7 +379,7 @@ function ViewFile() {
                               <FormLabel
                                 className="my-3 content"
                                 style={{
-                                  fontSize: "18px",
+                                  fontSize: "14px",
                                   paddingLeft: "20px",
                                   justifyContent: "space-between",
                                   display: "flex",
@@ -402,6 +394,7 @@ function ViewFile() {
                       </blockquote>
                     </div>
                   </div>
+
                   <div>
                     {/* {fileData?.documents && (
                       <FileDisplay data={fileData?.documents} />

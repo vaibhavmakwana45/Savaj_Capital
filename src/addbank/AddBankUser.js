@@ -340,7 +340,6 @@ function AddBankUser() {
               <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Select
-                  // disabled={branches.length === 0}
                   name="branch_name"
                   placeholder="Select Bank Branch"
                   onChange={(e) => {

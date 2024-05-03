@@ -81,12 +81,15 @@ function AddAllDocuments() {
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
         toast.success("Document deleted successfully!");
+      } else if(response.data.statusCode === 201){
+        toast.error(response.data.message);
+
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
     } catch (error) {
       console.error("Error deleting bank:", error);
-      toast.error("Role not delete");
+      toast.error(error);
     }
   };
 

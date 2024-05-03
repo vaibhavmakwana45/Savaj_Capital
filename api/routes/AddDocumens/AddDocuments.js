@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const AddDocuments = require("../../models/AddDocuments/AddDocuments");
+const File_Uplode = require("../../models/File/File_Uplode");
+const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
 // Post Documents
 router.post("/", async (req, res) => {
@@ -43,7 +45,7 @@ router.post("/", async (req, res) => {
 // Get Documents
 router.get("/", async (req, res) => {
   try {
-    const data = await AddDocuments.find({}).sort({updatedAt: -1});
+    const data = await AddDocuments.find({}).sort({ updatedAt: -1 });
     if (data.length === 0) {
       // If no data found
       return res.status(201).json({
@@ -101,6 +103,21 @@ router.put("/:document_id", async (req, res) => {
 router.delete("/:document_id", async (req, res) => {
   try {
     const { document_id } = req.params;
+
+    const documentExistsInFileUploads = await File_Uplode.findOne({
+      "documents.loan_document_id": document_id,
+    });
+
+    const documentExistsInLoanDocuments = await Loan_Documents.findOne({
+      document_ids: document_id,
+    });
+
+    if (documentExistsInFileUploads || documentExistsInLoanDocuments) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "Document cannot be deleted because it is currently in use.",
+      });
+    }
 
     const deletedDocument = await AddDocuments.findOneAndDelete({
       document_id: document_id,

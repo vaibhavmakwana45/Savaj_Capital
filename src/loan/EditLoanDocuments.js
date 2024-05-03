@@ -31,7 +31,7 @@ import upArrow from "../assets/svg/uparrow.svg";
 import downArrow from "../assets/svg/downarrow.svg";
 import { CloseIcon } from "@chakra-ui/icons";
 
-function AddLoanDocuments() {
+function EditLoanDocuments() {
   const textColor = useColorModeValue("gray.700", "white");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
@@ -201,6 +201,8 @@ function AddLoanDocuments() {
           loan_id: formData.loan_id,
           loantype_id: formData.loantype_id,
           title_id: title_id,
+          // title_id: formData.title_id,
+          // title: titleName,
           document_id: document_ids,
         });
 
@@ -249,7 +251,7 @@ function AddLoanDocuments() {
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-        <Card overflowX={{ xl: "hidden",scrollbarWidth:"thin" }}>
+        <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -299,9 +301,10 @@ function AddLoanDocuments() {
                     filterToggle();
                   }}
                   onBlur={() => {
+                    // Delay the filterToggle call to allow time for the click event
                     setTimeout(() => {
                       filterToggle();
-                    }, 200); 
+                    }, 200); // Adjust the delay as needed
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
@@ -402,7 +405,7 @@ function AddLoanDocuments() {
               </FormControl> */}
 
               <div className="w-100">
-                <FormLabel>Select Title</FormLabel>
+                <FormLabel>Select Loan</FormLabel>
 
                 <input
                   style={{
@@ -419,7 +422,7 @@ function AddLoanDocuments() {
                     borderRadius: "5px",
                     borderColor: "inherit",
                   }}
-                  placeholder="Select Title"
+                  placeholder="Select Loan-Type"
                   onFocus={() => {
                     setFiltereedData(titleData);
                     filteerToggle();
@@ -476,13 +479,13 @@ function AddLoanDocuments() {
                   </DropdownMenu>
                 </Dropdown>
               </div>
-              <FormControl mt={4} >
+              <FormControl mt={4}>
                 <FormLabel>Documents</FormLabel>
-                <Popover >
+                <Popover>
                   <PopoverTrigger>
                     <Button>Select Documents</Button>
                   </PopoverTrigger>
-                  <PopoverContent className="mx-5" style={{ marginLeft: "15px" ,height:"250px",overflow:"auto",scrollbarWidth:"thin"}}>
+                  <PopoverContent style={{ marginLeft: "15px" }}>
                     <PopoverArrow />
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>
@@ -581,4 +584,4 @@ function AddLoanDocuments() {
   );
 }
 
-export default AddLoanDocuments;
+export default EditLoanDocuments;
