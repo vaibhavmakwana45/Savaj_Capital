@@ -230,6 +230,7 @@ function EditLoanDocuments() {
               <Select
                 className="mt-3"
                 name="title"
+                disabled
                 placeholder="Select Title"
                 onChange={(e) => {
                   const selectedTitleId = e.target.value;
@@ -248,6 +249,7 @@ function EditLoanDocuments() {
                 <Select
                   className="mt-3"
                   name="title"
+                  disabled
                   placeholder="Select Loan-type"
                   onChange={(e) => {
                     const selectedLoanTypeId = e.target.value;
@@ -272,6 +274,7 @@ function EditLoanDocuments() {
                 className="mt-3"
                 name="title"
                 placeholder="Select Title"
+                disabled
                 onChange={(e) => {
                   const selectedTitleId = e.target.value;
                   setFormData({ ...formData, title_id: selectedTitleId });
@@ -296,19 +299,6 @@ function EditLoanDocuments() {
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>
                     <PopoverBody>
-                      {/* <CheckboxGroup
-                        colorScheme="blue"
-                        value={selectedDocs}
-                        onChange={(values) => setSelectedDocs(values)}
-                      >
-                        <Stack>
-                          {filterSelectedDocs().map((doc) => (
-                            <Checkbox key={doc.id} value={doc.document}>
-                              {doc.document}
-                            </Checkbox>
-                          ))}
-                        </Stack>
-                      </CheckboxGroup> */}
                       <CheckboxGroup
                         colorScheme="blue"
                         value={formData.document_ids}
@@ -335,20 +325,7 @@ function EditLoanDocuments() {
                 </Popover>
               </FormControl>
 
-              {/* <Button mt={4} colorScheme="blue" onClick={handleAddTitle}>
-                Add Title
-              </Button> */}
               <>
-                {/* {titles.length > 0 && (
-                  <Text
-                    fontSize="xl"
-                    color={textColor}
-                    fontWeight="bold"
-                    mt={4}
-                  >
-                    Titles and Documents
-                  </Text>
-                )} */}
                 <Flex direction="row" pt={{ base: "20px", md: "10px" }}>
                   {titles.map((title, index) => (
                     <Flex direction="column" key={index} mr={4}>
