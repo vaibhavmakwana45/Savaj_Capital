@@ -93,8 +93,6 @@ function Row(props) {
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">{file?.createdAt}</TableCell>
-        <TableCell align="">{file?.updatedAt}</TableCell>
         <TableCell align="center">
           {filePercentageData && (
             <div class="progress " data-value={Number(filePercentageData)}>
@@ -143,17 +141,26 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "70%" }}
+            style={{ width: "100%" }}
           >
-            <Box sx={{ margin: 1 }} >
-              <Paper elevation={3} sx={{ borderRadius: 3 }} style={{height:"104px" , overflow:"auto",scrollbarWidth:"thin"}}>
-                <Table size="small" aria-label="documents"  >
+            <Box sx={{ margin: 1 }} className="d-flex gap-4 collapse-table">
+              <Paper
+              className="col-8 col-md-8 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "104px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                         Document
                       </TableCell>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                      <TableCell className="status" sx={{ fontWeight: "bold", fontSize: "1rem", }}>
                         Status
                       </TableCell>
                     </TableRow>
@@ -164,7 +171,7 @@ function Row(props) {
                         <TableCell component="th" scope="row">
                           {documentRow?.name} ({documentRow?.title})
                         </TableCell>
-                        <TableCell>
+                        <TableCell >
                           {documentRow?.status === "Uploaded" ? (
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
@@ -183,6 +190,35 @@ function Row(props) {
                         </TableCell>
                       </TableRow>
                     ))}
+                  </TableBody>
+                </Table>
+              </Paper>
+              <Paper
+              className="col-4 col-md-4 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "100px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Create
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Update
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                      <TableRow >
+                        <TableCell>{file?.createdAt}</TableCell>
+                        <TableCell>{file?.updatedAt}</TableCell>
+                      </TableRow>
                   </TableBody>
                 </Table>
               </Paper>
@@ -402,12 +438,6 @@ export default function CollapsibleTable() {
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan Type
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Created At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Updated At
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Status

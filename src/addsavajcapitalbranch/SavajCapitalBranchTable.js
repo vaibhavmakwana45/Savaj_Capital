@@ -58,7 +58,14 @@ function SavajCapitalBranchTable() {
             user.state.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = ["Savaj Capital Branch", "City", "State", "Action"];
+  const allHeaders = [
+    "Savaj Capital Branch",
+    "City",
+    "State",
+    "create",
+    "update",
+    "Action",
+  ];
 
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
@@ -68,6 +75,8 @@ function SavajCapitalBranchTable() {
     item.branch_name,
     item.city,
     item.state,
+    item.createdAt,
+    item.updatedAt,
   ]);
 
   const handleDelete = (id) => {
@@ -126,7 +135,7 @@ function SavajCapitalBranchTable() {
         toast.error(response.data.message);
       } else if (response.data) {
         toast.error(response.data.message || "please try again later!", {
-          duration: 800,  
+          duration: 800,
         });
       }
     } catch (error) {
@@ -215,13 +224,31 @@ function SavajCapitalBranchTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               data={formattedData}
               loading={loading}
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={3}
+              removeIndex2={4}
+              documentIndex={4}
+              documentIndex2={5}
+              name={"Created At:"}
+              name2={"Updated At:"}
             />
           </CardBody>
         </Card>

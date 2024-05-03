@@ -226,6 +226,8 @@ function Document() {
               handleEdit={handleEdit}
               collapse={true}
               documentIndex={2}
+              removeIndex={1}
+              name={"Document Names:"}
             />
           </CardBody>
         </Card>

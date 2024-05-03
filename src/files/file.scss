@@ -325,6 +325,15 @@
 
 /* 768 */
 @media (max-width: 991px) {
+  .collapse-table{
+    flex-direction: column;
+   }
+   .paper{
+    width: 100% !important;
+   }
+   .status{
+    width: 150px;
+   }
 }
 
 /* 576 */
@@ -335,6 +344,15 @@
   .bradcrub-navbar{
     margin-left: 1px !important;
     margin-top: 15px !important;
+   }
+   .collapse-table{
+    flex-direction: column;
+   }
+   .paper{
+    width: 100% !important;
+   }
+   .status{
+    width: 150px;
    }
 }
 

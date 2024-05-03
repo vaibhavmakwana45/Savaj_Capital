@@ -96,6 +96,8 @@ function Tables() {
     "City",
     "State",
     "users",
+    "create",
+    "update",
     "Action",
   ];
 
@@ -106,6 +108,8 @@ function Tables() {
     bank.city,
     bank.state,
     bank?.user_count,
+    bank.createdAt,
+    bank.updatedAt,
   ]);
 
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
@@ -225,7 +229,7 @@ function Tables() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               banks={banks}
               data={formattedData}
               textColor={textColor}
@@ -235,6 +239,25 @@ function Tables() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+                <TableComponent
+              // documents={documents}
+              banks={banks}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
+              name={"Created At:"}
+              name2={"Updated At:"}
             />
           </CardBody>
         </Card>
