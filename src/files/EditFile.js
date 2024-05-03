@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./file.scss";
 import {
   Button,
@@ -8,8 +8,8 @@ import {
   FormLabel,
   Flex,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
-import { IconButton } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -31,12 +31,14 @@ function EditFile() {
   const [selectedLoanType, setSelectedLoanType] = useState({});
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
-  const [fileData, setFileData] = useState([]);
+  const [fileData, setFileData] = useState({});
   const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
   const fileInputRefs = useRef({});
-  const [isDragging, setIsDragging] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
+
+  const [datachanged, setDataChanged] = useState(false)
+
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -55,19 +57,23 @@ function EditFile() {
           }));
 
           const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
+            const key = `${doc.title_id}-${index}`;
             return {
               ...acc,
-              [`${doc.title_id}`]: [
-                {
-                  url: doc.file_path,
-                  name: doc.title_id,
-                  type: "application/pdf",
-                  new: false,
-                },
-              ],
+              [key]: {
+                url: doc.file_path,
+                name: doc.title_id,
+                type: doc.file_path.endsWith(".pdf")
+                  ? "application/pdf"
+                  : "image",
+                new: false,
+              },
             };
           }, {});
+
           setFileData(initialFileData);
+          setDataChanged(true)
+          
 
           const selectedLoan = loanType.find(
             (loan) => loan.loan_id === details.loan_id
@@ -95,7 +101,41 @@ function EditFile() {
     };
 
     fetchFileDetails();
-  }, [id, loanType, loanSubType]);
+  }, [loanType]);
+
+  useEffect(()=>{
+
+    setTimeout(() => {
+      
+
+    const keys = Object.keys(fileData);
+
+    if (keys.length != 0) {
+      // Get the keys of fileData
+      const keys = Object.keys(fileData);
+
+      // // Iterate over the keys and run processURL for each URL
+
+      keys.forEach((key) => {
+        const url = fileData[key]?.url;
+        const name = fileData[key]?.name;
+        const type = fileData[key]?.type;
+
+        const event = {
+          url: url,
+          name: name,
+          type: type
+        };
+
+        const innerIndex = key.split("-")[1];
+
+        handleFileInputChange(event, event.name, undefined, innerIndex, true );
+      });
+    }
+
+  }, 500);
+
+  }, [datachanged])
 
   useEffect(() => {
     const fetchLoanType = async () => {
@@ -147,20 +187,24 @@ function EditFile() {
     setSelectedLoanType(selectedLoan || {});
   };
 
-  const handleFileInputChange = (event, title_id, index, innerIndex) => {
-    const file = event.target.files[0];
+  const handleFileInputChange = (event, title_id, index, innerIndex, edit) => {
+
+    console.log(event, title_id, index, innerIndex, edit, "+++++")
+
+    const file = edit == undefined ? event.target.files[0] : event;
     if (file) {
-      const documentId =
-        groupedLoanDocuments[title_id][index].document_ids[innerIndex];
-      const key = `${title_id}-${index}-${innerIndex}`;
+      const documentId = edit == undefined ? groupedLoanDocuments[title_id][index].document_ids[innerIndex] : title_id;
+      const key = `${title_id}-${index || 0}-${innerIndex}`;
       const filePreview = {
         name: file.name,
-        url: URL.createObjectURL(file),
+        url:  edit == undefined ? URL.createObjectURL(file) : file.url,
         type: file.type,
         documentId: documentId,
         key: key,
       };
-      console.log("filePreview", filePreview);
+
+      console.log(filePreview, "filePreview");
+
       setFileData((prevData) => ({
         ...prevData,
         [key]: filePreview,
@@ -172,6 +216,8 @@ function EditFile() {
       ]);
     }
   };
+
+  console.log(fileData, "afsdkjaldskfldkfjldkfj")
 
   const handleRemoveFile = (key) => {
     setFileData((prevData) => {
@@ -231,6 +277,7 @@ function EditFile() {
   useEffect(() => {
     const newFileInputRefs = {};
     Object.keys(groupedLoanDocuments).forEach((title_id) => {
+      console.log(groupedLoanDocuments[title_id], "groupedLoanDocuments[title_id]")
       groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
         documentGroup.document_ids.forEach((documentId, innerIndex) => {
           const refKey = `${title_id}-${index}-${innerIndex}`;
@@ -254,7 +301,7 @@ function EditFile() {
     e.preventDefault();
     setLoading(true);
 
-    const fileDataArray = Object.values(fileData);
+    const fileDataArray = Object.values(uploadedFileName);
 
     try {
       const newFiles = fileDataArray.filter((file) => file.new);
@@ -277,7 +324,7 @@ function EditFile() {
         }
 
         return {
-          path: response.data.iamge_path,
+          path: response.data.image_path,
           loan_document_id: item.loan_document_id,
         };
       });
@@ -327,6 +374,7 @@ function EditFile() {
             </Flex>
           </CardHeader>
           <CardBody>
+            {/* Loan Type Select */}
             <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
               <Select
@@ -341,6 +389,8 @@ function EditFile() {
                 ))}
               </Select>
             </FormControl>
+
+            {/* Loan Subtype Select */}
             {selectedLoanType.is_subtype && (
               <FormControl id="loantype_id" mt={4}>
                 <FormLabel>Loan Subtype</FormLabel>
@@ -366,6 +416,8 @@ function EditFile() {
                 </Select>
               </FormControl>
             )}
+
+            {/* File Upload Section */}
             <div>
               {Object.keys(groupedLoanDocuments).map((title_id) => (
                 <div key={title_id} className="my-3">
@@ -415,30 +467,7 @@ function EditFile() {
                                   {fileData[
                                     `${title_id}-${index}-${innerIndex}`
                                   ] ? (
-                                    <div
-                                      className="file-preview text-end"
-                                      style={{
-                                        marginTop: "15px",
-                                        justifyContent: "space-between",
-                                        width: "100%",
-                                        padding: "10px",
-                                        boxSizing: "border-box",
-                                        backgroundColor: "#e8f0fe",
-                                        borderRadius: "8px",
-                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                      }}
-                                    >
-                                      <IconButton
-                                        aria-label="Remove file"
-                                        icon={<CloseIcon />}
-                                        size="sm"
-                                        onClick={() =>
-                                          handleRemoveFile(
-                                            `${title_id}-${index}-${innerIndex}`
-                                          )
-                                        }
-                                        style={{ margin: "0 10px" }}
-                                      />
+                                    <div className="file-preview text-end">
                                       {fileData[
                                         `${title_id}-${index}-${innerIndex}`
                                       ].url ? (
@@ -474,17 +503,7 @@ function EditFile() {
                                           />
                                         )
                                       ) : (
-                                        <span
-                                          style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            width: "100%",
-                                            padding: "20px",
-                                          }}
-                                        >
-                                          <i className="bx bxs-file"></i>
+                                        <span>
                                           {
                                             fileData[
                                               `${title_id}-${index}-${innerIndex}`
@@ -492,32 +511,26 @@ function EditFile() {
                                           }
                                         </span>
                                       )}
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() =>
+                                          handleRemoveFile(
+                                            `${title_id}-${index}-${innerIndex}`
+                                          )
+                                        }
+                                        style={{ margin: "0 10px" }}
+                                      />
                                     </div>
                                   ) : (
                                     <div
-                                      className={`upload-area__drop-zoon drop-zoon ${
-                                        isDragging ? "drop-zoon--over" : ""
-                                      }`}
-                                      onClick={() => {
-                                        const refKey = `${title_id}-${index}-${innerIndex}`;
-                                        const clickFunction =
-                                          fileInputRefs.current[refKey];
-                                        if (
-                                          typeof clickFunction === "function"
-                                        ) {
-                                          clickFunction();
-                                        } else {
-                                          console.error(
-                                            "Ref or current element is null or undefined, or click function is not available"
-                                          );
-                                        }
-                                      }}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexDirection: "column",
-                                      }}
+                                      className="upload-area__drop-zoon drop-zoon"
+                                      onClick={
+                                        fileInputRefs.current[
+                                          `${title_id}-${index}-${innerIndex}`
+                                        ]
+                                      }
                                     >
                                       <span className="drop-zoon__icon">
                                         <i className="bx bxs-file-image"></i>
@@ -538,6 +551,8 @@ function EditFile() {
                 </div>
               ))}
             </div>
+
+            {/* Submit and Cancel Buttons */}
             <div>
               <Button
                 mt={4}
@@ -549,7 +564,6 @@ function EditFile() {
               >
                 Submit
               </Button>
-
               <Button
                 mt={4}
                 colorScheme="yellow"
@@ -567,4 +581,5 @@ function EditFile() {
     </>
   );
 }
+
 export default EditFile;

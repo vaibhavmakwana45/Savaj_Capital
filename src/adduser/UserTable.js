@@ -66,19 +66,79 @@ function UserTable() {
   const filteredUsers =
     searchTerm.length === 0
       ? users
-      : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+      : users.filter((user) => {
+          const searchTermLower = searchTerm.toLowerCase();
+          const usernameIncludes = user.username
+            .toLowerCase()
+            .includes(searchTermLower);
+          const emailIncludes = user.email
+            .toLowerCase()
+            .includes(searchTermLower);
+          const numberIncludes = user.number
+            .toLowerCase()
+            .includes(searchTermLower);
+          const aadharCardIncludes = user.aadhar_card
+            .toString()
+            .includes(searchTermLower); // Directly include Aadhar card in search logic
+          const panCardIncludes =
+            typeof user.pan_card === "string" &&
+            user.pan_card.toLowerCase().includes(searchTermLower);
+
+          return (
+            usernameIncludes ||
+            emailIncludes ||
+            numberIncludes ||
+            aadharCardIncludes ||
+            panCardIncludes
+          );
+        });
+
+  const getCibilScoreCategory = (score) => {
+    if (score >= 300 && score <= 499) {
+      return "Poor";
+    } else if (score >= 500 && score <= 649) {
+      return "Average";
+    } else if (score >= 650 && score <= 749) {
+      return "Good";
+    } else if (score >= 750 && score <= 900) {
+      return "Excellent";
+    } else {
+      return "Unknown";
+    }
+  };
+
+  const getBackgroundColor = (category) => {
+    switch (category) {
+      case "Poor":
+        return "#FFCCCC"; // Light red
+      case "Average":
+        return "#FFF8CC"; // Light yellow
+      case "Good":
+        return "#E5FFCC"; // Light green
+      case "Excellent":
+        return "#CCE5FF"; // Light blue
+      default:
+        return "transparent";
+    }
+  };
+  
+  const getTextColor = (category) => {
+    switch (category) {
+      case "Poor":
+        return "#990000"; // Dark red
+      default:
+        return "black";
+    }
+  };
 
   const allHeaders = [
     "Name",
     "Email",
     "Number",
-    "CreatedAt",
-    "UpdatedAt",
+    "Aadhar Card",
+    "Pan Card",
+    "Cibil Score",
+    "CS Status",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
@@ -86,13 +146,26 @@ function UserTable() {
     item.username,
     item.email,
     item.number,
-    item.createdAt,
-    item.updatedAt,
+    item.aadhar_card,
+    item.pan_card,
+    item.cibil_score,
+    <Flex
+      alignItems="center"
+      backgroundColor={getBackgroundColor(
+        getCibilScoreCategory(item.cibil_score)
+      )}
+      color={getTextColor(getCibilScoreCategory(item.cibil_score))}
+      padding="0.5rem"
+      borderRadius="0.5rem"
+    >
+      {getCibilScoreCategory(item.cibil_score)}
+    </Flex>,
   ]);
 
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
+    console.log('id', id)
   };
 
   const handleEdit = (id) => {
