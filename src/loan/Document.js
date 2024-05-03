@@ -43,6 +43,7 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
+      console.log(url, "url");
       const response = await AxiosInstance.get(url);
       setDocuments(response.data.data || []);
     } catch (error) {
@@ -83,15 +84,19 @@ function Document() {
     setIsDeleteDialogOpen(true);
   };
 
+  // const handleEdit = (id) => {
+  //   setIsEditDocument(true);
+  //   setSelectedDocumentId(id);
+  //   const data = documents.find((document) => document.loan_document_id == id);
+  //   if (data) {
+  //     setSelectedDocument(data.loan_document);
+  //   } else {
+  //     console.error("Data not found for id:", id);
+  //   }
+  // };
+
   const handleEdit = (id) => {
-    setIsEditDocument(true);
-    setSelectedDocumentId(id);
-    const data = documents.find((document) => document.loan_document_id == id);
-    if (data) {
-      setSelectedDocument(data.loan_document);
-    } else {
-      console.error("Data not found for id:", id);
-    }
+    history.push(`/superadmin/editloandocs?id=${id}`);
   };
 
   const deleteDocument = async (loanDocumentId) => {

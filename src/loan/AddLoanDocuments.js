@@ -249,7 +249,7 @@ function AddLoanDocuments() {
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-        <Card overflowX={{ xl: "hidden",scrollbarWidth:"thin" }}>
+        <Card overflowX={{ xl: "hidden", scrollbarWidth: "thin" }}>
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -301,7 +301,7 @@ function AddLoanDocuments() {
                   onBlur={() => {
                     setTimeout(() => {
                       filterToggle();
-                    }, 200); 
+                    }, 200);
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
@@ -476,13 +476,21 @@ function AddLoanDocuments() {
                   </DropdownMenu>
                 </Dropdown>
               </div>
-              <FormControl mt={4} >
+              <FormControl mt={4}>
                 <FormLabel>Documents</FormLabel>
-                <Popover >
+                <Popover>
                   <PopoverTrigger>
                     <Button>Select Documents</Button>
                   </PopoverTrigger>
-                  <PopoverContent className="mx-5" style={{ marginLeft: "15px" ,height:"250px",overflow:"auto",scrollbarWidth:"thin"}}>
+                  <PopoverContent
+                    className="mx-5"
+                    style={{
+                      marginLeft: "15px",
+                      height: "250px",
+                      overflow: "auto",
+                      scrollbarWidth: "thin",
+                    }}
+                  >
                     <PopoverArrow />
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>

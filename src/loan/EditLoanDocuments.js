@@ -23,7 +23,7 @@ import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import toast, { Toaster } from "react-hot-toast";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
@@ -51,6 +51,38 @@ function EditLoanDocuments() {
   const [currentTitle, setCurrentTitle] = useState("");
   const [currentDocs, setCurrentDocs] = useState([]);
   const [selectedDocs, setSelectedDocs] = useState([]);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get("id");
+
+  const [checkSubType, setCheckSunType] = useState("");
+  console.log(checkSubType, "checkSubType");
+  useEffect(() => {
+    const fetchFileDetails = async () => {
+      try {
+        const response = await AxiosInstance.get(
+          `http://localhost:5882/api/loan_docs/doc_edit/${id}`
+        );
+        const data = response.data.data[0];
+        setCheckSunType(response.data.data[0]?.is_subtype);
+
+        // Update the state with fetched data
+        setFormData({
+          ...formData,
+          loan_id: data.loan_id,
+          title_id: data.title_id,
+          loantype_id: data?.loantype_id,
+          is_subtype: data?.is_subtype,
+          document_ids: data?.document_ids,
+        });
+      } catch (error) {
+        console.error("Error fetching file details:", error);
+        toast.error("Failed to load file details.");
+      }
+    };
+
+    fetchFileDetails();
+  }, []);
 
   useEffect(() => {
     const getLoanData = async () => {
@@ -132,81 +164,26 @@ function EditLoanDocuments() {
     setTitles([]);
   }, [formData.loan_id, formData.loantype_id, loanName, subType]);
 
-  // const handleAddTitle = () => {
-  //   if (!currentTitle || selectedDocs.length === 0) {
-  //     toast.error("Please enter a title and select at least one document.");
-  //     return;
-  //   }
-
-  //   const newTitle = {
-  //     title: currentTitle,
-  //     documents: selectedDocs.map((docName) => {
-  //       const selectedDoc = currentDocs.find((doc) => doc.document === docName);
-  //       return {
-  //         document: selectedDoc.document,
-  //         document_id: selectedDoc.document_id,
-  //       };
-  //     }),
-  //   };
-
-  //   const document_ids = newTitle.documents.map((doc) => doc.document_id);
-
-  //   setTitles([...titles, { ...newTitle, document_ids }]);
-  //   setCurrentTitle("");
-  //   setSelectedDocs([]);
-  //   toast.success("Title added successfully!");
-  // };
-
-  const handleAddTitle = () => {
-    if (selectedDocs.length === 0) {
-      toast.error("Please select at least one document.");
-      return;
-    }
-
-    const selectedTitle = titleData.find(
-      (title) => title.title_id === formData.title_id
-    );
-    if (!selectedTitle) {
-      toast.error("Please select a title.");
-      return;
-    }
-
-    const newTitle = {
-      title: selectedTitle.title,
-      title_id: selectedTitle.title_id,
-      documents: selectedDocs.map((docName) => {
-        const selectedDoc = currentDocs.find((doc) => doc.document === docName);
-        return {
-          document: selectedDoc.document,
-          document_id: selectedDoc.document_id,
-        };
-      }),
-    };
-
-    const document_ids = newTitle.documents.map((doc) => doc.document_id);
-
-    setTitles([...titles, { ...newTitle, document_ids }]);
-    setSelectedDocs([]);
-    toast.success("Title added successfully!");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      for (const postData of titles) {
-        const { title_id: title_id, document_ids } = postData;
-        const response = await AxiosInstance.post(`/loan_docs`, {
-          loan_id: formData.loan_id,
-          loantype_id: formData.loantype_id,
-          title_id: title_id,
-          // title_id: formData.title_id,
-          // title: titleName,
-          document_id: document_ids,
-        });
+      // Send a POST request for all titles at once
+      const response = await AxiosInstance.post(`/loan_docs/update`, {
+        title_id: formData.title_id,
+        loan_id: formData.loan_id,
+        loantype_id: formData?.loantype_id,
+        document_id: formData.document_ids, // Pass the selected document IDs directly
+      });
 
+      console.log(response.data, "shivam");
+
+      // Check if any new documents were added successfully
+      if (response.data.success) {
         toast.success("Document created successfully");
+      } else {
+        toast.error("Failed to create document");
       }
 
       toast.success("Loan Added Successfully!");
@@ -218,17 +195,6 @@ function EditLoanDocuments() {
     }
   };
 
-  const filterSelectedDocs = () => {
-    const selectedDocSet = new Set();
-    titles.forEach((title) => {
-      title.documents.forEach((doc) => {
-        selectedDocSet.add(doc.document);
-      });
-    });
-    return currentDocs.filter((doc) => !selectedDocSet.has(doc.document));
-  };
-
-  const [filteredData, setFilteredData] = useState("");
   const [filterOpen, setFilterOpen] = useState("");
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
@@ -261,224 +227,64 @@ function EditLoanDocuments() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
-                <FormLabel>Select Loan</FormLabel>
+              <Select
+                className="mt-3"
+                name="title"
+                placeholder="Select Title"
+                onChange={(e) => {
+                  const selectedTitleId = e.target.value;
+                  setFormData({ ...formData, loan_id: selectedTitleId });
+                }}
+                value={formData.loan_id} // Set the value to the fetched loan_id
+              >
+                {loandata.map((index) => (
+                  <option key={index.loan_id} value={index.loan_id}>
+                    {index.loan}
+                  </option>
+                ))}
+              </Select>
+
+              {checkSubType ? (
                 <Select
-                  name="city"
-                  placeholder="Select Loan-Type"
+                  className="mt-3"
+                  name="title"
+                  placeholder="Select Loan-type"
                   onChange={(e) => {
-                    const selectedLoanId = e.target.value;
-                    setFormData({ ...formData, loan_id: selectedLoanId });
+                    const selectedLoanTypeId = e.target.value;
+                    setFormData({
+                      ...formData,
+                      loantype_id: selectedLoanTypeId,
+                    });
                   }}
+                  value={formData.loantype_id} // Set the value to the fetched loantype_id
                 >
-                  {loandata.map((index) => (
-                    <option key={index.loan_id} value={index.loan_id}>
-                      {index.loan}
+                  {loanType.map((index) => (
+                    <option key={index.loantype_id} value={index.loantype_id}>
+                      {index.loan_type}
                     </option>
                   ))}
                 </Select>
-              </FormControl> */}
-
-              <div className="w-100">
-                <FormLabel>Select Loan</FormLabel>
-
-                <input
-                  style={{
-                    width: "100%",
-                    border: "0.5px solid #333",
-                    padding: "5px",
-                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right center",
-                    backgroundSize: "10px",
-                    backgroundPosition: "right 15px center",
-                    borderRadius: "5px",
-                    borderColor: "inherit",
-                  }}
-                  placeholder="Select Loan-Type"
-                  onFocus={() => {
-                    setFilteredData(loandata);
-                    filterToggle();
-                  }}
-                  onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
-                    setTimeout(() => {
-                      filterToggle();
-                    }, 200); // Adjust the delay as needed
-                  }}
-                  onChange={(e) => {
-                    if (e.target.value.length !== "") {
-                      setFilterOpen(true);
-                    } else {
-                      setFilterOpen(false);
-                    }
-                    const filterData = loandata.filter((item) => {
-                      return item.loan
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase());
-                    });
-                    setSelectedLoan(e.target.value);
-                    setFilteredData(filterData);
-                  }}
-                  value={selectedLoan}
-                />
-                <Dropdown
-                  className="w-100"
-                  isOpen={filterOpen}
-                  toggle={filterToggle}
-                >
-                  <DropdownMenu className="w-100">
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedLoan(item.loan);
-                            setFilterOpen(false);
-                            const selectedLoanId = item.loan_id;
-                            setFormData({
-                              ...formData,
-                              loan_id: selectedLoanId,
-                            });
-                          }}
-                        >
-                          {item.loan}
-                        </DropdownItem>
-                      ))
-                    ) : (
-                      <DropdownItem>No data found</DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
-              {subType === true &&
-              loanName !== "Car" &&
-              loanName !== "CRL-Car Loan" ? (
-                <FormControl id="savajcapitalbranch_name" mt={4}>
-                  <>
-                    <FormLabel>Select Loan-Type</FormLabel>
-                    <Select
-                      name="city"
-                      placeholder="Select Loan-Type"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          loantype_id: e.target.value,
-                        })
-                      }
-                    >
-                      <option key="title" disabled style={{ fontWeight: 800 }}>
-                        {loanName}
-                      </option>
-                      {loanType.map((index) => (
-                        <option
-                          key={index.loantype_id}
-                          value={index.loantype_id}
-                        >
-                          {index.loan_type}
-                        </option>
-                      ))}
-                    </Select>
-                  </>
-                </FormControl>
               ) : null}
 
               {/*======================  Title Dropdawn  ======================= */}
 
-              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
-                <FormLabel>Select Title</FormLabel>
-                <Select
-                  name="title"
-                  placeholder="Select Title"
-                  onChange={(e) => {
-                    const selectedTitleId = e.target.value;
-                    setFormData({ ...formData, title_id: selectedTitleId });
-                  }}
-                >
-                  {titleData.map((index) => (
-                    <option key={index.title_id} value={index.title_id}>
-                      {index.title}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl> */}
+              <Select
+                className="mt-3"
+                name="title"
+                placeholder="Select Title"
+                onChange={(e) => {
+                  const selectedTitleId = e.target.value;
+                  setFormData({ ...formData, title_id: selectedTitleId });
+                }}
+                value={formData.title_id} // Set the value to the fetched title_id
+              >
+                {titleData.map((index) => (
+                  <option key={index.title_id} value={index.title_id}>
+                    {index.title}
+                  </option>
+                ))}
+              </Select>
 
-              <div className="w-100">
-                <FormLabel>Select Loan</FormLabel>
-
-                <input
-                  style={{
-                    width: "100%",
-                    border: "0.5px solid #333",
-                    padding: "5px",
-                    backgroundImage: `url(${
-                      filteerOpen ? upArrow : downArrow
-                    })`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right center",
-                    backgroundSize: "10px",
-                    backgroundPosition: "right 15px center",
-                    borderRadius: "5px",
-                    borderColor: "inherit",
-                  }}
-                  placeholder="Select Loan-Type"
-                  onFocus={() => {
-                    setFiltereedData(titleData);
-                    filteerToggle();
-                  }}
-                  onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
-                    setTimeout(() => {
-                      filteerToggle();
-                    }, 200); // Adjust the delay as needed
-                  }}
-                  onChange={(e) => {
-                    if (e.target.value.length !== "") {
-                      setFilteerOpen(true);
-                    } else {
-                      setFilteerOpen(false);
-                    }
-                    const filterData = titleData.filter((item) => {
-                      return item.title
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase());
-                    });
-                    setSelecteedLoan(e.target.value);
-                    setFiltereedData(filterData);
-                  }}
-                  value={selecteedLoan}
-                />
-                <Dropdown
-                  className="w-100"
-                  isOpen={filteerOpen}
-                  toggle={filteerToggle}
-                >
-                  <DropdownMenu className="w-100">
-                    {filtereedData.length > 0 ? (
-                      filtereedData.map((item, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelecteedLoan(item.title);
-                            setFilteerOpen(false);
-                            const selectedLoanId = item.title_id;
-                            setFormData({
-                              ...formData,
-                              title_id: selectedLoanId,
-                            });
-                          }}
-                        >
-                          {item.title}
-                        </DropdownItem>
-                      ))
-                    ) : (
-                      <DropdownItem>No data found</DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
               <FormControl mt={4}>
                 <FormLabel>Documents</FormLabel>
                 <Popover>
@@ -490,7 +296,7 @@ function EditLoanDocuments() {
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>
                     <PopoverBody>
-                      <CheckboxGroup
+                      {/* <CheckboxGroup
                         colorScheme="blue"
                         value={selectedDocs}
                         onChange={(values) => setSelectedDocs(values)}
@@ -502,17 +308,38 @@ function EditLoanDocuments() {
                             </Checkbox>
                           ))}
                         </Stack>
+                      </CheckboxGroup> */}
+                      <CheckboxGroup
+                        colorScheme="blue"
+                        value={formData.document_ids}
+                        onChange={(values) =>
+                          setFormData({ ...formData, document_ids: values })
+                        }
+                      >
+                        <Stack>
+                          {currentDocs.map((doc) => (
+                            <Checkbox
+                              key={doc.id}
+                              value={doc.document_id}
+                              isChecked={formData.document_ids.includes(
+                                doc.document_id
+                              )}
+                            >
+                              {doc.document}
+                            </Checkbox>
+                          ))}
+                        </Stack>
                       </CheckboxGroup>
                     </PopoverBody>
                   </PopoverContent>
                 </Popover>
               </FormControl>
 
-              <Button mt={4} colorScheme="blue" onClick={handleAddTitle}>
+              {/* <Button mt={4} colorScheme="blue" onClick={handleAddTitle}>
                 Add Title
-              </Button>
+              </Button> */}
               <>
-                {titles.length > 0 && (
+                {/* {titles.length > 0 && (
                   <Text
                     fontSize="xl"
                     color={textColor}
@@ -521,7 +348,7 @@ function EditLoanDocuments() {
                   >
                     Titles and Documents
                   </Text>
-                )}
+                )} */}
                 <Flex direction="row" pt={{ base: "20px", md: "10px" }}>
                   {titles.map((title, index) => (
                     <Flex direction="column" key={index} mr={4}>

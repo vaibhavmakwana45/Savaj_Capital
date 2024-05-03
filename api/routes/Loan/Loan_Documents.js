@@ -280,4 +280,110 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/doc_edit/:loan_document_id", async (req, res) => {
+  try {
+    const loan_document_id = req.params.loan_document_id;
+
+    // Fetch loan documents
+    const data = await Loan_Documents.aggregate([
+      {
+        $match: { loan_document_id: loan_document_id },
+      },
+    ]);
+
+    // Extract document IDs from the fetched loan documents
+    const documentIds = data.reduce((ids, doc) => {
+      ids.push(...doc?.document_ids);
+      return ids;
+    }, []);
+
+    // Fetch document names based on the document IDs
+    const documents = await AddDocuments.find({
+      document_id: { $in: documentIds },
+    });
+
+    // Map document names to loan documents
+    const enrichedData = data.map((doc) => {
+      if (!doc.document_ids || doc.document_ids.length === 0) {
+        return { ...doc, document_names: [] }; // No document IDs found
+      }
+
+      const documentNames = doc.document_ids.map((id) => {
+        const document = documents.find((doc) => doc.document_id === id);
+        return document ? document.document : null;
+      });
+      return { ...doc, document_names: documentNames };
+    });
+
+    for (let i = 0; i < enrichedData.length; i++) {
+      const title_id = enrichedData[i].title_id;
+      const loan_id = enrichedData[i].loan_id;
+      const loantype_id = enrichedData[i]?.loantype_id;
+
+      const titleData = await Title.findOne({ title_id: title_id });
+      const loanData = await Loan.findOne({ loan_id: loan_id });
+      const loanTypeData = await Loan_Type.findOne({
+        loantype_id: loantype_id,
+      });
+      enrichedData[i].title = titleData?.title;
+      enrichedData[i].is_subtype = loanData?.is_subtype;
+      enrichedData[i].loan = loanData?.loan;
+      enrichedData[i].loan_type = loanTypeData?.loan_type;
+    }
+
+    const count = enrichedData.length;
+
+    res.json({
+      // statusCode: 200,
+      success: true,
+      data: enrichedData,
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.post("/update", async (req, res) => {
+  try {
+    const { loan_id, loantype_id, document_id, title_id } = req.body;
+
+    // Find the existing document based on loan_id, loantype_id (if provided), and title
+    const existingDocument = await Loan_Documents.findOne({
+      loan_id,
+      ...(loantype_id && { loantype_id }),
+      title_id: { $regex: new RegExp(`^${title_id}$`, "i") },
+    });
+
+    if (existingDocument) {
+      existingDocument.document_ids = document_id; // Replace old document_ids with new ones
+      existingDocument.updatedAt = moment()
+        .utcOffset(330)
+        .format("YYYY-MM-DD HH:mm:ss");
+
+      await existingDocument.save();
+
+      return res.json({
+        success: true,
+        data: existingDocument,
+        message: "Document IDs updated successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
 module.exports = router;
