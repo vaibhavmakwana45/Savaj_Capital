@@ -37,7 +37,7 @@ function EditFile() {
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const [datachanged, setDataChanged] = useState(false)
+  const [datachanged, setDataChanged] = useState(false);
 
   useEffect(() => {
     const fetchFileDetails = async () => {
@@ -72,8 +72,7 @@ function EditFile() {
           }, {});
 
           setFileData(initialFileData);
-          setDataChanged(true)
-          
+          setDataChanged(true);
 
           const selectedLoan = loanType.find(
             (loan) => loan.loan_id === details.loan_id
@@ -103,39 +102,34 @@ function EditFile() {
     fetchFileDetails();
   }, [loanType]);
 
-  useEffect(()=>{
-
+  useEffect(() => {
     setTimeout(() => {
-      
-
-    const keys = Object.keys(fileData);
-
-    if (keys.length != 0) {
-      // Get the keys of fileData
       const keys = Object.keys(fileData);
 
-      // // Iterate over the keys and run processURL for each URL
+      if (keys.length != 0) {
+        // Get the keys of fileData
+        const keys = Object.keys(fileData);
 
-      keys.forEach((key) => {
-        const url = fileData[key]?.url;
-        const name = fileData[key]?.name;
-        const type = fileData[key]?.type;
+        // // Iterate over the keys and run processURL for each URL
 
-        const event = {
-          url: url,
-          name: name,
-          type: type
-        };
+        keys.forEach((key) => {
+          const url = fileData[key]?.url;
+          const name = fileData[key]?.name;
+          const type = fileData[key]?.type;
 
-        const innerIndex = key.split("-")[1];
+          const event = {
+            url: url,
+            name: name,
+            type: type,
+          };
 
-        handleFileInputChange(event, event.name, undefined, innerIndex, true );
-      });
-    }
+          const innerIndex = key.split("-")[1];
 
-  }, 500);
-
-  }, [datachanged])
+          handleFileInputChange(event, event.name, undefined, innerIndex, true);
+        });
+      }
+    }, 500);
+  }, [datachanged]);
 
   useEffect(() => {
     const fetchLoanType = async () => {
@@ -188,16 +182,18 @@ function EditFile() {
   };
 
   const handleFileInputChange = (event, title_id, index, innerIndex, edit) => {
-
-    console.log(event, title_id, index, innerIndex, edit, "+++++")
+    console.log(event, title_id, index, innerIndex, edit, "+++++");
 
     const file = edit == undefined ? event.target.files[0] : event;
     if (file) {
-      const documentId = edit == undefined ? groupedLoanDocuments[title_id][index].document_ids[innerIndex] : title_id;
+      const documentId =
+        edit == undefined
+          ? groupedLoanDocuments[title_id][index].document_ids[innerIndex]
+          : title_id;
       const key = `${title_id}-${index || 0}-${innerIndex}`;
       const filePreview = {
         name: file.name,
-        url:  edit == undefined ? URL.createObjectURL(file) : file.url,
+        url: edit == undefined ? URL.createObjectURL(file) : file.url,
         type: file.type,
         documentId: documentId,
         key: key,
@@ -217,7 +213,7 @@ function EditFile() {
     }
   };
 
-  console.log(fileData, "afsdkjaldskfldkfjldkfj")
+  console.log(fileData, "afsdkjaldskfldkfjldkfj");
 
   const handleRemoveFile = (key) => {
     setFileData((prevData) => {
@@ -277,7 +273,10 @@ function EditFile() {
   useEffect(() => {
     const newFileInputRefs = {};
     Object.keys(groupedLoanDocuments).forEach((title_id) => {
-      console.log(groupedLoanDocuments[title_id], "groupedLoanDocuments[title_id]")
+      console.log(
+        groupedLoanDocuments[title_id],
+        "groupedLoanDocuments[title_id]"
+      );
       groupedLoanDocuments[title_id].forEach((documentGroup, index) => {
         documentGroup.document_ids.forEach((documentId, innerIndex) => {
           const refKey = `${title_id}-${index}-${innerIndex}`;
