@@ -24,6 +24,7 @@ import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import axios from "axios";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
@@ -108,45 +109,93 @@ function ViewFile() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [statusReason, setStatusReason] = useState("");
-  const [statusImage, setStatusImage] = useState("");
+  const [statusImage, setStatusImage] = useState(null);
+  const [statusImageFile, setStatusImageFile] = useState(null);
+
+  const uploadImageToCDN = async (file) => {
+    const formData = new FormData();
+    formData.append("b_video", file);
+
+    try {
+      const response = await axios.post(
+        "https://cdn.dohost.in/image_upload.php/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response.data && response.data.iamge_path) {
+        const imageName = response.data.iamge_path.split("/").pop();
+        setStatusImage(imageName);
+
+        return imageName;
+      } else {
+        throw new Error("Image path is missing in the response");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const response = await AxiosInstance.get(
           "/file_upload/file_upload/" + id
         );
         setFileData(response.data.data.file);
-        console.log("response.data.data.file", response.data.data.file);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching file data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   const handleAddStatus = async () => {
-    try {
-      const statusData = {
-        file_id: fileData.file_id,
-        user_id: fileData.user_id,
-        reason: statusReason,
-        status_img: statusImage,
-      };
+    let imgUrl = statusImage;
+    if (statusImageFile) {
+      imgUrl = (await uploadImageToCDN(statusImageFile)) || imgUrl;
+    }
 
+    const statusData = {
+      file_id: fileData.file_id,
+      user_id: fileData.user_id,
+      reason: statusReason,
+      status_img: imgUrl,
+    };
+
+    try {
       await AxiosInstance.post("/file-status/file-status", statusData);
       console.log("Status added successfully!");
       onClose();
+      setStatusReason("");
     } catch (error) {
       console.error("Error adding status:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Loader
+          type="spinner-circle"
+          bgColor={"#3182CE"}
+          color={"black"}
+          size={50}
+        />
+      </Flex>
+    );
+  }
 
   return (
     <div>
@@ -307,11 +356,10 @@ function ViewFile() {
               />
             </FormControl>
             <FormControl mt={4}>
-              <FormLabel>Status Image URL (optional)</FormLabel>
+              <FormLabel>Status Image (optional)</FormLabel>
               <Input
-                placeholder="Enter image URL"
-                value={statusImage}
-                onChange={(e) => setStatusImage(e.target.value)}
+                type="file"
+                onChange={(e) => setStatusImageFile(e.target.files[0])}
               />
             </FormControl>
           </ModalBody>
