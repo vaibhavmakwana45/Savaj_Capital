@@ -1,61 +1,52 @@
-
 /* media  */
 
 /* 1680 */
-@media (max-width: 1700px) {
-}
+@media (max-width: 1700px) {}
 
 /* 1500 */
-@media (max-width: 1680px) {
-}
+@media (max-width: 1680px) {}
 
 /* 1440 */
-@media (max-width: 1449px) {
-}
+@media (max-width: 1449px) {}
 
 /* 1280 */
-@media (max-width: 1439px) {
-}
+@media (max-width: 1439px) {}
 
 /* 992 */
-@media (max-width: 1279px) {
-}
+@media (max-width: 1279px) {}
 
 /* 768 */
-@media (max-width: 991px) {
-}
+@media (max-width: 991px) {}
 
 /* 576 */
-@media (max-width: 767px) {
-}
+@media (max-width: 767px) {}
 
 /* 525 */
 @media (max-width: 575px) {
-    .navbar-responsive{
+    .navbar-responsive {
         left: 16px !important;
     }
 }
 
 /* 480 */
-@media (max-width: 524px) {
-}
+@media (max-width: 524px) {}
 
 /* 425 */
-@media (max-width: 479px) {
-}
+@media (max-width: 479px) {}
 
 /* 375 */
-@media (max-width: 424px) {
- 
-}
+@media (max-width: 424px) {}
 
 /* 320 */
-@media (max-width: 374px) {
-}
+@media (max-width: 374px) {}
 
 /* 280 */
 @media (max-width: 319px) {
-    .navbar-responsive{
+    .navbar-responsive {
         left: 16px !important;
     }
+}
+
+.css-xahsar-with-width {
+    width: calc(100% - 100px) !important;
 }

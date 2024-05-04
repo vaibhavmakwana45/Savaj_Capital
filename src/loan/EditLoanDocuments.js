@@ -62,8 +62,6 @@ function EditLoanDocuments() {
         const response = await AxiosInstance.get(`/loan_docs/doc_edit/${id}`);
         const data = response.data.data[0];
         setCheckSunType(response.data.data[0]?.is_subtype);
-
-        // Update the state with fetched data
         setFormData({
           ...formData,
           loan_id: data.loan_id,
@@ -211,8 +209,8 @@ function EditLoanDocuments() {
 
   return (
     <>
-      <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-        <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+      <Flex direction="column" pt={{ md: "75px" }}>
+        <Card overflowX={{ sm: "scroll", xl: "hidden" ,overflow:"auto"}}>
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -231,7 +229,8 @@ function EditLoanDocuments() {
                   const selectedTitleId = e.target.value;
                   setFormData({ ...formData, loan_id: selectedTitleId });
                 }}
-                value={formData.loan_id} // Set the value to the fetched loan_id
+                style={{ borderColor: "black", color: "black",opacity:"10" }}
+                value={formData.loan_id} 
               >
                 {loandata.map((index) => (
                   <option key={index.loan_id} value={index.loan_id}>
@@ -253,6 +252,7 @@ function EditLoanDocuments() {
                       loantype_id: selectedLoanTypeId,
                     });
                   }}
+                  style={{ borderColor: "black", color: "black",opacity:"10" }}
                   value={formData.loantype_id} // Set the value to the fetched loantype_id
                 >
                   {loanType.map((index) => (
@@ -274,6 +274,7 @@ function EditLoanDocuments() {
                   const selectedTitleId = e.target.value;
                   setFormData({ ...formData, title_id: selectedTitleId });
                 }}
+                style={{ borderColor: "black",opacity:"10", color: "black" }}
                 value={formData.title_id} // Set the value to the fetched title_id
               >
                 {titleData.map((index) => (
@@ -289,7 +290,14 @@ function EditLoanDocuments() {
                   <PopoverTrigger>
                     <Button>Select Documents</Button>
                   </PopoverTrigger>
-                  <PopoverContent style={{ marginLeft: "15px" }}>
+                  <PopoverContent
+                    style={{
+                      marginLeft: "15px",
+                      height: "250px",
+                      overflow: "auto",
+                      scrollbarWidth: "thin",
+                    }}
+                  >
                     <PopoverArrow />
                     <PopoverCloseButton />
                     <PopoverHeader>Select the documents:</PopoverHeader>

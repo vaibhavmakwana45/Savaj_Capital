@@ -1,5 +1,7 @@
 /*eslint-disable*/
 import {
+  ArrowBackIcon,
+  ArrowRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   HamburgerIcon,
@@ -30,7 +32,7 @@ import {
   renderViewRTL,
 } from "components/Scrollbar/Scrollbar";
 import { HSeparator } from "components/Separator/Separator";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
 import logo1 from "../../assets/svg/logo.svg";
@@ -41,6 +43,14 @@ import {
   DropdownToggle,
 } from "reactstrap";
 import { useHistory } from "react-router-dom";
+import {
+  ArrowBackIos,
+  ArrowForwardIos,
+  ArrowLeftOutlined,
+  ArrowRight,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+} from "@mui/icons-material";
 
 // FUNCTIONS
 
@@ -59,12 +69,16 @@ function Sidebar(props) {
 
   // Function to toggle dropdown state for a specific key
   const toggleDropdown = (key) => {
-    setDropdownStates(prevStates => ({
+    setDropdownStates((prevStates) => ({
       ...prevStates,
-      [key]: !prevStates[key] // Toggle the state for the specified dropdown key
+      [key]: !prevStates[key], // Toggle the state for the specified dropdown key
     }));
   };
 
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
   const createLinks = (routes) => {
     let activeBg = useColorModeValue("white", "navy.700");
     let inactiveBg = useColorModeValue("white", "navy.700");
@@ -167,12 +181,14 @@ function Sidebar(props) {
                           {prop.icon}
                         </IconBox>
                       )}
-                      <Text color={activeColor} my="auto" fontSize="sm">
-                        {document.documentElement.dir === "rtl"
-                          ? prop.rtlName
-                          : prop.name}{" "}
-                        <ChevronDownIcon />
-                      </Text>
+                      {isOpen && (
+                        <Text color={activeColor} my="auto" fontSize="sm">
+                          {document.documentElement.dir === "rtl"
+                            ? prop.rtlName
+                            : prop.name}{" "}
+                          <ChevronDownIcon />
+                        </Text>
+                      )}
                     </Flex>
                   </DropdownToggle>
                   <DropdownMenu>
@@ -235,11 +251,13 @@ function Sidebar(props) {
                       {prop.icon}
                     </IconBox>
                   )}
-                  <Text color={activeColor} my="auto" fontSize="sm">
-                    {document.documentElement.dir === "rtl"
-                      ? prop.rtlName
-                      : prop.name}
-                  </Text>
+                  {isOpen && (
+                    <Text color={activeColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}
+                    </Text>
+                  )}
                 </Flex>
               </Button>
             )
@@ -300,12 +318,14 @@ function Sidebar(props) {
                         {prop.icon}
                       </IconBox>
                     )}
-                    <Text color={inactiveColor} my="auto" fontSize="sm">
-                      {document.documentElement.dir === "rtl"
-                        ? prop.rtlName
-                        : prop.name}{" "}
-                      <ChevronDownIcon />
-                    </Text>
+                    {isOpen && (
+                      <Text color={inactiveColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}{" "}
+                        <ChevronDownIcon />
+                      </Text>
+                    )}
                   </Flex>
                 </DropdownToggle>
                 <DropdownMenu>
@@ -367,11 +387,13 @@ function Sidebar(props) {
                     {prop.icon}
                   </IconBox>
                 )}
-                <Text color={inactiveColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
+                {isOpen && (
+                  <Text color={inactiveColor} my="auto" fontSize="sm">
+                    {document.documentElement.dir === "rtl"
+                      ? prop.rtlName
+                      : prop.name}
+                  </Text>
+                )}
               </Flex>
             </Button>
           )}
@@ -382,27 +404,81 @@ function Sidebar(props) {
   const { logo, routes } = props;
 
   var links = <>{createLinks(routes)}</>;
-  //  BRAND
-  //  Chakra Color Mode
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarRadius = "20px";
   let sidebarMargins = "0px";
   var brand = (
-    <Box>
-      <img src={logo1} alt="Logo" style={{ paddingBottom: "10px" }} />
-      <HSeparator />
+    // <Box style={{display:"flex",position:"relative",zIndex:"9"}}>
+    //   <img src={logo1} alt="Logo" style={{ paddingBottom: "10px",width:"50%" }} />
+    //   <HSeparator />
+    // </Box>
+    // <Box position="relative">
+    //   <img
+    //     src={logo1}
+    //     alt="Logo"
+    //     style={{ paddingBottom: "10px", width: "50%" }}
+    //   />
+
+    //   {/* Button to toggle sidebar visibility */}
+    //   <Button
+    //     position="absolute"
+    //     top="20px"
+    //     right="20px"
+    //     onClick={toggleSidebar}
+    //   >
+    //     <HamburgerIcon />
+    //   </Button>
+
+    //   {/* Sidebar content */}
+    //   {/* Add your existing sidebar content here */}
+    // </Box>
+    <Box position="relative">
+      {/* Logo */}
+      <Box textAlign="center" mt="20px">
+        <img src={logo1} alt="Logo" width="80%" />
+      </Box>
     </Box>
   );
+
+  useEffect(() => {
+    const elements = document.getElementsByClassName("css-xahsar");
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (!isOpen) {
+        element.classList.add("css-xahsar-with-width");
+      } else {
+        element.classList.remove("css-xahsar-with-width");
+      }
+    }
+  }, [isOpen]);
 
   // SIDEBAR
   return (
     <Box ref={mainPanel}>
-      <Box display={{ sm: "none", xl: "block" }} position="fixed">
+      <Box
+        display={{ sm: "none", xl: "block" }}
+        position="fixed"
+        width={isOpen ? "260px" : "100px"}
+      >
+        <Button
+          position="absolute"
+          top="20px"
+          left={isOpen ? "92%" : "80%"}
+          zIndex={99}
+          onClick={toggleSidebar}
+          style={{ borderRadius: "50%", padding: "0" }}
+        >
+          {isOpen ? (
+            <KeyboardArrowLeft fontSize="10px" />
+          ) : (
+            <KeyboardArrowRight fontSize="10px" />
+          )}
+        </Button>
         <Box
           bg={sidebarBg}
           transition={variantChange}
-          w="260px"
-          maxW="260px"
+          // w="260px"
+          // maxW="260px"
           ms={{
             sm: "16px",
           }}
@@ -410,8 +486,8 @@ function Sidebar(props) {
             sm: "16px",
           }}
           h="calc(100vh - 32px)"
-          ps="20px"
-          pe="20px"
+          ps={isOpen && "20px"}
+          pe={isOpen && "20px"}
           m={sidebarMargins}
           filter="drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
           borderRadius={sidebarRadius}
@@ -443,7 +519,6 @@ function Sidebar(props) {
     </Box>
   );
 }
-
 
 // FUNCTIONS
 
