@@ -130,7 +130,7 @@ function ViewFile() {
 
     fetchData();
   }, []);
-  
+
   const handleAddStatus = async () => {
     try {
       const statusData = {

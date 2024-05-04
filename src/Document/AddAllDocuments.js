@@ -59,6 +59,59 @@ function AddAllDocuments() {
     getDocumentData();
   }, []);
 
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [totalPages, setTotalPages] = useState(1);
+  // const itemsPerPage = 10; // Set the number of items per page
+
+  // const getDocumentData = async () => {
+  //   try {
+  //     const response = await AxiosInstance.get("/document/abc", {
+  //       params: { page: currentPage, limit: itemsPerPage },
+  //     });
+
+  //     if (response.data.success) {
+  //       setDocuments(response.data.data);
+  //       setTotalPages(response.data.totalPages);
+  //       setLoading(false);
+  //     } else {
+  //       alert("Please try again later...!");
+  //     }
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.error(error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   getDocumentData();
+  // }, [currentPage]); // Fetch data whenever currentPage changes
+
+  // const fllteredDocument =
+  //   searchTerm.length === 0
+  //     ? documents
+  //     : documents.filter((doc) =>
+  //         doc.document.toLowerCase().includes(searchTerm.toLowerCase())
+  //       );
+  // useEffect(() => {
+  //   getDocumentData();
+  // }, []);
+
+  // const handlePageChange = (pageNumber) => {
+  //   setCurrentPage(pageNumber);
+  // };
+
+  // const previousPage = () => {
+  //   if (currentPage > 1) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  // };
+
+  // const nextPage = () => {
+  //   if (currentPage < totalPages) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
+
   const allHeaders = ["Document", "create date", "update date", "Action"];
 
   const formattedData = fllteredDocument.map((bank) => [
@@ -74,16 +127,13 @@ function AddAllDocuments() {
   const cancelRef = React.useRef();
   const deleteDocument = async (documentId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/document/${documentId}`
-      );
+      const response = await AxiosInstance.delete(`/document/${documentId}`);
       getDocumentData();
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
         toast.success("Document deleted successfully!");
-      } else if(response.data.statusCode === 201){
+      } else if (response.data.statusCode === 201) {
         toast.error(response.data.message);
-
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -109,15 +159,11 @@ function AddAllDocuments() {
     }
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   const handleAddDocument = async (document) => {
     try {
-      const response = await AxiosInstance.post(
-        "/document",
-        { document }
-      );
+      const response = await AxiosInstance.post("/document", { document });
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsDocument(false);
@@ -209,6 +255,12 @@ function AddAllDocuments() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
+              // currentPage={currentPage}
+              // totalPages={totalPages}
+              // handlePageChange={handlePageChange}
+              // previousPage={previousPage}
+              // nextPage={nextPage}
             />
           </CardBody>
         </Card>
