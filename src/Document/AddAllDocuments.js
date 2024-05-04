@@ -59,58 +59,6 @@ function AddAllDocuments() {
     getDocumentData();
   }, []);
 
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(1);
-  // const itemsPerPage = 10; // Set the number of items per page
-
-  // const getDocumentData = async () => {
-  //   try {
-  //     const response = await AxiosInstance.get("/document/abc", {
-  //       params: { page: currentPage, limit: itemsPerPage },
-  //     });
-
-  //     if (response.data.success) {
-  //       setDocuments(response.data.data);
-  //       setTotalPages(response.data.totalPages);
-  //       setLoading(false);
-  //     } else {
-  //       alert("Please try again later...!");
-  //     }
-  //   } catch (error) {
-  //     setLoading(false);
-  //     console.error(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   getDocumentData();
-  // }, [currentPage]); // Fetch data whenever currentPage changes
-
-  // const fllteredDocument =
-  //   searchTerm.length === 0
-  //     ? documents
-  //     : documents.filter((doc) =>
-  //         doc.document.toLowerCase().includes(searchTerm.toLowerCase())
-  //       );
-  // useEffect(() => {
-  //   getDocumentData();
-  // }, []);
-
-  // const handlePageChange = (pageNumber) => {
-  //   setCurrentPage(pageNumber);
-  // };
-
-  // const previousPage = () => {
-  //   if (currentPage > 1) {
-  //     setCurrentPage(currentPage - 1);
-  //   }
-  // };
-
-  // const nextPage = () => {
-  //   if (currentPage < totalPages) {
-  //     setCurrentPage(currentPage + 1);
-  //   }
-  // };
 
   const allHeaders = ["Document", "create date", "update date", "Action"];
 
@@ -256,11 +204,6 @@ function AddAllDocuments() {
               handleEdit={handleEdit}
               handleRow={handleRow}
               showPagination={true}
-              // currentPage={currentPage}
-              // totalPages={totalPages}
-              // handlePageChange={handlePageChange}
-              // previousPage={previousPage}
-              // nextPage={nextPage}
             />
           </CardBody>
         </Card>

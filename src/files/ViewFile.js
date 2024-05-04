@@ -220,7 +220,8 @@ function ViewFile() {
                         <b>Loan User : {fileData?.username}</b>
                       </FormLabel>
                     </u>
-                    <div
+                    {/* Progress */}
+                    {/* <div
                       className="container-fluid progress-bar-area"
                       style={{ height: "20%" }}
                     >
@@ -277,7 +278,7 @@ function ViewFile() {
                           </ul>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                   <div>
                     {fileData?.documents && (
