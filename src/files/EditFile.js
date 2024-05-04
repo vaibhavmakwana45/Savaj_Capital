@@ -36,7 +36,7 @@ function EditFile() {
   const fileInputRefs = useRef({});
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
-
+  const [isDragging, setIsDragging] = useState(false);
   const [datachanged, setDataChanged] = useState(false);
 
   useEffect(() => {
@@ -56,21 +56,24 @@ function EditFile() {
             file_path: `${CDN_BASE_URL}${document.file_path}`,
           }));
 
+          
           const initialFileData = documentsWithCDN.reduce((acc, doc, index) => {
-            const key = `${doc.title_id}-${index}`;
+            const key = `${doc.key}`;
             return {
               ...acc,
               [key]: {
                 url: doc.file_path,
                 name: doc.title_id,
+                key: doc.key,
                 type: doc.file_path.endsWith(".pdf")
-                  ? "application/pdf"
-                  : "image",
+                ? "application/pdf"
+                : "image",
                 new: false,
               },
             };
           }, {});
-
+          
+          console.log(documentsWithCDN, "documentsWithCDN", initialFileData)
           setFileData(initialFileData);
           setDataChanged(true);
 
@@ -100,26 +103,25 @@ function EditFile() {
     };
 
     fetchFileDetails();
-  }, [loanType]);
+  }, [loanType, loanSubType]);
 
   useEffect(() => {
     setTimeout(() => {
       const keys = Object.keys(fileData);
 
       if (keys.length != 0) {
-        // Get the keys of fileData
         const keys = Object.keys(fileData);
 
-        // // Iterate over the keys and run processURL for each URL
-
-        keys.forEach((key) => {
-          const url = fileData[key]?.url;
-          const name = fileData[key]?.name;
-          const type = fileData[key]?.type;
+        keys.forEach((key1) => {
+          const url = fileData[key1]?.url;
+          const name = fileData[key1]?.name;
+          const type = fileData[key1]?.type;
+          const key = fileData[key1]?.key;
 
           const event = {
             url: url,
             name: name,
+            key: key,
             type: type,
           };
 
@@ -182,15 +184,14 @@ function EditFile() {
   };
 
   const handleFileInputChange = (event, title_id, index, innerIndex, edit) => {
-    console.log(event, title_id, index, innerIndex, edit, "+++++");
 
     const file = edit == undefined ? event.target.files[0] : event;
     if (file) {
       const documentId =
         edit == undefined
-          ? groupedLoanDocuments[title_id][index].document_ids[innerIndex]
+          ? groupedLoanDocuments[title_id][index]?.document_ids[innerIndex]
           : title_id;
-      const key = `${title_id}-${index || 0}-${innerIndex}`;
+      const key = event.key;
       const filePreview = {
         name: file.name,
         url: edit == undefined ? URL.createObjectURL(file) : file.url,
@@ -418,7 +419,7 @@ function EditFile() {
 
             {/* File Upload Section */}
             <div>
-              {Object.keys(groupedLoanDocuments).map((title_id) => (
+              {Object.entries(groupedLoanDocuments).map(([title_id], index) => (
                 <div key={title_id} className="my-3">
                   <h2 className="mx-4">
                     <i>
@@ -428,122 +429,148 @@ function EditFile() {
                     </i>
                   </h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                    {groupedLoanDocuments[title_id].map(
-                      (documentGroup, index) => (
-                        <div key={`${title_id}-${index}`} className="d-flex ">
-                          {documentGroup.document_names.map(
-                            (documentName, innerIndex) => (
-                              <div
-                                key={`${title_id}-${index}-${innerIndex}`}
-                                className="upload-area col-xl-12 col-md-12 col-sm-12"
-                              >
-                                <Text
-                                  fontSize="xl"
-                                  className="mx-3"
+                    {groupedLoanDocuments[title_id].map((documentGroup) =>
+                      documentGroup.document_names.map(
+                        (documentName, innerIndex) => (
+                          <div
+                            key={`${title_id}-${index}-${innerIndex}`}
+                            className="upload-area col-xl-12 col-md-12 col-sm-12"
+                          >
+                            <Text
+                              fontSize="xl"
+                              className="mx-3"
+                              style={{
+                                fontSize: "12px",
+                                textTransform: "capitalize",
+                              }}
+                            >
+                              {documentName}
+                            </Text>
+                            <div className="upload-option">
+                              <input
+                                type="file"
+                                id={`fileInput-${title_id}-${index}-${innerIndex}`}
+                                className="drop-zone__file-input"
+                                onChange={(event) =>
+                                  handleFileInputChange(
+                                    event,
+                                    title_id,
+                                    index,
+                                    innerIndex
+                                  )
+                                }
+                                style={{ display: "none" }}
+                              />
+                              {fileData[
+                                `${title_id}-${index}-${innerIndex}`
+                              ] ? (
+                                <div
+                                  className="file-preview text-end"
                                   style={{
-                                    fontSize: "12px",
-                                    textTransform: "capitalize",
+                                    marginTop: "15px",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                    padding: "10px",
+                                    backgroundColor: "#e8f0fe",
+                                    borderRadius: "8px",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                   }}
                                 >
-                                  {documentName}
-                                </Text>
-                                <div className="upload-option">
-                                  <input
-                                    type="file"
-                                    id={`fileInput-${title_id}-${index}-${innerIndex}`}
-                                    className="drop-zoon__file-input"
-                                    onChange={(event) =>
-                                      handleFileInputChange(
-                                        event,
-                                        title_id,
-                                        index,
-                                        innerIndex
+                                  <IconButton
+                                    aria-label="Remove file"
+                                    icon={<CloseIcon />}
+                                    size="sm"
+                                    onClick={() =>
+                                      handleRemoveFile(
+                                        `${title_id}-${index}-${innerIndex}`
                                       )
                                     }
-                                    style={{ display: "none" }}
+                                    style={{ margin: "0 10px" }}
                                   />
-
                                   {fileData[
                                     `${title_id}-${index}-${innerIndex}`
-                                  ] ? (
-                                    <div className="file-preview text-end">
-                                      {fileData[
-                                        `${title_id}-${index}-${innerIndex}`
-                                      ].url ? (
+                                  ].url ? (
+                                    fileData[
+                                      `${title_id}-${index}-${innerIndex}`
+                                    ].type === "application/pdf" ? (
+                                      <embed
+                                        src={
+                                          fileData[
+                                            `${title_id}-${index}-${innerIndex}`
+                                          ].url
+                                        }
+                                        type="application/pdf"
+                                        style={{
+                                          width: "100%",
+                                          minHeight: "100px",
+                                        }}
+                                      />
+                                    ) : (
+                                      <img
+                                        src={
+                                          fileData[
+                                            `${title_id}-${index}-${innerIndex}`
+                                          ].url
+                                        }
+                                        alt="Preview"
+                                        style={{
+                                          width: 100,
+                                          height: 100,
+                                          margin: "auto",
+                                          borderRadius: "4px",
+                                        }}
+                                      />
+                                    )
+                                  ) : (
+                                    <span
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        width: "100%",
+                                        padding: "20px",
+                                      }}
+                                    >
+                                      <i className="bx bxs-file"></i>
+                                      {
                                         fileData[
                                           `${title_id}-${index}-${innerIndex}`
-                                        ].type === "application/pdf" ? (
-                                          <embed
-                                            src={
-                                              fileData[
-                                                `${title_id}-${index}-${innerIndex}`
-                                              ].url
-                                            }
-                                            type="application/pdf"
-                                            style={{
-                                              width: "100%",
-                                              minHeight: "100px",
-                                            }}
-                                          />
-                                        ) : (
-                                          <img
-                                            src={
-                                              fileData[
-                                                `${title_id}-${index}-${innerIndex}`
-                                              ].url
-                                            }
-                                            alt="Preview"
-                                            style={{
-                                              width: 100,
-                                              height: 100,
-                                              margin: "auto",
-                                              borderRadius: "4px",
-                                            }}
-                                          />
-                                        )
-                                      ) : (
-                                        <span>
-                                          {
-                                            fileData[
-                                              `${title_id}-${index}-${innerIndex}`
-                                            ].name
-                                          }
-                                        </span>
-                                      )}
-                                      <IconButton
-                                        aria-label="Remove file"
-                                        icon={<CloseIcon />}
-                                        size="sm"
-                                        onClick={() =>
-                                          handleRemoveFile(
-                                            `${title_id}-${index}-${innerIndex}`
-                                          )
-                                        }
-                                        style={{ margin: "0 10px" }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div
-                                      className="upload-area__drop-zoon drop-zoon"
-                                      onClick={
-                                        fileInputRefs.current[
-                                          `${title_id}-${index}-${innerIndex}`
-                                        ]
+                                        ].name
                                       }
-                                    >
-                                      <span className="drop-zoon__icon">
-                                        <i className="bx bxs-file-image"></i>
-                                      </span>
-                                      <p className="drop-zoon__paragraph">
-                                        Drop your file here or click to browse
-                                      </p>
-                                    </div>
+                                    </span>
                                   )}
                                 </div>
-                              </div>
-                            )
-                          )}
-                        </div>
+                              ) : (
+                                <div
+                                  className={`upload-area__drop-zone drop-zone ${
+                                    isDragging ? "drop-zone--over" : ""
+                                  }`}
+                                  onClick={() => {
+                                    document
+                                      .getElementById(
+                                        `fileInput-${title_id}-${index}-${innerIndex}`
+                                      )
+                                      .click();
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    flexDirection: "column",
+                                  }}
+                                >
+                                  <span className="drop-zone__icon">
+                                    <i className="bx bxs-file-image"></i>
+                                  </span>
+                                  <p className="drop-zone__paragraph">
+                                    Drop your file here or click to browse
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
                       )
                     )}
                   </div>

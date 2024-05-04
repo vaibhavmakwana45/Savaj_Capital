@@ -10,6 +10,9 @@ const File_Uplode = require("../models/File/File_Uplode");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 const axios = require("axios");
+const Loan = require("../models/Loan/Loan");
+const Loan_Type = require("../models/Loan/Loan_Type");
+// const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -406,4 +409,58 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
   }
 });
 
-module.exports = router;
+router.get("/customer/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+
+    // Fetch user data just once
+    const user_data = await AddUser.findOne({ user_id: user_id });
+    const username = user_data ? user_data.username : null; // Assuming 'username' is the field name
+
+    // Continue with the file upload data aggregation
+    var data = await File_Uplode.aggregate([
+      {
+        $match: { user_id: user_id },
+      },
+    ]);
+
+    // Process each file upload data for additional details
+    for (let i = 0; i < data.length; i++) {
+      const loan_id = data[i].loan_id;
+      const loantype_id = data[i].loantype_id;
+      
+      if (loan_id) {
+        const loan_data = await Loan.findOne({ loan_id: loan_id });
+        if (loan_data) {
+          data[i].loan = loan_data.loan;
+        }
+      }
+
+      if (loantype_id) {
+        const loan_type_data = await Loan_Type.findOne({
+          loantype_id: loantype_id,
+        });
+        if (loan_type_data) {
+          data[i].loan_type = loan_type_data.loan_type;
+        }
+      }
+    }
+
+    const count = data.length;
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      username: username, // Return username directly here
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+
+module.exports = router;  

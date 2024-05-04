@@ -161,13 +161,13 @@ router.get("/file_upload/:file_id", async (req, res) => {
       loantype_id: fileData?.loantype_id,
     });
 
-    const savajcapitalbranch = await SavajCapital_Branch.findOne({
-      branch_id: fileData.branch_id,
-    });
+    // const savajcapitalbranch = await SavajCapital_Branch.findOne({
+    //   branch_id: fileData.branch_id,
+    // });
 
-    const savajcapitalbranchuser = await SavajCapital_User.findOne({
-      branchuser_id: fileData.branchuser_id,
-    });
+    // const savajcapitalbranchuser = await SavajCapital_User.findOne({
+    //   branchuser_id: fileData.branchuser_id,
+    // });
 
     const documentDetails = await Promise.all(
       fileData.documents.map(async (doc) => {
@@ -219,8 +219,8 @@ router.get("/file_upload/:file_id", async (req, res) => {
         loan: loan.loan,
         loan_type: loanType?.loan_type,
         username: user?.username,
-        branch_name: savajcapitalbranch.branch_name,
-        full_name: savajcapitalbranchuser.full_name,
+        // branch_name: savajcapitalbranch.branch_name,
+        // full_name: savajcapitalbranchuser.full_name,
         documents: groupedFiles, // Include grouped documents
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,

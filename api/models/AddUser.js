@@ -23,8 +23,10 @@ const UserSchema = new mongoose.Schema({
   country: {
     type: String,
   },
-
   unit_address: {
+    type: String,
+  },
+  reference: {
     type: String,
   },
   gst_number: {
