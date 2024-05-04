@@ -8,3 +8,4 @@ export const breakpoints = createBreakpoints({
   xl: "1100px",
   "2xl": "1680px",
 });
+  
