@@ -49,11 +49,14 @@ import AssignBank from "savajcapitaldashboard/AssignBank/AssignBank";
 import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
 import AddAllDocuments from "Document/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
-
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
 import AssignedBankUsers from "addbank/AssignedBankUsers";
 import Title from "./Title/Title"; // Assignes file (savaj user)
 import SavajAssignFile from "addsavajcapitalbranch/SavajAssignFile";
+import CustomerFile from "userdashboard/CustomerFiles/CustomerFile";
+import CreateCustomerFile from "userdashboard/CustomerFiles/CreateCustomerFile";
+import EditFileCustomer from "userdashboard/CustomerFiles/EditFileCustomer";
+import DetailCustomerFilePage from "userdashboard/CustomerFiles/DetailCustomerFilePage";
 
 var dashRoutes = [
   //superadmin
@@ -577,12 +580,50 @@ var dashRoutes = [
   //user
   {
     path: "/dashboard",
-    name: "User Dashboard",
+    name: "Dashboard",
     icon: <HomeIcon color="inherit" />,
     component: UserDashboard,
+    hideInCustomer: true,
     layout: "/user",
   },
-
+  {
+    path: "/userfile",
+    name: "User File",
+    icon: <PersonIcon color="inherit" />,
+    component: CustomerFile,
+    layout: "/user",
+    hideInCustomer: false,
+    hideInSResponsivrUser: true,
+    hideInBResponsivrUser: true,
+    hideInSResponsive: true,
+  },
+  {
+    path: "/adduserfile",
+    name: "Add user file",
+    component: CreateCustomerFile,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "adduserfile",
+  },
+  {
+    path: "/edituserfile",
+    name: "Edit user file",
+    component: EditFileCustomer,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "edituserfile",
+  },
+  {
+    path: "/viewuserfile",
+    name: "View user file",
+    component: DetailCustomerFilePage,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "viewuserfile",
+  },
   // Title
   {
     path: "/title",

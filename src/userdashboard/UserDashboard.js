@@ -212,7 +212,7 @@ export default function UserDashboard() {
           </Flex>
         </Card>
       </SimpleGrid>
-      <Grid
+      {/* <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}
         templateRows={{ lg: "repeat(2, auto)" }}
       gap='20px'>
@@ -393,7 +393,7 @@ export default function UserDashboard() {
             </Table>
           </Box>
         </Card>
-      </Grid>
+      </Grid> */}
     </Flex>
   );
 }

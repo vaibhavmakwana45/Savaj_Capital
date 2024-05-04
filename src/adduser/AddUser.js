@@ -52,6 +52,7 @@ function AddUser(props) {
     city: "",
     unit_address: "",
     gst_number: "",
+    reference: "",
     password: "",
   });
 
@@ -78,6 +79,7 @@ function AddUser(props) {
           state_code: user.state_code,
           unit_address: user.unit_address,
           gst_number: user.gst_number,
+          reference: user.reference,
           password: "",
         };
         setSelectedState(user.state_code);
@@ -134,6 +136,7 @@ function AddUser(props) {
             gst_number: formData.gst_number,
             state: formData.state,
             city: formData.city,
+            reference: formData.reference,
             state_code: selectedState,
             country_code: selectedCountry,
           },
@@ -403,6 +406,16 @@ function AddUser(props) {
                   onChange={handleChange}
                   value={formData.unit_address}
                   placeholder="Enter unit address"
+                />
+              </FormControl>
+              <FormControl id="reference" mt={4} isRequired>
+                <FormLabel>Reference</FormLabel>
+                <Input
+                  name="reference"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.reference}
+                  placeholder="Enter reference"
                 />
               </FormControl>
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>

@@ -820,13 +820,18 @@ export function SidebarResponsive(props) {
 
   const newroutes = routes.filter((route) => route.hideInSResponsive);
   const bankUser = routes.filter((route) => route.hideInBResponsivrUser);
-  const hideInSResponsivrUser = routes.filter(
+  const ScUser = routes.filter(
     (route) => route.hideInSResponsivrUser
+  );
+  const Customer = routes.filter(
+    (route) => route.hideInCustomer
   );
 
   var links = <>{createLinks(newroutes)}</>;
-  var scbranchlink = <>{createLinks(hideInSResponsivrUser)}</>;
+  var scbranchlink = <>{createLinks(ScUser)}</>;
   var banklink = <>{createLinks(bankUser)}</>;
+  var customerlink = <>{createLinks(Customer)}</>;
+
 
   //  BRAND
 
@@ -889,6 +894,9 @@ export function SidebarResponsive(props) {
                 )}
                 {location.pathname.includes("/bankuser") && (
                   <Box>{banklink}</Box>
+                )}
+                {location.pathname.includes("/user") && (
+                  <Box>{customerlink}</Box>
                 )}
               </Stack>
             </Box>
