@@ -442,12 +442,21 @@ function Sidebar(props) {
 
   useEffect(() => {
     const elements = document.getElementsByClassName("css-xahsar");
+    const elements2 = document.getElementsByClassName("navbar-responsive");
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (!isOpen) {
         element.classList.add("css-xahsar-with-width");
       } else {
         element.classList.remove("css-xahsar-with-width");
+      }
+    }
+    for (let i = 0; i < elements2.length; i++) {
+      const element = elements2[i];
+      if (!isOpen) {
+        element.classList.add("navbar-responsive-with-width");
+      } else {
+        element.classList.remove("navbar-responsive-with-width");
       }
     }
   }, [isOpen]);
@@ -616,6 +625,8 @@ export function SidebarResponsive(props) {
                     border: "none",
                     outline: "none",
                     boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
+                    position:"relative",
+                    zIndex:"9999"
                   }}
                   isOpen={isOpenDropdown}
                   toggle={toggle}
@@ -895,18 +906,13 @@ export function SidebarResponsive(props) {
 
   const newroutes = routes.filter((route) => route.hideInSResponsive);
   const bankUser = routes.filter((route) => route.hideInBResponsivrUser);
-  const ScUser = routes.filter(
-    (route) => route.hideInSResponsivrUser
-  );
-  const Customer = routes.filter(
-    (route) => route.hideInCustomer
-  );
+  const ScUser = routes.filter((route) => route.hideInSResponsivrUser);
+  const Customer = routes.filter((route) => route.hideInCustomer);
 
   var links = <>{createLinks(newroutes)}</>;
   var scbranchlink = <>{createLinks(ScUser)}</>;
   var banklink = <>{createLinks(bankUser)}</>;
   var customerlink = <>{createLinks(Customer)}</>;
-
 
   //  BRAND
 

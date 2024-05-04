@@ -50,3 +50,7 @@
 .css-xahsar-with-width {
     width: calc(100% - 100px) !important;
 }
+
+.navbar-responsive-with-width {
+    width: calc(100% - 150px) !important;
+}

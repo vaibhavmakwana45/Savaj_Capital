@@ -220,6 +220,64 @@ function ViewFile() {
                         <b>Loan User : {fileData?.username}</b>
                       </FormLabel>
                     </u>
+                    <div
+                      className="container-fluid progress-bar-area"
+                      style={{ height: "20%" }}
+                    >
+                      <div className="row  ">
+                        <div
+                          className="col"
+                          style={{ position: "relative", zIndex: "9" }}
+                        >
+                          <ul className="progressbar">
+                            <li id="step1" className="complete">
+                              <div className="circle-container">
+                                <a href="#">
+                                  <div className="circle-button"></div>
+                                </a>
+                              </div>
+                              Step 1
+                            </li>
+
+                            <li id="step2" className="complete">
+                              <div className="circle-container">
+                                <a href="#">
+                                  <div className="circle-button"></div>
+                                </a>
+                              </div>
+                              Step 2
+                            </li>
+
+                            <li id="step3" className="active">
+                              <div className="circle-container">
+                                <a href="#">
+                                  <div className="circle-button"></div>
+                                </a>
+                              </div>
+                              Step 3
+                            </li>
+
+                            <li id="step4">
+                              <div className="circle-container">
+                                <a href="#">
+                                  <div className="circle-button"></div>
+                                </a>
+                              </div>
+                              Step 4
+                            </li>
+
+                            <li id="step5">
+                              <div className="circle-container">
+                                <a href="#">
+                                  <div className="circle-button"></div>
+                                </a>
+                              </div>
+                              Step 5
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div>
                     {fileData?.documents && (
