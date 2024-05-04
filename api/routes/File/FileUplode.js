@@ -75,6 +75,7 @@ router.get("/", async (req, res) => {
 
       if (userData) {
         data[i].user_username = userData.username;
+        data[i].pan_card = userData.pan_card;
       }
       if (loanData) {
         data[i].loan = loanData.loan;

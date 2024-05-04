@@ -56,13 +56,10 @@ function EditLoanDocuments() {
   const id = searchParams.get("id");
 
   const [checkSubType, setCheckSunType] = useState("");
-  console.log(checkSubType, "checkSubType");
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await AxiosInstance.get(
-          `http://localhost:5882/api/loan_docs/doc_edit/${id}`
-        );
+        const response = await AxiosInstance.get(`/loan_docs/doc_edit/${id}`);
         const data = response.data.data[0];
         setCheckSunType(response.data.data[0]?.is_subtype);
 
@@ -176,8 +173,6 @@ function EditLoanDocuments() {
         loantype_id: formData?.loantype_id,
         document_id: formData.document_ids, // Pass the selected document IDs directly
       });
-
-      console.log(response.data, "shivam");
 
       // Check if any new documents were added successfully
       if (response.data.success) {

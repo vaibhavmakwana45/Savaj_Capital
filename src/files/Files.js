@@ -44,12 +44,12 @@ import AxiosInstance from "config/AxiosInstance";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick, handleDelete } = props;
+  const { id, file, handleEditClick, handleDelete, pan_card } = props;
   const history = useHistory();
   const [open, setOpen] = useState(false);
 
   const [fileData, setFileData] = useState([]);
-  const [filePercentageData, setFilePercentageData] = useState("");
+  let [filePercentageData, setFilePercentageData] = useState("");
   const fetchFileData = async () => {
     try {
       const file_id = file.file_id;
@@ -69,6 +69,56 @@ function Row(props) {
   useEffect(() => {
     fetchFileData();
   }, [file]);
+
+  useEffect(() => {
+    $(".progress").each(function () {
+      var value = parseInt($(this).attr("data-value"));
+      var progressBars = $(this).find(".progress-bar");
+
+      progressBars.removeClass("red yellow purple blue green");
+
+      if (value >= 0 && value < 20) {
+        progressBars.addClass("red");
+      } else if (value >= 20 && value < 40) {
+        progressBars.addClass("yellow");
+      } else if (value >= 40 && value < 60) {
+        progressBars.addClass("purple");
+      } else if (value >= 60 && value < 80) {
+        progressBars.addClass("blue");
+      } else if (value >= 80 && value <= 100) {
+        progressBars.addClass("green");
+      }
+
+      if (value <= 50) {
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      } else {
+        progressBars.eq(1).css("transform", "rotate(180deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
+      }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
+    });
+  }, [filePercentageData]);
+
+  const handleClick = () => {
+    AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
+      .then((response) => {
+        // Handle the response if needed
+        console.log("Response:", response.data);
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error("Error:", error);
+      });
+  };
 
   return (
     <React.Fragment>
@@ -91,6 +141,7 @@ function Row(props) {
         </TableCell>
         <TableCell align="">{file?.user_username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{file?.pan_card}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
         <TableCell align="center">
@@ -111,6 +162,28 @@ function Row(props) {
             </div>
           )}
         </TableCell>
+
+        <TableCell>
+          {file.loan_id === "1714582963176" ? (
+            <Button
+              style={{
+                padding: "5px",
+                borderRadius: "5px",
+                backgroundColor: "#ededed",
+                width: "100%",
+              }}
+              onClick={(e) => {
+                e.stopPropagation(e.target.value);
+                handleClick(pan_card);
+              }}
+            >
+              IDB
+            </Button>
+          ) : (
+            "-"
+          )}
+        </TableCell>
+
         <TableCell align="">
           <Flex>
             <IconButton
@@ -145,7 +218,7 @@ function Row(props) {
           >
             <Box sx={{ margin: 1 }} className="d-flex gap-4 collapse-table">
               <Paper
-              className="col-8 col-md-8 col-sm-12 paper"
+                className="col-8 col-md-8 col-sm-12 paper"
                 elevation={3}
                 sx={{ borderRadius: 3 }}
                 style={{
@@ -160,7 +233,10 @@ function Row(props) {
                       <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                         Document
                       </TableCell>
-                      <TableCell className="status" sx={{ fontWeight: "bold", fontSize: "1rem", }}>
+                      <TableCell
+                        className="status"
+                        sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                      >
                         Status
                       </TableCell>
                     </TableRow>
@@ -171,7 +247,7 @@ function Row(props) {
                         <TableCell component="th" scope="row">
                           {documentRow?.name} ({documentRow?.title})
                         </TableCell>
-                        <TableCell >
+                        <TableCell>
                           {documentRow?.status === "Uploaded" ? (
                             <span
                               style={{ color: "green", fontWeight: "bold" }}
@@ -194,7 +270,7 @@ function Row(props) {
                 </Table>
               </Paper>
               <Paper
-              className="col-4 col-md-4 col-sm-12 paper"
+                className="col-4 col-md-4 col-sm-12 paper"
                 elevation={3}
                 sx={{ borderRadius: 3 }}
                 style={{
@@ -215,10 +291,10 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                      <TableRow >
-                        <TableCell>{file?.createdAt}</TableCell>
-                        <TableCell>{file?.updatedAt}</TableCell>
-                      </TableRow>
+                    <TableRow>
+                      <TableCell>{file?.createdAt}</TableCell>
+                      <TableCell>{file?.updatedAt}</TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </Paper>
@@ -284,83 +360,8 @@ export default function CollapsibleTable() {
     fetchFiles();
   }, []);
 
-  $(function () {
-    $(".progress").each(function () {
-      var value = parseInt($(this).attr("data-value"));
-      var progressBars = $(this).find(".progress-bar");
+  // Inside the Row component
 
-      progressBars.removeClass("red yellow purple blue green");
-
-      if (value >= 0 && value < 20) {
-        progressBars.addClass("red");
-      } else if (value >= 20 && value < 40) {
-        progressBars.addClass("yellow");
-      } else if (value >= 40 && value < 60) {
-        progressBars.addClass("purple");
-      } else if (value >= 60 && value < 80) {
-        progressBars.addClass("blue");
-      } else if (value >= 80 && value <= 100) {
-        progressBars.addClass("green");
-      }
-
-      if (value <= 50) {
-        progressBars
-          .eq(1)
-          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
-      } else {
-        progressBars.eq(1).css("transform", "rotate(180deg)");
-        progressBars
-          .eq(0)
-          .css(
-            "transform",
-            "rotate(" + percentageToDegrees(value - 50) + "deg)"
-          );
-      }
-    });
-
-    function percentageToDegrees(percentage) {
-      return (percentage / 100) * 360;
-    }
-  });
-
-  // $(function () {
-  //   $(".progress").each(function () {
-  //     var value = parseInt($(this).attr("data-value"));
-  //     var progressBars = $(this).find(".progress-bar");
-
-  //     progressBars.removeClass("red yellow purple blue green");
-
-  //     if (value >= 0 && value < 20) {
-  //       progressBars.addClass("red");
-  //     } else if (value >= 20 && value < 40) {
-  //       progressBars.addClass("yellow");
-  //     } else if (value >= 40 && value < 60) {
-  //       progressBars.addClass("purple");
-  //     } else if (value >= 60 && value < 80) {
-  //       progressBars.addClass("blue");
-  //     } else if (value >= 80 && value <= 100) {
-  //       progressBars.addClass("green");
-  //     }
-
-  //     if (value <= 50) {
-  //       progressBars
-  //         .eq(1)
-  //         .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
-  //     } else {
-  //       progressBars.eq(1).css("transform", "rotate(180deg)");
-  //       progressBars
-  //         .eq(0)
-  //         .css(
-  //           "transform",
-  //           "rotate(" + percentageToDegrees(value - 50) + "deg)"
-  //         );
-  //     }
-  //   });
-
-  //   function percentageToDegrees(percentage) {
-  //     return (percentage / 100) * 360;
-  //   }
-  // });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
@@ -434,6 +435,9 @@ export default function CollapsibleTable() {
                       File Id
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Pan Card
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
@@ -441,6 +445,9 @@ export default function CollapsibleTable() {
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Status
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      IDB
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Action
@@ -453,6 +460,7 @@ export default function CollapsibleTable() {
                       key={file._id}
                       file={file}
                       id={file.file_id}
+                      pan_card={file.pan_card}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
                       handleDelete={handleDelete}
