@@ -74,7 +74,7 @@
 //             <Td colSpan={allHeaders.length + 1} textAlign="center">
 //               <Loader
 //                 type="spinner-circle"
-//                 bgColor={"#3182CE"}
+//                 bgColor={"#b19552"}
 //                 color={"black"}
 //                 size={50}
 //               />
@@ -326,7 +326,7 @@ const TableComponent = ({
               <Td colSpan={allHeaders.length + 1} textAlign="center">
                 <Loader
                   type="spinner-circle"
-                  bgColor={"#3182CE"}
+                  bgColor={"#b19552"}
                   color={"black"}
                   size={50}
                 />

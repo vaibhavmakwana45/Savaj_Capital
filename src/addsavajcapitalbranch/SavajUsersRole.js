@@ -219,7 +219,10 @@ function SavajUsersRole() {
                   onClick={() => {
                     setIsAddRole(true);
                   }}
-                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Role
                 </Button>
@@ -319,6 +322,10 @@ function SavajUsersRole() {
                     setIsAddRole(false);
                     setSelectedRoleId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -327,6 +334,10 @@ function SavajUsersRole() {
                   onClick={() => handleAddRole(role)}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedRoleId != "" ? "Updated Now" : "Add Now"}
                 </Button>

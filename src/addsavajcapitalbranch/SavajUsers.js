@@ -207,11 +207,21 @@ function Tables() {
                 <Button
                   onClick={navigateToAnotherPageUser}
                   colorScheme="blue"
-                  style={{ marginRight: "10px" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginRight: "10px",
+                  }}
                 >
                   Add User
                 </Button>
-                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                <Button
+                  onClick={navigateToAnotherPage}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
+                >
                   Add Branch
                 </Button>
                 {/* <Menu>
@@ -264,7 +274,7 @@ function Tables() {
               handleEdit={handleEdit}
               handleRow={handleRow}
             /> */}
-               <TableComponent
+            <TableComponent
               // documents={documents}
               banks={banks}
               data={formattedData}
@@ -349,7 +359,14 @@ function Tables() {
               </AlertDialogBody>
 
               <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={() => setIsAddRole(false)}>
+                <Button
+                  ref={cancelRef}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
+                  onClick={() => setIsAddRole(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -357,6 +374,10 @@ function Tables() {
                   onClick={() => handleAddRole(role)}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Now
                 </Button>

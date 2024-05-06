@@ -162,21 +162,12 @@ router.get("/file_upload/:file_id", async (req, res) => {
       loantype_id: fileData?.loantype_id,
     });
 
-    // const savajcapitalbranch = await SavajCapital_Branch.findOne({
-    //   branch_id: fileData.branch_id,
-    // });
-
-    // const savajcapitalbranchuser = await SavajCapital_User.findOne({
-    //   branchuser_id: fileData.branchuser_id,
-    // });
-
     const documentDetails = await Promise.all(
       fileData.documents.map(async (doc) => {
         const loanDocument = await Loan_Documents.findOne({
           loan_document_id: doc.loan_document_id,
         });
 
-        // Fetch title name using title_id
         const title = await Title.findOne({ title_id: doc.title_id });
 
         const documentName = await AddDocuments.findOne({
@@ -191,15 +182,11 @@ router.get("/file_upload/:file_id", async (req, res) => {
             : "Document name not found",
           doc_id: doc.doc_id,
           title_id: doc.title_id,
-          // loan_document: loanDocument
-          //   ? loanDocument.loan_document
-          //   : "Document name not found",
           title: title ? title.title : "Title not found",
         };
       })
     );
 
-    // Group documents by title names
     const groupedFiles = documentDetails.reduce((acc, curr) => {
       if (!acc[curr.title]) {
         acc[curr.title] = [];
@@ -207,6 +194,45 @@ router.get("/file_upload/:file_id", async (req, res) => {
       acc[curr.title].push(curr);
       return acc;
     }, {});
+
+    let arrayGroupFile = [];
+    for (const key in groupedFiles) {
+      if (groupedFiles.hasOwnProperty.call(groupedFiles, key)) {
+        const element = groupedFiles[key];
+        const titleData = await Loan_Documents.findOne({
+          loan_id: fileData.loan_id,
+          loantype_id: fileData?.loantype_id,
+          title_id: element[0].title_id,
+        });
+
+        let index = titleData ? titleData.index : null;
+
+        const data = {
+          index: index,
+          title: key,
+          value: element,
+        };
+        arrayGroupFile.push(data);
+      }
+    }
+
+    const filteredArrayGroupFile = arrayGroupFile.filter(
+      (item) => item.index !== null
+    );
+
+    function compareIndexes(a, b) {
+      if (a.index === null && b.index === null) return 0;
+      if (a.index === null) return 1;
+      if (b.index === null) return -1;
+      return parseInt(a.index) - parseInt(b.index);
+    }
+
+    const sortedGroupFiles = filteredArrayGroupFile.sort(compareIndexes);
+
+    const formattedData = {};
+    sortedGroupFiles.forEach((item) => {
+      formattedData[item.title] = item.value;
+    });
 
     const responseData = {
       file: {
@@ -220,9 +246,7 @@ router.get("/file_upload/:file_id", async (req, res) => {
         loan: loan.loan,
         loan_type: loanType?.loan_type,
         username: user?.username,
-        // branch_name: savajcapitalbranch.branch_name,
-        // full_name: savajcapitalbranchuser.full_name,
-        documents: groupedFiles, // Include grouped documents
+        documents: formattedData,
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,
         __v: fileData.__v,
@@ -642,6 +666,31 @@ router.get("/testfile/:file_id", async (req, res) => {
         file_id: file_id,
         document_percentage: parseInt(diff),
       },
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/get_steps/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const file = await File_Uplode.findOne({ file_id });
+    const loan = await Loan.findOne({ loan_id: file.loan_id });
+    const steps = [];
+
+    for (const loan_step_id of loan.loan_step_id) {
+      const step = await Loan_Step.findOne({ loan_step_id });
+      steps.push(step);
+    }
+
+    res.json({
+      statusCode: 200,
+      data: steps,
       message: "Read All Request",
     });
   } catch (error) {

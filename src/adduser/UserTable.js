@@ -225,6 +225,7 @@ function UserTable() {
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
                   className="adduser-btn"
+                  style={{background: "#b19552"}}
                 >
                   Add Customer
                 </Button>

@@ -199,7 +199,7 @@ export default function AdminNavbar(props) {
       pt="8px"
       top="18px"
       w={{ sm: "calc(100vw - 30px)", xl: "calc(100vw - 75px - 275px)" }}
-      style={{ zIndex: "9", backgroundColor: "#3182CE" }}
+      style={{ zIndex: "9", backgroundColor: "transparent" }}
     >
       <Flex
         w="100%"

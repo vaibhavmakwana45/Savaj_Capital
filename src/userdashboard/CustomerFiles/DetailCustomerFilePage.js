@@ -222,7 +222,7 @@ function DetailCustomerFilePage() {
         <Flex justify="center" align="center" height="100vh">
           <Loader
             type="spinner-circle"
-            bgColor={"#3182CE"}
+            bgColor={"#b19552"}
             color={"black"}
             size={50}
           />

@@ -180,7 +180,10 @@ function Title() {
                   onClick={() => {
                     setIsTitle(true);
                   }}
-                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Title
                 </Button>
@@ -280,11 +283,14 @@ function Title() {
                     setIsTitle(false);
                     setSelectedTitleId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
                 <Button
-                  colorScheme="blue"
                   onClick={() => {
                     if (selectedTitleId) {
                       editDocument(selectedTitle);
@@ -294,6 +300,10 @@ function Title() {
                   }}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedTitleId ? "Update Now" : "Add Now"}
                 </Button>

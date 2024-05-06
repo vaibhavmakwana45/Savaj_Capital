@@ -177,11 +177,24 @@ function SavajCapitalBranchTable() {
                 <Button
                   onClick={navigateToAnotherPage}
                   colorScheme="blue"
-                  style={{ marginRight: "10px" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 10,
+                  }}
                 >
                   Add Branch
                 </Button>
-                <Button onClick={navigateToAnotherPageUser} colorScheme="blue">
+                <Button
+                  onClick={navigateToAnotherPageUser}
+                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 10,
+                    marginLeft: 8,
+                  }}
+                >
                   Add User
                 </Button>
                 {/* <Menu>

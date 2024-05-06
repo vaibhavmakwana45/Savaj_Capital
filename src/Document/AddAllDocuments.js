@@ -59,7 +59,6 @@ function AddAllDocuments() {
     getDocumentData();
   }, []);
 
-
   const allHeaders = ["Document", "create date", "update date", "Action"];
 
   const formattedData = fllteredDocument.map((bank) => [
@@ -185,7 +184,7 @@ function AddAllDocuments() {
                   onClick={() => {
                     setIsDocument(true);
                   }}
-                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552", color: "#fff" }}
                 >
                   Add Documents
                 </Button>
@@ -288,6 +287,10 @@ function AddAllDocuments() {
                     setIsDocument(false);
                     setSelectedDocumetId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -302,6 +305,10 @@ function AddAllDocuments() {
                   }}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedDocumetId ? "Update Now" : "Add Now"}
                 </Button>

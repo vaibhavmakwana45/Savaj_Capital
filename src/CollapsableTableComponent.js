@@ -49,7 +49,7 @@ const CollapsableTableComponent = ({
             <Td colSpan={allHeaders.length + 1} textAlign="center">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />
@@ -93,7 +93,7 @@ const CollapsableTableComponent = ({
 
                     <IconButton
                       aria-label="Edit bank"
-                      icon={<EditIcon />}
+                      icon={<EditIcon color="#b19552" />}
                       onClick={() => handleEdit(rowData[0])}
                     />
                   </Flex>

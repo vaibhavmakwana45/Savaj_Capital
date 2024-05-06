@@ -114,11 +114,11 @@ function BankAssignFile() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Assuming you have bankUser and selectedBankId defined somewhere
-  
-  const filteredUsers = bankUser.filter(user =>
+
+  const filteredUsers = bankUser.filter((user) =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -162,7 +162,7 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl> */}
-  
+
             <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
               <input
@@ -259,15 +259,23 @@ function BankAssignFile() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{ marginTop: 40 }}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginTop: 40,
+                }}
               >
                 Assign
               </Button>
 
               <Button
                 mt={4}
-                colorScheme="yellow"
-                style={{ marginTop: 40, marginLeft: 8 }}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                  marginTop: 40,
+                  marginLeft: 8,
+                }}
                 onClick={() => history.push("/superadmin/bank")}
               >
                 Cancel

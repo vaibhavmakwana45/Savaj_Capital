@@ -24,12 +24,13 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import AxiosInstance from "config/AxiosInstance";
+import logo from "../../assets/svg/big logo.svg";
 
 function SignUp() {
   const history = useHistory();
   const bgForm = useColorModeValue("white", "navy.800");
   const textColor = useColorModeValue("gray.700", "white");
-  const titleColor = useColorModeValue("gray.700", "blue.500");
+  const titleColor = useColorModeValue("gray.700", "#b19552");
   const [showPassword, setShowPassword] = useState(false);
 
   const [userDetails, setUserDetails] = useState({
@@ -86,7 +87,7 @@ function SignUp() {
           mt={{ md: "14px" }}
           borderRadius={{ base: "0px", md: "20px" }}
         >
-          <Box w="100vw" h="100vh" bg="blue.500" opacity="0.8"></Box>
+          <Box w="100vw" h="100vh" bg="#b19552" opacity="0.8"></Box>
         </Box>
         {/* <Flex
         direction='column'
@@ -126,6 +127,16 @@ function SignUp() {
               "unset"
             )}
           >
+            <Text
+              fontSize="xl"
+              color={textColor}
+              fontWeight="bold"
+              textAlign="center"
+              mb="22px"
+              p={3}
+            >
+              <img src={logo} />
+            </Text>
             <Text
               fontSize="xl"
               color={textColor}

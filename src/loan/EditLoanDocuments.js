@@ -210,7 +210,7 @@ function EditLoanDocuments() {
   return (
     <>
       <Flex direction="column" pt={{ md: "75px" }}>
-        <Card overflowX={{ sm: "scroll", xl: "hidden" ,overflow:"auto"}}>
+        <Card overflowX={{ sm: "scroll", xl: "hidden", overflow: "auto" }}>
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" alignItems="center">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -229,8 +229,8 @@ function EditLoanDocuments() {
                   const selectedTitleId = e.target.value;
                   setFormData({ ...formData, loan_id: selectedTitleId });
                 }}
-                style={{ borderColor: "black", color: "black",opacity:"10" }}
-                value={formData.loan_id} 
+                style={{ borderColor: "black", color: "black", opacity: "10" }}
+                value={formData.loan_id}
               >
                 {loandata.map((index) => (
                   <option key={index.loan_id} value={index.loan_id}>
@@ -252,7 +252,11 @@ function EditLoanDocuments() {
                       loantype_id: selectedLoanTypeId,
                     });
                   }}
-                  style={{ borderColor: "black", color: "black",opacity:"10" }}
+                  style={{
+                    borderColor: "black",
+                    color: "black",
+                    opacity: "10",
+                  }}
                   value={formData.loantype_id} // Set the value to the fetched loantype_id
                 >
                   {loanType.map((index) => (
@@ -274,7 +278,7 @@ function EditLoanDocuments() {
                   const selectedTitleId = e.target.value;
                   setFormData({ ...formData, title_id: selectedTitleId });
                 }}
-                style={{ borderColor: "black",opacity:"10", color: "black" }}
+                style={{ borderColor: "black", opacity: "10", color: "black" }}
                 value={formData.title_id} // Set the value to the fetched title_id
               >
                 {titleData.map((index) => (
@@ -368,15 +372,23 @@ function EditLoanDocuments() {
                   type="submit"
                   isLoading={loading}
                   loadingText="Submitting"
-                  style={{ marginTop: 40 }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 40,
+                  }}
                 >
                   Submit
                 </Button>
 
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 40, marginLeft: 8 }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 40,
+                    marginLeft: 8,
+                  }}
                   onClick={() => history.push("/superadmin/loan")}
                 >
                   Cancel
