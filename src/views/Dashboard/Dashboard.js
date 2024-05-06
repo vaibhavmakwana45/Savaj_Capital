@@ -58,15 +58,24 @@ export default function Dashboard() {
   const [apiData, setApiData] = useState({
     banks: 0,
     users: 0,
-    savajcapitalbrnach: 0,
+    savajcapitalbranch: 0,
     superadmin: 0,
+    loans: [],
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await AxiosInstance.get("/allcount/data-count");
-        setApiData(response.data);
+        const responses = await Promise.all([
+          AxiosInstance.get("/allcount/data-count"),
+          AxiosInstance.get("/allcount/loan-files"),
+        ]);
+        console.log(responses, "responses");
+        setApiData((prev) => ({
+          ...prev,
+          ...responses[0].data,
+          loans: responses[1].data,
+        }));
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -382,6 +391,57 @@ export default function Dashboard() {
             </Text> */}
           </Flex>
         </Card>
+        {apiData.loans.map((loan) => (
+          <Card
+            key={loan._id}
+            minH="125px"
+            style={{ cursor: "pointer" }}
+            onClick={() => history.push(`/superadmin/filetable`)}
+          >
+            <Flex direction="column">
+              <Flex
+                flexDirection="row"
+                align="center"
+                justify="center"
+                w="100%"
+                mb="25px"
+              >
+                <Stat me="auto">
+                  <StatLabel
+                    fontSize="xs"
+                    color="gray.400"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                  >
+                    {/* Check if loanType is not 'Unknown' to determine subtype */}
+                    {loan.loanType !== "Unknown"
+                      ? `${loan.loan} (${loan.loanType})`
+                      : loan.loan}
+                  </StatLabel>
+                  <Flex>
+                    <StatNumber
+                      fontSize="lg"
+                      color={textColor}
+                      fontWeight="bold"
+                      style={{ paddingTop: "10px" }}
+                    >
+                      {loan.fileCount}
+                    </StatNumber>
+                  </Flex>
+                </Stat>
+                <IconBox
+                  borderRadius="50%"
+                  as="box"
+                  h={"45px"}
+                  w={"45px"}
+                  bg={iconBlue}
+                >
+                  <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                </IconBox>
+              </Flex>
+            </Flex>
+          </Card>
+        ))}
       </SimpleGrid>
       {/* <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}

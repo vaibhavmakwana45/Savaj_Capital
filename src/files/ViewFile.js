@@ -44,10 +44,118 @@ const FileDisplay = ({ groupedFiles }) => {
       console.error("Error downloading file:", error);
     }
   };
+  // const [openPanelIndex, setOpenPanelIndex] = useState(null);
 
+  // const handleAccordionClick = (index) => {
+  //   setOpenPanelIndex(index === openPanelIndex ? null : index);
+  // };
+
+  const [openPanelIndex, setOpenPanelIndex] = useState(0);
+
+  const handleAccordionClick = (index) => {
+    setOpenPanelIndex(index === openPanelIndex ? -1 : index);
+  };
   return (
-    <div>
-      <div
+    <>
+      <nav
+        // style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);"
+        aria-label="breadcrumb"
+        className="my-3"
+      >
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="#">Home</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Library
+          </li>
+        </ol>
+      </nav>
+      <h2
+        className="my-4"
+        style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
+      >
+        Uploaded Documents
+      </h2>
+      <div>
+        {Object.entries(groupedFiles).map(([title, files], index) => (
+          <div
+            className="accordion my-3"
+            id={`accordionPanelsStayOpenExample-${index}`}
+            key={index}
+          >
+            <div
+              className={`accordion-item ${
+                index === openPanelIndex ? "show" : ""
+              }`}
+              key={index}
+            >
+              <h2
+                className="accordion-header"
+                id={`panelsStayOpen-heading-${index}`}
+              >
+                <button
+                  className="accordion-button"
+                  type="button"
+                  onClick={() => handleAccordionClick(index)}
+                  aria-expanded={index === openPanelIndex ? "true" : "false"}
+                  style={{ color: "black", fontWeight: 700, fontSize: "14px" }}
+                >
+                  {title} documents
+                </button>
+              </h2>
+              <div
+                id={`panelsStayOpen-collapse-${index}`}
+                className={`accordion-collapse collapse  ${
+                  index === openPanelIndex ? "show" : ""
+                }`}
+                aria-labelledby={`panelsStayOpen-heading-${index}`}
+              >
+                {files.map((file, idx) => (
+                  <div className="accordion-body" key={idx}>
+                    {/* Render your file content here */}
+                    <p className="mb-3">{file.document_name}</p>
+                    {file.file_path.endsWith(".pdf") ? (
+                      <iframe
+                        src={`${basePath}${file.file_path}`}
+                        type="application/pdf"
+                        className="col-xl-6 col-md-6 col-sm-12"
+                        height="260"
+                        style={{
+                          border: "none",
+                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                          borderRadius: "12px",
+                          width: "40%",
+                        }}
+                        title="PDF Viewer"
+                      />
+                    ) : (
+                      <img
+                        src={`${basePath}${file.file_path}`}
+                        alt={file.loan_document_id}
+                        style={{
+                          width: "40%",
+                          height: "260px",
+                          borderRadius: "12px",
+                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                          cursor: "pointer",
+                        }}
+                        className="col-xl-6 col-md-6 col-sm-12"
+                        onClick={() =>
+                          handleDownload(
+                            `${basePath}${file.file_path}`,
+                            file.loan_document_id
+                          )
+                        }
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+        {/* <div
         className="d-flex flex-wrap justify-content-start image-responsive"
         style={{ overflow: "auto" }}
       >
@@ -98,8 +206,9 @@ const FileDisplay = ({ groupedFiles }) => {
             ))}
           </div>
         ))}
+      </div> */}
       </div>
-    </div>
+    </>
   );
 };
 

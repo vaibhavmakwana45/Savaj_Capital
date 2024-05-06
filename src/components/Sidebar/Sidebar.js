@@ -592,6 +592,7 @@ export function SidebarResponsive(props) {
           {activeRoute(prop.layout + prop.path) === "active" ? (
             prop.isDropdown ? (
               <Button
+              className="drop-button"
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
@@ -698,6 +699,8 @@ export function SidebarResponsive(props) {
               </Button>
             ) : (
               <Button
+              className="drop-button"
+
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
@@ -750,6 +753,7 @@ export function SidebarResponsive(props) {
             )
           ) : prop.isDropdown ? (
             <Button
+            className="drop-button"
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
@@ -850,6 +854,7 @@ export function SidebarResponsive(props) {
             </Button>
           ) : (
             <Button
+            className="drop-button"
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
@@ -877,7 +882,8 @@ export function SidebarResponsive(props) {
                 boxShadow: "none",
               }}
             >
-              <Flex>
+              
+              <Flex  className="drop-button">
                 {typeof prop.icon === "string" ? (
                   <Icon>{prop.icon}</Icon>
                 ) : (

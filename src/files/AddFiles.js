@@ -45,10 +45,24 @@ function AddFiles() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
+  // const [formData, setFormData] = useState({
+  //   user_id: "",
+  //   username: "",
+  //   number: "",
+  //   email: "",
+  //   pan_card: "",
+  //   aadhar_card: "",
+  //   dob: "",
+  //   country: "India",
+  //   state: "",
+  //   city: "",
+  // });
+
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
     number: "",
+    cibil_score: "",
     email: "",
     pan_card: "",
     aadhar_card: "",
@@ -56,6 +70,10 @@ function AddFiles() {
     country: "India",
     state: "",
     city: "",
+    unit_address: "",
+    gst_number: "",
+    reference: "",
+    password: "",
   });
 
   const {
@@ -115,12 +133,18 @@ function AddFiles() {
   const [fileData, setFileData] = useState({});
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const handleFileInputChange = (event, title_id, index, groupIndex, innerIndex) => {
+  const handleFileInputChange = (
+    event,
+    title_id,
+    index,
+    groupIndex,
+    innerIndex
+  ) => {
     const file = event.target.files[0];
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-        console.log(documentId,"documentId")
+      console.log(documentId, "documentId");
       const key = `${title_id}-${index}-${innerIndex}`;
       const filePreview = {
         name: file.name,
@@ -303,7 +327,7 @@ function AddFiles() {
           file_path: file.path,
           loan_document_id: file.documentId,
           title_id: file.title_id,
-          key: file.key
+          key: file.key,
         })),
       };
       await AxiosInstance.post("/file_upload", payload);
@@ -351,6 +375,52 @@ function AddFiles() {
       state: stateFullName,
     }));
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  const handleGstChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "gst_number" && value.length <= 15) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  
+  const handleeChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  // const handleadharChange = (e) => {
+  //   const { name, value } = e.target;
+  //   if (name === "aadhar_card" && value.length <= 12) {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //     });
+  //   }
+  // };
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+};
 
   return (
     <>
@@ -620,17 +690,28 @@ function AddFiles() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalBody pb={6}>
               <FormControl>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <Input
-                  placeholder="Username"
+                  placeholder="Customer Name"
                   {...register("username", {
                     required: "Username is required",
                   })}
                 />
                 {errors.username && <p>{errors.username.message}</p>}
               </FormControl>
+              <FormControl>
+                <FormLabel>Date of birth</FormLabel>
+                <Input
+                  placeholder="DOB"
+                  type="date"
+                  {...register("dob", {
+                    required: "DOB is required",
+                  })}
+                />
+                {errors.dob && <p>{errors.dob.message}</p>}
+              </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Number</FormLabel>
+                <FormLabel>Mobile Number</FormLabel>
                 <Input
                   placeholder="Number"
                   {...register("number", {
@@ -643,38 +724,75 @@ function AddFiles() {
                 />
                 {errors.number && <p>{errors.number.message}</p>}
               </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
+              <FormControl id="cibil_score" mt={4} isRequired>
+                <FormLabel>Cibil Score</FormLabel>
                 <Input
-                  placeholder="Email"
-                  type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  name="cibil_score"
+                  onChange={handleChange}
+                  value={formData.cibil_score}
+                  placeholder="Enter your cibil score"
                 />
-                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
-
-              <FormControl id="country" mt={4} isRequired>
-                <FormLabel>Country</FormLabel>
-
-                <Select
-                  name="country"
-                  value={selectedCountry}
-                  onChange={handleCountryChange}
-                >
-                  {countries.map((country) => (
-                    <option key={country.isoCode} value={country.isoCode}>
-                      {country.name}
-                    </option>
-                  ))}
-                </Select>
+              <FormControl id="gst_number" mt={4} isRequired>
+                <FormLabel>GST Number</FormLabel>
+                <Input
+                  name="gst_number"
+                  type="number"
+                  onChange={handleGstChange}
+                  value={formData.gst_number}
+                  placeholder="Enter GST number"
+                />
               </FormControl>
+              {/* <FormControl className="my-2">
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  placeholder="Aadhar Card"
+                  type="number"
+                  name="aadhar_card"
+                  onChange={handleadharChange}
+                  {...register("aadhar_card", {
+                    required: "Aadhar card is required",
+                  })}
+                  value={formData.aadhar_card}
+                />
+                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
+              </FormControl>
+             
+              <FormControl>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  placeholder="Pan Card"
+                  type="string"
+                  name="pan_card"
+                  onChange={handleeChange}
+                  {...register("pan_card", {
+                    required: "Pan card is required",
+                  })}
+                  value={formData.pan_card}
 
+                />
+                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+              </FormControl> */}
+                 <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handleeChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
               <FormControl id="state" mt={4} isRequired>
                 <FormLabel>State</FormLabel>
                 <Select
@@ -698,7 +816,6 @@ function AddFiles() {
                   )}
                 </Select>
               </FormControl>
-
               <FormControl id="city" mt={4} isRequired>
                 <FormLabel>City</FormLabel>
                 <Select
@@ -721,41 +838,74 @@ function AddFiles() {
                   )}
                 </Select>
               </FormControl>
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
 
-              <FormControl>
-                <FormLabel>Dob</FormLabel>
-                <Input
-                  placeholder="DOB"
-                  type="date"
-                  {...register("dob", {
-                    required: "DOB is required",
-                  })}
-                />
-                {errors.dob && <p>{errors.dob.message}</p>}
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
-
-              <FormControl className="my-2">
-                <FormLabel>Aadhar Card</FormLabel>
+              <FormControl id="unit_address" mt={4} isRequired>
+                <FormLabel>Unit Address</FormLabel>
                 <Input
-                  placeholder="Adhar Card"
-                  type="number"
-                  {...register("aadhar_card", {
-                    required: "Aadhar card is required",
-                  })}
-                />
-                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  placeholder="Pan Card"
+                  name="unit_address"
                   type="string"
-                  {...register("pan_card", {
-                    required: "Pan card is required",
+                  onChange={handleChange}
+                  value={formData.unit_address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <FormControl id="reference" mt={4} isRequired>
+                <FormLabel>Reference</FormLabel>
+                <Input
+                  name="reference"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.reference}
+                  placeholder="Enter reference"
+                />
+              </FormControl>
+              {/* <FormControl mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
                   })}
                 />
-                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+                {errors.email && <p>{errors.email.message}</p>}
+              </FormControl> */}
+
+              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
+                Login Credentials
+              </Text>
+              <FormControl mt={4}>
+                {/* <FormLabel>Email</FormLabel> */}
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
             </ModalBody>
 
