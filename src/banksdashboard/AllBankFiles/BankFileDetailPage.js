@@ -133,7 +133,7 @@ function BankFileDetailPage() {
       <Flex justify="center" align="center" height="100vh">
         <Loader
           type="spinner-circle"
-          bgColor={"#3182CE"}
+          bgColor={"#b19552"}
           color={"black"}
           size={50}
         />
@@ -147,7 +147,7 @@ function BankFileDetailPage() {
         <Flex justify="center" align="center" height="100vh">
           <Loader
             type="spinner-circle"
-            bgColor={"#3182CE"}
+            bgColor={"#b19552"}
             color={"black"}
             size={50}
           />
@@ -192,7 +192,7 @@ function BankFileDetailPage() {
                       className="card-header"
                       style={{
                         fontSize: "15px",
-                        backgroundColor: "#3182CE",
+                        backgroundColor: "#b19552",
                         borderTopLeftRadius: "10px",
                         borderTopRightRadius: "10px",
                         color: "white",

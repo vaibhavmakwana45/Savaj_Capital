@@ -446,18 +446,25 @@ function AddUser(props) {
               <div>
                 <Button
                   mt={4}
-                  colorScheme="teal"
                   type="submit"
                   isLoading={loading}
                   loadingText="Submitting"
-                  style={{ marginTop: 20 }}
+                  style={{
+                    marginTop: 20,
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Submit
                 </Button>
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 20, marginLeft: 8 }}
+                  style={{
+                    marginTop: 20,
+                    marginLeft: 8,
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                   onClick={() => history.push("/superadmin/alluser")}
                 >
                   Cancel

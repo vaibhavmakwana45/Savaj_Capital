@@ -292,7 +292,7 @@ function Document() {
                 />
                 <Button
                   onClick={() => history.push("/superadmin/addloandocs")}
-                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552", color: "#fff" }}
                 >
                   Add Document
                 </Button>
@@ -400,6 +400,10 @@ function Document() {
                     setSelectedDocument("");
                     setSelectedDocumentId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -414,6 +418,10 @@ function Document() {
                   }}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedDocumentId != "" ? "Updated Now" : "Add Now"}
                 </Button>

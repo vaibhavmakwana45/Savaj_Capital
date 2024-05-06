@@ -605,14 +605,22 @@ function EditFileScBranch() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{ marginTop: 40 }}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginTop: 40,
+                }}
               >
                 Submit
               </Button>
               <Button
                 mt={4}
-                colorScheme="yellow"
-                style={{ marginTop: 40, marginLeft: 8 }}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                  marginTop: 40,
+                  marginLeft: 8,
+                }}
                 onClick={() => history.push("/savajcapitaluser/userfile")}
               >
                 Cancel

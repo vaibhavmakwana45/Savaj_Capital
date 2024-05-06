@@ -19,6 +19,7 @@ const LoanTypeSchema = new mongoose.Schema({
   document_ids: [{ type: String }],
   createdAt: { type: String },
   updatedAt: { type: String },
+  index: { type: String },
 });
 
 module.exports = mongoose.model("loan-documents", LoanTypeSchema);

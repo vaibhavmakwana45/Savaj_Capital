@@ -47,7 +47,7 @@ import AxiosInstance from "config/AxiosInstance";
 export default function Dashboard() {
   const history = useHistory();
   // Chakra Color Mode
-  const iconBlue = useColorModeValue("blue.500", "blue.500");
+  const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
   const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
@@ -125,7 +125,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -176,7 +176,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -227,7 +227,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -274,7 +274,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <CartIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -326,7 +326,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -378,7 +378,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}
+                bg={"#b19552"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>

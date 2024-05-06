@@ -149,7 +149,13 @@ function AssignBank() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button onClick={navigateToAssignFile} colorScheme="blue">
+                <Button
+                  onClick={navigateToAssignFile}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
+                >
                   Assign File
                 </Button>
                 {/* <Menu>
@@ -225,6 +231,10 @@ function AssignBank() {
                 <Button
                   ref={cancelRef}
                   onClick={() => setIsDeleteDialogOpen(false)}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>

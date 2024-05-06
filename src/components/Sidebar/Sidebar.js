@@ -35,7 +35,8 @@ import { HSeparator } from "components/Separator/Separator";
 import React, { useEffect, useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
-import logo1 from "../../assets/svg/logo.svg";
+import logo1 from "../../assets/svg/big logo.svg";
+import logo2 from "../../assets/svg/small logo.svg";
 import {
   Dropdown,
   DropdownItem,
@@ -171,7 +172,7 @@ function Sidebar(props) {
                         <Icon>{prop.icon}</Icon>
                       ) : (
                         <IconBox
-                          bg="blue.500"
+                          bg="#b19552"
                           color="white"
                           h="30px"
                           w="30px"
@@ -211,7 +212,7 @@ function Sidebar(props) {
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
-                bg={activeBg}
+                bg={"activeBg"}
                 transition={variantChange}
                 mb={{
                   xl: "6px",
@@ -241,7 +242,7 @@ function Sidebar(props) {
                     <Icon>{prop.icon}</Icon>
                   ) : (
                     <IconBox
-                      bg="blue.500"
+                      bg="#b19552"
                       color="white"
                       h="30px"
                       w="30px"
@@ -309,7 +310,7 @@ function Sidebar(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -378,7 +379,7 @@ function Sidebar(props) {
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color="#b19552"
                     h="30px"
                     w="30px"
                     me="12px"
@@ -407,38 +408,24 @@ function Sidebar(props) {
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarRadius = "20px";
   let sidebarMargins = "0px";
-  var brand = (
-    // <Box style={{display:"flex",position:"relative",zIndex:"9"}}>
-    //   <img src={logo1} alt="Logo" style={{ paddingBottom: "10px",width:"50%" }} />
-    //   <HSeparator />
-    // </Box>
-    // <Box position="relative">
-    //   <img
-    //     src={logo1}
-    //     alt="Logo"
-    //     style={{ paddingBottom: "10px", width: "50%" }}
-    //   />
 
-    //   {/* Button to toggle sidebar visibility */}
-    //   <Button
-    //     position="absolute"
-    //     top="20px"
-    //     right="20px"
-    //     onClick={toggleSidebar}
-    //   >
-    //     <HamburgerIcon />
-    //   </Button>
-
-    //   {/* Sidebar content */}
-    //   {/* Add your existing sidebar content here */}
-    // </Box>
-    <Box position="relative">
-      {/* Logo */}
-      <Box textAlign="center" mt="20px">
-        <img src={logo1} alt="Logo" width="80%" />
-      </Box>
-    </Box>
-  );
+  const Brand = () => {
+    if (!isOpen) {
+      return (
+        <Box className="p-3">
+          <img src={logo2} alt="Logo" />
+          <HSeparator />
+        </Box>
+      );
+    } else {
+      return (
+        <Box>
+          <img src={logo1} alt="Logo2" />
+          <HSeparator />
+        </Box>
+      );
+    }
+  };
 
   useEffect(() => {
     const elements = document.getElementsByClassName("css-xahsar");
@@ -518,7 +505,9 @@ function Sidebar(props) {
                 : renderView
             }
           >
-            <Box>{brand}</Box>
+            <Box>
+              <Brand />
+            </Box>
             <Stack direction="column" mb="40px">
               <Box>{links}</Box>
             </Stack>
@@ -626,8 +615,8 @@ export function SidebarResponsive(props) {
                     border: "none",
                     outline: "none",
                     boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
-                    position:"relative",
-                    zIndex:"9999"
+                    position: "relative",
+                    zIndex: "9999",
                   }}
                   isOpen={isOpenDropdown}
                   toggle={toggle}
@@ -644,7 +633,7 @@ export function SidebarResponsive(props) {
                         <Icon>{prop.icon}</Icon>
                       ) : (
                         <IconBox
-                          bg="blue.500"
+                          bg="#b19552"
                           color="white"
                           h="30px"
                           w="30px"
@@ -667,7 +656,7 @@ export function SidebarResponsive(props) {
                       ) : (
                         <IconBox
                           bg={inactiveBg}
-                          color="blue.500"
+                          color="#b19552"
                           h="30px"
                           w="30px"
                           me="12px"
@@ -734,7 +723,7 @@ export function SidebarResponsive(props) {
                     <Icon>{prop.icon}</Icon>
                   ) : (
                     <IconBox
-                      bg="blue.500"
+                      bg="#b19552"
                       color="white"
                       h="30px"
                       w="30px"
@@ -800,7 +789,7 @@ export function SidebarResponsive(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -822,7 +811,7 @@ export function SidebarResponsive(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -889,7 +878,7 @@ export function SidebarResponsive(props) {
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color="#b19552"
                     h="30px"
                     w="30px"
                     me="12px"
@@ -919,18 +908,27 @@ export function SidebarResponsive(props) {
   var scbranchlink = <>{createLinks(ScUser)}</>;
   var banklink = <>{createLinks(bankUser)}</>;
   var customerlink = <>{createLinks(Customer)}</>;
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  //  BRAND
-
-  var brand = (
-    <Box>
-      <img src={logo1} alt="Logo" />
-      <HSeparator />
-    </Box>
-  );
+  const Brand = () => {
+    if (!isOpen) {
+      return (
+        <Box className="p-3">
+          <img src={logo2} alt="Logo" />
+          <HSeparator />
+        </Box>
+      );
+    } else {
+      return (
+        <Box>
+          <img src={logo1} alt="Logo2" />
+          <HSeparator />
+        </Box>
+      );
+    }
+  };
 
   // SIDEBAR
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
   // Color variables
   return (
@@ -971,7 +969,9 @@ export function SidebarResponsive(props) {
           />
           <DrawerBody maxW="250px" px="1rem">
             <Box maxW="100%" h="100vh">
-              <Box>{brand}</Box>
+              <Box>
+                <Brand />
+              </Box>
               <Stack direction="column" mb="40px">
                 {location.pathname.includes("/superadmin") && (
                   <Box>{links}</Box>

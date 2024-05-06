@@ -43,7 +43,7 @@ function Profile() {
 
   // Chakra color mode
   const textColor = useColorModeValue("gray.700", "white");
-  const iconColor = useColorModeValue("blue.500", "white");
+  const iconColor = useColorModeValue("#b19552", "white");
   const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
   const borderProfileColor = useColorModeValue("white", "transparent");
   const emailColor = useColorModeValue("gray.400", "gray.300");
@@ -301,7 +301,7 @@ function Profile() {
                     color={iconColor}
                     fontSize='lg'
                     me='10px'
-                    _hover={{ color: "blue.500" }}>
+                    _hover={{ color: "#b19552" }}>
                     <Icon as={FaFacebook} />
                   </Link>
                   <Link
@@ -309,7 +309,7 @@ function Profile() {
                     color={iconColor}
                     fontSize='lg'
                     me='10px'
-                    _hover={{ color: "blue.500" }}>
+                    _hover={{ color: "#b19552" }}>
                     <Icon as={FaInstagram} />
                   </Link>
                   <Link
@@ -317,7 +317,7 @@ function Profile() {
                     color={iconColor}
                     fontSize='lg'
                     me='10px'
-                    _hover={{ color: "blue.500" }}>
+                    _hover={{ color: "#b19552" }}>
                     <Icon as={FaTwitter} />
                   </Link>
                 </Flex>

@@ -268,6 +268,7 @@ function ViewFile() {
     };
 
     fetchData();
+    fetchStepsData();
   }, [id]);
 
   const handleAddStatus = async () => {
@@ -293,12 +294,23 @@ function ViewFile() {
     }
   };
 
+  const [stepData, setStepData] = useState([]);
+  const fetchStepsData = async () => {
+    try {
+      const response = await AxiosInstance.get(`/file_upload/get_steps/${id}`);
+      setStepData(response.data.data);
+      console.log(response.data.data, "filesy");
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
         <Loader
           type="spinner-circle"
-          bgColor={"#3182CE"}
+          bgColor={"#b19552"}
           color={"black"}
           size={50}
         />
@@ -312,7 +324,7 @@ function ViewFile() {
         <Flex justify="center" align="center" height="100vh">
           <Loader
             type="spinner-circle"
-            bgColor={"#3182CE"}
+            bgColor={"#b19552"}
             color={"black"}
             size={50}
           />
@@ -340,7 +352,11 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button colorScheme="blue" onClick={onOpen}>
+                  <Button
+                    colorScheme="blue"
+                    onClick={onOpen}
+                    style={{ backgroundColor: "#b19552", color: "#fff" }}
+                  >
                     Add Status
                   </Button>
                 </Flex>
@@ -359,7 +375,7 @@ function ViewFile() {
                       className="card-header"
                       style={{
                         fontSize: "15px",
-                        backgroundColor: "#3182CE",
+                        backgroundColor: "#b19552",
                         borderTopLeftRadius: "10px",
                         borderTopRightRadius: "10px",
                         color: "white",
@@ -379,64 +395,46 @@ function ViewFile() {
                       </FormLabel>
                     </u>
                     {/* Progress */}
-                    {/* <div
+                    <div
                       className="container-fluid progress-bar-area"
                       style={{ height: "20%" }}
                     >
-                      <div className="row  ">
+                      <div className="row">
                         <div
                           className="col"
                           style={{ position: "relative", zIndex: "9" }}
                         >
-                          <ul className="progressbar">
-                            <li id="step1" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 1
-                            </li>
-
-                            <li id="step2" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 2
-                            </li>
-
-                            <li id="step3" className="active">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 3
-                            </li>
-
-                            <li id="step4">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 4
-                            </li>
-
-                            <li id="step5">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 5
-                            </li>
+                          <ul
+                            className="progressbar"
+                            style={{
+                              display: "flex",
+                              listStyle: "none",
+                              padding: 0,
+                            }}
+                          >
+                            {stepData &&
+                              stepData.map((item, index) => (
+                                <li
+                                  key={index}
+                                  id={`step${index + 1}`}
+                                  className="active"
+                                  style={{
+                                    display: "inline-block",
+                                    marginRight: "10px",
+                                  }}
+                                >
+                                  <div className="circle-container">
+                                    <a href="#">
+                                      <div className="circle-button"></div>
+                                    </a>
+                                  </div>
+                                  {item.loan_step}
+                                </li>
+                              ))}
                           </ul>
                         </div>
                       </div>
-                    </div> */}
+                    </div>
                   </div>
                   <div>
                     {fileData?.documents && (

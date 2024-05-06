@@ -162,15 +162,23 @@ function AddSavajCapitalBranch() {
                   type="submit"
                   isLoading={loading}
                   loadingText="Add...."
-                  style={{ marginTop: 30 }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 30,
+                  }}
                 >
                   Add Branch
                 </Button>
 
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 30, marginLeft: 8 }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 30,
+                    marginLeft: 8,
+                  }}
                   onClick={() => history.push("/superadmin/savajcapitalbranch")}
                 >
                   Cancel

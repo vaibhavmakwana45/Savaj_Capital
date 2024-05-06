@@ -431,7 +431,10 @@ function AddFiles() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">
+              <Button
+                onClick={onOpen}
+                style={{ backgroundColor: "#b19552", color: "#fff" }}
+              >
                 Add New User
               </Button>
             </Flex>
@@ -659,20 +662,27 @@ function AddFiles() {
             <div>
               <Button
                 mt={4}
-                colorScheme="teal"
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{ marginTop: 40 }}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginTop: 40,
+                }}
               >
                 Submit
               </Button>
 
               <Button
                 mt={4}
-                colorScheme="yellow"
-                style={{ marginTop: 40, marginLeft: 8 }}
                 onClick={() => history.push("/superadmin/filetable")}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                  marginTop: 40,
+                  marginLeft: 8,
+                }}
               >
                 Cancel
               </Button>
@@ -910,10 +920,19 @@ function AddFiles() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+              <Button
+                mr={3}
+                type="submit"
+                style={{ backgroundColor: "#b19552", color: "#fff" }}
+              >
                 Save
               </Button>
-              <Button onClick={onClose}>Cancel</Button>
+              <Button
+                onClick={onClose}
+                style={{ backgroundColor: "#414650", color: "#fff" }}
+              >
+                Cancel
+              </Button>
             </ModalFooter>
           </form>
         </ModalContent>

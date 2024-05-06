@@ -368,7 +368,10 @@ function CreateCustomerFile() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">
+              <Button
+                onClick={onOpen}
+                style={{ backgroundColor: "#b19552", color: "#fff" }}
+              >
                 Add New User
               </Button>
             </Flex>
@@ -434,7 +437,13 @@ function CreateCustomerFile() {
             <div>
               {Object.keys(groupedLoanDocuments).map((title_id) => (
                 <div key={title_id} className="my-3">
-                  <h2 className="mx-4"><i><u><b>{groupedLoanDocuments[title_id][0].title}</b></u></i></h2>
+                  <h2 className="mx-4">
+                    <i>
+                      <u>
+                        <b>{groupedLoanDocuments[title_id][0].title}</b>
+                      </u>
+                    </i>
+                  </h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                     {groupedLoanDocuments[title_id].map(
                       (documentGroup, index) => (
@@ -597,7 +606,6 @@ function CreateCustomerFile() {
                 </div>
               ))}
             </div>
-     
 
             <div>
               <Button
@@ -606,15 +614,23 @@ function CreateCustomerFile() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{ marginTop: 40 }}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginTop: 40,
+                }}
               >
                 Submit
               </Button>
 
               <Button
                 mt={4}
-                colorScheme="yellow"
-                style={{ marginTop: 40, marginLeft: 8 }}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                  marginTop: 40,
+                  marginLeft: 8,
+                }}
                 onClick={() => history.push("/superadmin/filetable")}
               >
                 Cancel
@@ -776,10 +792,22 @@ function CreateCustomerFile() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+              <Button
+                style={{ backgroundColor: "#b19552", color: "#fff" }}
+                mr={3}
+                type="submit"
+              >
                 Save
               </Button>
-              <Button onClick={onClose}>Cancel</Button>
+              <Button
+                onClick={onClose}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                }}
+              >
+                Cancel
+              </Button>
             </ModalFooter>
           </form>
         </ModalContent>
