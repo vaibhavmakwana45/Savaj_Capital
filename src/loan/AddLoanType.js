@@ -220,7 +220,7 @@ function AddLoanType() {
           0,
           formData.loan_subtype.length - 1
         ),
-        loan_step_id: selectedLoanStepIds, 
+        loan_step_id: selectedLoanStepIds,
       };
 
       if (
@@ -303,7 +303,16 @@ function AddLoanType() {
                   value={formData.loan_type}
                 />
               </FormControl>
-              <div className="card" style={{padding:"30px",borderRadius:"15px",marginTop:"30px",boxShadow: "rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px"}}>
+              <div
+                className="card"
+                style={{
+                  padding: "30px",
+                  borderRadius: "15px",
+                  marginTop: "30px",
+                  boxShadow:
+                    "rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px",
+                }}
+              >
                 <div className="d-flex flex-wrap">
                   {loanSteps.map((step) => (
                     <FormControl
@@ -320,12 +329,17 @@ function AddLoanType() {
                         onChange={(event) =>
                           handleSwitchToggle(event, step.loan_step_id)
                         }
-                        style={{boxShadow: "rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px",borderRadius:"30px",marginBottom:"10px"}}
+                        style={{
+                          boxShadow:
+                            "rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px",
+                          borderRadius: "30px",
+                          marginBottom: "10px",
+                        }}
                       />
                       <FormLabel
                         htmlFor={`email-alerts-${step.loan_step_id}`}
                         mb="0"
-                        style={{fontSize:"14px",fontWeight:600}}
+                        style={{ fontSize: "14px", fontWeight: 600 }}
                       >
                         <i>{step.loan_step}</i>
                       </FormLabel>
@@ -357,7 +371,7 @@ function AddLoanType() {
                         ref={(inputRef) =>
                           (subtypeRefs.current[index] = inputRef)
                         }
-                        mr={2} 
+                        mr={2}
                       />
                       <Button
                         type="button"

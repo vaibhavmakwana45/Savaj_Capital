@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Documents
+// Get Documents (// Without pagination)
 router.get("/", async (req, res) => {
   try {
     const data = await AddDocuments.find({}).sort({ updatedAt: -1 });
@@ -65,6 +65,57 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+
+// With pagination
+// router.get("/", async (req, res) => {
+//   try {
+//     // Pagination parameters
+//     const page = parseInt(req.query.page) || 1;
+//     console.log(page, "page")
+//     const limit = parseInt(req.query.limit) || 10; // Default limit to 10 documents per page
+
+//     // Calculate skip value
+//     const skip = (page - 1) * limit;
+
+//     // Fetch documents with pagination
+//     const data = await AddDocuments.find({})
+//       .sort({ updatedAt: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     // Count total documents
+//     const totalCount = await AddDocuments.countDocuments();
+
+//     if (data.length === 0) {
+//       // If no data found
+//       return res.status(200).json({
+//         statusCode: 200,
+//         message: "No data found",
+//       });
+//     }
+
+//     // Calculate total pages
+//     const totalPages = Math.ceil(totalCount / limit);
+
+//     res.json({
+//       success: true,
+//       data,
+//       totalPages,
+//       currentPage: page,
+//       totalCount,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
+
+
+
 
 // Update Documents
 router.put("/:document_id", async (req, res) => {

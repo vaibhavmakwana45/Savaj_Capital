@@ -59,6 +59,7 @@ function AddAllDocuments() {
     getDocumentData();
   }, []);
 
+
   const allHeaders = ["Document", "create date", "update date", "Action"];
 
   const formattedData = fllteredDocument.map((bank) => [
@@ -74,16 +75,13 @@ function AddAllDocuments() {
   const cancelRef = React.useRef();
   const deleteDocument = async (documentId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/document/${documentId}`
-      );
+      const response = await AxiosInstance.delete(`/document/${documentId}`);
       getDocumentData();
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
         toast.success("Document deleted successfully!");
-      } else if(response.data.statusCode === 201){
+      } else if (response.data.statusCode === 201) {
         toast.error(response.data.message);
-
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
@@ -109,15 +107,11 @@ function AddAllDocuments() {
     }
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   const handleAddDocument = async (document) => {
     try {
-      const response = await AxiosInstance.post(
-        "/document",
-        { document }
-      );
+      const response = await AxiosInstance.post("/document", { document });
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsDocument(false);
@@ -209,6 +203,7 @@ function AddAllDocuments() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>

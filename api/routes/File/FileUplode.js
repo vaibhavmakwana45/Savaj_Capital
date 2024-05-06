@@ -11,6 +11,7 @@ const AddUser = require("../../models/AddUser");
 const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
 const Title = require("../../models/AddDocuments/Title");
+const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 
 router.post("/", async (req, res) => {
   try {
@@ -239,74 +240,90 @@ router.get("/file_upload/:file_id", async (req, res) => {
   }
 });
 
-// router.get("/file_upload/:file_id", async (req, res) => {
-//   try {
-//     const file_id = req.params.file_id;
+router.get("/abc/:file_id", async (req, res) => {
+  try {
+    const file_id = req.params.file_id;
 
-//     const fileData = await File_Uplode.findOne({ file_id: file_id });
+    const fileData = await File_Uplode.findOne({ file_id: file_id });
 
-//     const loan = await Loan.findOne({ loan_id: fileData.loan_id });
+    const loan = await Loan.findOne({ loan_id: fileData.loan_id });
 
-//     const user = await AddUser.findOne({ user_id: fileData.user_id });
+    const user = await AddUser.findOne({ user_id: fileData.user_id });
 
-//     const loanType = await Loan_Type.findOne({
-//       loantype_id: fileData?.loantype_id,
-//     });
+    const loanType = await Loan_Type.findOne({
+      loantype_id: fileData?.loantype_id,
+    });
 
-//     const savajcapitalbranch = await SavajCapital_Branch.findOne({
-//       branch_id: fileData.branch_id,
-//     });
+    const loanStepDetails = await Promise.all(
+      loan.loan_step_id.map(async (stepId) => {
+        const loanStep = await Loan_Step.findOne({ loan_step_id: stepId });
+        return {
+          loan_step_id: stepId,
+          loan_step: loanStep ? loanStep.loan_step : "Loan step not found",
+        };
+      })
+    );
 
-//     const savajcapitalbranchuser = await SavajCapital_User.findOne({
-//       branchuser_id: fileData.branchuser_id,
-//     });
+    const documentDetails = await Promise.all(
+      fileData.documents.map(async (doc) => {
+        const loanDocument = await Loan_Documents.findOne({
+          loan_document_id: doc.loan_document_id,
+        });
 
-//     const documentDetails = await Promise.all(
-//       fileData.documents.map(async (doc) => {
-//         const loanDocument = await Loan_Documents.findOne({
-//           loan_document_id: doc.loan_document_id,
-//         });
-//         return {
-//           file_path: doc.file_path,
-//           loan_document_id: doc.loan_document_id,
-//           doc_id: doc.doc_id,
-//           title_id: doc.title_id,
-//           loan_document: loanDocument
-//             ? loanDocument.loan_document
-//             : "Document name not found",
-//         };
-//       })
-//     );
+        const documentName = await AddDocuments.findOne({
+          document_id: doc.loan_document_id,
+        });
 
-//     const responseData = {
-//       file: {
-//         _id: fileData._id,
-//         user_id: fileData.user_id,
-//         loan_id: fileData.loan_id,
-//         loantype_id: fileData?.loantype_id,
-//         file_id: fileData.file_id,
-//         loan: loan.loan,
-//         loan_type: loanType?.loan_type,
-//         username: user?.username,
-//         branch_name: savajcapitalbranch.branch_name,
-//         full_name: savajcapitalbranchuser.full_name,
-//         documents: documentDetails,
-//         createdAt: fileData.createdAt,
-//         updatedAt: fileData.updatedAt,
-//         __v: fileData.__v,
-//       },
-//     };
+        return {
+          file_path: doc.file_path,
+          loan_document_id: doc.loan_document_id,
+          document_name: documentName
+            ? documentName.document
+            : "Document name not found",
+          doc_id: doc.doc_id,
+          title_id: doc.title_id,
+        };
+      })
+    );
 
-//     res.json({
-//       statusCode: 200,
-//       data: responseData,
-//       message: "Loan details retrieved successfully",
-//     });
-//   } catch (error) {
-//     console.error("Error during data retrieval:", error);
-//     res.status(500).json({ message: error.message });
-//   }
-// });
+    const groupedFiles = documentDetails.reduce((acc, curr) => {
+      if (!acc[curr.title]) {
+        acc[curr.title] = [];
+      }
+      acc[curr.title].push(curr);
+      return acc;
+    }, {});
+
+    const responseData = {
+      file: {
+        _id: fileData._id,
+        branch_id: fileData.branch_id,
+        branchuser_id: fileData.branchuser_id,
+        user_id: fileData.user_id,
+        loan_id: fileData.loan_id,
+        loantype_id: fileData?.loantype_id,
+        file_id: fileData.file_id,
+        loan: loan.loan,
+        loan_step_id: loanStepDetails,
+        loan_type: loanType?.loan_type,
+        username: user?.username,
+        documents: groupedFiles,
+        createdAt: fileData.createdAt,
+        updatedAt: fileData.updatedAt,
+        __v: fileData.__v,
+      },
+    };
+
+    res.json({
+      statusCode: 200,
+      data: responseData,
+      message: "Loan details retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Error during data retrieval:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 router.get("/edit_file_upload/:file_id", async (req, res) => {
   try {
