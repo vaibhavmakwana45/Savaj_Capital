@@ -103,7 +103,7 @@ function UserTable() {
     } else if (score >= 750 && score <= 900) {
       return "Excellent";
     } else {
-      return "Unknown";
+      return "-";
     }
   };
 

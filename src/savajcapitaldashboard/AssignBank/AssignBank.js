@@ -130,8 +130,7 @@ function AssignBank() {
     navigateToAnotherPage(id);
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   return (
     <>
@@ -150,9 +149,9 @@ function AssignBank() {
                   width="250px"
                   marginRight="10px"
                 />
-                    <Button onClick={navigateToAssignFile} colorScheme="blue">
-                    Assign File
-                  </Button>
+                <Button onClick={navigateToAssignFile} colorScheme="blue">
+                  Assign File
+                </Button>
                 {/* <Menu>
                   <MenuButton>
                     <Button

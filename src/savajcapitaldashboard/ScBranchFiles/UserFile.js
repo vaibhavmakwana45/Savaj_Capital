@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 import {
   Button,
   useColorModeValue,
@@ -91,7 +91,7 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="">{file?.user_username}</TableCell>
+        <TableCell align="">{file?.username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
@@ -251,6 +251,7 @@ export default function CollapsibleTable() {
             `/branch_assign/branch_user/${accessType.branchuser_id}`
           );
           setFiles(response.data.data);
+          console.log(response.data.data, "response.data.data");
           setLoading(false);
         } catch (error) {
           console.error("Error fetching files:", error);
@@ -314,7 +315,7 @@ export default function CollapsibleTable() {
     }
   };
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
   const handleDelete = (id) => {
     setSelectedFileId(id);

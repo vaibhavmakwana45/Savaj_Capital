@@ -45,6 +45,7 @@ function AddUser(props) {
     cibil_score: "",
     email: "",
     pan_card: "",
+    businessname: "",
     aadhar_card: "",
     dob: "",
     country: "India",
@@ -80,6 +81,7 @@ function AddUser(props) {
           unit_address: user.unit_address,
           gst_number: user.gst_number,
           reference: user.reference,
+          businessname: user.businessname,
           password: "",
         };
         setSelectedState(user.state_code);
@@ -133,6 +135,7 @@ function AddUser(props) {
             password: formData.password,
             country: formData.country,
             unit_address: formData.unit_address,
+            businessname: formData.businessname,
             gst_number: formData.gst_number,
             state: formData.state,
             city: formData.city,
@@ -277,7 +280,15 @@ function AddUser(props) {
                   placeholder="Enter your Name"
                 />
               </FormControl>
-
+              <FormControl id="businessname" mt={4} isRequired>
+                <FormLabel>Business Name</FormLabel>
+                <Input
+                  name="businessname"
+                  onChange={handleChange}
+                  value={formData.businessname}
+                  placeholder="Enter your business name"
+                />
+              </FormControl>
               <FormControl id="dob" mt={4} isRequired>
                 <FormLabel>DOB</FormLabel>
                 <Input
