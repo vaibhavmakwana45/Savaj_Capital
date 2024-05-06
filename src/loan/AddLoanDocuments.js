@@ -132,31 +132,6 @@ function AddLoanDocuments() {
     setTitles([]);
   }, [formData.loan_id, formData.loantype_id, loanName, subType]);
 
-  // const handleAddTitle = () => {
-  //   if (!currentTitle || selectedDocs.length === 0) {
-  //     toast.error("Please enter a title and select at least one document.");
-  //     return;
-  //   }
-
-  //   const newTitle = {
-  //     title: currentTitle,
-  //     documents: selectedDocs.map((docName) => {
-  //       const selectedDoc = currentDocs.find((doc) => doc.document === docName);
-  //       return {
-  //         document: selectedDoc.document,
-  //         document_id: selectedDoc.document_id,
-  //       };
-  //     }),
-  //   };
-
-  //   const document_ids = newTitle.documents.map((doc) => doc.document_id);
-
-  //   setTitles([...titles, { ...newTitle, document_ids }]);
-  //   setCurrentTitle("");
-  //   setSelectedDocs([]);
-  //   toast.success("Title added successfully!");
-  // };
-
   const handleAddTitle = () => {
     if (selectedDocs.length === 0) {
       toast.error("Please select at least one document.");
@@ -259,24 +234,6 @@ function AddLoanDocuments() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
-                <FormLabel>Select Loan</FormLabel>
-                <Select
-                  name="city"
-                  placeholder="Select Loan-Type"
-                  onChange={(e) => {
-                    const selectedLoanId = e.target.value;
-                    setFormData({ ...formData, loan_id: selectedLoanId });
-                  }}
-                >
-                  {loandata.map((index) => (
-                    <option key={index.loan_id} value={index.loan_id}>
-                      {index.loan}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl> */}
-
               <div className="w-100">
                 <FormLabel>Select Loan</FormLabel>
 
@@ -381,29 +338,8 @@ function AddLoanDocuments() {
                 </FormControl>
               ) : null}
 
-              {/*======================  Title Dropdawn  ======================= */}
-
-              {/* <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
-                <FormLabel>Select Title</FormLabel>
-                <Select
-                  name="title"
-                  placeholder="Select Title"
-                  onChange={(e) => {
-                    const selectedTitleId = e.target.value;
-                    setFormData({ ...formData, title_id: selectedTitleId });
-                  }}
-                >
-                  {titleData.map((index) => (
-                    <option key={index.title_id} value={index.title_id}>
-                      {index.title}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl> */}
-
               <div className="w-100">
                 <FormLabel>Select Title</FormLabel>
-
                 <input
                   style={{
                     width: "100%",
@@ -425,10 +361,9 @@ function AddLoanDocuments() {
                     filteerToggle();
                   }}
                   onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
                     setTimeout(() => {
                       filteerToggle();
-                    }, 200); // Adjust the delay as needed
+                    }, 200);
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
