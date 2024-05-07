@@ -50,7 +50,7 @@ export default function AdminNavbar(props) {
     onOpen,
     ...rest
   } = props;
-
+  console.log(props);
   let mainText =
     fixed && scrolled
       ? useColorModeValue("gray.700", "gray.200")
@@ -240,7 +240,11 @@ export default function AdminNavbar(props) {
           routes={routes}
           {...rest}
         />
-        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar" style={{ marginLeft: "30px" }}>
+        <Box
+          mb={{ sm: "8px", md: "0px" }}
+          className="bradcrub-navbar"
+          style={{ marginLeft: "30px" }}
+        >
           <Breadcrumb separator=">" style={{ color: "white" }}>
             {generateBreadcrumbs()}
           </Breadcrumb>

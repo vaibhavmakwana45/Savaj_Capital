@@ -40,26 +40,42 @@ router.get("/loan-files", async (req, res) => {
     const enhancedLoans = await Promise.all(
       loans.map(async (loan) => {
         let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
-        const files = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
+        const allFiles = await File_Uplode.find({
+          loan_id: loan.loan_id,
+        }).lean();
 
         if (loanTypes.length === 0) {
-          loanTypes = [{ loan_type: "Unknown", subtype: "Main" }];
+          loanTypes = [
+            { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
+          ];
         }
 
-        return loanTypes.map((loanType) => ({
-          ...loan,
-          loanType: loanType.loan_type,
-          subtype: loanType.subtype || "Main",
-          files: files.map((file) => ({
-            filename: file.filename,
-            typename: file.typename,
-          })),
-          fileCount: files.length,
-        }));
+        return loanTypes
+          .map((loanType) => {
+            const filteredFiles = allFiles.filter(
+              (file) =>
+                loanType.loantype_id === "" ||
+                file.loantype_id === loanType.loantype_id
+            );
+
+            return {
+              ...loan,
+              loanType: loanType.loan_type,
+              subtype: loanType.subtype || "Main",
+              files: filteredFiles.map((file) => ({
+                filename: file.filename,
+                typename: file.typename,
+              })),
+              fileCount: filteredFiles.length,
+            };
+          })
+          .filter((loanType) => loanType.files.length > 0);
       })
     );
 
-    const flattenedLoans = [].concat(...enhancedLoans);
+    const flattenedLoans = []
+      .concat(...enhancedLoans)
+      .filter((loan) => loan.files.length > 0);
 
     res.json(flattenedLoans);
   } catch (error) {

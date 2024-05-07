@@ -11,35 +11,116 @@ router.get("/:loan_id", async (req, res) => {
   try {
     const loan_id = req.params.loan_id;
 
-    // Fetch loan documents
     const data = await Loan_Documents.aggregate([
       {
         $match: { loan_id: loan_id },
       },
       {
+        $addFields: {
+          hasIndex: {
+            $cond: {
+              if: { $ifNull: ["$index", false] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
         $sort: {
-          index: { $exists: 1, $type: 'number' }, // First sort by existence and type of index
-          index: 1, // Then sort by index value
-          updatedAt: -1 // Lastly by updatedAt for those without index
-        }
+          hasIndex: -1,
+          index: 1,
+          updatedAt: -1,
+        },
       },
     ]);
 
-    // Extract document IDs from the fetched loan documents
     const documentIds = data.reduce((ids, doc) => {
       ids.push(...doc?.document_ids);
       return ids;
     }, []);
 
-    // Fetch document names based on the document IDs
     const documents = await AddDocuments.find({
       document_id: { $in: documentIds },
     });
 
-    // Map document names to loan documents
     const enrichedData = data.map((doc) => {
       if (!doc.document_ids || doc.document_ids.length === 0) {
-        return { ...doc, document_names: [] }; // No document IDs found
+        return { ...doc, document_names: [] };
+      }
+
+      const documentNames = doc.document_ids.map((id) => {
+        const document = documents.find((doc) => doc.document_id === id);
+        return document ? document.document : null;
+      });
+      return { ...doc, document_names: documentNames };
+    });
+
+    for (let i = 0; i < enrichedData.length; i++) {
+      const title_id = enrichedData[i].title_id;
+
+      const titleData = await Title.findOne({ title_id: title_id });
+      enrichedData[i].title = titleData.title;
+    }
+
+    const count = enrichedData.length;
+
+    res.json({
+      // statusCode: 200,
+      success: true,
+      data: enrichedData,
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
+  try {
+    const loan_id = req.params.loan_id;
+    const loantype_id = req.params.loantype_id;
+
+    const data = await Loan_Documents.aggregate([
+      {
+        $match: { loan_id: loan_id },
+      },
+      {
+        $addFields: {
+          hasIndex: {
+            $cond: {
+              if: { $ifNull: ["$index", false] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          hasIndex: -1,
+          index: 1,
+          updatedAt: -1,
+        },
+      },
+    ]);
+
+    const documentIds = data.reduce((ids, doc) => {
+      ids.push(...doc?.document_ids);
+      return ids;
+    }, []);
+
+    const documents = await AddDocuments.find({
+      document_id: { $in: documentIds },
+    });
+
+    const enrichedData = data.map((doc) => {
+      if (!doc.document_ids || doc.document_ids.length === 0) {
+        return { ...doc, document_names: [] };
       }
 
       const documentNames = doc.document_ids.map((id) => {
@@ -95,69 +176,6 @@ router.get("/loan_docs/:loan_id/:loantype_id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
-    });
-  }
-});
-
-router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
-  try {
-    const loan_id = req.params.loan_id;
-    const loantype_id = req.params.loantype_id;
-
-    const data = await Loan_Documents.aggregate([
-      {
-        $match: { loan_id: loan_id, loantype_id: loantype_id },
-      },
-      {
-        $sort: {
-          index: { $exists: 1, $type: 'number' }, // First sort by existence and type of index
-          index: 1, // Then sort by index value
-          updatedAt: -1 // Lastly by updatedAt for those without index
-        }
-      },
-    ]);
-
-    const documentIds = data.reduce((ids, doc) => {
-      ids.push(...doc?.document_ids);
-      return ids;
-    }, []);
-
-    const documents = await AddDocuments.find({
-      document_id: { $in: documentIds },
-    });
-
-    const enrichedData = data.map((doc) => {
-      if (!doc.document_ids || doc.document_ids.length === 0) {
-        return { ...doc, document_names: [] };
-      }
-
-      const documentNames = doc.document_ids.map((id) => {
-        const document = documents.find((doc) => doc.document_id === id);
-        return document ? document.document : null;
-      });
-      return { ...doc, document_names: documentNames };
-    });
-
-    for (let i = 0; i < enrichedData.length; i++) {
-      const title_id = enrichedData[i].title_id;
-
-      const titleData = await Title.findOne({ title_id: title_id });
-      enrichedData[i].title = titleData.title;
-    }
-
-    const count = enrichedData.length;
-
-    res.json({
-      // statusCode: 200,
-      success: true,
-      data: enrichedData,
-      count: count,
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.json({
-      statusCode: 500,
-      message: error.message,
     });
   }
 });
@@ -387,7 +405,9 @@ router.put("/update-index/:loan_document_id", async (req, res) => {
 
     const loanDocument = await Loan_Documents.findOne({ loan_document_id });
     if (!loanDocument) {
-      return res.status(404).json({ success: false, message: "Loan document not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Loan document not found" });
     }
 
     const { loan_id, loantype_id } = loanDocument;
@@ -396,13 +416,13 @@ router.put("/update-index/:loan_document_id", async (req, res) => {
       loan_id,
       loantype_id,
       index: newIndex,
-      loan_document_id: { $ne: loan_document_id }
+      loan_document_id: { $ne: loan_document_id },
     });
 
     if (existingDocumentWithIndex) {
       return res.status(409).json({
         success: false,
-        message: `Another document with index ${newIndex} already exists.`
+        message: `Another document with index ${newIndex} already exists.`,
       });
     }
 
@@ -421,6 +441,5 @@ router.put("/update-index/:loan_document_id", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

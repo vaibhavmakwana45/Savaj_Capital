@@ -93,14 +93,18 @@ const FileDisplay = ({ groupedFiles }) => {
               <h2
                 className="accordion-header"
                 id={`panelsStayOpen-heading-${index}`}
-                
               >
                 <button
                   className="accordion-button"
                   type="button"
                   onClick={() => handleAccordionClick(index)}
                   aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{ color: "white", fontWeight: 700, fontSize: "14px",backgroundColor:"#414650" }}
+                  style={{
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    backgroundColor: "#414650",
+                  }}
                 >
                   {title} documents
                 </button>
@@ -261,6 +265,7 @@ function ViewFile() {
           "/file_upload/file_upload/" + id
         );
         setFileData(response.data.data.file);
+        console.log(response.data.data.file, "response.data.data.file");
       } catch (error) {
         console.error("Error fetching file data:", error);
       } finally {
@@ -353,7 +358,11 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button colorScheme="blue" style={{backgroundColor:"#b19552"}} onClick={onOpen}>
+                  <Button
+                    colorScheme="blue"
+                    style={{ backgroundColor: "#b19552" }}
+                    onClick={onOpen}
+                  >
                     Add Status
                   </Button>
                 </Flex>
@@ -383,14 +392,39 @@ function ViewFile() {
                       {fileData?.subtype && ` - ${fileData.subtype}`}
                     </div>
 
-                    <u>
-                      <FormLabel
-                        className="my-3"
-                        style={{ fontSize: "14px", paddingLeft: "20px" }}
-                      >
-                        <b>Loan User : {fileData?.username}</b>
-                      </FormLabel>
-                    </u>
+                    <FormLabel
+                      className="my-3"
+                      style={{ fontSize: "14px", paddingLeft: "20px" }}
+                    >
+                      <div className="row">
+                        <div className="col-md-6">
+                          <strong>Loan User:</strong>{" "}
+                          {fileData?.user?.username || "N/A"}
+                          <br />
+                          <strong>Email:</strong>{" "}
+                          {fileData?.user?.email || "N/A"}
+                          <br />
+                          <strong>Phone Number:</strong>{" "}
+                          {fileData?.user?.number || "N/A"}
+                          <br />
+                          <strong>Cibil Score:</strong>{" "}
+                          {fileData?.user?.cibil_score || "N/A"}
+                          <br />
+                        </div>
+                        <div className="col-md-6">
+                          <strong>Gst Number:</strong>{" "}
+                          {fileData?.user?.gst_number || "N/A"}
+                          <br />
+                          <strong>PAN Card:</strong>{" "}
+                          {fileData?.user?.pan_card || "N/A"}
+                          <br />
+                          <strong>Aadhar Card:</strong>{" "}
+                          {fileData?.user?.aadhar_card || "N/A"}
+                          <br />
+                        </div>
+                      </div>
+                    </FormLabel>
+
                     {/* Progress */}
                     <div
                       className="container-fluid progress-bar-area"
