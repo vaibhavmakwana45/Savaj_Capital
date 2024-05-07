@@ -179,7 +179,13 @@ function Row(props) {
             // >
             //   IDB
             // </Button>
-            <a href="https://ibdlp.indianbank.in/GSTAdvantage/">IDB</a>
+            <a
+              href="https://ibdlp.indianbank.in/GSTAdvantage/"
+              target="_blank"
+              onClick={(e) => e.stopPropagation(e.target.value)}
+            >
+              IDB
+            </a>
           ) : (
             "-"
           )}
