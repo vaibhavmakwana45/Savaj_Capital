@@ -163,18 +163,23 @@ function Row(props) {
 
         <TableCell>
           {file.loan_id === "1714582963176" ? (
-            <Button
-              style={{
-                padding: "5px",
-                borderRadius: "5px",
-                backgroundColor: "#ededed",
-                width: "100%",
-              }}
-              onClick={(e) => {
-                e.stopPropagation(e.target.value);
-                handleClick(pan_card);
-              }}
-            >IDB</Button>
+            // <Button
+            //   style={{
+            //     padding: "5px",
+            //     borderRadius: "5px",
+            //     backgroundColor: "#ededed",
+            //     width: "100%",
+            //   }}
+            //   onClick={(e) => {
+            //     e.stopPropagation(e.target.value);
+            //     // handleClick(pan_card);
+            //     href="https://ibdlp.indianbank.in/GSTAdvantage/components/"
+
+            //   }}
+            // >
+            //   IDB
+            // </Button>
+            <a href="https://ibdlp.indianbank.in/GSTAdvantage/">IDB</a>
           ) : (
             "-"
           )}
