@@ -127,19 +127,7 @@ router.get("/:branch_id", async (req, res) => {
 router.put("/:branchuser_id", async (req, res) => {
   try {
     const { branchuser_id } = req.params;
-    // let findEmail = await SavajCapital_User.findOne({
-    //   email: req.body.email,
-    // });
-    // const user = await AddUser.findOne({ email: req.body.email });
-    // const bankUser = await BankUser.findOne({ email: req.body.email });
-    // const superAdmin = await SuperAdmin.findOne({ email: req.body.email });
-
-    // if (findEmail || bankUser || superAdmin || user) {
-    //   return res
-    //     .status(200)
-    //     .send({ statusCode: 201, message: "Email already in use" });
-    // }
-
+    
     // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     if (!req.body.password) {

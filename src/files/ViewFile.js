@@ -93,13 +93,14 @@ const FileDisplay = ({ groupedFiles }) => {
               <h2
                 className="accordion-header"
                 id={`panelsStayOpen-heading-${index}`}
+                
               >
                 <button
                   className="accordion-button"
                   type="button"
                   onClick={() => handleAccordionClick(index)}
                   aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{ color: "black", fontWeight: 700, fontSize: "14px" }}
+                  style={{ color: "white", fontWeight: 700, fontSize: "14px",backgroundColor:"#414650" }}
                 >
                   {title} documents
                 </button>
@@ -268,6 +269,7 @@ function ViewFile() {
     };
 
     fetchData();
+    fetchStepsData();
   }, [id]);
 
   const handleAddStatus = async () => {
@@ -290,6 +292,17 @@ function ViewFile() {
       setStatusReason("");
     } catch (error) {
       console.error("Error adding status:", error);
+    }
+  };
+
+  const [stepData, setStepData] = useState([]);
+  const fetchStepsData = async () => {
+    try {
+      const response = await AxiosInstance.get(`/file_upload/get_steps/${id}`);
+      setStepData(response.data.data);
+      console.log(response.data.data, "filesy");
+    } catch (error) {
+      console.error("Error: ", error.message);
     }
   };
 
@@ -340,7 +353,7 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button colorScheme="blue" onClick={onOpen}>
+                  <Button colorScheme="blue" style={{backgroundColor:"#b19552"}} onClick={onOpen}>
                     Add Status
                   </Button>
                 </Flex>
@@ -359,7 +372,7 @@ function ViewFile() {
                       className="card-header"
                       style={{
                         fontSize: "15px",
-                        backgroundColor: "#3182CE",
+                        backgroundColor: "#b19552",
                         borderTopLeftRadius: "10px",
                         borderTopRightRadius: "10px",
                         color: "white",
@@ -379,64 +392,46 @@ function ViewFile() {
                       </FormLabel>
                     </u>
                     {/* Progress */}
-                    {/* <div
+                    <div
                       className="container-fluid progress-bar-area"
                       style={{ height: "20%" }}
                     >
-                      <div className="row  ">
+                      <div className="row">
                         <div
                           className="col"
                           style={{ position: "relative", zIndex: "9" }}
                         >
-                          <ul className="progressbar">
-                            <li id="step1" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 1
-                            </li>
-
-                            <li id="step2" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 2
-                            </li>
-
-                            <li id="step3" className="active">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 3
-                            </li>
-
-                            <li id="step4">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 4
-                            </li>
-
-                            <li id="step5">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 5
-                            </li>
+                          <ul
+                            className="progressbar"
+                            style={{
+                              display: "flex",
+                              listStyle: "none",
+                              padding: 0,
+                            }}
+                          >
+                            {stepData &&
+                              stepData.map((item, index) => (
+                                <li
+                                  key={index}
+                                  id={`step${index + 1}`}
+                                  className="active"
+                                  style={{
+                                    display: "inline-block",
+                                    marginRight: "10px",
+                                  }}
+                                >
+                                  <div className="circle-container">
+                                    <a href="#">
+                                      <div className="circle-button"></div>
+                                    </a>
+                                  </div>
+                                  {item.loan_step}
+                                </li>
+                              ))}
                           </ul>
                         </div>
                       </div>
-                    </div> */}
+                    </div>
                   </div>
                   <div>
                     {fileData?.documents && (

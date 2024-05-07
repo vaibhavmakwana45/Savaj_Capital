@@ -12,6 +12,8 @@ const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
 const Title = require("../../models/AddDocuments/Title");
 const Loan_Step = require("../../models/Loan_Step/Loan_Step");
+const BankApproval = require("../../models/Bank/BankApproval");
+const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
 
 router.post("/", async (req, res) => {
   try {
