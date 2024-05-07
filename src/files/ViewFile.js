@@ -25,6 +25,9 @@ import { useLocation } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.dohost.in/upload/";
@@ -55,21 +58,39 @@ const FileDisplay = ({ groupedFiles }) => {
   const handleAccordionClick = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
   };
+
+  const [accordionStatus, setAccordionStatus] = useState();
   return (
     <>
       <nav
-        // style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);"
         aria-label="breadcrumb"
         className="my-3"
+        style={{ overflow: "auto" }}
       >
-        <ol class="breadcrumb">
+        <ul className="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="#">Home</a>
+            <a href="#"> Home</a>
           </li>
-          <li class="breadcrumb-item active" aria-current="page">
-            Library
-          </li>
-        </ol>
+          {Object.entries(groupedFiles).map(([title, files], index) => (
+            <li key={title} className="breadcrumb-item">
+              <a
+                href={`#${title}`}
+                onClick={() => handleAccordionClick(index)}
+                style={{ color: "#414650" }}
+              >
+                {title} documents
+              </a>
+              {accordionStatus && accordionStatus[title] && (
+                <div className="accordion-content">
+                  {/* Render files related to this title */}
+                  {files.map((file, index) => (
+                    <div key={index}>{file.name}</div>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </nav>
       <h2
         className="my-4"
@@ -93,16 +114,28 @@ const FileDisplay = ({ groupedFiles }) => {
               <h2
                 className="accordion-header"
                 id={`panelsStayOpen-heading-${index}`}
-                
               >
                 <button
                   className="accordion-button"
                   type="button"
+                  // name="butonnnns"
                   onClick={() => handleAccordionClick(index)}
                   aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{ color: "white", fontWeight: 700, fontSize: "14px",backgroundColor:"#414650" }}
+                  style={{
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    backgroundColor: "#414650",
+                    justifyContent: "space-between",
+                  }}
+                  id={title}
                 >
                   {title} documents
+                  <FontAwesomeIcon
+                    icon={
+                      index === openPanelIndex ? faChevronUp : faChevronDown
+                    }
+                  />
                 </button>
               </h2>
               <div
@@ -141,7 +174,7 @@ const FileDisplay = ({ groupedFiles }) => {
                           boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
                           cursor: "pointer",
                         }}
-                        className="col-xl-6 col-md-6 col-sm-12"
+                        className="col-xl-6 col-md-6 col-sm-12 details-image"
                         onClick={() =>
                           handleDownload(
                             `${basePath}${file.file_path}`,
@@ -333,27 +366,31 @@ function ViewFile() {
       ) : (
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-            <CardBody style={{ padding: "40px" }} className="cardss">
+            <CardBody style={{ padding: "40px", }} className="cardss">
               <FormLabel
-                className="mb-2 back-responsive"
+                className="mb-2 back-responsive ttext"
                 style={{ fontSize: "20px" }}
               >
                 <Flex
-                  alignItems="center"
                   justifyContent="space-between"
                   width="100%"
+                  className="thead"
                 >
-                  <div>
+                  <div className="theadd">
                     <IconButton
                       icon={<ArrowBackIcon />}
                       onClick={() => history.goBack()}
                       aria-label="Back"
                       mr="4"
-                      className="icon-button"
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button colorScheme="blue" style={{backgroundColor:"#b19552"}} onClick={onOpen}>
+                  <Button
+                    colorScheme="blue"
+                    style={{ backgroundColor: "#b19552"}}
+                    onClick={onOpen}
+                    className="buttonss"
+                  >
                     Add Status
                   </Button>
                 </Flex>
@@ -469,7 +506,12 @@ function ViewFile() {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleAddStatus}>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={handleAddStatus}
+              style={{ backgroundColor: "#b19552" }}
+            >
               Save
             </Button>
             <Button variant="ghost" onClick={onClose}>

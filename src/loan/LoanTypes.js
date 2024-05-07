@@ -300,7 +300,8 @@ function UserTable() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    color: "#fff",
+                    color: "#000",
+                    border:"2px solid #b19552"
                   }}
                 >
                   Cancel

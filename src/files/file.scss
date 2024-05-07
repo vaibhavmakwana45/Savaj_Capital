@@ -304,23 +304,43 @@
 /* media  */
 
 /* 1680 */
+@media (max-width:  3000px) {
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+   }
+}
 @media (max-width: 1700px) {
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+   }
 }
 
 /* 1500 */
 @media (max-width: 1680px) {
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+   }
 }
 
 /* 1440 */
 @media (max-width: 1449px) {
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+   }
 }
 
 /* 1280 */
 @media (max-width: 1439px) {
+  .bradcrub-navbar{
+    margin-left: 1px !important;
+   }
 }
 
 /* 992 */
 @media (max-width: 1279px) {
+  .bradcrub-navbar{
+    margin-left: 30px !important;
+   }
 }
 
 /* 768 */
@@ -328,12 +348,21 @@
   .collapse-table{
     flex-direction: column;
    }
+   .bradcrub-navbar{
+    margin-left: 30px !important;
+    // margin-top: -7px !important;
+   }
    .paper{
     width: 100% !important;
    }
    .status{
     width: 150px;
    }
+   .linksss{
+    margin-bottom: 60px !important;
+  }
+  
+
 }
 
 /* 576 */
@@ -341,6 +370,7 @@
   .navbar-responsive{
     display: flex !important;
   }
+
   .bradcrub-navbar{
     margin-left: 1px !important;
     margin-top: 15px !important;
@@ -354,6 +384,16 @@
    .status{
     width: 150px;
    }
+   .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
+  }
+  .mainnnn {
+    flex-direction: column !important;
+  }
 }
 
 /* 525 */
@@ -391,7 +431,16 @@
   .image-responsive{
     flex-direction: column !important;
   }
- 
+  .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
+  }
+  .mainnnn {
+    flex-direction: column !important;
+  }
 }
 
 /* 480 */
@@ -400,6 +449,16 @@
     margin-left: 1px !important;
     margin-top: 15px !important;
    }
+   .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
+  }
+  .mainnnn {
+    flex-direction: column !important;
+  }
 }
 
 /* 425 */
@@ -408,6 +467,25 @@
     margin-left: 1px !important;
     margin-top: 15px !important;
    }
+   .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
+  }
+  .theadd{
+    display: flex;
+    flex-direction: row;
+  }
+  .buttonss{
+    width: 50% !important;
+    margin-top: 10px;
+    padding: 10px !important;
+  }
+  .mainnnn {
+    flex-direction: column !important;
+  }
 }
 
 /* 375 */
@@ -418,6 +496,24 @@
  .bradcrub-navbar{
   margin-left: 1px !important;
  }
+ .bradcrub-navbar{
+  // margin-left: 30px !important;
+  margin-top: 7px !important;
+ }
+ .css-1ece9uh {
+  margin-top: -9px;
+}
+.buttonss{
+  width: 50% !important;
+  margin-top: 10px;
+  padding: 10px !important;
+}
+.card-main{
+  padding: 0;
+}
+.mainnnn {
+  flex-direction: column !important;
+}
 }
 
 /* 320 */
@@ -426,6 +522,24 @@
     margin-left: 1px !important;
     margin-top: 15px !important;
    }
+   .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
+  }
+  .buttonss{
+    width: 50% !important;
+    margin-top: 10px;
+    padding: 10px !important;
+  }
+  .card-main{
+    padding: 0 !important;
+  }
+  .mainnnn {
+    flex-direction: column !important;
+  }
 }
 
 /* 280 */
@@ -436,6 +550,13 @@
   .back-responsive{
     display: flex !important;
     margin-bottom: 1px;
+  }
+  .bradcrub-navbar{
+    // margin-left: 30px !important;
+    margin-top: 7px !important;
+   }
+   .css-1ece9uh {
+    margin-top: -9px;
   }
   .back-responsive b{
     font-size: 16px;
@@ -491,6 +612,16 @@ width: 100px !important;
 .bradcrub-navbar{
   margin-left: 1px !important;
  }
+ .buttonss{
+  width: 60% !important;
+  margin-top: 10px;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+.details-image{
+  width: 100% !important;
+  height: 100%;
+}
 }
 
 .TableCell {
@@ -726,7 +857,14 @@ button.btn.btn-secondary:focus {
   background-color: none;
 }
 
+/* Custom CSS to change accordion icon color to white */
 .accordion-button:not(.collapsed)::after {
-  background-image: url();
-  transform: rotate(-180deg);
+  // color: white !important; /* Force override with !important */
+  // background-image: url("../assets/svg/down.svg");
+  display: none;
+}
+
+.add-doc-button{
+  // background:"#b19552" !important;
+  border: 2px solid #b19552 !important;
 }

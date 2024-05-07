@@ -431,11 +431,11 @@ function AddFiles() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
+            <Flex justifyContent="space-between"  className="mainnnn">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">
+              <Button onClick={onOpen} colorScheme="blue" style={{backgroundColor:"#b19552"}} >
                 Add New User
               </Button>
             </Flex>
@@ -942,7 +942,7 @@ function AddFiles() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+              <Button colorScheme="blue" mr={3} type="submit" style={{backgroundColor:"#b19552"}}>
                 Save
               </Button>
               <Button onClick={onClose}>Cancel</Button>
@@ -950,6 +950,7 @@ function AddFiles() {
           </form>
         </ModalContent>
       </Modal>
+      
       <Toaster />
     </>
   );
