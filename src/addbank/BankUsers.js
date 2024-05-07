@@ -254,6 +254,7 @@ function BankUsers() {
               documentIndex2={6}
               name={"Created At:"}
               name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

@@ -258,6 +258,7 @@ function Tables() {
               documentIndex2={7}
               name={"Created At:"}
               name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

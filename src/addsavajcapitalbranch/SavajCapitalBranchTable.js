@@ -262,6 +262,7 @@ function SavajCapitalBranchTable() {
               documentIndex2={5}
               name={"Created At:"}
               name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

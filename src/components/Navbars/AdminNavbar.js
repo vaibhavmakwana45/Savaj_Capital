@@ -110,19 +110,30 @@ export default function AdminNavbar(props) {
       ? findRouteByKey(currentRoute.parent)
       : null;
 
-    // if (parentRoute) {
-    //   generateBreadcrumbItems(parentRoute, items);
-    // }
-
     if (items.length === 0) {
+      // Add the dashboard name dynamically based on the current route
+      let dashboardName = "";
+      switch (currentRoute.layout) {
+        case "/superadmin":
+          dashboardName = "Superadmin";
+          break;
+        case "/bankuser":
+          dashboardName = "Bank User";
+          break;
+        case "/scbranchuser":
+          dashboardName = "SC Branch User";
+          break;
+        default:
+          dashboardName = "Dashboard"; // Default dashboard name
+      }
       items.push(
-        <BreadcrumbItem key="superadmin">
+        <BreadcrumbItem key="dashboard">
           <BreadcrumbLink
-            href="/superadmin"
+            href={currentRoute.layout}
             color="white"
             _hover={{ color: "white" }}
           >
-            Superadmin
+            {dashboardName}
           </BreadcrumbLink>
         </BreadcrumbItem>
       );
@@ -240,11 +251,12 @@ export default function AdminNavbar(props) {
           routes={routes}
           {...rest}
         />
-        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar" >
+        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar">
           <Breadcrumb separator=">" style={{ color: "white" }}>
             {generateBreadcrumbs()}
           </Breadcrumb>
-          <Link className="linksss"
+          <Link
+            className="linksss"
             pt="20px"
             color={mainText}
             href="#"

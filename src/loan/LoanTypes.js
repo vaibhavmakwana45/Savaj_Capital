@@ -222,6 +222,7 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>
@@ -301,7 +302,7 @@ function UserTable() {
                   style={{
                     backgroundColor: "#414650",
                     color: "#000",
-                    border:"2px solid #b19552"
+                    border: "2px solid #b19552",
                   }}
                 >
                   Cancel

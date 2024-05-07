@@ -254,7 +254,7 @@ const TableComponent = ({
   removeIndex2,
   documentIndex2,
   name2,
-  itemsPerPageOptions = [5, 10, 25],
+  itemsPerPageOptions = [10, 20, 50],
   showPagination = false, // Option to show pagination dynamically
 }) => {
   const [expandedRows, setExpandedRows] = useState([]);

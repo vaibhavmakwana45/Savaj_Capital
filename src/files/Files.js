@@ -354,7 +354,7 @@ export default function CollapsibleTable() {
   const handleRow = (url) => {
     history.push(url);
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -371,7 +371,7 @@ export default function CollapsibleTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -463,11 +463,11 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }} className="card-main">
-          <Flex justifyContent="space-between"  p="4" className="mainnnn">
+          <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
               Add Files
             </Text>
-            <Flex  className="thead">
+            <Flex className="thead">
               <Select
                 placeholder="Select Loan"
                 value={selectedLoan}
@@ -602,6 +602,7 @@ export default function CollapsibleTable() {
       </div>
       {/* pagination */}
       <Flex justifyContent="flex-end" alignItems="center" p="4">
+        <Text mr="4">Total Records: {files.length}</Text>
         <Text mr="2">Rows per page:</Text>
         <Select
           value={itemsPerPage}
@@ -636,4 +637,3 @@ export default function CollapsibleTable() {
     </>
   );
 }
-

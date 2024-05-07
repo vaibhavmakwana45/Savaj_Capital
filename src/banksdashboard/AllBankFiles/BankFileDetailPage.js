@@ -175,7 +175,6 @@ function BankFileDetailPage() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-
                 </Flex>
               </FormLabel>
 

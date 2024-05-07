@@ -90,7 +90,6 @@ export default function HeaderLinks(props) {
     >
       <SearchBar me="18px" />
 
-    
       <SettingsIcon
         cursor="pointer"
         ms={{ base: "16px", xl: "0px" }}
@@ -157,7 +156,8 @@ export default function HeaderLinks(props) {
               <Flex align="center" justifyContent="flex-start">
                 <FaUser color="currentColor" pr="20px" />
                 &nbsp; {accessType?.firstname} {accessType?.lastname}{" "}
-                {accessType?.username} {accessType?.full_name}
+                {accessType?.username} {accessType?.full_name}{" "}
+                {accessType?.bankuser_name}
               </Flex>
             </MenuItem>
             <MenuItem borderRadius="8px">

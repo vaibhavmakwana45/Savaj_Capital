@@ -293,7 +293,7 @@ function Document() {
                 <Button
                   className="add-doc-button"
                   onClick={() => history.push("/superadmin/addloandocs")}
-                  style={{backgroundColor:"red"}}
+                  style={{ backgroundColor: "red" }}
                 >
                   Add Document
                 </Button>
@@ -317,6 +317,7 @@ function Document() {
               documentIndex={3}
               removeIndex={2}
               name={"Document Names:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

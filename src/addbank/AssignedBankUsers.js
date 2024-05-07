@@ -156,6 +156,7 @@ function AssignedBankUsers() {
               showEditButton={false}
               handleDelete={handleDelete}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>

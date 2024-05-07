@@ -201,6 +201,7 @@ function Title() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>

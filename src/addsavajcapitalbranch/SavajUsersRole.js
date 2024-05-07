@@ -240,6 +240,7 @@ function SavajUsersRole() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>
