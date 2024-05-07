@@ -412,14 +412,14 @@ function Sidebar(props) {
   const Brand = () => {
     if (!isOpen) {
       return (
-        <Box className="p-3">
+        <Box className="p-3" style={{overflow:"hidden"}}>
           <img src={logo2} alt="Logo" />
           <HSeparator />
         </Box>
       );
     } else {
       return (
-        <Box>
+        <Box style={{overflow:"hidden"}}>
           <img src={logo1} alt="Logo2" />
           <HSeparator />
         </Box>
@@ -526,6 +526,8 @@ export function SidebarResponsive(props) {
   const { logo, routes, colorMode, hamburgerColor, ...rest } = props;
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const toggle = () => setIsOpenDropdown(!isOpenDropdown);
+  const [isOpenDropdown1, setIsOpenDropdown1] = useState(false);
+  const toggle1 = () => setIsOpenDropdown1(!isOpenDropdown1);
   // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
@@ -772,7 +774,7 @@ export function SidebarResponsive(props) {
             >
               <Dropdown
                 style={{ background: "none", border: "none", outline: "none" }}
-                isOpen={isOpenDropdown}
+                isOpen={isOpenDropdown1}
                 toggle={toggle}
               >
                 <DropdownToggle

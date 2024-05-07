@@ -68,9 +68,7 @@ const FileDisplay = ({ groupedFiles }) => {
         style={{ overflow: "auto" }}
       >
         <ul className="breadcrumb">
-          <li class="breadcrumb-item">
-            <a href="#"> Home</a>
-          </li>
+   
           {Object.entries(groupedFiles).map(([title, files], index) => (
             <li key={title} className="breadcrumb-item">
               <a
