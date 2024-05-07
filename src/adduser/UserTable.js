@@ -255,6 +255,7 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
+              showPagination={true}
               removeIndex={5}
               removeIndex2={6}
               documentIndex={6}

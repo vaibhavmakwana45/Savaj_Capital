@@ -431,12 +431,22 @@ export default function CollapsibleTable() {
                 width="250px"
                 mr="10px"
               />
-              <Button
-                onClick={() => history.push("/superadmin/addfile")}
-                style={{ backgroundColor: "#b19552", color: "#fff" }}
-              >
-                Add File
-              </Button>
+              <div>
+                <style>
+                  {`
+      .dynamicImportantStyle {
+        background-color: #b19552 !important;
+        color: #fff !important;
+      }
+    `}
+                </style>
+                <Button
+                  onClick={() => history.push("/superadmin/addfile")}
+                  className="dynamicImportantStyle"
+                >
+                  Add File
+                </Button>
+              </div>
             </Flex>
           </Flex>
         </CardHeader>

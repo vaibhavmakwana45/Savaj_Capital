@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
   IconButton,
+  Checkbox
 } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -38,6 +39,11 @@ function EditFile() {
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
+  const [formData, setFormData] = useState({
+    stemp_paper_print: false,
+    loan_dispatch: false,
+    // any other fields that need to be managed
+  });
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -50,6 +56,12 @@ function EditFile() {
           setSelectedUser(details.user_id);
           setSelectedLoanId(details.loan_id);
           setSelectedLoanSubtypeId(details.loantype_id);
+          setFormData({
+            stemp_paper_print: details.stemp_paper_print,
+            loan_dispatch: details.loan_dispatch,
+            // set other necessary fields here
+          });
+  
           const documentsWithCDN = details.documents.map((document) => ({
             ...document,
             file_path: `${CDN_BASE_URL}${document.file_path}`,
@@ -349,6 +361,8 @@ function EditFile() {
           loan_document_id: file.loan_document_id,
           key: file.key,
         })),
+        stemp_paper_print: formData.stemp_paper_print,
+        loan_dispatch: formData.loan_dispatch 
       };
 
       console.log(payload, "payload");
@@ -364,6 +378,14 @@ function EditFile() {
     } finally {
       setLoading(false);
     }
+  };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    console.log(`Checkbox ${name} set to ${checked}`);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
   };
 
   return (
@@ -597,6 +619,25 @@ function EditFile() {
                 </div>
               ))}
             </div>
+            <FormControl id="stemp_paper_print" mt={4}>
+              <Checkbox
+                name="stemp_paper_print"
+                onChange={handleCheckboxChange}
+                isChecked={formData.stemp_paper_print}
+              >
+                Stemp Paper Print
+              </Checkbox>
+            </FormControl>
+
+            <FormControl id="loan_dispatch" mt={4}>
+              <Checkbox
+                name="loan_dispatch"
+                onChange={handleCheckboxChange}
+                isChecked={formData.loan_dispatch}
+              >
+                Loan Dispatch
+              </Checkbox>
+            </FormControl>
             {/* Submit and Cancel Buttons */}
             <div>
               <Button

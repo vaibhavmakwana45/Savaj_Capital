@@ -291,7 +291,7 @@ export default function Dashboard() {
         <Card
           minH="125px"
           style={{ cursor: "pointer" }}
-          // onClick={() => history.push("/superadmin/role")}
+          onClick={() => history.push("/superadmin/savajuserroles")}
         >
           <Flex direction="column">
             <Flex
@@ -317,7 +317,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.users}
+                    {apiData.role}
                   </StatNumber>
                 </Flex>
               </Stat>

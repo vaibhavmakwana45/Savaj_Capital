@@ -18,6 +18,7 @@ import {
   ModalBody,
   Input,
   ModalFooter,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
@@ -73,7 +74,8 @@ function AddFiles() {
     unit_address: "",
     gst_number: "",
     reference: "",
-    password: "",
+    stemp_paper_print: false, // Initialize as false
+    loan_dispatch: false, // Initialize as false
   });
 
   const {
@@ -286,61 +288,7 @@ function AddFiles() {
     }
   };
 
-  const handleSubmitData = async (e) => {
-    e.preventDefault();
-    setLoading(true);
 
-    try {
-      const uploadPromises = uploadedFileName.map(async (item) => {
-        const formData = new FormData();
-        formData.append("b_video", item.file);
-
-        const response = await axios.post(
-          "https://cdn.dohost.in/image_upload.php/",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        if (!response.data.success) {
-          throw new Error(response.data.msg || "File upload failed");
-        }
-
-        if (!response.data.iamge_path) {
-          throw new Error("Image path is missing in the response");
-        }
-
-        const imageName = response.data.iamge_path.split("/").pop();
-        return { ...item, path: imageName, documentId: item.documentId };
-      });
-
-      const uploadedFiles = await Promise.all(uploadPromises);
-
-      const payload = {
-        user_id: selectedUser,
-        loan_id: selectedLoanId,
-        loantype_id: selectedLoanSubtypeId,
-        documents: uploadedFiles.map((file) => ({
-          file_path: file.path,
-          loan_document_id: file.documentId,
-          title_id: file.title_id,
-          key: file.key,
-        })),
-      };
-      await AxiosInstance.post("/file_upload", payload);
-
-      history.push("/superadmin/filetable");
-      toast.success("All data submitted successfully!");
-    } catch (error) {
-      console.error("Error while uploading files or submitting data:", error);
-      toast.error("Submission failed! Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     setCountries(Country.getAllCountries());
@@ -392,7 +340,7 @@ function AddFiles() {
       });
     }
   };
-  
+
   const handleeChange = (e) => {
     const { name, value } = e.target;
     if (name === "pan_card" && value.toUpperCase().length <= 10) {
@@ -403,15 +351,15 @@ function AddFiles() {
       });
     }
   };
-  // const handleadharChange = (e) => {
-  //   const { name, value } = e.target;
-  //   if (name === "aadhar_card" && value.length <= 12) {
-  //     setFormData({
-  //       ...formData,
-  //       [name]: value,
-  //     });
-  //   }
-  // };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    console.log(`Checkbox ${name} set to ${checked}`); // Check the immediate state change
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
+  };
+
   const handleadharChange = (e) => {
     const { name, value } = e.target;
     if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
@@ -420,8 +368,64 @@ function AddFiles() {
         [name]: value,
       });
     }
-};
+  };
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
+    try {
+      const uploadPromises = uploadedFileName.map(async (item) => {
+        const formData = new FormData();
+        formData.append("b_video", item.file);
+
+        const response = await axios.post(
+          "https://cdn.dohost.in/image_upload.php/",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (!response.data.success) {
+          throw new Error(response.data.msg || "File upload failed");
+        }
+
+        if (!response.data.iamge_path) {
+          throw new Error("Image path is missing in the response");
+        }
+
+        const imageName = response.data.iamge_path.split("/").pop();
+        return { ...item, path: imageName, documentId: item.documentId };
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+
+      const payload = {
+        user_id: selectedUser,
+        loan_id: selectedLoanId,
+        loantype_id: selectedLoanSubtypeId,
+        documents: uploadedFiles.map((file) => ({
+          file_path: file.path,
+          loan_document_id: file.documentId,
+          title_id: file.title_id,
+          key: file.key,
+        })),
+        stemp_paper_print: formData.stemp_paper_print,  // Include checkbox state
+        loan_dispatch: formData.loan_dispatch 
+      };
+      await AxiosInstance.post("/file_upload", payload);
+      console.log('Form Data on Submit:', payload); // Check the state at submit
+      history.push("/superadmin/filetable");
+      toast.success("All data submitted successfully!");
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      toast.error("Submission failed! Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -431,10 +435,7 @@ function AddFiles() {
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button
-                onClick={onOpen}
-                style={{ backgroundColor: "#b19552", color: "#fff" }}
-              >
+              <Button onClick={onOpen} colorScheme="blue">
                 Add New User
               </Button>
             </Flex>
@@ -658,17 +659,37 @@ function AddFiles() {
                 </div>
               ))}
             </div>
+            <FormControl id="stemp_paper_print" mt={4}>
+              <Checkbox
+                name="stemp_paper_print"
+                onChange={handleCheckboxChange}
+                isChecked={formData.stemp_paper_print}
+              >
+                Stemp Paper Print
+              </Checkbox>
+            </FormControl>
+
+            <FormControl id="loan_dispatch" mt={4}>
+              <Checkbox
+                name="loan_dispatch"
+                onChange={handleCheckboxChange}
+                isChecked={formData.loan_dispatch}
+              >
+                Loan Dispatch
+              </Checkbox>
+            </FormControl>
 
             <div>
               <Button
                 mt={4}
+                colorScheme="teal"
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
                 style={{
+                  marginTop: 40,
                   backgroundColor: "#b19552",
                   color: "#fff",
-                  marginTop: 40,
                 }}
               >
                 Submit
@@ -676,13 +697,14 @@ function AddFiles() {
 
               <Button
                 mt={4}
-                onClick={() => history.push("/superadmin/filetable")}
+                colorScheme="yellow"
                 style={{
-                  backgroundColor: "#414650",
-                  color: "#fff",
                   marginTop: 40,
                   marginLeft: 8,
+                  backgroundColor: "#414650",
+                  color: "#fff",
                 }}
+                onClick={() => history.push("/superadmin/filetable")}
               >
                 Cancel
               </Button>
@@ -783,7 +805,7 @@ function AddFiles() {
                 />
                 {errors.pan_card && <p>{errors.pan_card.message}</p>}
               </FormControl> */}
-                 <FormControl id="aadharcard" mt={4} isRequired>
+              <FormControl id="aadharcard" mt={4} isRequired>
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   name="aadhar_card"
@@ -920,19 +942,10 @@ function AddFiles() {
             </ModalBody>
 
             <ModalFooter>
-              <Button
-                mr={3}
-                type="submit"
-                style={{ backgroundColor: "#b19552", color: "#fff" }}
-              >
+              <Button colorScheme="blue" mr={3} type="submit">
                 Save
               </Button>
-              <Button
-                onClick={onClose}
-                style={{ backgroundColor: "#414650", color: "#fff" }}
-              >
-                Cancel
-              </Button>
+              <Button onClick={onClose}>Cancel</Button>
             </ModalFooter>
           </form>
         </ModalContent>
