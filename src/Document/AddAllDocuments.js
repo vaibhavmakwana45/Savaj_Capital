@@ -184,7 +184,7 @@ function AddAllDocuments() {
                   onClick={() => {
                     setIsDocument(true);
                   }}
-                  style={{ backgroundColor: "#b19552", color: "#fff" }}
+                  style={{ border: "2px solid #b19552", color: "#b19552" }}
                 >
                   Add Documents
                 </Button>
