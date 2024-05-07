@@ -26,6 +26,7 @@ import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import AxiosInstance from "config/AxiosInstance";
+import logo from "../../assets/svg/big logo.svg";
 
 function SignIn() {
   const history = useHistory();
@@ -33,7 +34,7 @@ function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const textColor = useColorModeValue("gray.700", "white");
   const bgForm = useColorModeValue("white", "navy.800");
-  const titleColor = useColorModeValue("gray.700", "blue.500");
+  const titleColor = useColorModeValue("gray.700", "#b19552");
   const colorIcons = useColorModeValue("gray.700", "white");
   const bgIcons = useColorModeValue("trasnparent", "navy.700");
   const bgIconsHover = useColorModeValue("gray.50", "whiteAlpha.100");
@@ -99,7 +100,7 @@ function SignIn() {
       if (response.data.statusCode === 201) {
         toast.error("user not exists");
       } else if (response.data.statusCode === 202) {
-        toast.error(response.data.message)
+        toast.error(response.data.message);
       } else if (response.data.success) {
         const { token, role } = response.data;
         if (token) {
@@ -132,7 +133,7 @@ function SignIn() {
       setLoading(false);
     }
   };
-  
+
   return (
     <>
       <Flex position="relative">
@@ -173,83 +174,19 @@ function SignIn() {
                 fontWeight="bold"
                 textAlign="center"
                 mb="22px"
+                p={3}
+              >
+                <img src={logo} />
+              </Text>
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                textAlign="center"
+                mb="22px"
               >
                 Login With
               </Text>
-              {/* <HStack spacing="15px" justify="center" mb="22px">
-              <Flex
-                justify="center"
-                align="center"
-                w="75px"
-                h="75px"
-                borderRadius="8px"
-                border={useColorModeValue("1px solid", "0px")}
-                borderColor="gray.200"
-                cursor="pointer"
-                transition="all .25s ease"
-                bg={bgIcons}
-                _hover={{ bg: bgIconsHover }}
-              >
-                <Link href="#">
-                  <Icon as={FaFacebook} color={colorIcons} w="30px" h="30px" />
-                </Link>
-              </Flex>
-              <Flex
-                justify="center"
-                align="center"
-                w="75px"
-                h="75px"
-                borderRadius="8px"
-                border={useColorModeValue("1px solid", "0px")}
-                borderColor="gray.200"
-                cursor="pointer"
-                transition="all .25s ease"
-                bg={bgIcons}
-                _hover={{ bg: bgIconsHover }}
-              >
-                <Link href="#">
-                  <Icon
-                    as={FaApple}
-                    color={colorIcons}
-                    w="30px"
-                    h="30px"
-                    _hover={{ filter: "brightness(120%)" }}
-                  />
-                </Link>
-              </Flex>
-              <Flex
-                justify="center"
-                align="center"
-                w="75px"
-                h="75px"
-                borderRadius="8px"
-                border={useColorModeValue("1px solid", "0px")}
-                borderColor="gray.200"
-                cursor="pointer"
-                transition="all .25s ease"
-                bg={bgIcons}
-                _hover={{ bg: bgIconsHover }}
-              >
-                <Link href="#">
-                  <Icon
-                    as={FaGoogle}
-                    color={colorIcons}
-                    w="30px"
-                    h="30px"
-                    _hover={{ filter: "brightness(120%)" }}
-                  />
-                </Link>
-              </Flex>
-            </HStack>
-            <Text
-              fontSize="lg"
-              color="gray.400"
-              fontWeight="bold"
-              textAlign="center"
-              mb="22px"
-            >
-              or
-            </Text> */}
               <FormControl as="form" onSubmit={handleSubmit}>
                 {/* Update these input fields */}
                 <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
@@ -339,7 +276,7 @@ function SignIn() {
               w="100%"
               h="100%"
               bgSize="cover"
-              bg="blue.500"
+              bg="#b19552"
               opacity="0.8"
             ></Box>
           </Box>

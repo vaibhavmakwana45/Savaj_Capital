@@ -21,6 +21,7 @@
 		"@material-ui/icons": "^4.11.3",
 		"@mui/icons-material": "^5.15.15",
 		"@mui/material": "^5.15.15",
+		"@mui/styles": "^5.15.16",
 		"apexcharts": "^3.27.3",
 		"axios": "^1.6.8",
 		"classnames": "2.3.1",

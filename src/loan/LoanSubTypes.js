@@ -386,6 +386,10 @@ function LoanSubTypes() {
                     setisEditLoan(false);
                     setSelectedLoan("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -398,6 +402,10 @@ function LoanSubTypes() {
                   }
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedLoanId !== "" ? "Update Now" : "Add Now"}
                 </Button>

@@ -45,6 +45,7 @@ function AddUser(props) {
     cibil_score: "",
     email: "",
     pan_card: "",
+    businessname: "",
     aadhar_card: "",
     dob: "",
     country: "India",
@@ -80,6 +81,7 @@ function AddUser(props) {
           unit_address: user.unit_address,
           gst_number: user.gst_number,
           reference: user.reference,
+          businessname: user.businessname,
           password: "",
         };
         setSelectedState(user.state_code);
@@ -133,6 +135,7 @@ function AddUser(props) {
             password: formData.password,
             country: formData.country,
             unit_address: formData.unit_address,
+            businessname: formData.businessname,
             gst_number: formData.gst_number,
             state: formData.state,
             city: formData.city,
@@ -277,7 +280,15 @@ function AddUser(props) {
                   placeholder="Enter your Name"
                 />
               </FormControl>
-
+              <FormControl id="businessname" mt={4} isRequired>
+                <FormLabel>Business Name</FormLabel>
+                <Input
+                  name="businessname"
+                  onChange={handleChange}
+                  value={formData.businessname}
+                  placeholder="Enter your business name"
+                />
+              </FormControl>
               <FormControl id="dob" mt={4} isRequired>
                 <FormLabel>DOB</FormLabel>
                 <Input
@@ -435,18 +446,25 @@ function AddUser(props) {
               <div>
                 <Button
                   mt={4}
-                  colorScheme="teal"
                   type="submit"
                   isLoading={loading}
                   loadingText="Submitting"
-                  style={{ marginTop: 20 }}
+                  style={{
+                    marginTop: 20,
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Submit
                 </Button>
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 20, marginLeft: 8 }}
+                  style={{
+                    marginTop: 20,
+                    marginLeft: 8,
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                   onClick={() => history.push("/superadmin/alluser")}
                 >
                   Cancel

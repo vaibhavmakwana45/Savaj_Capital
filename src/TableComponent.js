@@ -74,7 +74,7 @@
 //             <Td colSpan={allHeaders.length + 1} textAlign="center">
 //               <Loader
 //                 type="spinner-circle"
-//                 bgColor={"#3182CE"}
+//                 bgColor={"#b19552"}
 //                 color={"black"}
 //                 size={50}
 //               />
@@ -181,10 +181,6 @@
 
 // export default TableComponent;
 
-
-
-
-
 import React, { useState } from "react";
 import {
   Flex,
@@ -206,6 +202,7 @@ import {
   ChevronUpIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  AddIcon, // Added new icon here
 } from "@chakra-ui/icons";
 
 const Pagination = ({
@@ -246,7 +243,9 @@ const TableComponent = ({
   handleDelete,
   handleEdit,
   handleRow,
+  handleTitle,
   showDeleteButton = true,
+  showTitleButton = false,
   showEditButton = true,
   collapse = false,
   removeIndex,
@@ -326,7 +325,7 @@ const TableComponent = ({
               <Td colSpan={allHeaders.length + 1} textAlign="center">
                 <Loader
                   type="spinner-circle"
-                  bgColor={"#3182CE"}
+                  bgColor={"#b19552"}
                   color={"black"}
                   size={50}
                 />
@@ -386,6 +385,14 @@ const TableComponent = ({
                           }
                           onClick={() => toggleRow(rowIndex)}
                           ml={2}
+                        />
+                      )}
+                      {showTitleButton && (
+                        <IconButton
+                          aria-label="Title"
+                          icon={<AddIcon />}
+                          ml={2}
+                          onClick={() => handleTitle(rowData[0])}
                         />
                       )}
                     </Flex>

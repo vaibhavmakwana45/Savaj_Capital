@@ -7,8 +7,6 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const Title = require("../../models/AddDocuments/Title");
 
-let loanTypeCounter = 0;
-
 router.get("/:loan_id", async (req, res) => {
   try {
     const loan_id = req.params.loan_id;
@@ -19,7 +17,11 @@ router.get("/:loan_id", async (req, res) => {
         $match: { loan_id: loan_id },
       },
       {
-        $sort: { updatedAt: -1 },
+        $sort: {
+          index: { $exists: 1, $type: 'number' }, // First sort by existence and type of index
+          index: 1, // Then sort by index value
+          updatedAt: -1 // Lastly by updatedAt for those without index
+        }
       },
     ]);
 
@@ -102,31 +104,31 @@ router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
     const loan_id = req.params.loan_id;
     const loantype_id = req.params.loantype_id;
 
-    // Fetch loan documents
     const data = await Loan_Documents.aggregate([
       {
         $match: { loan_id: loan_id, loantype_id: loantype_id },
       },
       {
-        $sort: { updatedAt: -1 },
+        $sort: {
+          index: { $exists: 1, $type: 'number' }, // First sort by existence and type of index
+          index: 1, // Then sort by index value
+          updatedAt: -1 // Lastly by updatedAt for those without index
+        }
       },
     ]);
 
-    // Extract document IDs from the fetched loan documents
     const documentIds = data.reduce((ids, doc) => {
       ids.push(...doc?.document_ids);
       return ids;
     }, []);
 
-    // Fetch document names based on the document IDs
     const documents = await AddDocuments.find({
       document_id: { $in: documentIds },
     });
 
-    // Map document names to loan documents
     const enrichedData = data.map((doc) => {
       if (!doc.document_ids || doc.document_ids.length === 0) {
-        return { ...doc, document_names: [] }; // No document IDs found
+        return { ...doc, document_names: [] };
       }
 
       const documentNames = doc.document_ids.map((id) => {
@@ -224,7 +226,6 @@ router.post("/", async (req, res) => {
   try {
     const { loan_id, loantype_id, document_id, title_id } = req.body;
 
-    // Find the existing document based on loan_id, loantype_id (if provided), and title
     const existingDocument = await Loan_Documents.findOne({
       loan_id,
       ...(loantype_id && { loantype_id }),
@@ -232,12 +233,10 @@ router.post("/", async (req, res) => {
     });
 
     if (existingDocument) {
-      // Check if any of the new document_ids are already present in the existing document
       const newDocumentIds = document_id.filter(
         (id) => !existingDocument.document_ids.includes(id)
       );
 
-      // If there are new document_ids, push them to the existing document's document_ids array
       if (newDocumentIds.length > 0) {
         existingDocument.document_ids.push(...newDocumentIds);
         existingDocument.updatedAt = moment()
@@ -252,7 +251,6 @@ router.post("/", async (req, res) => {
         message: "Document updated successfully",
       });
     } else {
-      // If document does not exist, create a new document
       const timestamp = Date.now();
       const uniqueId = `${timestamp}`;
 
@@ -261,7 +259,7 @@ router.post("/", async (req, res) => {
         loan_id,
         loantype_id,
         title_id,
-        document_ids: document_id, // Pass document_id as a flat array of strings
+        document_ids: document_id,
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
         updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       });
@@ -284,28 +282,24 @@ router.get("/doc_edit/:loan_document_id", async (req, res) => {
   try {
     const loan_document_id = req.params.loan_document_id;
 
-    // Fetch loan documents
     const data = await Loan_Documents.aggregate([
       {
         $match: { loan_document_id: loan_document_id },
       },
     ]);
 
-    // Extract document IDs from the fetched loan documents
     const documentIds = data.reduce((ids, doc) => {
       ids.push(...doc?.document_ids);
       return ids;
     }, []);
 
-    // Fetch document names based on the document IDs
     const documents = await AddDocuments.find({
       document_id: { $in: documentIds },
     });
 
-    // Map document names to loan documents
     const enrichedData = data.map((doc) => {
       if (!doc.document_ids || doc.document_ids.length === 0) {
-        return { ...doc, document_names: [] }; // No document IDs found
+        return { ...doc, document_names: [] };
       }
 
       const documentNames = doc.document_ids.map((id) => {
@@ -385,5 +379,48 @@ router.post("/update", async (req, res) => {
     });
   }
 });
+
+router.put("/update-index/:loan_document_id", async (req, res) => {
+  try {
+    const { loan_document_id } = req.params;
+    const { newIndex } = req.body;
+
+    const loanDocument = await Loan_Documents.findOne({ loan_document_id });
+    if (!loanDocument) {
+      return res.status(404).json({ success: false, message: "Loan document not found" });
+    }
+
+    const { loan_id, loantype_id } = loanDocument;
+
+    const existingDocumentWithIndex = await Loan_Documents.findOne({
+      loan_id,
+      loantype_id,
+      index: newIndex,
+      loan_document_id: { $ne: loan_document_id }
+    });
+
+    if (existingDocumentWithIndex) {
+      return res.status(409).json({
+        success: false,
+        message: `Another document with index ${newIndex} already exists.`
+      });
+    }
+
+    loanDocument.index = newIndex;
+    await loanDocument.save();
+
+    res.json({
+      success: true,
+      message: `Document index updated successfully to ${newIndex}`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
 
 module.exports = router;

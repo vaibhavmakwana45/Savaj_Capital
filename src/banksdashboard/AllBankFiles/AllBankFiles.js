@@ -43,7 +43,7 @@ import moment from "moment";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file} = props;
+  const { id, file } = props;
   const history = useHistory();
   const [open, setOpen] = React.useState(false);
 
@@ -82,7 +82,7 @@ function Row(props) {
             unmountOnExit
             style={{ width: "100%" }}
           >
-            <div
+            {/* <div
               className="container-fluid progress-bar-area"
               style={{ height: "20%" }}
             >
@@ -136,7 +136,7 @@ function Row(props) {
                   </ul>
                 </div>
               </div>
-            </div>
+            </div> */}
           </Collapse>
         </TableCell>
       </TableRow>
@@ -188,7 +188,7 @@ export default function CollapsibleTable() {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
-  console.log(accessType.bankuser_id, "accessType.bankuser_id")
+  console.log(accessType.bankuser_id, "accessType.bankuser_id");
 
   const [loading, setLoading] = useState(true);
 
@@ -296,7 +296,7 @@ export default function CollapsibleTable() {
             <Flex justify="center" align="center" height="100vh">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />

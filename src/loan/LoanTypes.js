@@ -192,14 +192,19 @@ function UserTable() {
                     onClick={() => history.push("/superadmin/addloantype")}
                     colorScheme="blue"
                     className="adduser-btn mb-1"
+                    style={{ backgroundColor: "#b19552", color: "#fff" }}
                   >
                     Add Loan
                   </Button>
                   <Button
                     className="loanuser-btn mb-1"
-                    style={{ marginLeft: "10px" }}
                     onClick={() => history.push("/superadmin/addloandocs")}
                     colorScheme="blue"
+                    style={{
+                      backgroundColor: "#b19552",
+                      color: "#fff",
+                      marginLeft: "10px",
+                    }}
                   >
                     Add Documents
                   </Button>
@@ -293,6 +298,10 @@ function UserTable() {
                     setisEditLoan(false);
                     setSelectedLoan("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -305,6 +314,10 @@ function UserTable() {
                   }
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedLoanId !== "" ? "Update Now" : "Add Now"}
                 </Button>

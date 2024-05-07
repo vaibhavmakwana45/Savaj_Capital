@@ -527,7 +527,6 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserFile,
     layout: "/savajcapitaluser",
-    hideInSResponsive: false,
     hideInSResponsivrUser: true,
   },
   {
@@ -593,9 +592,6 @@ var dashRoutes = [
     component: CustomerFile,
     layout: "/user",
     hideInCustomer: false,
-    hideInSResponsivrUser: true,
-    hideInBResponsivrUser: true,
-    hideInSResponsive: true,
   },
   {
     path: "/adduserfile",
@@ -631,7 +627,6 @@ var dashRoutes = [
     icon: <DocumentIcon color="inherit" />,
     component: Title,
     layout: "/superadmin",
-    hideInSResponsive: true,
     hideInSidebar: true,
   },
 ];

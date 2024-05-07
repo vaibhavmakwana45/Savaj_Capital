@@ -103,7 +103,7 @@ function UserTable() {
     } else if (score >= 750 && score <= 900) {
       return "Excellent";
     } else {
-      return "Unknown";
+      return "-";
     }
   };
 
@@ -225,6 +225,7 @@ function UserTable() {
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
                   className="adduser-btn"
+                  style={{background: "#b19552"}}
                 >
                   Add Customer
                 </Button>
@@ -254,6 +255,7 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
+              showPagination={true}
               removeIndex={5}
               removeIndex2={6}
               documentIndex={6}

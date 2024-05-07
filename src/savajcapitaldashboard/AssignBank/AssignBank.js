@@ -130,8 +130,7 @@ function AssignBank() {
     navigateToAnotherPage(id);
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   return (
     <>
@@ -150,9 +149,15 @@ function AssignBank() {
                   width="250px"
                   marginRight="10px"
                 />
-                    <Button onClick={navigateToAssignFile} colorScheme="blue">
-                    Assign File
-                  </Button>
+                <Button
+                  onClick={navigateToAssignFile}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
+                >
+                  Assign File
+                </Button>
                 {/* <Menu>
                   <MenuButton>
                     <Button
@@ -226,6 +231,10 @@ function AssignBank() {
                 <Button
                   ref={cancelRef}
                   onClick={() => setIsDeleteDialogOpen(false)}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
-
+import { Select } from "@chakra-ui/react";
 import {
   Button,
   useColorModeValue,
@@ -111,11 +111,9 @@ function Row(props) {
   const handleClick = () => {
     AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
       .then((response) => {
-        // Handle the response if needed
         console.log("Response:", response.data);
       })
       .catch((error) => {
-        // Handle errors
         console.error("Error:", error);
       });
   };
@@ -326,18 +324,32 @@ export default function CollapsibleTable() {
   const [files, setFiles] = useState([]);
   let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
-  const filteredUsers =
-    searchTerm.length === 0
-      ? files
-      : files.filter(
-          (user) =>
-            (user.loan &&
-              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.file_id &&
-              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.loan_type &&
-              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+  const [selectedLoan, setSelectedLoan] = useState("");
+  const [loans, setLoans] = useState([]);
+  const filteredUsers = files.filter((file) => {
+    const loanSafe =
+      file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
+    const fileIdSafe =
+      file.file_id && typeof file.file_id === "string"
+        ? file.file_id.toLowerCase()
+        : "";
+    const loanTypeSafe =
+      file.loan_type && typeof file.loan_type === "string"
+        ? file.loan_type.toLowerCase()
+        : "";
+    const usernameSafe =
+      file.user_username && typeof file.user_username === "string"
+        ? file.user_username.toLowerCase()
+        : "";
+
+    return (
+      (selectedLoan === "" || loanSafe === selectedLoan.toLowerCase()) &&
+      (loanSafe.includes(searchTerm.toLowerCase()) ||
+        fileIdSafe.includes(searchTerm.toLowerCase()) ||
+        loanTypeSafe.includes(searchTerm.toLowerCase()) ||
+        usernameSafe.includes(searchTerm.toLowerCase()))
+    );
+  });
 
   const history = useHistory();
 
@@ -347,17 +359,21 @@ export default function CollapsibleTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFiles = async () => {
+    const fetchData = async () => {
       try {
-        const response = await AxiosInstance.get("/file_upload");
-        setFiles(response.data.data);
+        const fileResponse = await AxiosInstance.get("/file_upload");
+        const loanResponse = await AxiosInstance.get("/loan");
+
+        setFiles(fileResponse.data.data);
+        setLoans(loanResponse.data.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching files:", error);
+        console.error("Error fetching data:", error);
+        setLoading(false);
       }
     };
 
-    fetchFiles();
+    fetchData();
   }, []);
 
   // Inside the Row component
@@ -390,26 +406,48 @@ export default function CollapsibleTable() {
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
         <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext">
+          <Flex justifyContent="space-between" alignItems="center" p="4">
+            <Text fontSize="xl" fontWeight="bold">
               Add Files
             </Text>
-            <div>
+            <Flex alignItems="center">
+              <Select
+                placeholder="Select Loan"
+                value={selectedLoan}
+                onChange={(e) => setSelectedLoan(e.target.value)}
+                mr="10px"
+                width="200px"
+              >
+                {loans.map((loan) => (
+                  <option key={loan._id} value={loan.loan}>
+                    {loan.loan}
+                  </option>
+                ))}
+              </Select>
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by name"
                 width="250px"
-                marginRight="10px"
+                mr="10px"
               />
-
-              <Button
-                onClick={() => history.push("/superadmin/addfile")}
-                colorScheme="blue"
-              >
-                Add File
-              </Button>
-            </div>
+              <div>
+                <style>
+                  {`
+      .dynamicImportantStyle {
+        background-color: #b19552 !important;
+        color: #fff !important;
+      }
+    `}
+                </style>
+                <Button
+                  onClick={() => history.push("/superadmin/addfile")}
+                  className="dynamicImportantStyle"
+                >
+                  Add File
+                </Button>
+              </div>
+            </Flex>
           </Flex>
         </CardHeader>
         <ThemeProvider theme={theme}>
@@ -417,7 +455,7 @@ export default function CollapsibleTable() {
             <Flex justify="center" align="center" height="100vh">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />

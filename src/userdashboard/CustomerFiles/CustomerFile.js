@@ -315,7 +315,7 @@ export default function CollapsibleTable() {
     }
   };
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/user/edituserfile?id=${id}`);
   };
   const handleDelete = (id) => {
     setSelectedFileId(id);
@@ -356,7 +356,7 @@ export default function CollapsibleTable() {
             <Flex justify="center" align="center" height="100vh">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />
