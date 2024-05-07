@@ -51,7 +51,7 @@ function Document() {
   const cancelRef = React.useRef();
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
   const [inputIndex, setInputIndex] = useState("");
-  const toast = useToast();
+
 
   const openTitleModal = (documentId) => {
     setSelectedDocumentId(documentId);
@@ -290,13 +290,13 @@ function Document() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button
+                {/* <Button
                   className="add-doc-button"
                   onClick={() => history.push("/superadmin/addloandocs")}
                   style={{ backgroundColor: "red" }}
                 >
                   Add Document
-                </Button>
+                </Button> */}
               </div>
             </Flex>
           </CardHeader>

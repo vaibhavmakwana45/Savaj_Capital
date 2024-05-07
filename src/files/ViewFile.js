@@ -471,14 +471,14 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button
+                  {/* <Button
                     colorScheme="blue"
                     style={{ backgroundColor: "#b19552"}}
                     onClick={onOpen}
                     className="buttonss"
                   >
                     Add Status
-                  </Button>
+                  </Button> */}
                 </Flex>
               </FormLabel>
 
