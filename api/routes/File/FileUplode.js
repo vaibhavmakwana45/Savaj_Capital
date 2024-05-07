@@ -509,8 +509,10 @@ router.delete("/:file_id", async (req, res) => {
     const fileAssignToSavajCapitalBranch = SavajCapital_BranchAssign.findOne({
       file_id: file_id,
     });
+    console.log(fileAssignToSavajCapitalBranch, "fileAssignToSavajCapitalBranch")
 
     const fileAssignToBankApproval = BankApproval.findOne({ file_id: file_id });
+    console.log(fileAssignToBankApproval, "fileAssignToBankApproval")
 
     if (fileAssignToSavajCapitalBranch || fileAssignToBankApproval) {
       return res.status(200).json({
