@@ -435,13 +435,17 @@ function AddLoanDocuments() {
                         value={selectedDocs}
                         onChange={(values) => setSelectedDocs(values)}
                       >
-                        <Stack>
-                          {filterSelectedDocs().map((doc) => (
+                        {/* <Stack> */}
+                        {filterSelectedDocs().map((doc) => (
+                          <>
                             <Checkbox key={doc.id} value={doc.document}>
                               {doc.document}
                             </Checkbox>
-                          ))}
-                        </Stack>
+                            <br />
+                          </>
+                        ))}
+
+                        {/* </Stack> */}
                       </CheckboxGroup>
                     </PopoverBody>
                   </PopoverContent>

@@ -313,8 +313,9 @@ function EditLoanDocuments() {
                           setFormData({ ...formData, document_ids: values })
                         }
                       >
-                        <Stack>
-                          {currentDocs.map((doc) => (
+                        {/* <Stack> */}
+                        {currentDocs.map((doc) => (
+                          <>
                             <Checkbox
                               key={doc.id}
                               value={doc.document_id}
@@ -324,8 +325,10 @@ function EditLoanDocuments() {
                             >
                               {doc.document}
                             </Checkbox>
-                          ))}
-                        </Stack>
+                            <br />
+                          </>
+                        ))}
+                        {/* </Stack> */}
                       </CheckboxGroup>
                     </PopoverBody>
                   </PopoverContent>
