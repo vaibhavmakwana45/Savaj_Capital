@@ -25,6 +25,12 @@ const UserSchema = new mongoose.Schema({
   branch_id: {
     type: String,
   },
+  amount: {
+    type: String,
+  },
+  note: {
+    type: String,
+  },
   createdAt: {
     type: String,
   },

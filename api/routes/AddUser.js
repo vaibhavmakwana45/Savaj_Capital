@@ -128,7 +128,7 @@ router.post("/adduserbyadmin", async (req, res) => {
     }
 
     // const hashedPassword = encrypt(userDetails.password);
-
+    const status = req.body.cibil_score === "" ? "active" : "complete";
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
     const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
@@ -142,6 +142,7 @@ router.post("/adduserbyadmin", async (req, res) => {
       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       password: "",
+      status: status,
     });
 
     await newUser.save();
@@ -251,13 +252,10 @@ router.put("/edituser/:userId", async (req, res) => {
   const updates = req.body;
 
   try {
-    // if (updates.password) {
-    //   updates.password = await hashPassword(updates.password);
-    // }
-
+    const status = req.body.cibil_score === "" ? "active" : "complete";
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
-      updates,
+      { ...updates, status },
       { new: true, runValidators: true }
     ).select("-password");
 

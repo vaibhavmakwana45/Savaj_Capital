@@ -31,6 +31,7 @@ const AddDocumentsRoutes = require("./routes/AddDocumens/AddDocuments"); // Add-
 const TitleRoutes = require("./routes/AddDocumens/Title"); // Title
 const BranchAssignRoutes = require("./routes/Savaj_Capital/Branch_Assign");
 const FileStatusRoutes = require("./routes/FileStatus/FileStatus");
+const IDBAccountRoutes = require("./routes/Bank/IDB_Account");
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -64,6 +65,7 @@ app.use("/api/document", AddDocumentsRoutes);
 app.use("/api/title", TitleRoutes);
 app.use("/api/branch_assign", BranchAssignRoutes);
 app.use("/api/file-status", FileStatusRoutes);
+app.use("/api/ibd_account", IDBAccountRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

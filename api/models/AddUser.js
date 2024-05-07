@@ -56,6 +56,9 @@ const UserSchema = new mongoose.Schema({
   state_code: {
     type: String,
   },
+  status: {
+    type: String,
+  },
   createdAt: {
     type: String,
   },
