@@ -93,13 +93,14 @@ const FileDisplay = ({ groupedFiles }) => {
               <h2
                 className="accordion-header"
                 id={`panelsStayOpen-heading-${index}`}
+                
               >
                 <button
                   className="accordion-button"
                   type="button"
                   onClick={() => handleAccordionClick(index)}
                   aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{ color: "black", fontWeight: 700, fontSize: "14px" }}
+                  style={{ color: "white", fontWeight: 700, fontSize: "14px",backgroundColor:"#414650" }}
                 >
                   {title} documents
                 </button>
@@ -352,7 +353,7 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button colorScheme="blue" onClick={onOpen}>
+                  <Button colorScheme="blue" style={{backgroundColor:"#b19552"}} onClick={onOpen}>
                     Add Status
                   </Button>
                 </Flex>
@@ -371,7 +372,7 @@ function ViewFile() {
                       className="card-header"
                       style={{
                         fontSize: "15px",
-                        backgroundColor: "#3182CE",
+                        backgroundColor: "#b19552",
                         borderTopLeftRadius: "10px",
                         borderTopRightRadius: "10px",
                         color: "white",
