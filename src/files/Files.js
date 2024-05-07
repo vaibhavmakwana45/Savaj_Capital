@@ -174,7 +174,7 @@ function Row(props) {
                 e.stopPropagation(e.target.value);
                 handleClick(pan_card);
               }}
-            ></Button>
+            >IDB</Button>
           ) : (
             "-"
           )}

@@ -152,8 +152,7 @@ function AssignBank() {
                 <Button
                   onClick={navigateToAssignFile}
                   style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
+                    border: "2px solid #b19552",
                   }}
                 >
                   Assign File
