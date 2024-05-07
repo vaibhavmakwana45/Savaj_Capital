@@ -268,6 +268,7 @@ function ViewFile() {
     };
 
     fetchData();
+    fetchStepsData();
   }, [id]);
 
   const handleAddStatus = async () => {
@@ -290,6 +291,17 @@ function ViewFile() {
       setStatusReason("");
     } catch (error) {
       console.error("Error adding status:", error);
+    }
+  };
+
+  const [stepData, setStepData] = useState([]);
+  const fetchStepsData = async () => {
+    try {
+      const response = await AxiosInstance.get(`/file_upload/get_steps/${id}`);
+      setStepData(response.data.data);
+      console.log(response.data.data, "filesy");
+    } catch (error) {
+      console.error("Error: ", error.message);
     }
   };
 
@@ -383,56 +395,38 @@ function ViewFile() {
                       className="container-fluid progress-bar-area"
                       style={{ height: "20%" }}
                     >
-                      <div className="row  ">
+                      <div className="row">
                         <div
                           className="col"
                           style={{ position: "relative", zIndex: "9" }}
                         >
-                          <ul className="progressbar">
-                            <li id="step1" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 1
-                            </li>
-
-                            <li id="step2" className="complete">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 2
-                            </li>
-
-                            <li id="step3" className="active">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 3
-                            </li>
-
-                            <li id="step4">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 4
-                            </li>
-
-                            <li id="step5">
-                              <div className="circle-container">
-                                <a href="#">
-                                  <div className="circle-button"></div>
-                                </a>
-                              </div>
-                              Step 5
-                            </li>
+                          <ul
+                            className="progressbar"
+                            style={{
+                              display: "flex",
+                              listStyle: "none",
+                              padding: 0,
+                            }}
+                          >
+                            {stepData &&
+                              stepData.map((item, index) => (
+                                <li
+                                  key={index}
+                                  id={`step${index + 1}`}
+                                  className="active"
+                                  style={{
+                                    display: "inline-block",
+                                    marginRight: "10px",
+                                  }}
+                                >
+                                  <div className="circle-container">
+                                    <a href="#">
+                                      <div className="circle-button"></div>
+                                    </a>
+                                  </div>
+                                  {item.loan_step}
+                                </li>
+                              ))}
                           </ul>
                         </div>
                       </div>
