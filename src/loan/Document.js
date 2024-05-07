@@ -291,8 +291,9 @@ function Document() {
                   marginRight="10px"
                 />
                 <Button
+                  className="add-doc-button"
                   onClick={() => history.push("/superadmin/addloandocs")}
-                  style={{ backgroundColor: "#b19552", color: "#fff" }}
+                  style={{backgroundColor:"red"}}
                 >
                   Add Document
                 </Button>
@@ -452,6 +453,7 @@ function Document() {
                 colorScheme="blue"
                 mr={3}
                 onClick={handleInputIndexSubmit}
+                style={{ backgroundColor: "#b19552" }}
               >
                 Submit
               </Button>

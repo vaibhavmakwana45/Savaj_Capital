@@ -308,4 +308,33 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
   }
 });
 
+router.delete("/assigedfile_delete/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+
+    const deletedUser = await BankApproval.findOneAndDelete({
+      file_id: file_id,
+    });
+
+    if (!deletedUser) {
+      return res.status(200).json({
+        statusCode: 202,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "File successfully deleted.",
+      deletedBankId: file_id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;

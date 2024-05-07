@@ -85,9 +85,10 @@ function AssignedBankUsers() {
     "Loan Type",
     "CreatedAt",
     "UpdatedAt",
+    "Action",
   ];
   const formattedData = filteredUsers?.map((item) => [
-    item?.user_id,
+    item?.file_id,
     item?.file_id,
     item?.username,
     item?.loan,
@@ -96,7 +97,36 @@ function AssignedBankUsers() {
     item?.file_data.updatedAt,
   ]);
 
-  const handleRow = (id) => {
+  const handleRow = (id) => {};
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [bankUserAssignedFileId, setBankUserAssignedFileId] = useState(null);
+
+  const cancelRef = React.useRef();
+  const deleteBankUser = async (file_id) => {
+    try {
+      const response = await AxiosInstance.delete(
+        `/bank_user/assigedfile_delete/${file_id}`
+      );
+
+      if (response.data.success) {
+        setIsDeleteDialogOpen(false);
+        toast.success("Bank deleted successfully!");
+        setSavajUserAssignedFile(
+          savajUserAssignedFile.filter(
+            (savajUserFileAssign) => savajUserFileAssign.file_id !== file_id
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting bank:", error);
+      toast.error(error);
+    }
+  };
+
+  const handleDelete = (file_id) => {
+    setBankUserAssignedFileId(file_id);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -122,12 +152,46 @@ function AssignedBankUsers() {
               borderColor={borderColor}
               loading={loading}
               allHeaders={allHeaders}
-              showDeleteButton={false}
+              showDeleteButton={true}
               showEditButton={false}
+              handleDelete={handleDelete}
               handleRow={handleRow}
             />
           </CardBody>
         </Card>
+        <AlertDialog
+          isOpen={isDeleteDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Delete Bank
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure? You can't undo this action afterwards.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => deleteBankUser(bankUserAssignedFileId)}
+                  ml={3}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </Flex>
       <Toaster />
     </>

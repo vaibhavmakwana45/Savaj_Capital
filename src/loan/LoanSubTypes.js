@@ -228,7 +228,7 @@ function LoanSubTypes() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button onClick={() => setisEditLoan(true)} colorScheme="blue">
+                <Button onClick={() => setisEditLoan(true)} colorScheme="blue" style={{backgroundColor:"#b19552"}}>
                   Add Loan
                 </Button>
               </Flex>

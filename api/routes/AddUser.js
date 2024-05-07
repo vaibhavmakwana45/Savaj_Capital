@@ -428,7 +428,7 @@ router.get("/customer/:user_id", async (req, res) => {
     for (let i = 0; i < data.length; i++) {
       const loan_id = data[i].loan_id;
       const loantype_id = data[i].loantype_id;
-      
+
       if (loan_id) {
         const loan_data = await Loan.findOne({ loan_id: loan_id });
         if (loan_data) {
@@ -462,5 +462,4 @@ router.get("/customer/:user_id", async (req, res) => {
   }
 });
 
-
-module.exports = router;  
+module.exports = router;

@@ -127,7 +127,7 @@ router.get("/:branch_id", async (req, res) => {
 router.put("/:branchuser_id", async (req, res) => {
   try {
     const { branchuser_id } = req.params;
-    
+
     // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     if (!req.body.password) {
@@ -376,6 +376,35 @@ router.get("/assigned_file/:branchuser_id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+});
+
+router.delete("/assigedfile_delete/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+
+    const deletedUser = await Branch_Assign.findOneAndDelete({
+      file_id: file_id,
+    });
+
+    if (!deletedUser) {
+      return res.status(200).json({
+        statusCode: 202,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "File successfully deleted.",
+      deletedBankId: file_id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 });

@@ -46,14 +46,27 @@ router.post("/", async (req, res) => {
   }
 });
 
+// With Pagination
 router.get("/", async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; // Default limit is 2 records per page
+    const skip = (page - 1) * limit;
+
+    // Query to fetch paginated data
     var data = await File_Uplode.aggregate([
       {
         $sort: { updatedAt: -1 },
       },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
     ]);
 
+    // Loop through the data to populate additional fields
     for (let i = 0; i < data.length; i++) {
       const branchuser_id = data[i].branchuser_id;
       const user_id = data[i].user_id;
@@ -132,12 +145,18 @@ router.get("/", async (req, res) => {
       data[i].uploaded_documents_count = uploadedDocumentsCount;
     }
 
-    const count = data.length;
+    // Query to fetch total count of documents
+    const totalCount = await File_Uplode.countDocuments();
+
+    // Calculate total page count
+    const totalPages = Math.ceil(totalCount / limit);
 
     res.json({
       statusCode: 200,
       data: data,
-      count: count,
+      count: totalCount,
+      totalPages: totalPages,
+      currentPage: page,
       message: "Read All Request",
     });
   } catch (error) {
@@ -147,6 +166,109 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+// Without Pagination
+// router.get("/", async (req, res) => {
+//   try {
+//     var data = await File_Uplode.aggregate([
+//       {
+//         $sort: { updatedAt: -1 },
+//       },
+//     ]);
+
+//     for (let i = 0; i < data.length; i++) {
+//       const branchuser_id = data[i].branchuser_id;
+//       const user_id = data[i].user_id;
+//       const loan_id = data[i].loan_id;
+//       const loantype_id = data[i].loantype_id;
+
+//       const branchUserData = await SavajCapital_User.findOne({
+//         branchuser_id: branchuser_id,
+//       });
+
+//       const userData = await AddUser.findOne({ user_id: user_id });
+//       const loanData = await Loan.findOne({
+//         loan_id: loan_id,
+//       });
+//       const loanTypeData = await Loan_Type.findOne({
+//         loantype_id: loantype_id,
+//       });
+
+//       if (branchUserData) {
+//         data[i].brachuser_full_name = branchUserData.full_name;
+//       }
+
+//       if (userData) {
+//         data[i].user_username = userData.username;
+//         data[i].pan_card = userData.pan_card;
+//       }
+//       if (loanData) {
+//         data[i].loan = loanData.loan;
+//       }
+//       if (loanTypeData) {
+//         data[i].loan_type = loanTypeData.loan_type;
+//       }
+
+//       let documentCount;
+//       if (loantype_id === "") {
+//         documentCount = await Loan_Documents.countDocuments({
+//           loan_id: loan_id,
+//         });
+//       } else {
+//         documentCount = await Loan_Documents.countDocuments({
+//           loantype_id: loantype_id,
+//         });
+//       }
+
+//       let loan_doc_data;
+//       if (loantype_id === "") {
+//         loan_doc_data = await Loan_Documents.find({
+//           loan_id: loan_id,
+//         }).limit(documentCount);
+//       } else {
+//         loan_doc_data = await Loan_Documents.find({
+//           loantype_id: loantype_id,
+//         }).limit(documentCount);
+//       }
+
+//       data[i].loan_document_ids = loan_doc_data.map((doc) => ({
+//         loan_document_id: doc.loan_document_id,
+//         loan_document: doc.loan_document,
+//       }));
+
+//       data[i].loan_document_ids.forEach((doc) => {
+//         const found = data[i].documents.some(
+//           (d) => d.loan_document_id === doc.loan_document_id
+//         );
+//         doc.is_uploaded = found;
+//       });
+
+//       const uploadedDocumentsCount = data[i].documents.length;
+//       let percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(
+//         2
+//       );
+
+//       data[i].document_count = documentCount;
+//       data[i].document_percentage = parseFloat(percentage);
+
+//       data[i].uploaded_documents_count = uploadedDocumentsCount;
+//     }
+
+//     const count = data.length;
+
+//     res.json({
+//       statusCode: 200,
+//       data: data,
+//       count: count,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 
 // Assuming Title model is imported and available
 
@@ -384,6 +506,18 @@ router.get("/edit_file_upload/:file_id", async (req, res) => {
 router.delete("/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
+    const fileAssignToSavajCapitalBranch = SavajCapital_BranchAssign.findOne({
+      file_id: file_id,
+    });
+
+    const fileAssignToBankApproval = BankApproval.findOne({ file_id: file_id });
+
+    if (fileAssignToSavajCapitalBranch || fileAssignToBankApproval) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "File cannot be deleted because it is currently assigned.",
+      });
+    }
 
     const deletedFile = await File_Uplode.findOneAndDelete({
       file_id: file_id,
