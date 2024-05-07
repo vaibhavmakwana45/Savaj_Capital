@@ -174,9 +174,7 @@ function Row(props) {
                 e.stopPropagation(e.target.value);
                 handleClick(pan_card);
               }}
-            >
-              IDB
-            </Button>
+            ></Button>
           ) : (
             "-"
           )}
@@ -356,16 +354,38 @@ export default function CollapsibleTable() {
   const handleRow = (url) => {
     history.push(url);
   };
-  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const loanResponse = await AxiosInstance.get("/loan");
+        setLoans(loanResponse.data.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fileResponse = await AxiosInstance.get("/file_upload");
-        const loanResponse = await AxiosInstance.get("/loan");
+        const response = await AxiosInstance.get("/file_upload", {
+          params: {
+            page: currentPage, // Current page
+            limit: itemsPerPage, // Items per page
+          },
+        });
 
-        setFiles(fileResponse.data.data);
-        setLoans(loanResponse.data.data);
+        setFiles(response.data.data);
+        setTotalPages(response.data.totalPages); // Set total pages from API response
+        setCurrentPage(response.data.currentPage); // Set current page from API response
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -374,7 +394,39 @@ export default function CollapsibleTable() {
     };
 
     fetchData();
-  }, []);
+  }, [currentPage, itemsPerPage]);
+
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    if (nextPage <= totalPages) {
+      setCurrentPage(nextPage);
+    }
+  };
+
+  const handlePrevPage = () => {
+    const prevPage = currentPage - 1;
+    if (prevPage >= 1) {
+      setCurrentPage(prevPage);
+    }
+  };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const fileResponse = await AxiosInstance.get("/file_upload");
+  //       const loanResponse = await AxiosInstance.get("/loan");
+
+  //       setFiles(fileResponse.data.data);
+  //       setLoans(loanResponse.data.data);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   // Inside the Row component
 
@@ -405,12 +457,12 @@ export default function CollapsibleTable() {
         className="card"
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
-        <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" alignItems="center" p="4">
+        <CardHeader style={{ padding: "30px" }} className="card-main">
+          <Flex justifyContent="space-between"  p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
               Add Files
             </Text>
-            <Flex alignItems="center">
+            <Flex  className="thead">
               <Select
                 placeholder="Select Loan"
                 value={selectedLoan}
@@ -543,6 +595,38 @@ export default function CollapsibleTable() {
           </AlertDialogOverlay>
         </AlertDialog>
       </div>
+      {/* pagination */}
+      <Flex justifyContent="flex-end" alignItems="center" p="4">
+        <Text mr="2">Rows per page:</Text>
+        <Select
+          value={itemsPerPage}
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          mr="2"
+          width="100px"
+        >
+          {[10, 20, 50].map((perPage) => (
+            <option key={perPage} value={perPage}>
+              {perPage}
+            </option>
+          ))}
+        </Select>
+        <Text mr="4">
+          Page {currentPage} of {totalPages}
+        </Text>
+        <IconButton
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          aria-label="Previous Page"
+          icon={<KeyboardArrowUpIcon />}
+          mr="2"
+        />
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          aria-label="Next Page"
+          icon={<KeyboardArrowDownIcon />}
+        />
+      </Flex>
       <Toaster />
     </>
   );

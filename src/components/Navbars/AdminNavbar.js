@@ -240,11 +240,11 @@ export default function AdminNavbar(props) {
           routes={routes}
           {...rest}
         />
-        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar" style={{ marginLeft: "30px" }}>
+        <Box mb={{ sm: "8px", md: "0px" }} className="bradcrub-navbar" >
           <Breadcrumb separator=">" style={{ color: "white" }}>
             {generateBreadcrumbs()}
           </Breadcrumb>
-          <Link
+          <Link className="linksss"
             pt="20px"
             color={mainText}
             href="#"
