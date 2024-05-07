@@ -383,10 +383,15 @@ export default function CollapsibleTable() {
   const cancelRef = React.useRef();
   const deletefile = async (fileId) => {
     try {
-      await AxiosInstance.delete(`/file_upload/${fileId}`);
-      setFiles(files.filter((file) => file.file_id !== fileId));
-      setIsDeleteDialogOpen(false);
-      toast.success("File deleted successfully!");
+      const response = await AxiosInstance.delete(`/file_upload/${fileId}`);
+      if (response.data.success) {
+        setFiles(files.filter((file) => file.file_id !== fileId));
+        setIsDeleteDialogOpen(false);
+        toast.success("File deleted successfully!");
+      } else if (response.data.statusCode === 201) {
+        toast.error(response.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("file not delete");
@@ -547,3 +552,4 @@ export default function CollapsibleTable() {
     </>
   );
 }
+

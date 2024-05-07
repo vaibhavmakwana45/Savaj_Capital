@@ -99,7 +99,7 @@ function BankAssignFile() {
 
       await AxiosInstance.post("/bank_approval", payload);
 
-      history.push("/superadmin/filetable");
+      history.push("/superadmin/bank");
       toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
