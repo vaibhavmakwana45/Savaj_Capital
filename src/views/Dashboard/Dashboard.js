@@ -43,6 +43,7 @@ import {
 import { pageVisits, socialTraffic } from "variables/general";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
+import { PersonIcon } from "components/Icons/Icons";
 
 export default function Dashboard() {
   const history = useHistory();
@@ -229,7 +230,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
             {/* <Text color="gray.400" fontSize="sm">
@@ -276,7 +277,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <CartIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
             {/* <Text color="gray.400" fontSize="sm">
@@ -328,7 +329,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
             {/* <Text color="gray.400" fontSize="sm">

@@ -369,7 +369,7 @@ router.get("/file_upload/:file_id", async (req, res) => {
         file_id: fileData.file_id,
         loan: loan.loan,
         loan_type: loanType?.loan_type,
-        username: user?.username,
+        user: user,
         documents: formattedData,
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,

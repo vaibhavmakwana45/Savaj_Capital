@@ -50,7 +50,7 @@ export default function AdminNavbar(props) {
     onOpen,
     ...rest
   } = props;
-
+  console.log(props);
   let mainText =
     fixed && scrolled
       ? useColorModeValue("gray.700", "gray.200")
