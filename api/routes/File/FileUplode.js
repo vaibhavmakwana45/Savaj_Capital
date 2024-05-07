@@ -504,16 +504,16 @@ router.get("/edit_file_upload/:file_id", async (req, res) => {
   }
 });
 
-router.delete("/:file_id", async (req, res) => {
+router.delete("/:fileId", async (req, res) => {
   try {
-    const { file_id } = req.params;
-    const fileAssignToSavajCapitalBranch = SavajCapital_BranchAssign.findOne({
-      file_id: file_id,
+    const { fileId } = req.params;
+    console.log(fileId, "fileId");
+    const fileAssignToSavajCapitalBranch = await SavajCapital_BranchAssign.findOne({
+      file_id: fileId,
     });
-
-    const fileAssignToBankApproval = BankApproval.findOne({ file_id: file_id });
-    console.log(fileAssignToBankApproval, "fileAssignToBankApproval")
-
+    
+    const fileAssignToBankApproval = await BankApproval.findOne({ file_id: fileId });
+    
     if (fileAssignToSavajCapitalBranch || fileAssignToBankApproval) {
       return res.status(200).json({
         statusCode: 201,
@@ -522,7 +522,7 @@ router.delete("/:file_id", async (req, res) => {
     }
 
     const deletedFile = await File_Uplode.findOneAndDelete({
-      file_id: file_id,
+      file_id: fileId,
     });
 
     if (!deletedFile) {
@@ -535,7 +535,7 @@ router.delete("/:file_id", async (req, res) => {
     res.json({
       success: true,
       message: "File deleted successfully",
-      deletedFileId: file_id,
+      deletedFileId: fileId,
     });
   } catch (error) {
     console.error(`Error when trying to delete file: ${error}`);
