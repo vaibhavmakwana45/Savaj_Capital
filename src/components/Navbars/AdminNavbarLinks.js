@@ -90,32 +90,6 @@ export default function HeaderLinks(props) {
     >
       <SearchBar me="18px" />
 
-      <SidebarResponsive
-        hamburgerColor={"white"}
-        logo={
-          <Stack direction="row" spacing="12px" align="center" justify="center">
-            {colorMode === "dark" ? (
-              <ArgonLogoLight w="74px" h="27px" />
-            ) : (
-              <ArgonLogoDark w="74px" h="27px" />
-            )}
-            <Box
-              w="1px"
-              h="20px"
-              bg={colorMode === "dark" ? "white" : "gray.700"}
-            />
-            {colorMode === "dark" ? (
-              <ChakraLogoLight w="82px" h="21px" />
-            ) : (
-              <ChakraLogoDark w="82px" h="21px" />
-            )}
-          </Stack>
-        }
-        colorMode={colorMode}
-        secondary={props.secondary}
-        routes={routes}
-        {...rest}
-      />
       <SettingsIcon
         cursor="pointer"
         ms={{ base: "16px", xl: "0px" }}
@@ -182,7 +156,8 @@ export default function HeaderLinks(props) {
               <Flex align="center" justifyContent="flex-start">
                 <FaUser color="currentColor" pr="20px" />
                 &nbsp; {accessType?.firstname} {accessType?.lastname}{" "}
-                {accessType?.username} {accessType?.full_name}
+                {accessType?.username} {accessType?.full_name}{" "}
+                {accessType?.bankuser_name}
               </Flex>
             </MenuItem>
             <MenuItem borderRadius="8px">

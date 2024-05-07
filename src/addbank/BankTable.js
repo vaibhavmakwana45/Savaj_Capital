@@ -54,9 +54,6 @@ function Tables() {
             bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.state.toLowerCase().includes(searchTerm.toLowerCase())
-          // bank.users.some((user) =>
-          //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
-          // )
         );
 
   useEffect(() => {
@@ -99,6 +96,8 @@ function Tables() {
     "City",
     "State",
     "users",
+    "create",
+    "update",
     "Action",
   ];
 
@@ -109,6 +108,8 @@ function Tables() {
     bank.city,
     bank.state,
     bank?.user_count,
+    bank.createdAt,
+    bank.updatedAt,
   ]);
 
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
@@ -119,13 +120,20 @@ function Tables() {
   const cancelRef = React.useRef();
   const deleteBankUser = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
-      setBanks(banks.filter((bank) => bank.bank_id !== bankId));
-      setIsDeleteDialogOpen(false);
-      toast.success("Bank deleted successfully!");
+      const response = await AxiosInstance.delete(`/bank_user/${bankId}`);
+      console.log(response.data, "shivam")
+
+      if (response.data.success) {
+        setIsDeleteDialogOpen(false);
+        toast.success("Bank deleted successfully!");
+        setBanks(banks.filter((bank) => bank.bank_id !== bankId));
+      } else if (response.data.statusCode === 201) {
+        setIsDeleteDialogOpen(false);
+        toast.error(response.data.message);
+      }
     } catch (error) {
       console.error("Error deleting bank:", error);
-      toast.error("bank not delete");
+      toast.error(error);
     }
   };
 
@@ -221,7 +229,7 @@ function Tables() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               banks={banks}
               data={formattedData}
               textColor={textColor}
@@ -231,6 +239,26 @@ function Tables() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+                <TableComponent
+              // documents={documents}
+              banks={banks}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
+              name={"Created At:"}
+              name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

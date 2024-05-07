@@ -104,7 +104,6 @@ function LoanSubTypes() {
     if (data) {
       setSelectedLoan(data.loan_type);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Data not found for id:", id);
     }
   };
@@ -229,7 +228,7 @@ function LoanSubTypes() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button onClick={() => setisEditLoan(true)} colorScheme="blue">
+                <Button onClick={() => setisEditLoan(true)} colorScheme="blue" style={{backgroundColor:"#b19552"}}>
                   Add Loan
                 </Button>
               </Flex>
@@ -245,6 +244,7 @@ function LoanSubTypes() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>
@@ -387,6 +387,10 @@ function LoanSubTypes() {
                     setisEditLoan(false);
                     setSelectedLoan("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -399,6 +403,10 @@ function LoanSubTypes() {
                   }
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedLoanId !== "" ? "Update Now" : "Add Now"}
                 </Button>

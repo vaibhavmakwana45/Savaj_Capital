@@ -8,16 +8,31 @@ const UserSchema = new mongoose.Schema({
   username: {
     type: String,
   },
+  businessname: {
+    type: String,
+  },
   email: {
     type: String,
   },
   number: {
     type: String,
   },
+  cibil_score: {
+    type: String,
+  },
   password: {
     type: String,
   },
   country: {
+    type: String,
+  },
+  unit_address: {
+    type: String,
+  },
+  reference: {
+    type: String,
+  },
+  gst_number: {
     type: String,
   },
   state: {
@@ -39,6 +54,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   state_code: {
+    type: String,
+  },
+  status: {
     type: String,
   },
   createdAt: {

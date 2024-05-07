@@ -1,5 +1,7 @@
 /*eslint-disable*/
 import {
+  ArrowBackIcon,
+  ArrowRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   HamburgerIcon,
@@ -30,10 +32,11 @@ import {
   renderViewRTL,
 } from "components/Scrollbar/Scrollbar";
 import { HSeparator } from "components/Separator/Separator";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars";
 import { NavLink, useLocation } from "react-router-dom";
-import logo1 from "../../assets/svg/logo.svg";
+import logo1 from "../../assets/svg/big logo.svg";
+import logo2 from "../../assets/svg/small logo.svg";
 import {
   Dropdown,
   DropdownItem,
@@ -41,6 +44,14 @@ import {
   DropdownToggle,
 } from "reactstrap";
 import { useHistory } from "react-router-dom";
+import {
+  ArrowBackIos,
+  ArrowForwardIos,
+  ArrowLeftOutlined,
+  ArrowRight,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+} from "@mui/icons-material";
 
 // FUNCTIONS
 
@@ -59,12 +70,16 @@ function Sidebar(props) {
 
   // Function to toggle dropdown state for a specific key
   const toggleDropdown = (key) => {
-    setDropdownStates(prevStates => ({
+    setDropdownStates((prevStates) => ({
       ...prevStates,
-      [key]: !prevStates[key] // Toggle the state for the specified dropdown key
+      [key]: !prevStates[key], // Toggle the state for the specified dropdown key
     }));
   };
 
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
   const createLinks = (routes) => {
     let activeBg = useColorModeValue("white", "navy.700");
     let inactiveBg = useColorModeValue("white", "navy.700");
@@ -157,7 +172,7 @@ function Sidebar(props) {
                         <Icon>{prop.icon}</Icon>
                       ) : (
                         <IconBox
-                          bg="blue.500"
+                          bg="#b19552"
                           color="white"
                           h="30px"
                           w="30px"
@@ -167,12 +182,14 @@ function Sidebar(props) {
                           {prop.icon}
                         </IconBox>
                       )}
-                      <Text color={activeColor} my="auto" fontSize="sm">
-                        {document.documentElement.dir === "rtl"
-                          ? prop.rtlName
-                          : prop.name}{" "}
-                        <ChevronDownIcon />
-                      </Text>
+                      {isOpen && (
+                        <Text color={activeColor} my="auto" fontSize="sm">
+                          {document.documentElement.dir === "rtl"
+                            ? prop.rtlName
+                            : prop.name}{" "}
+                          <ChevronDownIcon />
+                        </Text>
+                      )}
                     </Flex>
                   </DropdownToggle>
                   <DropdownMenu>
@@ -195,7 +212,7 @@ function Sidebar(props) {
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
-                bg={activeBg}
+                bg={"activeBg"}
                 transition={variantChange}
                 mb={{
                   xl: "6px",
@@ -225,7 +242,7 @@ function Sidebar(props) {
                     <Icon>{prop.icon}</Icon>
                   ) : (
                     <IconBox
-                      bg="blue.500"
+                      bg="#b19552"
                       color="white"
                       h="30px"
                       w="30px"
@@ -235,11 +252,13 @@ function Sidebar(props) {
                       {prop.icon}
                     </IconBox>
                   )}
-                  <Text color={activeColor} my="auto" fontSize="sm">
-                    {document.documentElement.dir === "rtl"
-                      ? prop.rtlName
-                      : prop.name}
-                  </Text>
+                  {isOpen && (
+                    <Text color={activeColor} my="auto" fontSize="sm">
+                      {document.documentElement.dir === "rtl"
+                        ? prop.rtlName
+                        : prop.name}
+                    </Text>
+                  )}
                 </Flex>
               </Button>
             )
@@ -291,7 +310,7 @@ function Sidebar(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -300,12 +319,14 @@ function Sidebar(props) {
                         {prop.icon}
                       </IconBox>
                     )}
-                    <Text color={inactiveColor} my="auto" fontSize="sm">
-                      {document.documentElement.dir === "rtl"
-                        ? prop.rtlName
-                        : prop.name}{" "}
-                      <ChevronDownIcon />
-                    </Text>
+                    {isOpen && (
+                      <Text color={inactiveColor} my="auto" fontSize="sm">
+                        {document.documentElement.dir === "rtl"
+                          ? prop.rtlName
+                          : prop.name}{" "}
+                        <ChevronDownIcon />
+                      </Text>
+                    )}
                   </Flex>
                 </DropdownToggle>
                 <DropdownMenu>
@@ -358,7 +379,7 @@ function Sidebar(props) {
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color="#b19552"
                     h="30px"
                     w="30px"
                     me="12px"
@@ -367,11 +388,13 @@ function Sidebar(props) {
                     {prop.icon}
                   </IconBox>
                 )}
-                <Text color={inactiveColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
+                {isOpen && (
+                  <Text color={inactiveColor} my="auto" fontSize="sm">
+                    {document.documentElement.dir === "rtl"
+                      ? prop.rtlName
+                      : prop.name}
+                  </Text>
+                )}
               </Flex>
             </Button>
           )}
@@ -380,29 +403,78 @@ function Sidebar(props) {
     });
   };
   const { logo, routes } = props;
-
+  console.log(props,"props----")
   var links = <>{createLinks(routes)}</>;
-  //  BRAND
-  //  Chakra Color Mode
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarRadius = "20px";
   let sidebarMargins = "0px";
-  var brand = (
-    <Box>
-      <img src={logo1} alt="Logo" style={{ paddingBottom: "10px" }} />
-      <HSeparator />
-    </Box>
-  );
+
+  const Brand = () => {
+    if (!isOpen) {
+      return (
+        <Box className="p-3" style={{overflow:"hidden"}}>
+          <img src={logo2} alt="Logo" />
+          <HSeparator />
+        </Box>
+      );
+    } else {
+      return (
+        <Box style={{overflow:"hidden"}}>
+          <img src={logo1} alt="Logo2" />
+          <HSeparator />
+        </Box>
+      );
+    }
+  };
+
+  useEffect(() => {
+    const elements = document.getElementsByClassName("css-xahsar");
+    const elements2 = document.getElementsByClassName("navbar-responsive");
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (!isOpen) {
+        element.classList.add("css-xahsar-with-width");
+      } else {
+        element.classList.remove("css-xahsar-with-width");
+      }
+    }
+    for (let i = 0; i < elements2.length; i++) {
+      const element = elements2[i];
+      if (!isOpen) {
+        element.classList.add("navbar-responsive-with-width");
+      } else {
+        element.classList.remove("navbar-responsive-with-width");
+      }
+    }
+  }, [isOpen]);
 
   // SIDEBAR
   return (
     <Box ref={mainPanel}>
-      <Box display={{ sm: "none", xl: "block" }} position="fixed">
+      <Box
+        display={{ sm: "none", xl: "block" }}
+        position="fixed"
+        width={isOpen ? "260px" : "100px"}
+      >
+        <Button
+          position="absolute"
+          top="20px"
+          left={isOpen ? "92%" : "80%"}
+          zIndex={99}
+          onClick={toggleSidebar}
+          style={{ borderRadius: "50%", padding: "0" }}
+        >
+          {isOpen ? (
+            <KeyboardArrowLeft fontSize="10px" />
+          ) : (
+            <KeyboardArrowRight fontSize="10px" />
+          )}
+        </Button>
         <Box
           bg={sidebarBg}
           transition={variantChange}
-          w="260px"
-          maxW="260px"
+          // w="260px"
+          // maxW="260px"
           ms={{
             sm: "16px",
           }}
@@ -410,8 +482,8 @@ function Sidebar(props) {
             sm: "16px",
           }}
           h="calc(100vh - 32px)"
-          ps="20px"
-          pe="20px"
+          ps={isOpen && "20px"}
+          pe={isOpen && "20px"}
           m={sidebarMargins}
           filter="drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
           borderRadius={sidebarRadius}
@@ -433,7 +505,9 @@ function Sidebar(props) {
                 : renderView
             }
           >
-            <Box>{brand}</Box>
+            <Box>
+              <Brand />
+            </Box>
             <Stack direction="column" mb="40px">
               <Box>{links}</Box>
             </Stack>
@@ -444,7 +518,6 @@ function Sidebar(props) {
   );
 }
 
-
 // FUNCTIONS
 
 export function SidebarResponsive(props) {
@@ -453,6 +526,8 @@ export function SidebarResponsive(props) {
   const { logo, routes, colorMode, hamburgerColor, ...rest } = props;
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const toggle = () => setIsOpenDropdown(!isOpenDropdown);
+  const [isOpenDropdown1, setIsOpenDropdown1] = useState(false);
+  const toggle1 = () => setIsOpenDropdown1(!isOpenDropdown1);
   // this is for the rest of the collapses
   const [state, setState] = React.useState({});
   const mainPanel = React.useRef();
@@ -508,6 +583,7 @@ export function SidebarResponsive(props) {
           {activeRoute(prop.layout + prop.path) === "active" ? (
             prop.isDropdown ? (
               <Button
+                className="drop-button"
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
@@ -541,6 +617,8 @@ export function SidebarResponsive(props) {
                     border: "none",
                     outline: "none",
                     boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
+                    position: "relative",
+                    zIndex: "9999",
                   }}
                   isOpen={isOpenDropdown}
                   toggle={toggle}
@@ -557,7 +635,7 @@ export function SidebarResponsive(props) {
                         <Icon>{prop.icon}</Icon>
                       ) : (
                         <IconBox
-                          bg="blue.500"
+                          bg="#b19552"
                           color="white"
                           h="30px"
                           w="30px"
@@ -580,7 +658,7 @@ export function SidebarResponsive(props) {
                       ) : (
                         <IconBox
                           bg={inactiveBg}
-                          color="blue.500"
+                          color="#b19552"
                           h="30px"
                           w="30px"
                           me="12px"
@@ -612,6 +690,7 @@ export function SidebarResponsive(props) {
               </Button>
             ) : (
               <Button
+                className="drop-button"
                 boxSize="initial"
                 justifyContent="flex-start"
                 alignItems="center"
@@ -645,7 +724,7 @@ export function SidebarResponsive(props) {
                     <Icon>{prop.icon}</Icon>
                   ) : (
                     <IconBox
-                      bg="blue.500"
+                      bg="#b19552"
                       color="white"
                       h="30px"
                       w="30px"
@@ -664,6 +743,7 @@ export function SidebarResponsive(props) {
             )
           ) : prop.isDropdown ? (
             <Button
+              className="drop-button"
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
@@ -694,7 +774,7 @@ export function SidebarResponsive(props) {
             >
               <Dropdown
                 style={{ background: "none", border: "none", outline: "none" }}
-                isOpen={isOpenDropdown}
+                isOpen={isOpenDropdown1}
                 toggle={toggle}
               >
                 <DropdownToggle
@@ -710,7 +790,7 @@ export function SidebarResponsive(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -732,7 +812,7 @@ export function SidebarResponsive(props) {
                     ) : (
                       <IconBox
                         bg={inactiveBg}
-                        color="blue.500"
+                        color="#b19552"
                         h="30px"
                         w="30px"
                         me="12px"
@@ -764,6 +844,7 @@ export function SidebarResponsive(props) {
             </Button>
           ) : (
             <Button
+              className="drop-button"
               boxSize="initial"
               justifyContent="flex-start"
               alignItems="center"
@@ -791,13 +872,13 @@ export function SidebarResponsive(props) {
                 boxShadow: "none",
               }}
             >
-              <Flex>
+              <Flex className="drop-button">
                 {typeof prop.icon === "string" ? (
                   <Icon>{prop.icon}</Icon>
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color="#b19552"
                     h="30px"
                     w="30px"
                     me="12px"
@@ -820,25 +901,34 @@ export function SidebarResponsive(props) {
 
   const newroutes = routes.filter((route) => route.hideInSResponsive);
   const bankUser = routes.filter((route) => route.hideInBResponsivrUser);
-  const hideInSResponsivrUser = routes.filter(
-    (route) => route.hideInSResponsivrUser
-  );
+  const ScUser = routes.filter((route) => route.hideInSResponsivrUser);
+  const Customer = routes.filter((route) => route.hideInCustomer);
 
   var links = <>{createLinks(newroutes)}</>;
-  var scbranchlink = <>{createLinks(hideInSResponsivrUser)}</>;
+  var scbranchlink = <>{createLinks(ScUser)}</>;
   var banklink = <>{createLinks(bankUser)}</>;
+  var customerlink = <>{createLinks(Customer)}</>;
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  //  BRAND
-
-  var brand = (
-    <Box>
-      <img src={logo1} alt="Logo" />
-      <HSeparator />
-    </Box>
-  );
+  const Brand = () => {
+    if (!isOpen) {
+      return (
+        <Box className="p-3">
+          <img src={logo2} alt="Logo" />
+          <HSeparator />
+        </Box>
+      );
+    } else {
+      return (
+        <Box>
+          <img src={logo1} alt="Logo2" />
+          <HSeparator />
+        </Box>
+      );
+    }
+  };
 
   // SIDEBAR
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
   // Color variables
   return (
@@ -879,7 +969,9 @@ export function SidebarResponsive(props) {
           />
           <DrawerBody maxW="250px" px="1rem">
             <Box maxW="100%" h="100vh">
-              <Box>{brand}</Box>
+              <Box>
+                <Brand />
+              </Box>
               <Stack direction="column" mb="40px">
                 {location.pathname.includes("/superadmin") && (
                   <Box>{links}</Box>
@@ -889,6 +981,9 @@ export function SidebarResponsive(props) {
                 )}
                 {location.pathname.includes("/bankuser") && (
                   <Box>{banklink}</Box>
+                )}
+                {location.pathname.includes("/user") && (
+                  <Box>{customerlink}</Box>
                 )}
               </Stack>
             </Box>

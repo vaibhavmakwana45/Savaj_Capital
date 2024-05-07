@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ import {
   ModalBody,
   Input,
   ModalFooter,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
@@ -26,8 +27,6 @@ import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile } from "@fortawesome/free-solid-svg-icons";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 import { Country, State, City } from "country-state-city";
@@ -47,10 +46,24 @@ function AddFiles() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
+  // const [formData, setFormData] = useState({
+  //   user_id: "",
+  //   username: "",
+  //   number: "",
+  //   email: "",
+  //   pan_card: "",
+  //   aadhar_card: "",
+  //   dob: "",
+  //   country: "India",
+  //   state: "",
+  //   city: "",
+  // });
+
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
     number: "",
+    cibil_score: "",
     email: "",
     pan_card: "",
     aadhar_card: "",
@@ -58,6 +71,11 @@ function AddFiles() {
     country: "India",
     state: "",
     city: "",
+    unit_address: "",
+    gst_number: "",
+    reference: "",
+    stemp_paper_print: false, // Initialize as false
+    loan_dispatch: false, // Initialize as false
   });
 
   const {
@@ -117,11 +135,18 @@ function AddFiles() {
   const [fileData, setFileData] = useState({});
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const handleFileInputChange = (event, title_id, index, innerIndex) => {
+  const handleFileInputChange = (
+    event,
+    title_id,
+    index,
+    groupIndex,
+    innerIndex
+  ) => {
     const file = event.target.files[0];
     if (file) {
       const documentId =
-        groupedLoanDocuments[title_id][index].document_ids[innerIndex];
+        groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
+      console.log(documentId, "documentId");
       const key = `${title_id}-${index}-${innerIndex}`;
       const filePreview = {
         name: file.name,
@@ -130,6 +155,8 @@ function AddFiles() {
         documentId: documentId,
         key: key,
       };
+
+      console.log(filePreview, "meet");
 
       setFileData((prevData) => ({
         ...prevData,
@@ -238,64 +265,6 @@ function AddFiles() {
     setSelectedLoanSubtypeId(event.target.value);
   };
 
-  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState(null);
-  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranch = async () => {
-      try {
-        const response = await AxiosInstance.get("/branch");
-        setSavajcapitalbranch(response.data.data);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
-
-    fetchSavajcapitalbranch();
-    getRolesData();
-  }, []);
-
-  useEffect(() => {
-    const fetchSavajcapitalbranchUser = async () => {
-      if (!selectedBranchId) {
-        setSavajcapitalbranchUser([]);
-        return;
-      }
-      try {
-        const response = await AxiosInstance.get(
-          `/savaj_user/${selectedBranchId}`
-        );
-        setSavajcapitalbranchUser(response.data.data || []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching branch users:", error);
-      }
-    };
-
-    fetchSavajcapitalbranchUser();
-  }, [selectedBranchId]);
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
-  const getRoleName = (roleId) => {
-    const role = roles.find((role) => role.role_id === roleId);
-    return role ? role.role : "No role found";
-  };
-
   const onSubmit = async (data) => {
     try {
       const wrappedData = {
@@ -319,6 +288,87 @@ function AddFiles() {
     }
   };
 
+
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+    setStates(State.getStatesOfCountry("IN"));
+  }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
+      setStates(statesOfSelectedCountry);
+      setSelectedState("");
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    const citiesOfState = City.getCitiesOfState(selectedCountry, selectedState);
+    setCities(citiesOfState);
+  }, [selectedState, selectedCountry]);
+
+  const handleCountryChange = (event) => {
+    setSelectedCountry(event.target.value);
+  };
+
+  const handleStateChange = (event) => {
+    const stateCode = event.target.value;
+    const stateObj = states.find((state) => state.isoCode === stateCode);
+    const stateFullName = stateObj ? stateObj.name : "";
+
+    setSelectedState(stateCode);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: stateFullName,
+    }));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  const handleGstChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "gst_number" && value.length <= 15) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleeChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    console.log(`Checkbox ${name} set to ${checked}`); // Check the immediate state change
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
+  };
+
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -355,17 +405,18 @@ function AddFiles() {
       const payload = {
         user_id: selectedUser,
         loan_id: selectedLoanId,
-        branch_id: selectedBranchId,
-        branchuser_id: selectedBranchUserId,
         loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
           loan_document_id: file.documentId,
           title_id: file.title_id,
+          key: file.key,
         })),
+        stemp_paper_print: formData.stemp_paper_print,  // Include checkbox state
+        loan_dispatch: formData.loan_dispatch 
       };
       await AxiosInstance.post("/file_upload", payload);
-
+      console.log('Form Data on Submit:', payload); // Check the state at submit
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
@@ -375,51 +426,16 @@ function AddFiles() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    setCountries(Country.getAllCountries());
-    setStates(State.getStatesOfCountry("IN"));
-  }, []);
-
-  useEffect(() => {
-    if (selectedCountry) {
-      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
-      setStates(statesOfSelectedCountry);
-      setSelectedState("");
-    }
-  }, [selectedCountry]);
-
-  useEffect(() => {
-    const citiesOfState = City.getCitiesOfState(selectedCountry, selectedState);
-    setCities(citiesOfState);
-  }, [selectedState, selectedCountry]);
-
-  const handleCountryChange = (event) => {
-    setSelectedCountry(event.target.value);
-  };
-
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const stateObj = states.find((state) => state.isoCode === stateCode);
-    const stateFullName = stateObj ? stateObj.name : "";
-
-    setSelectedState(stateCode);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      state: stateFullName,
-    }));
-  };
-
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
+            <Flex justifyContent="space-between"  className="mainnnn">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue">
+              <Button onClick={onOpen} colorScheme="blue" style={{backgroundColor:"#b19552"}} >
                 Add New User
               </Button>
             </Flex>
@@ -483,209 +499,185 @@ function AddFiles() {
               </FormControl>
             )}
             <div>
-              {Object.keys(groupedLoanDocuments).map((title_id) => (
+              {Object.entries(groupedLoanDocuments).map(([title_id], index) => (
                 <div key={title_id} className="my-3">
-                  <h2 className="mx-4"><i><u><b>{groupedLoanDocuments[title_id][0].title}</b></u></i></h2>
+                  <h2 className="mx-4">
+                    <i>
+                      <u>
+                        <b>{groupedLoanDocuments[title_id][0].title}</b>
+                      </u>
+                    </i>
+                  </h2>
                   <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
                     {groupedLoanDocuments[title_id].map(
-                      (documentGroup, index) => (
-                        <div key={`${title_id}-${index}`} className="d-flex ">
-                          {documentGroup.document_names.map(
-                            (documentName, innerIndex) => (
-                              <div
-                                key={`${title_id}-${index}-${innerIndex}`} // Ensure unique key
-                                className="upload-area col-xl-12 col-md-12 col-sm-12"
+                      (documentGroup, groupIndex) =>
+                        documentGroup.document_names.map(
+                          (documentName, innerIndex) => (
+                            <div
+                              key={`${title_id}-${index}-${innerIndex}`}
+                              className="upload-area col-xl-12 col-md-12 col-sm-12"
+                            >
+                              <Text
+                                fontSize="xl"
+                                className="mx-3"
+                                style={{
+                                  fontSize: "12px",
+                                  textTransform: "capitalize",
+                                }}
                               >
-                                <Text
-                                  fontSize="xl"
-                                  className="mx-3"
-                                  style={{
-                                    fontSize: "12px",
-                                    textTransform: "capitalize",
-                                  }}
-                                >
-                                  {documentName}
-                                </Text>
-                                <div className="upload-option">
-                                  <input
-                                    type="file"
-                                    id={`fileInput-${title_id}-${index}-${innerIndex}`}
-                                    className="drop-zoon__file-input"
-                                    onChange={(event) =>
-                                      handleFileInputChange(
-                                        event,
-                                        title_id,
-                                        index,
-                                        innerIndex
-                                      )
-                                    }
-                                    style={{ display: "none" }}
-                                  />
-
-                                  {fileData[
-                                    `${title_id}-${index}-${innerIndex}`
-                                  ] ? (
-                                    <div
-                                      className="file-preview text-end"
-                                      style={{
-                                        marginTop: "15px",
-                                        justifyContent: "space-between",
-                                        width: "100%",
-                                        padding: "10px",
-                                        boxSizing: "border-box",
-                                        backgroundColor: "#e8f0fe",
-                                        borderRadius: "8px",
-                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                      }}
-                                    >
-                                      <IconButton
-                                        aria-label="Remove file"
-                                        icon={<CloseIcon />}
-                                        size="sm"
-                                        onClick={() =>
-                                          handleRemoveFile(
-                                            `${title_id}-${index}-${innerIndex}`
-                                          )
-                                        }
-                                        style={{ margin: "0 10px" }}
-                                      />
-                                      {fileData[
-                                        `${title_id}-${index}-${innerIndex}`
-                                      ].url ? (
-                                        fileData[
+                                {documentName}
+                              </Text>
+                              <div className="upload-option">
+                                <input
+                                  type="file"
+                                  id={`fileInput-${title_id}-${index}-${innerIndex}`}
+                                  className="drop-zone__file-input"
+                                  onChange={(event) =>
+                                    handleFileInputChange(
+                                      event,
+                                      title_id,
+                                      index,
+                                      groupIndex,
+                                      innerIndex
+                                    )
+                                  }
+                                  style={{ display: "none" }}
+                                />
+                                {fileData[
+                                  `${title_id}-${index}-${innerIndex}`
+                                ] ? (
+                                  <div
+                                    className="file-preview text-end"
+                                    style={{
+                                      marginTop: "15px",
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                      padding: "10px",
+                                      backgroundColor: "#e8f0fe",
+                                      borderRadius: "8px",
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                    }}
+                                  >
+                                    <IconButton
+                                      aria-label="Remove file"
+                                      icon={<CloseIcon />}
+                                      size="sm"
+                                      onClick={() =>
+                                        handleRemoveFile(
                                           `${title_id}-${index}-${innerIndex}`
-                                        ].type === "application/pdf" ? (
-                                          <embed
-                                            src={
-                                              fileData[
-                                                `${title_id}-${index}-${innerIndex}`
-                                              ].url
-                                            }
-                                            type="application/pdf"
-                                            style={{
-                                              width: "100%",
-                                              minHeight: "100px",
-                                            }}
-                                          />
-                                        ) : (
-                                          <img
-                                            src={
-                                              fileData[
-                                                `${title_id}-${index}-${innerIndex}`
-                                              ].url
-                                            }
-                                            alt="Preview"
-                                            style={{
-                                              width: 100,
-                                              height: 100,
-                                              margin: "auto",
-                                              borderRadius: "4px",
-                                            }}
-                                          />
                                         )
-                                      ) : (
-                                        <span
-                                          style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            width: "100%",
-                                            padding: "20px",
-                                          }}
-                                        >
-                                          <i className="bx bxs-file"></i>
-                                          {
+                                      }
+                                      style={{ margin: "0 10px" }}
+                                    />
+                                    {fileData[
+                                      `${title_id}-${index}-${innerIndex}`
+                                    ].url ? (
+                                      fileData[
+                                        `${title_id}-${index}-${innerIndex}`
+                                      ].type === "application/pdf" ? (
+                                        <embed
+                                          src={
                                             fileData[
                                               `${title_id}-${index}-${innerIndex}`
-                                            ].name
+                                            ].url
                                           }
-                                        </span>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div
-                                      className={`upload-area__drop-zoon drop-zoon ${
-                                        isDragging ? "drop-zoon--over" : ""
-                                      }`}
-                                      onClick={() => {
-                                        const refKey = `${title_id}-${index}-${innerIndex}`;
-                                        const clickFunction =
-                                          fileInputRefs.current[refKey];
-                                        if (
-                                          typeof clickFunction === "function"
-                                        ) {
-                                          clickFunction();
-                                        } else {
-                                          console.error(
-                                            "Ref or current element is null or undefined, or click function is not available"
-                                          );
+                                          type="application/pdf"
+                                          style={{
+                                            width: "100%",
+                                            minHeight: "100px",
+                                          }}
+                                        />
+                                      ) : (
+                                        <img
+                                          src={
+                                            fileData[
+                                              `${title_id}-${index}-${innerIndex}`
+                                            ].url
+                                          }
+                                          alt="Preview"
+                                          style={{
+                                            width: 100,
+                                            height: 100,
+                                            margin: "auto",
+                                            borderRadius: "4px",
+                                          }}
+                                        />
+                                      )
+                                    ) : (
+                                      <span
+                                        style={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          width: "100%",
+                                          padding: "20px",
+                                        }}
+                                      >
+                                        <i className="bx bxs-file"></i>
+                                        {
+                                          fileData[
+                                            `${title_id}-${index}-${innerIndex}`
+                                          ].name
                                         }
-                                      }}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexDirection: "column",
-                                      }}
-                                    >
-                                      <span className="drop-zoon__icon">
-                                        <i className="bx bxs-file-image"></i>
                                       </span>
-                                      <p className="drop-zoon__paragraph">
-                                        Drop your file here or click to browse
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div
+                                    className={`upload-area__drop-zone drop-zone ${
+                                      isDragging ? "drop-zone--over" : ""
+                                    }`}
+                                    onClick={() => {
+                                      document
+                                        .getElementById(
+                                          `fileInput-${title_id}-${index}-${innerIndex}`
+                                        )
+                                        .click();
+                                    }}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      flexDirection: "column",
+                                    }}
+                                  >
+                                    <span className="drop-zone__icon">
+                                      <i className="bx bxs-file-image"></i>
+                                    </span>
+                                    <p className="drop-zone__paragraph">
+                                      Drop your file here or click to browse
+                                    </p>
+                                  </div>
+                                )}
                               </div>
-                            )
-                          )}
-                        </div>
-                      )
+                            </div>
+                          )
+                        )
                     )}
                   </div>
                 </div>
               ))}
             </div>
-            <div>
-              <FormControl id="branch_id" mt={4} isRequired>
-                <FormLabel>Savaj Capital Branch</FormLabel>
-                <Select
-                  placeholder="Select Branch"
-                  onChange={(e) => setSelectedBranchId(e.target.value)}
-                >
-                  {savajcapitalbranch.map((branch) => (
-                    <option key={branch.branch_id} value={branch.branch_id}>
-                      {`${branch.branch_name} (${branch.city})`}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
+            {/* <FormControl id="stemp_paper_print" mt={4}>
+              <Checkbox
+                name="stemp_paper_print"
+                onChange={handleCheckboxChange}
+                isChecked={formData.stemp_paper_print}
+              >
+                Stemp Paper Print
+              </Checkbox>
+            </FormControl>
 
-              {selectedBranchId && (
-                <FormControl id="branchuser_id" mt={4} isRequired>
-                  <FormLabel>Branch User</FormLabel>
-                  {savajcapitalbranchUser.length > 0 ? (
-                    <Select
-                      placeholder="Select User"
-                      onChange={(e) => setSelectedBranchUserId(e.target.value)}
-                    >
-                      {savajcapitalbranchUser.map((user) => (
-                        <option
-                          key={user.branchuser_id}
-                          value={user.branchuser_id}
-                        >
-                          {`${user.full_name} (${getRoleName(user.role_id)})`}
-                        </option>
-                      ))}
-                    </Select>
-                  ) : (
-                    <Text>No users available for this branch.</Text>
-                  )}
-                </FormControl>
-              )}
-            </div>
+            <FormControl id="loan_dispatch" mt={4}>
+              <Checkbox
+                name="loan_dispatch"
+                onChange={handleCheckboxChange}
+                isChecked={formData.loan_dispatch}
+              >
+                Loan Dispatch
+              </Checkbox>
+            </FormControl> */}
 
             <div>
               <Button
@@ -694,7 +686,11 @@ function AddFiles() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{ marginTop: 40 }}
+                style={{
+                  marginTop: 40,
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
               >
                 Submit
               </Button>
@@ -702,7 +698,12 @@ function AddFiles() {
               <Button
                 mt={4}
                 colorScheme="yellow"
-                style={{ marginTop: 40, marginLeft: 8 }}
+                style={{
+                  marginTop: 40,
+                  marginLeft: 8,
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                }}
                 onClick={() => history.push("/superadmin/filetable")}
               >
                 Cancel
@@ -721,17 +722,28 @@ function AddFiles() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalBody pb={6}>
               <FormControl>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <Input
-                  placeholder="Username"
+                  placeholder="Customer Name"
                   {...register("username", {
                     required: "Username is required",
                   })}
                 />
                 {errors.username && <p>{errors.username.message}</p>}
               </FormControl>
+              <FormControl>
+                <FormLabel>Date of birth</FormLabel>
+                <Input
+                  placeholder="DOB"
+                  type="date"
+                  {...register("dob", {
+                    required: "DOB is required",
+                  })}
+                />
+                {errors.dob && <p>{errors.dob.message}</p>}
+              </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Number</FormLabel>
+                <FormLabel>Mobile Number</FormLabel>
                 <Input
                   placeholder="Number"
                   {...register("number", {
@@ -744,38 +756,75 @@ function AddFiles() {
                 />
                 {errors.number && <p>{errors.number.message}</p>}
               </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
+              <FormControl id="cibil_score" mt={4} isRequired>
+                <FormLabel>Cibil Score</FormLabel>
                 <Input
-                  placeholder="Email"
-                  type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  name="cibil_score"
+                  onChange={handleChange}
+                  value={formData.cibil_score}
+                  placeholder="Enter your cibil score"
                 />
-                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
-
-              <FormControl id="country" mt={4} isRequired>
-                <FormLabel>Country</FormLabel>
-
-                <Select
-                  name="country"
-                  value={selectedCountry}
-                  onChange={handleCountryChange}
-                >
-                  {countries.map((country) => (
-                    <option key={country.isoCode} value={country.isoCode}>
-                      {country.name}
-                    </option>
-                  ))}
-                </Select>
+              <FormControl id="gst_number" mt={4} isRequired>
+                <FormLabel>GST Number</FormLabel>
+                <Input
+                  name="gst_number"
+                  type="number"
+                  onChange={handleGstChange}
+                  value={formData.gst_number}
+                  placeholder="Enter GST number"
+                />
               </FormControl>
+              {/* <FormControl className="my-2">
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  placeholder="Aadhar Card"
+                  type="number"
+                  name="aadhar_card"
+                  onChange={handleadharChange}
+                  {...register("aadhar_card", {
+                    required: "Aadhar card is required",
+                  })}
+                  value={formData.aadhar_card}
+                />
+                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
+              </FormControl>
+             
+              <FormControl>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  placeholder="Pan Card"
+                  type="string"
+                  name="pan_card"
+                  onChange={handleeChange}
+                  {...register("pan_card", {
+                    required: "Pan card is required",
+                  })}
+                  value={formData.pan_card}
 
+                />
+                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+              </FormControl> */}
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handleeChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
               <FormControl id="state" mt={4} isRequired>
                 <FormLabel>State</FormLabel>
                 <Select
@@ -799,7 +848,6 @@ function AddFiles() {
                   )}
                 </Select>
               </FormControl>
-
               <FormControl id="city" mt={4} isRequired>
                 <FormLabel>City</FormLabel>
                 <Select
@@ -810,9 +858,6 @@ function AddFiles() {
                   }
                   disabled={!selectedState}
                   value={formData.city}
-                  // {...register("city", {
-                  //   required: "City is required",
-                  // })}
                 >
                   {cities.length ? (
                     cities.map((city) => (
@@ -825,46 +870,79 @@ function AddFiles() {
                   )}
                 </Select>
               </FormControl>
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
 
-              <FormControl>
-                <FormLabel>Dob</FormLabel>
-                <Input
-                  placeholder="DOB"
-                  type="date"
-                  {...register("dob", {
-                    required: "DOB is required",
-                  })}
-                />
-                {errors.dob && <p>{errors.dob.message}</p>}
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
-
-              <FormControl className="my-2">
-                <FormLabel>Aadhar Card</FormLabel>
+              <FormControl id="unit_address" mt={4} isRequired>
+                <FormLabel>Unit Address</FormLabel>
                 <Input
-                  placeholder="Adhar Card"
-                  type="number"
-                  {...register("aadhar_card", {
-                    required: "Aadhar card is required",
-                  })}
-                />
-                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  placeholder="Pan Card"
+                  name="unit_address"
                   type="string"
-                  {...register("pan_card", {
-                    required: "Pan card is required",
+                  onChange={handleChange}
+                  value={formData.unit_address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <FormControl id="reference" mt={4} isRequired>
+                <FormLabel>Reference</FormLabel>
+                <Input
+                  name="reference"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.reference}
+                  placeholder="Enter reference"
+                />
+              </FormControl>
+              {/* <FormControl mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
                   })}
                 />
-                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+                {errors.email && <p>{errors.email.message}</p>}
+              </FormControl> */}
+
+              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
+                Login Credentials
+              </Text>
+              <FormControl mt={4}>
+                {/* <FormLabel>Email</FormLabel> */}
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit">
+              <Button colorScheme="blue" mr={3} type="submit" style={{backgroundColor:"#b19552"}}>
                 Save
               </Button>
               <Button onClick={onClose}>Cancel</Button>
@@ -872,6 +950,7 @@ function AddFiles() {
           </form>
         </ModalContent>
       </Modal>
+      
       <Toaster />
     </>
   );

@@ -58,7 +58,14 @@ function SavajCapitalBranchTable() {
             user.state.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = ["Savaj Capital Branch", "City", "State", "Action"];
+  const allHeaders = [
+    "Savaj Capital Branch",
+    "City",
+    "State",
+    "create",
+    "update",
+    "Action",
+  ];
 
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
@@ -68,6 +75,8 @@ function SavajCapitalBranchTable() {
     item.branch_name,
     item.city,
     item.state,
+    item.createdAt,
+    item.updatedAt,
   ]);
 
   const handleDelete = (id) => {
@@ -118,18 +127,20 @@ function SavajCapitalBranchTable() {
       );
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
-        fetchBanks();
+        fetchSavajcapitalbranch();
         toast.success("Branch deleted Successfully!", {
-          duration: 800, // Time in milliseconds (3 seconds in this example)
+          duration: 800,
         });
+      } else if (response.data.statusCode === 201) {
+        toast.error(response.data.message);
       } else if (response.data) {
         toast.error(response.data.message || "please try again later!", {
-          duration: 800, // Time in milliseconds (3 seconds in this example)
+          duration: 800,
         });
       }
     } catch (error) {
       console.error("Error deleting branch:", error);
-      toast.error("branch not delete");
+      toast.error(error);
     }
   };
   const navigateToEditPage = (branchId) => {
@@ -166,11 +177,24 @@ function SavajCapitalBranchTable() {
                 <Button
                   onClick={navigateToAnotherPage}
                   colorScheme="blue"
-                  style={{ marginRight: "10px" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 10,
+                  }}
                 >
                   Add Branch
                 </Button>
-                <Button onClick={navigateToAnotherPageUser} colorScheme="blue">
+                <Button
+                  onClick={navigateToAnotherPageUser}
+                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 10,
+                    marginLeft: 8,
+                  }}
+                >
                   Add User
                 </Button>
                 {/* <Menu>
@@ -213,13 +237,32 @@ function SavajCapitalBranchTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               data={formattedData}
               loading={loading}
               allHeaders={allHeaders}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={3}
+              removeIndex2={4}
+              documentIndex={4}
+              documentIndex2={5}
+              name={"Created At:"}
+              name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

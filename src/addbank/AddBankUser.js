@@ -340,7 +340,6 @@ function AddBankUser() {
               <FormControl id="bank_name" mt={4} isRequired>
                 <FormLabel>Branch Name</FormLabel>
                 <Select
-                  // disabled={branches.length === 0}
                   name="branch_name"
                   placeholder="Select Bank Branch"
                   onChange={(e) => {
@@ -436,15 +435,23 @@ function AddBankUser() {
                   type="submit"
                   isLoading={loading}
                   loadingText="Submitting"
-                  style={{ marginTop: 40 }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 40,
+                  }}
                 >
                   Submit
                 </Button>
 
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 40, marginLeft: 8 }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 40,
+                    marginLeft: 8,
+                  }}
                   onClick={() => history.push("/superadmin/bank")}
                 >
                   Cancel

@@ -99,7 +99,6 @@ function AddSavajCapitalBranch() {
           password: "",
         };
 
-
         setFormData(submissionData);
       } else {
         alert("Please try again later...!");
@@ -149,6 +148,7 @@ function AddSavajCapitalBranch() {
     state: "",
     city: "",
     full_name: "",
+    branch_id: "",
     email: "",
     password: "",
   });
@@ -237,7 +237,10 @@ function AddSavajCapitalBranch() {
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
                 }}
-                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
               >
                 Add Role
               </Button>
@@ -290,10 +293,9 @@ function AddSavajCapitalBranch() {
 
                   }}
                   onBlur={() => {
-                    // Delay the filterToggle call to allow time for the click event
                     setTimeout(() => {
                       filterToggle();
-                    }, 200); // Adjust the delay as needed
+                    }, 200);
                   }}
                   onChange={(e) => {
                     if (e.target.value.length !== "") {
@@ -434,6 +436,10 @@ function AddSavajCapitalBranch() {
                   type="submit"
                   isLoading={loading}
                   loadingText="Add..."
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {id ? "Update User now" : "Add User"}
                 </Button>
@@ -441,7 +447,11 @@ function AddSavajCapitalBranch() {
                 <Button
                   mt={4}
                   colorScheme="yellow"
-                  style={{ marginLeft: 8 }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginLeft: 8,
+                  }}
                   onClick={() => history.push("/superadmin/savajcapitalbranch")}
                 >
                   Cancel
@@ -485,6 +495,10 @@ function AddSavajCapitalBranch() {
               <Button
                 ref={cancelRef}
                 onClick={() => setIsDeleteDialogOpen(false)}
+                style={{
+                  backgroundColor: "#414650",
+                  color: "#fff",
+                }}
               >
                 Cancel
               </Button>
@@ -494,6 +508,10 @@ function AddSavajCapitalBranch() {
                 ml={3}
                 type="submit"
                 isLoading={loading}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
               >
                 Add Now
               </Button>

@@ -125,7 +125,7 @@ function NewPassword() {
           mt={{ md: "14px" }}
           borderRadius={{ base: "0px", md: "20px" }}
         >
-          <Box w="100vw" h="100vh" bg="blue.500" opacity="0.8"></Box>
+          <Box w="100vw" h="100vh" bg="#b19552" opacity="0.8"></Box>
         </Box>
         {tokenExpired ? (
           <Flex alignItems="center" justifyContent="center" mb="60px" mt="0px">

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
-
+import { Select } from "@chakra-ui/react";
 import {
   Button,
   useColorModeValue,
@@ -44,12 +44,12 @@ import AxiosInstance from "config/AxiosInstance";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick, handleDelete } = props;
+  const { id, file, handleEditClick, handleDelete, pan_card } = props;
   const history = useHistory();
   const [open, setOpen] = useState(false);
 
   const [fileData, setFileData] = useState([]);
-  const [filePercentageData, setFilePercentageData] = useState("");
+  let [filePercentageData, setFilePercentageData] = useState("");
   const fetchFileData = async () => {
     try {
       const file_id = file.file_id;
@@ -69,6 +69,54 @@ function Row(props) {
   useEffect(() => {
     fetchFileData();
   }, [file]);
+
+  useEffect(() => {
+    $(".progress").each(function () {
+      var value = parseInt($(this).attr("data-value"));
+      var progressBars = $(this).find(".progress-bar");
+
+      progressBars.removeClass("red yellow purple blue green");
+
+      if (value >= 0 && value < 20) {
+        progressBars.addClass("red");
+      } else if (value >= 20 && value < 40) {
+        progressBars.addClass("yellow");
+      } else if (value >= 40 && value < 60) {
+        progressBars.addClass("purple");
+      } else if (value >= 60 && value < 80) {
+        progressBars.addClass("blue");
+      } else if (value >= 80 && value <= 100) {
+        progressBars.addClass("green");
+      }
+
+      if (value <= 50) {
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      } else {
+        progressBars.eq(1).css("transform", "rotate(180deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
+      }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
+    });
+  }, [filePercentageData]);
+
+  const handleClick = () => {
+    AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
+      .then((response) => {
+        console.log("Response:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   return (
     <React.Fragment>
@@ -91,10 +139,9 @@ function Row(props) {
         </TableCell>
         <TableCell align="">{file?.user_username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{file?.pan_card}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">{file?.createdAt}</TableCell>
-        <TableCell align="">{file?.updatedAt}</TableCell>
         <TableCell align="center">
           {filePercentageData && (
             <div class="progress " data-value={Number(filePercentageData)}>
@@ -113,6 +160,26 @@ function Row(props) {
             </div>
           )}
         </TableCell>
+
+        <TableCell>
+          {file.loan_id === "1714582963176" ? (
+            <Button
+              style={{
+                padding: "5px",
+                borderRadius: "5px",
+                backgroundColor: "#ededed",
+                width: "100%",
+              }}
+              onClick={(e) => {
+                e.stopPropagation(e.target.value);
+                handleClick(pan_card);
+              }}
+            >IDB</Button>
+          ) : (
+            "-"
+          )}
+        </TableCell>
+
         <TableCell align="">
           <Flex>
             <IconButton
@@ -143,17 +210,29 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "50%" }}
+            style={{ width: "100%" }}
           >
-            <Box sx={{ margin: 1 }}>
-              <Paper elevation={3} sx={{ borderRadius: 3 }}>
+            <Box sx={{ margin: 1 }} className="d-flex gap-4 collapse-table">
+              <Paper
+                className="col-8 col-md-8 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "104px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
                 <Table size="small" aria-label="documents">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                         Document
                       </TableCell>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                      <TableCell
+                        className="status"
+                        sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                      >
                         Status
                       </TableCell>
                     </TableRow>
@@ -186,6 +265,35 @@ function Row(props) {
                   </TableBody>
                 </Table>
               </Paper>
+              <Paper
+                className="col-4 col-md-4 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "100px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Create
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Update
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>{file?.createdAt}</TableCell>
+                      <TableCell>{file?.updatedAt}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Paper>
             </Box>
           </Collapse>
         </TableCell>
@@ -214,87 +322,128 @@ export default function CollapsibleTable() {
   const [files, setFiles] = useState([]);
   let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
-  const filteredUsers =
-    searchTerm.length === 0
-      ? files
-      : files.filter(
-          (user) =>
-            (user.loan &&
-              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.file_id &&
-              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.loan_type &&
-              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+  const [selectedLoan, setSelectedLoan] = useState("");
+  const [loans, setLoans] = useState([]);
+  const filteredUsers = files.filter((file) => {
+    const loanSafe =
+      file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
+    const fileIdSafe =
+      file.file_id && typeof file.file_id === "string"
+        ? file.file_id.toLowerCase()
+        : "";
+    const loanTypeSafe =
+      file.loan_type && typeof file.loan_type === "string"
+        ? file.loan_type.toLowerCase()
+        : "";
+    const usernameSafe =
+      file.user_username && typeof file.user_username === "string"
+        ? file.user_username.toLowerCase()
+        : "";
+
+    return (
+      (selectedLoan === "" || loanSafe === selectedLoan.toLowerCase()) &&
+      (loanSafe.includes(searchTerm.toLowerCase()) ||
+        fileIdSafe.includes(searchTerm.toLowerCase()) ||
+        loanTypeSafe.includes(searchTerm.toLowerCase()) ||
+        usernameSafe.includes(searchTerm.toLowerCase()))
+    );
+  });
 
   const history = useHistory();
 
   const handleRow = (url) => {
     history.push(url);
   };
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFiles = async () => {
+    const fetchData = async () => {
       try {
-        const response = await AxiosInstance.get("/file_upload");
-        setFiles(response.data.data);
-        setLoading(false);
+        const loanResponse = await AxiosInstance.get("/loan");
+        setLoans(loanResponse.data.data);
       } catch (error) {
-        console.error("Error fetching files:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchFiles();
+    fetchData();
   }, []);
 
-  $(function () {
-    $(".progress").each(function () {
-      var value = parseInt($(this).attr("data-value"));
-      var progressBars = $(this).find(".progress-bar");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-      progressBars.removeClass("red yellow purple blue green");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await AxiosInstance.get("/file_upload", {
+          params: {
+            page: currentPage, // Current page
+            limit: itemsPerPage, // Items per page
+          },
+        });
 
-      if (value >= 0 && value < 20) {
-        progressBars.addClass("red");
-      } else if (value >= 20 && value < 40) {
-        progressBars.addClass("yellow");
-      } else if (value >= 40 && value < 60) {
-        progressBars.addClass("purple");
-      } else if (value >= 60 && value < 80) {
-        progressBars.addClass("blue");
-      } else if (value >= 80 && value <= 100) {
-        progressBars.addClass("green");
+        setFiles(response.data.data);
+        setTotalPages(response.data.totalPages); // Set total pages from API response
+        setCurrentPage(response.data.currentPage); // Set current page from API response
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
       }
+    };
 
-      if (value <= 50) {
-        progressBars
-          .eq(1)
-          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
-      } else {
-        progressBars.eq(1).css("transform", "rotate(180deg)");
-        progressBars
-          .eq(0)
-          .css(
-            "transform",
-            "rotate(" + percentageToDegrees(value - 50) + "deg)"
-          );
-      }
-    });
+    fetchData();
+  }, [currentPage, itemsPerPage]);
 
-    function percentageToDegrees(percentage) {
-      return (percentage / 100) * 360;
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    if (nextPage <= totalPages) {
+      setCurrentPage(nextPage);
     }
-  });
+  };
+
+  const handlePrevPage = () => {
+    const prevPage = currentPage - 1;
+    if (prevPage >= 1) {
+      setCurrentPage(prevPage);
+    }
+  };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const fileResponse = await AxiosInstance.get("/file_upload");
+  //       const loanResponse = await AxiosInstance.get("/loan");
+
+  //       setFiles(fileResponse.data.data);
+  //       setLoans(loanResponse.data.data);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  // Inside the Row component
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
   const deletefile = async (fileId) => {
     try {
-      await AxiosInstance.delete(`/file_upload/${fileId}`);
-      setFiles(files.filter((file) => file.file_id !== fileId));
-      setIsDeleteDialogOpen(false);
-      toast.success("File deleted successfully!");
+      const response = await AxiosInstance.delete(`/file_upload/${fileId}`);
+      if (response.data.success) {
+        setFiles(files.filter((file) => file.file_id !== fileId));
+        setIsDeleteDialogOpen(false);
+        toast.success("File deleted successfully!");
+      } else if (response.data.statusCode === 201) {
+        toast.error(response.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("file not delete");
@@ -313,27 +462,49 @@ export default function CollapsibleTable() {
         className="card"
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
-        <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext">
+        <CardHeader style={{ padding: "30px" }} className="card-main">
+          <Flex justifyContent="space-between" p="4" className="mainnnn">
+            <Text fontSize="xl" fontWeight="bold">
               Add Files
             </Text>
-            <div>
+            <Flex className="thead">
+              <Select
+                placeholder="Select Loan"
+                value={selectedLoan}
+                onChange={(e) => setSelectedLoan(e.target.value)}
+                mr="10px"
+                width="200px"
+              >
+                {loans.map((loan) => (
+                  <option key={loan._id} value={loan.loan}>
+                    {loan.loan}
+                  </option>
+                ))}
+              </Select>
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by name"
                 width="250px"
-                marginRight="10px"
+                mr="10px"
               />
-
-              <Button
-                onClick={() => history.push("/superadmin/addfile")}
-                colorScheme="blue"
-              >
-                Add File
-              </Button>
-            </div>
+              <div>
+                <style>
+                  {`
+      .dynamicImportantStyle {
+        background-color: #b19552 !important;
+        color: #fff !important;
+      }
+    `}
+                </style>
+                <Button
+                  onClick={() => history.push("/superadmin/addfile")}
+                  className="dynamicImportantStyle"
+                >
+                  Add File
+                </Button>
+              </div>
+            </Flex>
           </Flex>
         </CardHeader>
         <ThemeProvider theme={theme}>
@@ -341,7 +512,7 @@ export default function CollapsibleTable() {
             <Flex justify="center" align="center" height="100vh">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />
@@ -359,19 +530,19 @@ export default function CollapsibleTable() {
                       File Id
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Pan Card
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Loan Type
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Created At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Updated At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Status
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      IDB
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Action
@@ -384,6 +555,7 @@ export default function CollapsibleTable() {
                       key={file._id}
                       file={file}
                       id={file.file_id}
+                      pan_card={file.pan_card}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
                       handleDelete={handleDelete}
@@ -428,6 +600,39 @@ export default function CollapsibleTable() {
           </AlertDialogOverlay>
         </AlertDialog>
       </div>
+      {/* pagination */}
+      <Flex justifyContent="flex-end" alignItems="center" p="4">
+        <Text mr="4">Total Records: {files.length}</Text>
+        <Text mr="2">Rows per page:</Text>
+        <Select
+          value={itemsPerPage}
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          mr="2"
+          width="100px"
+        >
+          {[10, 20, 50].map((perPage) => (
+            <option key={perPage} value={perPage}>
+              {perPage}
+            </option>
+          ))}
+        </Select>
+        <Text mr="4">
+          Page {currentPage} of {totalPages}
+        </Text>
+        <IconButton
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          aria-label="Previous Page"
+          icon={<KeyboardArrowUpIcon />}
+          mr="2"
+        />
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          aria-label="Next Page"
+          icon={<KeyboardArrowDownIcon />}
+        />
+      </Flex>
       <Toaster />
     </>
   );

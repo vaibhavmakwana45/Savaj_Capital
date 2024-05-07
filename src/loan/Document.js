@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Flex, Text, useColorModeValue, Button } from "@chakra-ui/react";
+import {
+  Flex,
+  Text,
+  useColorModeValue,
+  Button,
+  useToast,
+} from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -10,6 +16,13 @@ import {
   IconButton,
   Input,
   FormControl,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
@@ -36,6 +49,74 @@ function Document() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedLoanDocumentId, setSelctedDocumentId] = useState(null);
   const cancelRef = React.useRef();
+  const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
+  const [inputIndex, setInputIndex] = useState("");
+
+
+  const openTitleModal = (documentId) => {
+    setSelectedDocumentId(documentId);
+    setIsTitleModalOpen(true);
+  };
+
+  const updateDocumentIndex = async (documentId, newIndex) => {
+    try {
+      const response = await AxiosInstance.put(
+        `/loan_docs/update-index/${documentId}`,
+        {
+          newIndex,
+        }
+      );
+      if (response.data.success) {
+        toast({
+          title: "Index updated successfully!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchDocuments();
+        setDocuments((prevDocs) =>
+          prevDocs.map((doc) =>
+            doc.loan_document_id === documentId
+              ? { ...doc, index: newIndex }
+              : doc
+          )
+        );
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating document index:", error);
+      toast({
+        title: "Error updating index. Please try again.",
+        description: error.response?.data.message || error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleInputIndexSubmit = () => {
+    console.log("Index submitted:", inputIndex);
+    if (inputIndex.trim() !== "" && !isNaN(inputIndex) && selectedDocumentId) {
+      updateDocumentIndex(selectedDocumentId, parseInt(inputIndex, 10));
+      setIsTitleModalOpen(false);
+      setInputIndex("");
+    } else {
+      toast({
+        title: "Invalid input",
+        description: "Invalid index or no document selected.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleTitle = (rowData) => {
+    console.log("Row data:", rowData);
+    openTitleModal(rowData);
+  };
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -43,6 +124,7 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
+      console.log(url, "url");
       const response = await AxiosInstance.get(url);
       setDocuments(response.data.data || []);
     } catch (error) {
@@ -58,6 +140,7 @@ function Document() {
   }, [loan_id, loantype_id]);
 
   const allHeadersWithoutDocNames = [
+    "Index",
     "Title",
     "Document Name",
     "createdAt",
@@ -72,6 +155,7 @@ function Document() {
 
   const formattedDataWithoutDocNames = filteredDocuments.map((doc) => [
     doc.loan_document_id,
+    doc.index,
     doc.title,
     doc.document_names.join(", "),
     doc.createdAt,
@@ -83,16 +167,23 @@ function Document() {
     setIsDeleteDialogOpen(true);
   };
 
+  // const handleEdit = (id) => {
+  //   setIsEditDocument(true);
+  //   setSelectedDocumentId(id);
+  //   const data = documents.find((document) => document.loan_document_id == id);
+  //   if (data) {
+  //     setSelectedDocument(data.loan_document);
+  //   } else {
+  //     console.error("Data not found for id:", id);
+  //   }
+  // };
+
   const handleEdit = (id) => {
-    setIsEditDocument(true);
-    setSelectedDocumentId(id);
-    const data = documents.find((document) => document.loan_document_id == id);
-    if (data) {
-      setSelectedDocument(data.loan_document);
-    } else {
-      console.error("Data not found for id:", id);
-    }
+    history.push(`/superadmin/editloandocs?id=${id}`);
   };
+  // const handleTitle = (rowData) => {
+  //   console.log("Row data:", rowData);
+  // };
 
   const deleteDocument = async (loanDocumentId) => {
     try {
@@ -199,13 +290,13 @@ function Document() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button
-                  // onClick={() => setIsEditDocument(true)}
+                {/* <Button
+                  className="add-doc-button"
                   onClick={() => history.push("/superadmin/addloandocs")}
-                  colorScheme="blue"
+                  style={{ backgroundColor: "red" }}
                 >
                   Add Document
-                </Button>
+                </Button> */}
               </div>
             </Flex>
           </CardHeader>
@@ -220,8 +311,13 @@ function Document() {
               handleRow={handleRow}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
+              handleTitle={handleTitle}
               collapse={true}
-              documentIndex={2}
+              showTitleButton={true}
+              documentIndex={3}
+              removeIndex={2}
+              name={"Document Names:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>
@@ -306,6 +402,10 @@ function Document() {
                     setSelectedDocument("");
                     setSelectedDocumentId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -320,6 +420,10 @@ function Document() {
                   }}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedDocumentId != "" ? "Updated Now" : "Add Now"}
                 </Button>
@@ -327,6 +431,42 @@ function Document() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        <Modal
+          isOpen={isTitleModalOpen}
+          onClose={() => setIsTitleModalOpen(false)}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Add an Index</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl>
+                <Input
+                  value={inputIndex}
+                  onChange={(e) => setInputIndex(e.target.value)}
+                  placeholder="Enter index"
+                  type="number" // Ensure only numbers can be entered
+                />
+              </FormControl>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                onClick={handleInputIndexSubmit}
+                style={{ backgroundColor: "#b19552" }}
+              >
+                Submit
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setIsTitleModalOpen(false)}
+              >
+                Cancel
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Flex>
       <Toaster />
     </>

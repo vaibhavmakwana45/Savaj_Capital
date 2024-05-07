@@ -25,7 +25,7 @@ import FixedPlugin from "../components/FixedPlugin/FixedPlugin";
 import MainPanel from "../components/Layout/MainPanel";
 import PanelContainer from "../components/Layout/PanelContainer";
 import PanelContent from "../components/Layout/PanelContent";
-import bgAdmin from "assets/img/admin-background.png";
+import bgAdmin from "assets/img/imgonline-com-ua-ReplaceColor-MctypTu8tYMo7T.jpg";
 
 export default function Dashboard(props) {
   const { name } = props;

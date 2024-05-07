@@ -35,9 +35,7 @@ function AllStep() {
 
   const getStepData = async () => {
     try {
-      const response = await AxiosInstance.get(
-        "/loan_step"
-      );
+      const response = await AxiosInstance.get("/loan_step");
 
       if (response.data.success) {
         setSteps(response.data.data);
@@ -55,8 +53,9 @@ function AllStep() {
     searchTerm.length === 0
       ? steps
       : steps.filter((stp) =>
-          stp.step.toLowerCase().includes(searchTerm.toLowerCase())
+          stp.loan_step?.toLowerCase().includes(searchTerm.toLowerCase())
         );
+
   useEffect(() => {
     getStepData();
   }, []);
@@ -77,9 +76,7 @@ function AllStep() {
 
   const deleteStep = async (documentId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/loan_step/${documentId}`
-      );
+      const response = await AxiosInstance.delete(`/loan_step/${documentId}`);
       getStepData();
       setIsDeleteDialogOpen(false);
       if (response.data.success) {
@@ -109,17 +106,13 @@ function AllStep() {
     }
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   const handleAddStep = async (loan_step) => {
     try {
-      const response = await AxiosInstance.post(
-        "/loan_step",
-        {
-          loan_step,
-        }
-      );
+      const response = await AxiosInstance.post("/loan_step", {
+        loan_step,
+      });
       if (response.data.success) {
         toast.success("Document added successfully!");
         setIsStep(false);
@@ -139,12 +132,9 @@ function AllStep() {
 
   const editStep = async (loan_step) => {
     try {
-      const response = await AxiosInstance.put(
-        "/loan_step/" + selectedStepId,
-        {
-          loan_step,
-        }
-      );
+      const response = await AxiosInstance.put("/loan_step/" + selectedStepId, {
+        loan_step,
+      });
 
       if (response.data.success) {
         toast.success("Document Updated successfully!");
@@ -193,7 +183,10 @@ function AllStep() {
                   onClick={() => {
                     setIsStep(true);
                   }}
-                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Step
                 </Button>
@@ -211,6 +204,7 @@ function AllStep() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              showPagination={true}
             />
           </CardBody>
         </Card>
@@ -293,6 +287,10 @@ function AllStep() {
                     setIsStep(false);
                     setSelectedStepId("");
                   }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>
@@ -307,6 +305,10 @@ function AllStep() {
                   }}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   {selectedStepId ? "Update Now" : "Add Now"}
                 </Button>

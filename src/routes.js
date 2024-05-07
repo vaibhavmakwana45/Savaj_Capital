@@ -33,6 +33,7 @@ import LoanTypes from "loan/LoanTypes";
 import AddLoanType from "loan/AddLoanType";
 import LoanSubTypes from "loan/LoanSubTypes";
 import AddLoanDocuments from "loan/AddLoanDocuments";
+import EditLoanDocuments from "loan/EditLoanDocuments";
 import NewPassword from "views/Pages/NewPassword";
 import Files from "files/Files";
 import AddFiles from "files/AddFiles";
@@ -48,10 +49,14 @@ import AssignBank from "savajcapitaldashboard/AssignBank/AssignBank";
 import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
 import AddAllDocuments from "Document/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
-
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers"; // Assignes file (savaj user)
 import AssignedBankUsers from "addbank/AssignedBankUsers";
 import Title from "./Title/Title"; // Assignes file (savaj user)
+import SavajAssignFile from "addsavajcapitalbranch/SavajAssignFile";
+import CustomerFile from "userdashboard/CustomerFiles/CustomerFile";
+import CreateCustomerFile from "userdashboard/CustomerFiles/CreateCustomerFile";
+import EditFileCustomer from "userdashboard/CustomerFiles/EditFileCustomer";
+import DetailCustomerFilePage from "userdashboard/CustomerFiles/DetailCustomerFilePage";
 
 var dashRoutes = [
   //superadmin
@@ -115,7 +120,7 @@ var dashRoutes = [
     key: "editfile",
   },
   //users
- 
+
   {
     path: "/adduser",
     name: "Add Customer",
@@ -196,6 +201,16 @@ var dashRoutes = [
     key: "addloandocs",
   },
   {
+    path: "/editloandocs",
+    name: "Edit Document",
+    icon: <CreditIcon color="inherit" />,
+    component: EditLoanDocuments,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    parent: "loan",
+    key: "addloandocs",
+  },
+  {
     path: "/documents",
     name: "Document",
     icon: <CreditIcon color="inherit" />,
@@ -252,6 +267,11 @@ var dashRoutes = [
         layout: "/superadmin",
         path: "/savajuserroles",
         name: "Add Roles",
+      },
+      {
+        layout: "/superadmin",
+        path: "/branch-assigned-file",
+        name: "Assigned File",
       },
     ],
   },
@@ -314,6 +334,16 @@ var dashRoutes = [
     layout: "/superadmin",
     parent: "superadmin",
     key: "savajcapitalbranch",
+  },
+  {
+    path: "/branch-assigned-file",
+    name: "Assigned File (Savaj User)",
+    icon: <CreditIcon color="inherit" />,
+    component: SavajAssignFile,
+    hideInSidebar: true,
+    layout: "/superadmin",
+    parent: "savajcapitalbranch",
+    key: "branch-assigned-file",
   },
   //bank
   {
@@ -497,7 +527,6 @@ var dashRoutes = [
     icon: <PersonIcon color="inherit" />,
     component: UserFile,
     layout: "/savajcapitaluser",
-    hideInSResponsive: false,
     hideInSResponsivrUser: true,
   },
   {
@@ -550,12 +579,47 @@ var dashRoutes = [
   //user
   {
     path: "/dashboard",
-    name: "User Dashboard",
+    name: "Dashboard",
     icon: <HomeIcon color="inherit" />,
     component: UserDashboard,
+    hideInCustomer: true,
     layout: "/user",
   },
-
+  {
+    path: "/userfile",
+    name: "User File",
+    icon: <PersonIcon color="inherit" />,
+    component: CustomerFile,
+    layout: "/user",
+    hideInCustomer: false,
+  },
+  {
+    path: "/adduserfile",
+    name: "Add user file",
+    component: CreateCustomerFile,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "adduserfile",
+  },
+  {
+    path: "/edituserfile",
+    name: "Edit user file",
+    component: EditFileCustomer,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "edituserfile",
+  },
+  {
+    path: "/viewuserfile",
+    name: "View user file",
+    component: DetailCustomerFilePage,
+    layout: "/user",
+    hideInSidebar: true,
+    parent: "adduserfile",
+    key: "viewuserfile",
+  },
   // Title
   {
     path: "/title",
@@ -563,7 +627,6 @@ var dashRoutes = [
     icon: <DocumentIcon color="inherit" />,
     component: Title,
     layout: "/superadmin",
-    hideInSResponsive: true,
     hideInSidebar: true,
   },
 ];

@@ -6,7 +6,7 @@ import {
   ChakraLogoLight,
   ProfileIcon,
   SettingsIcon,
-} from "components/Icons/Icons"; // Chakra Imports
+} from "components/Icons/Icons";
 import {
   Box,
   Button,
@@ -104,13 +104,22 @@ function Tables() {
     history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
   };
 
-  const allHeaders = ["Bank Name", "Name", "role", "Action"];
+  const allHeaders = [
+    "Bank Name",
+    "Name",
+    "role",
+    "create",
+    "update",
+    "Action",
+  ];
 
   const formattedData = filteredUsers.map((bank) => [
     bank.branchuser_id,
     bank.email,
     bank.full_name,
     bank.role,
+    bank.createdAt,
+    bank.updatedAt,
   ]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -195,10 +204,24 @@ function Tables() {
                   marginRight="10px"
                 />
 
-                <Button onClick={navigateToAnotherPageUser} colorScheme="blue" style={{marginRight:'10px'}}>
+                <Button
+                  onClick={navigateToAnotherPageUser}
+                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginRight: "10px",
+                  }}
+                >
                   Add User
                 </Button>
-                <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                <Button
+                  onClick={navigateToAnotherPage}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
+                >
                   Add Branch
                 </Button>
                 {/* <Menu>
@@ -240,7 +263,7 @@ function Tables() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               banks={banks}
               data={formattedData}
               textColor={textColor}
@@ -250,6 +273,26 @@ function Tables() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              banks={banks}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={3}
+              removeIndex2={4}
+              documentIndex={4}
+              documentIndex2={5}
+              name={"Created At:"}
+              name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>
@@ -317,7 +360,14 @@ function Tables() {
               </AlertDialogBody>
 
               <AlertDialogFooter>
-                <Button ref={cancelRef} onClick={() => setIsAddRole(false)}>
+                <Button
+                  ref={cancelRef}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
+                  onClick={() => setIsAddRole(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -325,6 +375,10 @@ function Tables() {
                   onClick={() => handleAddRole(role)}
                   ml={3}
                   type="submit"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Now
                 </Button>

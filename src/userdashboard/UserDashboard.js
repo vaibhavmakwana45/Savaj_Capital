@@ -43,7 +43,7 @@ import { pageVisits, socialTraffic } from "variables/general";
 
 export default function UserDashboard() {
   // Chakra Color Mode
-  const iconBlue = useColorModeValue("blue.500", "blue.500");
+  const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
   const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
@@ -212,7 +212,7 @@ export default function UserDashboard() {
           </Flex>
         </Card>
       </SimpleGrid>
-      <Grid
+      {/* <Grid
         templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}
         templateRows={{ lg: "repeat(2, auto)" }}
       gap='20px'>
@@ -393,7 +393,7 @@ export default function UserDashboard() {
             </Table>
           </Box>
         </Card>
-      </Grid>
+      </Grid> */}
     </Flex>
   );
 }

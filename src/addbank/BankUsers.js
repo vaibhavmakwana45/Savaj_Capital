@@ -98,7 +98,15 @@ function BankUsers() {
     history.push("/superadmin/addbankuser");
   };
 
-  const allHeaders = ["email", "mobile", "aadhar", "address", "Action"];
+  const allHeaders = [
+    "email",
+    "mobile",
+    "aadhar",
+    "address",
+    "create",
+    "update",
+    "Action",
+  ];
 
   const formattedData = filteredUsers.map((bank) => [
     bank.bankuser_id,
@@ -106,6 +114,8 @@ function BankUsers() {
     bank.mobile,
     bank.adhar,
     bank.adress,
+    bank.createdAt,
+    bank.updatedAt,
   ]);
 
   const formattedCollapsedData = filteredUsers.map((bank) => [bank.bank_id]);
@@ -115,13 +125,21 @@ function BankUsers() {
   const cancelRef = React.useRef();
   const deleteBank = async (bankId) => {
     try {
-      await AxiosInstance.delete(`/bank_user/deletebankuser/${bankId}`);
-      setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
-      setIsDeleteDialogOpen(false);
-      toast.success("Bank User deleted successfully!");
+      const responce = await AxiosInstance.delete(
+        `/bank_user/deletebankuser/${bankId}`
+      );
+
+      if (responce.data.success) {
+        setIsDeleteDialogOpen(false);
+        setBankUsers(bankUsers.filter((bank) => bank.bankuser_id !== bankId));
+        toast.success("Bank User deleted successfully!");
+      } else if (responce.data.statusCode === 201) {
+        toast.error(responce.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting bank:", error);
-      toast.error("bank not delete");
+      toast.error(error);
     }
   };
 
@@ -143,8 +161,17 @@ function BankUsers() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center" className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext d-flex">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              className="thead"
+            >
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext d-flex"
+              >
                 <IconButton
                   icon={<ArrowBackIcon />}
                   onClick={() => history.goBack()}
@@ -165,7 +192,7 @@ function BankUsers() {
 
                 <Menu>
                   <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue">
+                    <Button onClick={navigateToAnotherPage} colorScheme="blue" style={{backgroundColor:"#b19552"}}>
                       ...
                     </Button>
                   </MenuButton>
@@ -198,7 +225,7 @@ function BankUsers() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               bankUsers={bankUsers}
               data={formattedData}
               textColor={textColor}
@@ -208,6 +235,26 @@ function BankUsers() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              bankUsers={bankUsers}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              removeIndex={4}
+              removeIndex2={5}
+              documentIndex={5}
+              documentIndex2={6}
+              name={"Created At:"}
+              name2={"Updated At:"}
+              showPagination={true}
             />
           </CardBody>
         </Card>

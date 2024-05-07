@@ -53,9 +53,6 @@ function AssignBank() {
             bank.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
             bank.state.toLowerCase().includes(searchTerm.toLowerCase())
-          // bank.users.some((user) =>
-          //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
-          // )
         );
 
   useEffect(() => {
@@ -74,18 +71,14 @@ function AssignBank() {
 
   const navigateToAnotherPage = (id) => {
     if (id) {
-      //   history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    // history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
     if (id) {
-      //   history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
-    // history.push("/superadmin/addbankuser");
   };
 
   const navigateToAssignFile = () => {
@@ -137,9 +130,7 @@ function AssignBank() {
     navigateToAnotherPage(id);
   };
 
-  const handleRow = (id) => {
-    // history.push("/superadmin/bankusers?id=" + id);
-  };
+  const handleRow = (id) => {};
 
   return (
     <>
@@ -158,9 +149,14 @@ function AssignBank() {
                   width="250px"
                   marginRight="10px"
                 />
-                    <Button onClick={navigateToAssignFile} colorScheme="blue">
-                    Assign File
-                  </Button>
+                <Button
+                  onClick={navigateToAssignFile}
+                  style={{
+                    border: "2px solid #b19552",
+                  }}
+                >
+                  Assign File
+                </Button>
                 {/* <Menu>
                   <MenuButton>
                     <Button
@@ -234,6 +230,10 @@ function AssignBank() {
                 <Button
                   ref={cancelRef}
                   onClick={() => setIsDeleteDialogOpen(false)}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                  }}
                 >
                   Cancel
                 </Button>

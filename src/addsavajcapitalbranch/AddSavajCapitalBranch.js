@@ -79,18 +79,6 @@ function AddSavajCapitalBranch() {
     e.preventDefault();
     setLoading(true);
 
-    // const submissionData = {
-    //   savajCapitalBranchDetails: {
-    //     state: formData.state,
-    //     city: formData.city,
-    //     branch_name: formData.branch_name,
-    //   },
-    //   savajCapitalUserDetails: {
-    //     email: formData.email,
-    //     password: formData.password,
-    //   },
-    // };
-
     try {
       const response = await AxiosInstance.post("/branch", formData);
 
@@ -167,11 +155,6 @@ function AddSavajCapitalBranch() {
                 <FormLabel>Branch Address</FormLabel>
                 <Input name="adress" onChange={handleChange} />
               </FormControl>
-              {/* <FormControl id="branch_name" mt={4} isRequired>
-                <FormLabel>Branch Name</FormLabel>
-                <Input name="branch_name" onChange={handleChange} />
-              </FormControl> */}
-              {/* User Details */}
               <div className="d-flex">
                 <Button
                   mt={4}
@@ -179,15 +162,23 @@ function AddSavajCapitalBranch() {
                   type="submit"
                   isLoading={loading}
                   loadingText="Add...."
-                  style={{ marginTop: 30 }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 30,
+                  }}
                 >
                   Add Branch
                 </Button>
 
                 <Button
                   mt={4}
-                  colorScheme="yellow"
-                  style={{ marginTop: 30, marginLeft: 8 }}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 30,
+                    marginLeft: 8,
+                  }}
                   onClick={() => history.push("/superadmin/savajcapitalbranch")}
                 >
                   Cancel

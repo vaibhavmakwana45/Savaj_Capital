@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
   },
   documents: {
-    type: Array,  
+    type: Array,
   },
   branchuser_id: {
     type: String,
@@ -25,11 +25,25 @@ const UserSchema = new mongoose.Schema({
   branch_id: {
     type: String,
   },
+  amount: {
+    type: String,
+  },
+  note: {
+    type: String,
+  },
   createdAt: {
     type: String,
   },
   updatedAt: {
     type: String,
+  },
+  loan_dispatch: {
+    type: Boolean,
+    default: false,
+  },
+  stemp_paper_print: {
+    type: Boolean,
+    default: false,
   },
 });
 

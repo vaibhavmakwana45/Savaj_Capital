@@ -61,17 +61,30 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/:bankuser_id", async (req, res) => {
+// Bank Delete
+router.delete("/:bank_id", async (req, res) => {
   try {
-    const { bankuser_id } = req.params;
+    const { bank_id } = req.params;
 
-    const deletedUser = await BankUser.findOneAndDelete({
-      bankuser_id: bankuser_id,
+    const bankExistsInBankUser = await BankUser.findOne({ bank_id: bank_id });
+    const bankExistsInBankApproval = await BankApproval.findOne({
+      bank_id: bank_id,
+    });
+
+    if (bankExistsInBankUser || bankExistsInBankApproval) {
+      return res.status(200).json({
+        statusCode: 201,
+        message: "Bank cannot be deleted because it is currently assigned.",
+      });
+    }
+
+    const deletedUser = await Bank.findOneAndDelete({
+      bank_id: bank_id,
     });
 
     if (!deletedUser) {
       return res.status(200).json({
-        statusCode: 201,
+        statusCode: 202,
         message: "User not found",
       });
     }
@@ -79,7 +92,7 @@ router.delete("/:bankuser_id", async (req, res) => {
     res.json({
       success: true,
       message: "User deleted successfully",
-      deletedRoleId: bankuser_id,
+      deletedBankId: bank_id,
     });
   } catch (error) {
     console.error(error);
@@ -180,9 +193,22 @@ router.get("/:bank_id", async (req, res) => {
   }
 });
 
+// Bank User Delete
 router.delete("/deletebankuser/:bankId", async (req, res) => {
   try {
     const { bankId } = req.params;
+
+    const bankUserExistsInBankApproval = await BankApproval.findOne({
+      bankuser_id: bankId,
+    });
+
+    if (bankUserExistsInBankApproval) {
+      return res.status(200).json({
+        statusCode: 201,
+        message:
+          "Bank-user cannot be deleted because it is currently assigned.",
+      });
+    }
 
     const deletedBankUser = await BankUser.findOneAndDelete({
       bankuser_id: bankId,
@@ -223,45 +249,55 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
         data: [],
       });
     }
-    const bankUserData = await BankUser.findOne({bankuser_id: bankuser_id})
+    const bankUserData = await BankUser.findOne({ bankuser_id: bankuser_id });
 
     const fileIds = bankApprovals.map((approval) => approval.file_id);
 
     const fileDetails = await File_Uplode.find({ file_id: { $in: fileIds } });
 
-    const augmentedData = await Promise.all(bankApprovals.map(async (approval) => {
-      const fileData = fileDetails.find((detail) => detail.file_id === approval.file_id);
-      if (!fileData) return null;
+    const augmentedData = await Promise.all(
+      bankApprovals.map(async (approval) => {
+        const fileData = fileDetails.find(
+          (detail) => detail.file_id === approval.file_id
+        );
+        if (!fileData) return null;
 
-      const loanData = await Loan.findOne({ loan_id: fileData.loan_id });
-      const loanTypeData = await Loan_Type.findOne({ loantype_id: fileData.loantype_id });
-      const userData = await AddUser.findOne({ user_id: fileData.user_id });
+        const loanData = await Loan.findOne({ loan_id: fileData.loan_id });
+        const loanTypeData = await Loan_Type.findOne({
+          loantype_id: fileData.loantype_id,
+        });
+        const userData = await AddUser.findOne({ user_id: fileData.user_id });
 
-      const entry = {
-        ...approval.toObject(),
-        file_data: fileData,
-        loan: loanData ? loanData.loan : null,
-        loan_type: loanTypeData ? loanTypeData.loan_type : null,
-        username: userData ? userData.username : null,
-      };
+        const entry = {
+          ...approval.toObject(),
+          file_data: fileData,
+          loan: loanData ? loanData.loan : null,
+          loan_type: loanTypeData ? loanTypeData.loan_type : null,
+          username: userData ? userData.username : null,
+        };
 
-      const hasMissingDetail = !fileData || !loanData || !loanTypeData || !userData;
-      if (hasMissingDetail) {
-        console.log("Missing detail for BankApproval with file_id:", approval.file_id);
-        console.log("File data:", fileData);
-        console.log("Loan data:", loanData);
-        console.log("Loan type data:", loanTypeData);
-        console.log("User data:", userData);
-      }
+        const hasMissingDetail =
+          !fileData || !loanData || !loanTypeData || !userData;
+        if (hasMissingDetail) {
+          console.log(
+            "Missing detail for BankApproval with file_id:",
+            approval.file_id
+          );
+          console.log("File data:", fileData);
+          console.log("Loan data:", loanData);
+          console.log("Loan type data:", loanTypeData);
+          console.log("User data:", userData);
+        }
 
-      return entry;
-    }));
+        return entry;
+      })
+    );
 
     res.json({
       success: true,
       data: augmentedData,
       count: augmentedData.length,
-      bankUserData : bankUserData,
+      bankUserData: bankUserData,
       message: "Bank approvals data with all details retrieved successfully.",
     });
   } catch (error) {
@@ -272,7 +308,33 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
   }
 });
 
+router.delete("/assigedfile_delete/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
 
+    const deletedUser = await BankApproval.findOneAndDelete({
+      file_id: file_id,
+    });
 
+    if (!deletedUser) {
+      return res.status(200).json({
+        statusCode: 202,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "File successfully deleted.",
+      deletedBankId: file_id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 module.exports = router;

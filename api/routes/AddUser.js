@@ -6,9 +6,13 @@ const BankUser = require("../models/Bank/BankUserSchema");
 const BankSchema = require("../models/Bank/BankSchema");
 const SuperAdmin = require("../models/SuperAdminSignupSchema");
 const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
+const File_Uplode = require("../models/File/File_Uplode");
 const { createToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 const axios = require("axios");
+const Loan = require("../models/Loan/Loan");
+const Loan_Type = require("../models/Loan/Loan_Type");
+// const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -87,14 +91,44 @@ router.post("/adduserbyadmin", async (req, res) => {
       email: userDetails.email,
     });
 
+    const userNumberExists = await AddUser.findOne({
+      number: userDetails.number,
+    });
+
+    const userAdharExists = await AddUser.findOne({
+      aadhar_card: userDetails.aadhar_card,
+    });
+
+    const userPanExists = await AddUser.findOne({
+      pan_card: userDetails.pan_card,
+    });
+
     if (bankUser || superAdmin || user || savajCapital_user) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
-    // const hashedPassword = encrypt(userDetails.password);
+    if (userNumberExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 204, message: "Mobile number already in use" });
+    }
 
+    if (userPanExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 203, message: "Pan Card already in use" });
+    }
+
+    if (userAdharExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 202, message: "Aadhar Card already in use" });
+    }
+
+    // const hashedPassword = encrypt(userDetails.password);
+    const status = req.body.cibil_score === "" ? "active" : "complete";
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
     const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
@@ -105,9 +139,10 @@ router.post("/adduserbyadmin", async (req, res) => {
     const newUser = new AddUser({
       ...userDetails,
       user_id: userId,
-      createdAt: currentDate,
-      updatedAt: currentDate,
+      createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       password: "",
+      status: status,
     });
 
     await newUser.save();
@@ -135,7 +170,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
 router.get("/getusers", async (req, res) => {
   try {
-    const users = await AddUser.find({}, "-password");
+    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
     res.json({
       success: true,
       users,
@@ -175,7 +210,18 @@ router.get("/:user_id", async (req, res) => {
 
 router.delete("/deleteuser/:userId", async (req, res) => {
   try {
-    const { userId } = req.params;
+    // const { userId } = req.params;
+    const userId = req.params.userId;
+    console.log(userId, "userId");
+
+    const user = await File_Uplode.findOne({ user_id: userId });
+
+    if (user) {
+      return res.status(200).send({
+        statusCode: 201,
+        message: "Loan application detected. Delete not allowed.",
+      });
+    }
 
     const deletedUser = await AddUser.findOneAndDelete({ user_id: userId });
 
@@ -206,13 +252,10 @@ router.put("/edituser/:userId", async (req, res) => {
   const updates = req.body;
 
   try {
-    // if (updates.password) {
-    //   updates.password = await hashPassword(updates.password);
-    // }
-
+    const status = req.body.cibil_score === "" ? "active" : "complete";
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
-      updates,
+      { ...updates, status },
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -360,6 +403,59 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/customer/:user_id", async (req, res) => {
+  try {
+    const user_id = req.params.user_id;
+
+    // Fetch user data just once
+    const user_data = await AddUser.findOne({ user_id: user_id });
+    const username = user_data ? user_data.username : null; // Assuming 'username' is the field name
+
+    // Continue with the file upload data aggregation
+    var data = await File_Uplode.aggregate([
+      {
+        $match: { user_id: user_id },
+      },
+    ]);
+
+    // Process each file upload data for additional details
+    for (let i = 0; i < data.length; i++) {
+      const loan_id = data[i].loan_id;
+      const loantype_id = data[i].loantype_id;
+
+      if (loan_id) {
+        const loan_data = await Loan.findOne({ loan_id: loan_id });
+        if (loan_data) {
+          data[i].loan = loan_data.loan;
+        }
+      }
+
+      if (loantype_id) {
+        const loan_type_data = await Loan_Type.findOne({
+          loantype_id: loantype_id,
+        });
+        if (loan_type_data) {
+          data[i].loan_type = loan_type_data.loan_type;
+        }
+      }
+    }
+
+    const count = data.length;
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      username: username, // Return username directly here
+      count: count,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 });

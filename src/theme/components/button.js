@@ -44,9 +44,9 @@ export const buttonStyles = {
         }),
         dark: (props) => ({
           color: "white",
-          bg: mode("gray.700", "blue.500")(props),
+          bg: mode("gray.700", "#b19552")(props),
           fontSize: "10px",
-          _hover: { bg: mode("gray.700", "blue.500")(props) },
+          _hover: { bg: mode("gray.700", "#b19552")(props) },
           _focus: { bg: mode("gray.700", "blue.600")(props) },
           _active: { bg: mode("gray.700", "blue.400")(props) },
         }),

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 import {
   Button,
   useColorModeValue,
@@ -69,12 +69,51 @@ function Row(props) {
   useEffect(() => {
     fetchFileData();
   }, [file]);
+  useEffect(() => {
+    $(".progress").each(function () {
+      var value = parseInt($(this).attr("data-value"));
+      var progressBars = $(this).find(".progress-bar");
+
+      progressBars.removeClass("red yellow purple blue green");
+
+      if (value >= 0 && value < 20) {
+        progressBars.addClass("red");
+      } else if (value >= 20 && value < 40) {
+        progressBars.addClass("yellow");
+      } else if (value >= 40 && value < 60) {
+        progressBars.addClass("purple");
+      } else if (value >= 60 && value < 80) {
+        progressBars.addClass("blue");
+      } else if (value >= 80 && value <= 100) {
+        progressBars.addClass("green");
+      }
+
+      if (value <= 50) {
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      } else {
+        progressBars.eq(1).css("transform", "rotate(180deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
+      }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
+    });
+  }, [filePercentageData]);
 
   return (
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() => props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)}
+        onClick={() =>
+          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
+        }
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -89,7 +128,7 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="">{file?.user_username}</TableCell>
+        <TableCell align="">{file?.username}</TableCell>
         <TableCell align="">{file?.file_id}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">{file?.loan_type || "-"}</TableCell>
@@ -232,60 +271,35 @@ export default function CollapsibleTable() {
   const handleRow = (url) => {
     history.push(url);
   };
+
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
-      try {
-        const response = await AxiosInstance.get("/file_upload");
-        setFiles(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching files:", error);
+      if (accessType.branchuser_id) {
+        try {
+          const response = await AxiosInstance.get(
+            `/branch_assign/branch_user/${accessType.branchuser_id}`
+          );
+          setFiles(response.data.data);
+          console.log(response.data.data, "response.data.data");
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching files:", error);
+        }
       }
     };
 
     fetchFiles();
-  }, []);
+  }, [accessType]);
 
-  $(function () {
-    $(".progress").each(function () {
-      var value = parseInt($(this).attr("data-value"));
-      var progressBars = $(this).find(".progress-bar");
-
-      progressBars.removeClass("red yellow purple blue green");
-
-      if (value >= 0 && value < 20) {
-        progressBars.addClass("red");
-      } else if (value >= 20 && value < 40) {
-        progressBars.addClass("yellow");
-      } else if (value >= 40 && value < 60) {
-        progressBars.addClass("purple");
-      } else if (value >= 60 && value < 80) {
-        progressBars.addClass("blue");
-      } else if (value >= 80 && value <= 100) {
-        progressBars.addClass("green");
-      }
-
-      if (value <= 50) {
-        progressBars
-          .eq(1)
-          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
-      } else {
-        progressBars.eq(1).css("transform", "rotate(180deg)");
-        progressBars
-          .eq(0)
-          .css(
-            "transform",
-            "rotate(" + percentageToDegrees(value - 50) + "deg)"
-          );
-      }
-    });
-
-    function percentageToDegrees(percentage) {
-      return (percentage / 100) * 360;
-    }
-  });
+ 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
@@ -301,7 +315,7 @@ export default function CollapsibleTable() {
     }
   };
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
   const handleDelete = (id) => {
     setSelectedFileId(id);
@@ -315,7 +329,7 @@ export default function CollapsibleTable() {
       >
         <CardHeader style={{ padding: "30px" }}>
           <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext">
+            <Text fontSize="xl" fontWeight="bold" className="ttext text-dark">
               Add Files
             </Text>
             <div>
@@ -329,7 +343,7 @@ export default function CollapsibleTable() {
 
               <Button
                 onClick={() => history.push("/savajcapitaluser/adduserfile")}
-                colorScheme="blue"
+                style={{ border:"2px solid #b19552" }}
               >
                 Add File
               </Button>
@@ -341,7 +355,7 @@ export default function CollapsibleTable() {
             <Flex justify="center" align="center" height="100vh">
               <Loader
                 type="spinner-circle"
-                bgColor={"#3182CE"}
+                bgColor={"#b19552"}
                 color={"black"}
                 size={50}
               />

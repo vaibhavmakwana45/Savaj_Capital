@@ -33,7 +33,7 @@ import TablesTableRow from "components/Tables/TablesTableRow";
 import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-import "./user.css"
+import "./user.css";
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -66,51 +66,133 @@ function UserTable() {
   const filteredUsers =
     searchTerm.length === 0
       ? users
-      : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+      : users.filter((user) => {
+          const searchTermLower = searchTerm.toLowerCase();
+          const usernameIncludes = user.username
+            .toLowerCase()
+            .includes(searchTermLower);
+          const emailIncludes = user.email
+            .toLowerCase()
+            .includes(searchTermLower);
+          const numberIncludes = user.number
+            .toLowerCase()
+            .includes(searchTermLower);
+          const aadharCardIncludes = user.aadhar_card
+            .toString()
+            .includes(searchTermLower); // Directly include Aadhar card in search logic
+          const panCardIncludes =
+            typeof user.pan_card === "string" &&
+            user.pan_card.toLowerCase().includes(searchTermLower);
+
+          return (
+            usernameIncludes ||
+            emailIncludes ||
+            numberIncludes ||
+            aadharCardIncludes ||
+            panCardIncludes
+          );
+        });
+
+  const getCibilScoreCategory = (score) => {
+    if (score >= 300 && score <= 499) {
+      return "Poor";
+    } else if (score >= 500 && score <= 649) {
+      return "Average";
+    } else if (score >= 650 && score <= 749) {
+      return "Good";
+    } else if (score >= 750 && score <= 900) {
+      return "Excellent";
+    } else {
+      return "-";
+    }
+  };
+
+  const getBackgroundColor = (category) => {
+    switch (category) {
+      case "Poor":
+        return "#FFCCCC"; // Light red
+      case "Average":
+        return "#FFF8CC"; // Light yellow
+      case "Good":
+        return "#E5FFCC"; // Light green
+      case "Excellent":
+        return "#CCE5FF"; // Light blue
+      default:
+        return "transparent";
+    }
+  };
+
+  const getTextColor = (category) => {
+    switch (category) {
+      case "Poor":
+        return "#990000";
+      default:
+        return "black";
+    }
+  };
 
   const allHeaders = [
     "Name",
-    "Email",
     "Number",
-    "CreatedAt",
-    "UpdatedAt",
+    "Aadhar Card",
+    "Pan Card",
+    "Cibil Score",
+    "create",
+    "update",
+    "CS Status",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
     item.username,
-    item.email,
     item.number,
+    item.aadhar_card,
+    item.pan_card,
+    item.cibil_score,
     item.createdAt,
     item.updatedAt,
+    <Flex
+      alignItems="center"
+      backgroundColor={getBackgroundColor(
+        getCibilScoreCategory(item.cibil_score)
+      )}
+      color={getTextColor(getCibilScoreCategory(item.cibil_score))}
+      padding="0.5rem"
+      borderRadius="0.5rem"
+    >
+      {getCibilScoreCategory(item.cibil_score)}
+    </Flex>,
   ]);
 
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
+    console.log("id", id);
   };
 
   const handleEdit = (id) => {
     history.push("/superadmin/adduser?id=" + id);
   };
 
-  const handleRow = (id) => {
-  };
+  const handleRow = (id) => {};
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const cancelRef = React.useRef();
   const deletebranch = async (userId) => {
     try {
-      await AxiosInstance.delete(`/addusers/deleteuser/${userId}`);
-      setUsers(users.filter((user) => user.user_id !== userId));
-      setIsDeleteDialogOpen(false);
-      toast.success("User deleted successfully!");
+      const response = await AxiosInstance.delete(
+        `/addusers/deleteuser/${userId}`
+      );
+
+      if (response.data.success) {
+        setIsDeleteDialogOpen(false);
+        toast.success("User deleted successfully!");
+        setUsers(users.filter((user) => user.user_id !== userId));
+      } else if (response.data.statusCode === 201) {
+        toast.error(response.data.message);
+        setIsDeleteDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("user not delete");
@@ -122,9 +204,14 @@ function UserTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between"  className="thead">
-              <Text fontSize="xl" color={textColor} fontWeight="bold" className="ttext">
-                All Users
+            <Flex justifyContent="space-between" className="thead">
+              <Text
+                fontSize="xl"
+                color={textColor}
+                fontWeight="bold"
+                className="ttext"
+              >
+                All Customers
               </Text>
               <Flex className="thead">
                 <Input
@@ -137,15 +224,16 @@ function UserTable() {
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
-                  className="adduser-btn"
+                  className="buttonss"
+                  style={{background: "#b19552"}}
                 >
-                  Add User
+                  Add Customer
                 </Button>
               </Flex>
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
+            {/* <TableComponent
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
@@ -154,6 +242,26 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               handleRow={handleRow}
+              collapse={true}
+            /> */}
+            <TableComponent
+              // documents={documents}
+              data={formattedData}
+              textColor={textColor}
+              borderColor={borderColor}
+              loading={loading}
+              allHeaders={allHeaders}
+              handleRow={handleRow}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              collapse={true}
+              showPagination={true}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
+              name={"Created At:"}
+              name2={"Updated At:"}
             />
           </CardBody>
         </Card>
