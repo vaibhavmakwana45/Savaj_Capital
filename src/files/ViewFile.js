@@ -71,7 +71,6 @@ const FileDisplay = ({ groupedFiles }) => {
         style={{ overflow: "auto" }}
       >
         <ul className="breadcrumb">
-   
           {Object.entries(groupedFiles).map(([title, files], index) => (
             <li key={title} className="breadcrumb-item">
               <a
@@ -452,7 +451,7 @@ function ViewFile() {
       ) : (
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-            <CardBody style={{ padding: "40px", }} className="cardss">
+            <CardBody style={{ padding: "40px" }} className="cardss">
               <FormLabel
                 className="mb-2 back-responsive ttext"
                 style={{ fontSize: "20px" }}

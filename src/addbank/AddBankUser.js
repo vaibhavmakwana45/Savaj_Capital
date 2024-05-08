@@ -99,7 +99,7 @@ function AddBankUser() {
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
           email: userDetails.email,
-          password: "",
+          password: userDetails.password,
           country_code: bankDetails.country_code,
           state_code: bankDetails.state_code,
         };
@@ -228,8 +228,11 @@ function AddBankUser() {
       } else {
         const response = await AxiosInstance.post("/bank_user", submissionData);
 
+        console.log(response.data, "shivam")
         if (response.data?.statusCode === 201) {
           toast.error("Email already in use");
+        } else if (response.data.statusCode === 202) {
+          toast.error(response.data.message);
         } else if (response.data.success) {
           const msg = "Bank and User added successfully";
           toast.success(msg);
@@ -425,6 +428,17 @@ function AddBankUser() {
                   type="number"
                   onChange={handleChange}
                   value={formData.emergancy_contact}
+                />
+              </FormControl>
+
+
+              <FormControl id="password" mt={4}>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="password"
+                  onChange={handleChange}
+                  value={formData.password}
                 />
               </FormControl>
 

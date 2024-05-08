@@ -826,7 +826,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (step.loan_step === "Cibil") {
         try {
           const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_cibil_score/${file_id}`
+            `http://localhost:5882/api/file_upload/get_cibil_score/${file_id}`
           );
           steps.push(res.data.data);
         } catch (error) {
@@ -835,7 +835,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       } else if (step.loan_step === "Bank A/C Open") {
         try {
           const res = await axios.get(
-            `https://admin.savajcapital.com/api/ibd_account/get_account/${file_id}`
+            `http://localhost:5882/api/ibd_account/get_account/${file_id}`
           );
           steps.push(res.data.data);
         } catch (error) {
@@ -844,7 +844,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       } else if (step.loan_step === "Documents") {
         try {
           const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
           );
           steps.push(res.data.data);
         } catch (error) {

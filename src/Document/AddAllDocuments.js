@@ -36,12 +36,11 @@ function AddAllDocuments() {
   const getDocumentData = async () => {
     try {
       const response = await AxiosInstance.get("/document");
-
       if (response.data.success) {
         setDocuments(response.data.data);
         setLoading(false);
-      } else {
-        alert("Please try again later...!");
+      } else if (response.data.statusCode === 201) {
+        setLoading(false);
       }
     } catch (error) {
       setLoading(false);

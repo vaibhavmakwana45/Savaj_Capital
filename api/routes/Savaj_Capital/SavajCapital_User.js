@@ -21,17 +21,45 @@ const encrypt = (text) => {
   return encrypted;
 };
 
+// const decrypt = (text) => {
+//   const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+//   let decrypted = decipher.update(text, "hex", "utf-8");
+//   decrypted += decipher.final("utf-8");
+//   return decrypted;
+// };
+
 const decrypt = (text) => {
-  const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
-  let decrypted = decipher.update(text, "hex", "utf-8");
-  decrypted += decipher.final("utf-8");
-  return decrypted;
+  // Check if the text contains hexadecimal characters (indicative of encryption)
+  const isEncrypted = /[0-9A-Fa-f]{6}/.test(text);
+
+  // If the text is encrypted, decrypt it
+  if (isEncrypted) {
+    const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+    let decrypted = decipher.update(text, "hex", "utf-8");
+    decrypted += decipher.final("utf-8");
+    return decrypted;
+  } else {
+    // If the text is not encrypted, return it as is
+    return text;
+  }
 };
 
 router.post("/", async (req, res) => {
   try {
     let findEmail = await SavajCapital_User.findOne({
       email: req.body.email,
+    });
+
+    let findMobileNumber = await SavajCapital_User.findOne({
+      number: req.body.number,
+    });
+
+    const numberExistsInBankUser = await BankUser.findOne({
+      mobile: req.body.number,
+    });
+
+    const userNumberExists = await AddUser.findOne({
+      number: req.body.number,
     });
 
     const user = await AddUser.findOne({ email: req.body.email });
@@ -44,9 +72,16 @@ router.post("/", async (req, res) => {
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
+    if (findMobileNumber || numberExistsInBankUser || userNumberExists) {
+      return res
+        .status(200)
+        .send({ statusCode: 202, message: "Mobile number already in use" });
+    }
+
     // if (!findEmail || !user || !bankUser || !superAdmin) {
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
+    const hashedPassword = encrypt(req.body.password);
 
     req.body["branchuser_id"] = uniqueId;
     req.body["createdAt"] = moment()
@@ -55,13 +90,12 @@ router.post("/", async (req, res) => {
     req.body["updatedAt"] = moment()
       .utcOffset(330)
       .format("YYYY-MM-DD HH:mm:ss");
-
-    req.body.password = "";
+    req.body["password"] = hashedPassword;
 
     var data = await SavajCapital_User.create(req.body);
 
     const ApiResponse = await axios.post(
-      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
+      `http://localhost:5882/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }
@@ -129,10 +163,13 @@ router.put("/:branchuser_id", async (req, res) => {
     const { branchuser_id } = req.params;
 
     // Ensure that updatedAt field is set
+    const hashedPassword = encrypt(req.body.password);
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-    if (!req.body.password) {
-      delete req.body.password;
-    }
+    req.body.password = hashedPassword;
+
+    // if (!req.body.password) {
+    //   delete req.body.password;
+    // }
     const result = await SavajCapital_User.findOneAndUpdate(
       { branchuser_id: branchuser_id },
       { $set: req.body },
@@ -212,6 +249,13 @@ router.get("/user/:branchuser_id", async (req, res) => {
         $sort: { updatedAt: -1 },
       },
     ]);
+
+    // const hashedPassword = decrypt(data[0]?.password);
+
+    for (let i = 0; i < data.length; i++) {
+      const decryptedPassword = decrypt(data[i]?.password);
+      data[i].password = decryptedPassword;
+    }
 
     const branch = await SavajCapital_Branch.findOne({
       branchuser_id: data.branchuser_id,

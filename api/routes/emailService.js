@@ -58,8 +58,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true for 465 (SSL), false for other ports like 587 (TLS/STARTTLS)
   auth: {
-    user: 'mailto:no-reply@savajcapital.com',
-    pass: 'mailto:aapp@00.com',
+    user: 'no-reply@savajcapital.com',
+    pass: 'AApp@00.com',
   },
   tls: {
     rejectUnauthorized: false // This bypasses SSL certificate validation (use cautiously)
@@ -68,7 +68,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendWelcomeEmail(toEmail, subject, htmlContent) {
   const info = await transporter.sendMail({
-    from: '"Savaj Capital" <mailto:no-reply@savajcapital.com>',
+    from: '"Savaj Capital" <no-reply@savajcapital.com>',
     to: toEmail,
     subject: subject,
     html: htmlContent,

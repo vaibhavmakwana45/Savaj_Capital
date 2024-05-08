@@ -87,7 +87,7 @@ router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
 
     const data = await Loan_Documents.aggregate([
       {
-        $match: { loan_id: loan_id },
+        $match: { loan_id: loan_id, loantype_id: loantype_id },
       },
       {
         $addFields: {
