@@ -5,6 +5,7 @@ const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
 const Loan = require("../../models/Loan/Loan");
 const File_Uplode = require("../../models/File/File_Uplode");
+const { default: axios } = require("axios");
 
 // Post Loan-Step
 router.post("/", async (req, res) => {
@@ -139,19 +140,30 @@ router.get("/get_steps/:file_id", async (req, res) => {
     const steps = [];
 
     for (const loan_step_id of loan.loan_step_id) {
-      const compelete_step = await Compelete_Step.findOne({
-        loan_step_id,
-        file_id,
-      });
-      if (compelete_step) {
-        steps.push(compelete_step);
+      if (loan_step_id === "1715149246513") {
+        try {
+          const res = await axios.get(
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+          );
+          steps.push(res.data.data);
+        } catch (error) {
+          console.error("Error: ", error.message);
+        }
       } else {
-        const step = await Loan_Step.findOne({ loan_step_id });
-        const inputs = step.inputs;
-        const isActive = inputs.some((input) => input.is_required);
-        const status = isActive ? "active" : "complete";
+        const compelete_step = await Compelete_Step.findOne({
+          loan_step_id,
+          file_id,
+        });
+        if (compelete_step) {
+          steps.push(compelete_step);
+        } else {
+          const step = await Loan_Step.findOne({ loan_step_id });
+          const inputs = step.inputs;
+          const isActive = inputs.some((input) => input.is_required);
+          const status = isActive ? "active" : "complete";
 
-        steps.push({ ...step.toObject(), status });
+          steps.push({ ...step.toObject(), status });
+        }
       }
     }
 
