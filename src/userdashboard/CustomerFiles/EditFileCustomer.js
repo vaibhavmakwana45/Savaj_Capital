@@ -457,6 +457,13 @@ function EditFileCustomer() {
                             <div
                               key={`${title_id}-${index}-${innerIndex}`}
                               className="upload-area col-xl-12 col-md-12 col-sm-12"
+                              onClick={() => {
+                                document
+                                  .getElementById(
+                                    `fileInput-${title_id}-${index}-${innerIndex}`
+                                  )
+                                  .click();
+                              }}
                             >
                               <Text
                                 fontSize="xl"
@@ -578,13 +585,17 @@ function EditFileCustomer() {
                                       alignItems: "center",
                                       justifyContent: "center",
                                       flexDirection: "column",
+                                      border: "2px dashed rgb(171, 202, 255)",
+                                      borderRadius: "15px",
+                                      marginTop: "25px",
+                                      cursor: "pointer",
                                     }}
                                   >
                                     <span className="drop-zone__icon">
                                       <i className="bx bxs-file-image"></i>
                                     </span>
                                     <p className="drop-zone__paragraph">
-                                      Drop your file here or click to browse
+                                    Upload Your Documents
                                     </p>
                                   </div>
                                 )}

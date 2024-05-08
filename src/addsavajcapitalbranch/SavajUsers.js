@@ -211,7 +211,8 @@ function Tables() {
                 </Button>
                 <Button
                   onClick={navigateToAnotherPage}
-                  style={{
+                colorScheme="blue"
+                    style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
                   }}
