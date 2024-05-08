@@ -223,6 +223,7 @@ function AllStep() {
                   onClick={() => {
                     setIsStep(true);
                   }}
+                  colorScheme="blue"
                   style={{
                     backgroundColor: "#b19552",
                     color: "#fff",

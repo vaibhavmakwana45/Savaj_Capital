@@ -50,11 +50,9 @@ function EditSavajCapitalBranch() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await AxiosInstance.get(
-          "/branch/" + id
-        );
+        const response = await AxiosInstance.get("/branch/" + id);
         if (response.data.success) {
-          setDetails(response.data.data)
+          setDetails(response.data.data);
         } else {
           toastInstance({
             title: "An error occurred",
@@ -85,7 +83,7 @@ function EditSavajCapitalBranch() {
     setDetails((prevDetails) => ({
       ...prevDetails,
       state: stateObj.name,
-      city: "", 
+      city: "",
     }));
   };
 
@@ -114,10 +112,7 @@ function EditSavajCapitalBranch() {
     e.preventDefault();
 
     try {
-      const response = await AxiosInstance.put(
-        `/branch/${id}`,
-        details
-      );
+      const response = await AxiosInstance.put(`/branch/${id}`, details);
       if (response.data.success) {
         toast.success("Details Updated", {
           duration: 5000,
@@ -190,8 +185,26 @@ function EditSavajCapitalBranch() {
                   onChange={handleSavajCapitalBranchChange}
                 />
               </FormControl>
+              <FormControl isRequired mb={3}>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  placeholder="Password"
+                  name="password"
+                  type="password"
+                  value={details.password}
+                  onChange={handleSavajCapitalBranchChange}
+                />
+              </FormControl>
 
-              <Button mt={4} colorScheme="teal" type="submit">
+              <Button
+                mt={4}
+                colorScheme="teal"
+                type="submit"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
                 Update Details
               </Button>
             </form>

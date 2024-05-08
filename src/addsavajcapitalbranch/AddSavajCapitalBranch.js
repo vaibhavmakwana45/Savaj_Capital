@@ -96,6 +96,16 @@ function AddSavajCapitalBranch() {
     }
   };
 
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "mobile" && /^\d{0,10}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -143,10 +153,16 @@ function AddSavajCapitalBranch() {
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Input name="branch_name" onChange={handleChange} />
               </FormControl>
-              <FormControl id="mobile" isRequired mt={4}>
+              <FormControl id="mobile" mt={4} isRequired>
                 <FormLabel>Branch Mobile</FormLabel>
-                <Input name="mobile" onChange={handleChange} />
-              </FormControl>{" "}
+                <Input
+                  name="mobile"
+                  type="number"
+                  value={formData.mobile}
+                  onChange={handlePhoneChange}
+                  placeholder="Enter your Number"
+                />
+              </FormControl>
               <FormControl id="email" isRequired mt={4}>
                 <FormLabel>Branch Email</FormLabel>
                 <Input name="email" onChange={handleChange} />

@@ -148,7 +148,6 @@ const FileDisplay = ({ groupedFiles }) => {
               >
                 {files.map((file, idx) => (
                   <div className="accordion-body" key={idx}>
-                    {/* Render your file content here */}
                     <p className="mb-3">{file.document_name}</p>
                     {file.file_path.endsWith(".pdf") ? (
                       <iframe
@@ -401,7 +400,26 @@ function ViewFile() {
       </Flex>
     );
   }
-
+  function copyText(elementId) {
+    var textToCopy = document.getElementById(elementId).innerText;
+    var tempInput = document.createElement("input");
+    tempInput.setAttribute("value", textToCopy);
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    var messageElement = document.createElement("div");
+    messageElement.innerText = "Copied!";
+    messageElement.style.color = "green";
+    var clickedSpan = document.getElementById(elementId);
+    clickedSpan.parentNode.insertBefore(
+      messageElement,
+      clickedSpan.nextSibling
+    );
+    setTimeout(function () {
+      messageElement.parentNode.removeChild(messageElement);
+    }, 2000);
+  }
   return (
     <div>
       {loading ? (
@@ -490,14 +508,29 @@ function ViewFile() {
                           <br />
                         </div>
                         <div className="col-md-6">
-                          <strong>Gst Number:</strong>{" "}
-                          {fileData?.user?.gst_number || "N/A"}
+                          <strong id="gstNumber">Gst Number:</strong>{" "}
+                          <span
+                            id="gstNumberText"
+                            onClick={() => copyText("gstNumberText")}
+                          >
+                            {fileData?.user?.gst_number || "N/A"}
+                          </span>
                           <br />
-                          <strong>PAN Card:</strong>{" "}
-                          {fileData?.user?.pan_card || "N/A"}
+                          <strong id="panCard">PAN Card:</strong>{" "}
+                          <span
+                            id="panCardText"
+                            onClick={() => copyText("panCardText")}
+                          >
+                            {fileData?.user?.pan_card || "N/A"}
+                          </span>
                           <br />
-                          <strong>Aadhar Card:</strong>{" "}
-                          {fileData?.user?.aadhar_card || "N/A"}
+                          <strong id="aadharCard">Aadhar Card:</strong>{" "}
+                          <span
+                            id="aadharCardText"
+                            onClick={() => copyText("aadharCardText")}
+                          >
+                            {fileData?.user?.aadhar_card || "N/A"}
+                          </span>
                           <br />
                         </div>
                       </div>

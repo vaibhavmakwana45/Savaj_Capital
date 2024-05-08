@@ -21,11 +21,27 @@ const encrypt = (text) => {
   return encrypted;
 };
 
+// const decrypt = (text) => {
+//   const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+//   let decrypted = decipher.update(text, "hex", "utf-8");
+//   decrypted += decipher.final("utf-8");
+//   return decrypted;
+// };
+
 const decrypt = (text) => {
-  const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
-  let decrypted = decipher.update(text, "hex", "utf-8");
-  decrypted += decipher.final("utf-8");
-  return decrypted;
+  // Check if the text contains hexadecimal characters (indicative of encryption)
+  const isEncrypted = /[0-9A-Fa-f]{6}/.test(text);
+
+  // If the text is encrypted, decrypt it
+  if (isEncrypted) {
+    const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+    let decrypted = decipher.update(text, "hex", "utf-8");
+    decrypted += decipher.final("utf-8");
+    return decrypted;
+  } else {
+    // If the text is not encrypted, return it as is
+    return text;
+  }
 };
 
 const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
@@ -95,6 +111,10 @@ router.post("/adduserbyadmin", async (req, res) => {
       number: userDetails.number,
     });
 
+    let findMobileNumber = await SavajCapital_User.findOne({
+      number: userDetails.number,
+    });
+
     const userAdharExists = await AddUser.findOne({
       aadhar_card: userDetails.aadhar_card,
     });
@@ -103,13 +123,17 @@ router.post("/adduserbyadmin", async (req, res) => {
       pan_card: userDetails.pan_card,
     });
 
+    const numberExistsInBankUser = await BankUser.findOne({
+      mobile: userDetails.number,
+    });
+
     if (bankUser || superAdmin || user || savajCapital_user) {
       return res
         .status(200)
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
-    if (userNumberExists) {
+    if (userNumberExists || numberExistsInBankUser || findMobileNumber) {
       return res
         .status(200)
         .send({ statusCode: 204, message: "Mobile number already in use" });
@@ -127,7 +151,7 @@ router.post("/adduserbyadmin", async (req, res) => {
         .send({ statusCode: 202, message: "Aadhar Card already in use" });
     }
 
-    // const hashedPassword = encrypt(userDetails.password);
+    const hashedPassword = encrypt(userDetails.password);
     const status = req.body.cibil_score === "" ? "active" : "complete";
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substr(2, 9);
@@ -141,13 +165,14 @@ router.post("/adduserbyadmin", async (req, res) => {
       user_id: userId,
       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
-      password: "",
+      // password: "",
+      password: hashedPassword,
       status: status,
     });
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://admin.savajcapital.com/api/setpassword/passwordmail`,
+      `http://localhost:5882/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }
@@ -253,6 +278,10 @@ router.put("/edituser/:userId", async (req, res) => {
 
   try {
     const status = req.body.cibil_score === "" ? "active" : "complete";
+    const hashedPassword = encrypt(req.body.password);
+
+    req.body.password = hashedPassword;
+
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
       { ...updates, status },
@@ -335,6 +364,9 @@ router.get("/user/:user_id", async (req, res) => {
         .send({ statusCode: 201, message: "User not found" });
     }
 
+    const passwordDecrypt = decrypt(user?.password);
+    user.password = passwordDecrypt;
+
     res.json({
       success: true,
       user,
@@ -370,6 +402,8 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
       });
     }
 
+    const passwordDecrypt = decrypt(bankUser?.password);
+
     const bankDetails = {
       bank_name: bankData.bank_name,
       country: bankData.country,
@@ -382,8 +416,9 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
     };
 
     const userDetails = {
+      bankuser_name: bankUser.bankuser_name,
       email: bankUser.email,
-      password: bankUser.password,
+      password: passwordDecrypt,
       bankuser_id: bankUser.bankuser_id,
       bank_id: bankUser.bank_id,
       adress: bankUser.adress,
