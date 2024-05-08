@@ -52,7 +52,6 @@ function Document() {
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
   const [inputIndex, setInputIndex] = useState("");
 
-
   const openTitleModal = (documentId) => {
     setSelectedDocumentId(documentId);
     setIsTitleModalOpen(true);

@@ -65,6 +65,10 @@ const UserSchema = new mongoose.Schema({
   updatedAt: {
     type: String,
   },
+  isActivate: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 module.exports = mongoose.model("AllUser", UserSchema);

@@ -5,6 +5,7 @@ import {
   Text,
   useColorModeValue,
   Input,
+  Checkbox,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -22,6 +23,8 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import axios from "axios";
+import { CloseIcon } from "@chakra-ui/icons";
+import { Form } from "reactstrap";
 
 function AllStep() {
   const [steps, setSteps] = useState([]);
@@ -41,7 +44,7 @@ function AllStep() {
         setSteps(response.data.data);
         setLoading(false);
       } else {
-        alert("Please try again later...!");
+        // alert("Please try again later...!");
       }
     } catch (error) {
       setLoading(false);
@@ -112,6 +115,7 @@ function AllStep() {
     try {
       const response = await AxiosInstance.post("/loan_step", {
         loan_step,
+        inputs,
       });
       if (response.data.success) {
         toast.success("Document added successfully!");
@@ -153,6 +157,41 @@ function AllStep() {
     }
   };
 
+  const [inputIndex, setInputIndex] = useState(1);
+  const [inputs, setInputs] = useState([
+    { type: "input", value: "", is_required: false, label: "" },
+  ]);
+  const [inputLabels, setInputLabels] = useState([""]);
+  const [checkboxLabels, setCheckboxLabels] = useState(["Checkbox"]);
+
+  const handleRemoveInput = (indexToRemove) => {
+    setInputs((prevInputs) =>
+      prevInputs.filter((_, index) => index !== indexToRemove)
+    );
+    setInputLabels((prevLabels) =>
+      prevLabels.filter((_, index) => index !== indexToRemove)
+    );
+    setCheckboxLabels((prevLabels) =>
+      prevLabels.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+  const handleCheckboxLabelChange = (index, newValue) => {
+    setInputs((prevInputs) =>
+      prevInputs.map((item, i) =>
+        i === index ? { ...item, label: newValue } : item
+      )
+    );
+  };
+
+  const handleFileLabelChange = (index, newValue) => {
+    setInputs((prevInputs) =>
+      prevInputs.map((item, i) =>
+        i === index ? { ...item, label: newValue } : item
+      )
+    );
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -180,9 +219,11 @@ function AllStep() {
                   marginRight="10px"
                 />
                 <Button
+                  colorScheme="blue"
                   onClick={() => {
                     setIsStep(true);
                   }}
+              
                   style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
@@ -249,72 +290,227 @@ function AllStep() {
             setSelectedStepId("");
           }}
         >
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Add Step
-              </AlertDialogHeader>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (selectedStepId) {
+                editStep(selectedStep);
+              } else {
+                handleAddStep(step, inputs);
+              }
+            }}
+          >
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Add Step
+                </AlertDialogHeader>
 
-              <AlertDialogBody>
-                <FormControl id="step" isRequired>
-                  <Input
-                    name="step"
-                    onChange={(e) => {
-                      selectedStepId == ""
-                        ? setStep(e.target.value)
-                        : setSelectedStep(e.target.value);
-                    }}
-                    value={selectedStepId == "" ? step : selectedStep}
-                    placeholder="Add step"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        if (selectedStepId) {
-                          editStep(selectedStep);
-                        } else {
-                          handleAddStep(step);
-                        }
-                      }
-                    }}
-                  />
-                </FormControl>
-              </AlertDialogBody>
+                <AlertDialogBody>
+                  <FormControl id="step">
+                    <Input
+                      required
+                      name="step"
+                      onChange={(e) => {
+                        selectedStepId == ""
+                          ? setStep(e.target.value)
+                          : setSelectedStep(e.target.value);
+                      }}
+                      value={selectedStepId == "" ? step : selectedStep}
+                      placeholder="Add step"
+                    />
+                  </FormControl>
 
-              <AlertDialogFooter>
-                <Button
-                  ref={cancelRef}
-                  onClick={() => {
-                    setIsStep(false);
-                    setSelectedStepId("");
-                  }}
-                  style={{
-                    backgroundColor: "#414650",
-                    color: "#fff",
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  colorScheme="blue"
-                  onClick={() => {
-                    if (selectedStepId) {
-                      editStep(selectedStep);
-                    } else {
-                      handleAddStep(step);
-                    }
-                  }}
-                  ml={3}
-                  type="submit"
-                  style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
-                  }}
-                >
-                  {selectedStepId ? "Update Now" : "Add Now"}
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
+                  {inputs.map((input, index) => (
+                    <FormControl
+                      key={index}
+                      id="step"
+                      className="d-flex row justify-content-between align-items-center mt-4"
+                    >
+                      <div className="col-9">
+                        {input.type === "input" ? (
+                          <Input
+                            name="step"
+                            required
+                            onChange={(e) => {
+                              const newValue = e.target.value;
+                              setInputs((prevInputs) =>
+                                prevInputs.map((item, i) =>
+                                  i === index
+                                    ? { ...item, label: newValue }
+                                    : item
+                                )
+                              );
+                            }}
+                            value={input.label}
+                            placeholder="Enter Field Name"
+                          />
+                        ) : input.type === "checkbox" ? (
+                          <div className="row align-items-center">
+                            <div className="col">
+                              <Checkbox checked={input.value} disabled>
+                                {checkboxLabels[index]}
+                              </Checkbox>
+                            </div>
+                            <div className="col">
+                              <FormControl id="step">
+                                <Input
+                                  required
+                                  value={input.label}
+                                  onChange={(e) =>
+                                    handleCheckboxLabelChange(
+                                      index,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Enter Checkbox Label"
+                                />
+                              </FormControl>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="row align-items-center">
+                            <div className="col">
+                              <Input type="file" disabled />
+                            </div>
+                            <div className="col">
+                              <FormControl id="step">
+                                <Input
+                                  required
+                                  value={input.label}
+                                  onChange={(e) =>
+                                    handleFileLabelChange(index, e.target.value)
+                                  }
+                                  placeholder="Enter File Label"
+                                />
+                              </FormControl>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="col-3 d-flex justify-content-between align-items-center">
+                        <Checkbox
+                          onChange={(e) => {
+                            setInputs((prevInputs) =>
+                              prevInputs.map((input, i) =>
+                                i === index
+                                  ? {
+                                      ...input,
+                                      is_required: !input.is_required,
+                                    }
+                                  : input
+                              )
+                            );
+                          }}
+                          checked={input.is_required}
+                        >
+                          Required
+                        </Checkbox>
+                        <CloseIcon
+                          className="mx-2"
+                          cursor="pointer"
+                          color="red"
+                          onClick={() => handleRemoveInput(index)}
+                        />
+                      </div>
+                    </FormControl>
+                  ))}
+
+                  <FormControl
+                    id="step"
+                    className="mt-4 d-flex justify-content-between"
+                  >
+                    <Button
+                      colorScheme="yellow"
+                      color="white"
+                      onClick={() => {
+                        setInputs((prevInputs) => [
+                          ...prevInputs,
+                          { type: "input", value: "", is_required: false },
+                        ]);
+                        setInputLabels((prevLabels) => [
+                          ...prevLabels,
+                          "Checkbox",
+                        ]);
+                        setInputIndex(inputIndex + 1);
+                      }}
+                    >
+                      Add Text Box
+                    </Button>
+                    <Button
+                      colorScheme="yellow"
+                      className="mx-2"
+                      color="white"
+                      onClick={() => {
+                        setInputs((prevInputs) => [
+                          ...prevInputs,
+                          {
+                            type: "checkbox",
+                            value: false,
+                            is_required: false,
+                          },
+                        ]);
+                        setCheckboxLabels((prevLabels) => [
+                          ...prevLabels,
+                          "Checkbox",
+                        ]);
+                        setInputIndex(inputIndex + 1);
+                      }}
+                    >
+                      Add Check Box
+                    </Button>
+                    <Button
+                      colorScheme="yellow"
+                      className="mx-2"
+                      color="white"
+                      onClick={() => {
+                        setInputs((prevInputs) => [
+                          ...prevInputs,
+                          {
+                            type: "file",
+                            value: "",
+                            is_required: false,
+                          },
+                        ]);
+                        setInputLabels((prevLabels) => [...prevLabels, ""]);
+                        setInputIndex(inputIndex + 1);
+                      }}
+                    >
+                      Add File Input
+                    </Button>
+                  </FormControl>
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button
+                    colorScheme="blue"
+                    ref={cancelRef}
+                    onClick={() => {
+                      setIsStep(false);
+                      setSelectedStepId("");
+                    }}
+                    style={{
+                      backgroundColor: "#414650",
+                      color: "#fff",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme="blue"
+                    ml={3}
+                    type="submit"
+                    style={{
+                      backgroundColor: "#b19552",
+                      color: "#fff",
+                    }}
+                  >
+                    {selectedStepId ? "Update Now" : "Add Now"}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </Form>
         </AlertDialog>
       </Flex>
       <Toaster />

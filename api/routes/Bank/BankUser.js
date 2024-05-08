@@ -15,6 +15,36 @@ const File_Uplode = require("../../models/File/File_Uplode");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 
+const encrypt = (text) => {
+  const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
+  let encrypted = cipher.update(text, "utf-8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
+};
+
+// const decrypt = (text) => {
+//   const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+//   let decrypted = decipher.update(text, "hex", "utf-8");
+//   decrypted += decipher.final("utf-8");
+//   return decrypted;
+// };
+
+const decrypt = (text) => {
+  // Check if the text contains hexadecimal characters (indicative of encryption)
+  const isEncrypted = /[0-9A-Fa-f]{6}/.test(text);
+
+  // If the text is encrypted, decrypt it
+  if (isEncrypted) {
+    const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+    let decrypted = decipher.update(text, "hex", "utf-8");
+    decrypted += decipher.final("utf-8");
+    return decrypted;
+  } else {
+    // If the text is not encrypted, return it as is
+    return text;
+  }
+};
+
 router.post("/", async (req, res) => {
   try {
     let savajUser = await SavajCapital_User.findOne({
@@ -31,12 +61,35 @@ router.post("/", async (req, res) => {
         message: `${req.body.branch_name} Name Already Added`,
       });
     }
+    // Number find in savaj-capital user
+    let findMobileNumber = await SavajCapital_User.findOne({
+      number: req.body.mobile,
+    });
+
+    // Number find in Bank user
+    const numberExistsInBankUser = await BankUser.findOne({
+      mobile: req.body.mobile,
+    });
+
+    // Number find in Add user
+    const userNumberExists = await AddUser.findOne({
+      number: req.body.mobile,
+    });
+
+    if (numberExistsInBankUser || userNumberExists || findMobileNumber) {
+      return res
+        .status(200)
+        .send({ statusCode: 202, message: "Mobile number already in use" });
+    }
+
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
 
+    const hashedPassword = encrypt(req.body.password);
     req.body["bankuser_id"] = uniqueId;
     req.body["createdAt"] = currentDate;
     req.body["updatedAt"] = currentDate;
+    req.body["password"] = hashedPassword;
 
     var data = await BankUser.create(req.body);
     const ApiResponse = await axios.post(
@@ -119,10 +172,12 @@ router.put("/:bankuser_id", async (req, res) => {
         .send({ statusCode: 201, message: "Email already in use" });
     }
 
+    const hashedPassword = encrypt(req.body.password);
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-    if (!req.body.password) {
-      delete req.body.password;
-    }
+    req.body.password = hashedPassword
+    // if (!req.body.password) {
+    //   delete req.body.password;
+    // }
     const result = await BankUser.findOneAndUpdate(
       { bankuser_id: bankuser_id },
       { $set: req.body },
@@ -165,16 +220,6 @@ router.get("/:bank_id", async (req, res) => {
     const bank = await Bank.findOne({
       bank_id: bank_id,
     });
-
-    //   for (let i = 0; i < data.length; i++) {
-    //     const role_id = data[i].role_id;
-
-    //     const branch_data = await SavajCapital_Role.findOne({ role_id: role_id });
-
-    //     if (branch_data) {
-    //       data[i].role = branch_data.role;
-    //     }
-    //   }
 
     const count = data.length;
 

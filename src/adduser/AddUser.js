@@ -87,7 +87,6 @@ function AddUser(props) {
         setSelectedState(user.state_code);
         setSelectedCountry(user.country_code);
         setFormData(submissionData);
-
         setFormData(user);
       } else {
         alert("Please try again later...!");
@@ -248,7 +247,25 @@ function AddUser(props) {
       });
     }
   };
-  const handleGstChange = (e) => {
+  const handlephoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "number" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handlecibilChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "cibil_score" && value.length <= 3) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handlegstChange = (e) => {
     const { name, value } = e.target;
     if (name === "gst_number" && value.toUpperCase().length <= 15) {
       setFormData({
@@ -299,33 +316,32 @@ function AddUser(props) {
                   value={formData.dob}
                 />
               </FormControl>
-
               <FormControl id="number" mt={4} isRequired>
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
                   name="number"
-                  onChange={handleChange}
+                  type="number"
+                  onChange={handlephoneChange}
                   value={formData.number}
                   placeholder="Enter your Number"
                 />
               </FormControl>
-
-              <FormControl id="cibil_score" mt={4} isRequired>
+              <FormControl id="aadharcard" mt={4} isRequired>
                 <FormLabel>Cibil Score</FormLabel>
                 <Input
                   name="cibil_score"
-                  onChange={handleChange}
+                  type="text"
+                  onChange={handlecibilChange}
                   value={formData.cibil_score}
                   placeholder="Enter your cibil score"
                 />
               </FormControl>
-
-              <FormControl id="gst_number" mt={4} isRequired>
+              <FormControl id="aadharcard" mt={4} isRequired>
                 <FormLabel>GST Number</FormLabel>
                 <Input
                   name="gst_number"
                   type="text"
-                  onChange={handleGstChange}
+                  onChange={handlegstChange}
                   value={formData.gst_number}
                   placeholder="Enter gst number"
                 />
@@ -441,6 +457,16 @@ function AddUser(props) {
                   onChange={handleChange}
                   value={formData.email}
                   placeholder="Enter your email"
+                />
+              </FormControl>
+              <FormControl id="password" mt={4} isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="text"
+                  onChange={handleChange}
+                  value={formData.password}
+                  placeholder="Enter your Password"
                 />
               </FormControl>
 

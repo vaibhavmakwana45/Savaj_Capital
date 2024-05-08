@@ -87,7 +87,11 @@ export default function Dashboard() {
 
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
-      <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px" mb="20px">
+      <SimpleGrid
+        columns={{ base: 1, sm: 1, md: 2, xl: 4 }}
+        spacing="24px"
+        mb="20px"
+      >
         <Card
           minH="125px"
           style={{ cursor: "pointer" }}

@@ -389,7 +389,7 @@ function LoanSubTypes() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    color: "#fff",
+                    border:"2px solid #b19552"
                   }}
                 >
                   Cancel

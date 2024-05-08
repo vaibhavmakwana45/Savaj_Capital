@@ -294,8 +294,8 @@ function Sidebar(props) {
             >
               <Dropdown
                 style={{ background: "none", border: "none", outline: "none" }}
-                isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
-                toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
+                isOpen={dropdownStates[prop.name]} 
+                toggle={() => toggleDropdown(prop.name)} 
               >
                 <DropdownToggle
                   style={{
@@ -403,7 +403,7 @@ function Sidebar(props) {
     });
   };
   const { logo, routes } = props;
-  console.log(props,"props----")
+  console.log(props, "props----");
   var links = <>{createLinks(routes)}</>;
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarRadius = "20px";
@@ -412,14 +412,14 @@ function Sidebar(props) {
   const Brand = () => {
     if (!isOpen) {
       return (
-        <Box className="p-3" style={{overflow:"hidden"}}>
+        <Box className="p-3" style={{ overflow: "hidden" }}>
           <img src={logo2} alt="Logo" />
           <HSeparator />
         </Box>
       );
     } else {
       return (
-        <Box style={{overflow:"hidden"}}>
+        <Box style={{ overflow: "hidden" }}>
           <img src={logo1} alt="Logo2" />
           <HSeparator />
         </Box>
@@ -456,20 +456,30 @@ function Sidebar(props) {
         position="fixed"
         width={isOpen ? "260px" : "100px"}
       >
-        <Button
-          position="absolute"
-          top="20px"
-          left={isOpen ? "92%" : "80%"}
-          zIndex={99}
+        <div
           onClick={toggleSidebar}
-          style={{ borderRadius: "50%", padding: "0" }}
+          style={{
+            position: "absolute",
+            marginTop: "20px",
+            marginLeft: isOpen ? "95%" : "89%",
+            zIndex: "99",
+            cursor: "pointer",
+            backgroundColor: "#b19552",
+            fontSize: "20px",
+            color: "white",
+            padding: 0,
+            borderRadius: "50%",
+            height: "25px",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
           {isOpen ? (
-            <KeyboardArrowLeft fontSize="10px" />
+            <KeyboardArrowLeft fontSize="20px" />
           ) : (
-            <KeyboardArrowRight fontSize="10px" />
+            <KeyboardArrowRight fontSize="20px" />
           )}
-        </Button>
+        </div>
         <Box
           bg={sidebarBg}
           transition={variantChange}

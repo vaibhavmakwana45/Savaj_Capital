@@ -17,13 +17,14 @@ import {
   ModalCloseButton,
   Input,
   Divider,
+  Checkbox,
 } from "@chakra-ui/react";
 
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom";
-import { ArrowBackIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon, CloseIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
 import { Form, FormGroup, Table } from "reactstrap";
@@ -71,7 +72,6 @@ const FileDisplay = ({ groupedFiles }) => {
         style={{ overflow: "auto" }}
       >
         <ul className="breadcrumb">
-   
           {Object.entries(groupedFiles).map(([title, files], index) => (
             <li key={title} className="breadcrumb-item">
               <a
@@ -148,7 +148,6 @@ const FileDisplay = ({ groupedFiles }) => {
               >
                 {files.map((file, idx) => (
                   <div className="accordion-body" key={idx}>
-                    {/* Render your file content here */}
                     <p className="mb-3">{file.document_name}</p>
                     {file.file_path.endsWith(".pdf") ? (
                       <iframe
@@ -332,94 +331,58 @@ function ViewFile() {
   const [stepData, setStepData] = useState([]);
   const fetchStepsData = async () => {
     try {
-      const response = await AxiosInstance.get(`/file_upload/get_steps/${id}`);
+      const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
       setStepData(response.data.data);
     } catch (error) {
       console.error("Error: ", error.message);
     }
   };
 
-  const [openStep, setOpenStep] = useState({ status: false, data: {} });
-  const [cibilData, setCibilData] = useState({});
-  const [accountData, setAccountData] = useState({});
-  const [documentData, setDocumentData] = useState({});
-  const [amountData, setAmountData] = useState({});
+  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
 
-  const submitCibil = async () => {
-    try {
-      const response = await AxiosInstance.put(
-        `/addusers/edituser/${cibilData.user_id}`,
-        { cibil_score: cibilData.cibil_score }
-      );
-      if (response) {
-        await fetchData();
-        await fetchStepsData();
-        setOpenStep({ status: false, data: {} });
-      }
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
+  const handleChange = (e, index) => {
+    const { name, value, checked, type, files } = e.target;
+    const newData = { ...open.data };
+    const inputs = [...newData.inputs];
 
-  const submitAccount = async () => {
-    try {
-      const response = await AxiosInstance.post(`/ibd_account`, accountData);
-      if (response) {
-        await fetchData();
-        await fetchStepsData();
-        setOpenStep({ status: false, data: {} });
-      }
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
-
-  const submitAmount = async () => {
-    try {
-      const response = await AxiosInstance.put(
-        `/file_upload/update_amount/${id}`,
-        {
-          amount: amountData.amount,
-          note: amountData.note,
-        }
-      );
-      if (response) {
-        await fetchData();
-        await fetchStepsData();
-        setOpenStep({ status: false, data: {} });
-      }
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
-
-  const submitChecked = async () => {
-    try {
-      if (documentData.loan_step === "Generate Documents") {
-        const response = await AxiosInstance.put(
-          `/file_upload/update_amount/${id}`,
-          {
-            stemp_paper_print: documentData.stemp_paper_print,
-          }
-        );
-        if (response) {
-          await fetchData();
-          await fetchStepsData();
-          setOpenStep({ status: false, data: {} });
-        }
+    if (type === "checkbox") {
+      inputs[index].value = checked;
+      if (checked) {
+        inputs[index].is_required = false;
       } else {
-        const response = await AxiosInstance.put(
-          `/file_upload/update_amount/${id}`,
-          {
-            loan_dispatch: documentData.loan_dispatch,
-          }
-        );
-        if (response) {
-          await fetchData();
-          await fetchStepsData();
-          setOpenStep({ status: false, data: {} });
-        }
+        inputs[index].is_required =
+          stepData[open?.index]?.inputs[index]?.is_required;
       }
+    } else if (type === "text") {
+      inputs[index].value = value;
+      if (value !== "") {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[open?.index]?.inputs[index]?.is_required;
+      }
+    } else {
+      inputs[index].value = files[0] || "";
+      if (files.length > 0) {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[open?.index]?.inputs[index]?.is_required;
+      }
+    }
+
+    setOpen({ is: open.is, data: { ...newData, inputs }, index: open.index });
+  };
+
+  const submitStep = async () => {
+    try {
+      const response = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        open.data
+      );
+      fetchData();
+      fetchStepsData();
+      setOpen({ is: false, data: {}, index: "" });
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -437,7 +400,26 @@ function ViewFile() {
       </Flex>
     );
   }
-
+  function copyText(elementId) {
+    var textToCopy = document.getElementById(elementId).innerText;
+    var tempInput = document.createElement("input");
+    tempInput.setAttribute("value", textToCopy);
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    var messageElement = document.createElement("div");
+    messageElement.innerText = "Copied!";
+    messageElement.style.color = "green";
+    var clickedSpan = document.getElementById(elementId);
+    clickedSpan.parentNode.insertBefore(
+      messageElement,
+      clickedSpan.nextSibling
+    );
+    setTimeout(function () {
+      messageElement.parentNode.removeChild(messageElement);
+    }, 2000);
+  }
   return (
     <div>
       {loading ? (
@@ -452,7 +434,7 @@ function ViewFile() {
       ) : (
         <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
           <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-            <CardBody style={{ padding: "40px", }} className="cardss">
+            <CardBody style={{ padding: "40px" }} className="cardss">
               <FormLabel
                 className="mb-2 back-responsive ttext"
                 style={{ fontSize: "20px" }}
@@ -526,25 +508,39 @@ function ViewFile() {
                           <br />
                         </div>
                         <div className="col-md-6">
-                          <strong>Gst Number:</strong>{" "}
-                          {fileData?.user?.gst_number || "N/A"}
+                          <strong id="gstNumber">Gst Number:</strong>{" "}
+                          <span
+                            id="gstNumberText"
+                            onClick={() => copyText("gstNumberText")}
+                          >
+                            {fileData?.user?.gst_number || "N/A"}
+                          </span>
                           <br />
-                          <strong>PAN Card:</strong>{" "}
-                          {fileData?.user?.pan_card || "N/A"}
+                          <strong id="panCard">PAN Card:</strong>{" "}
+                          <span
+                            id="panCardText"
+                            onClick={() => copyText("panCardText")}
+                          >
+                            {fileData?.user?.pan_card || "N/A"}
+                          </span>
                           <br />
-                          <strong>Aadhar Card:</strong>{" "}
-                          {fileData?.user?.aadhar_card || "N/A"}
+                          <strong id="aadharCard">Aadhar Card:</strong>{" "}
+                          <span
+                            id="aadharCardText"
+                            onClick={() => copyText("aadharCardText")}
+                          >
+                            {fileData?.user?.aadhar_card || "N/A"}
+                          </span>
                           <br />
                         </div>
                       </div>
                     </FormLabel>
 
-                    {/* Progress */}
                     <div
                       className="container-fluid progress-bar-area"
                       style={{ height: "20%" }}
                     >
-                      <div className="row pb-4">
+                      <div className="row">
                         <div
                           className="col"
                           style={{ position: "relative", zIndex: "9" }}
@@ -558,11 +554,13 @@ function ViewFile() {
                             }}
                           >
                             {stepData &&
-                              stepData.map((item, index) => (
+                              stepData?.map((item, index) => (
                                 <li
                                   key={index}
                                   id={`step${index + 1}`}
-                                  className={item.status ? item.status : ""}
+                                  className={
+                                    item.status ? item.status : "active"
+                                  }
                                   style={{
                                     display: "inline-block",
                                     marginRight: "10px",
@@ -579,31 +577,18 @@ function ViewFile() {
                                         "complete" ||
                                       index === 0
                                     ) {
-                                      setOpenStep({
-                                        status: !openStep.status,
-                                        data: item,
-                                      });
-                                      if (item.loan_step === "Cibil") {
-                                        setCibilData(item);
-                                      }
-                                      if (item.loan_step === "Bank A/C Open") {
-                                        setAccountData(item);
-                                      }
-                                      if (item.loan_step === "Documents") {
-                                        setDocumentData(item);
-                                      }
-                                      if (
-                                        item.loan_step === "Approval Amount"
-                                      ) {
-                                        setAmountData(item);
-                                      }
-                                      if (
-                                        item.loan_step === "Generate Documents"
-                                      ) {
-                                        setDocumentData(item);
-                                      }
-                                      if (item.loan_step === "Dispatch") {
-                                        setDocumentData(item);
+                                      if (open.index === index) {
+                                        setOpen({
+                                          is: false,
+                                          data: {},
+                                          index: 0,
+                                        });
+                                      } else {
+                                        setOpen({
+                                          is: true,
+                                          data: item,
+                                          index,
+                                        });
                                       }
                                     }
                                   }}
@@ -613,114 +598,76 @@ function ViewFile() {
                                       <div className="circle-button"></div>
                                     </a>
                                   </div>
-                                  {item.loan_step}
+                                  {item?.loan_step}
                                 </li>
                               ))}
                           </ul>
                         </div>
-                      </div>
-                      {openStep.status && openStep.data.loan_step === "Cibil" && (
-                        <div className="row pb-0 mb-0">
-                          <div className="col px-3 pt-3">
-                            <Form className="d-flex justify-content-start align-items-center">
-                              <FormGroup className="px-2">
-                                <label htmlFor="score">Cibil Score</label>
-                                <Input
-                                  type="text"
-                                  value={cibilData.cibil_score}
-                                  onChange={(e) => {
-                                    const newCibilData = {
-                                      ...cibilData,
-                                      cibil_score: e.target.value,
-                                    };
-                                    setCibilData(newCibilData);
-                                  }}
-                                  placeholder="Cili_Score"
-                                  disabled={cibilData.status === "complete"}
-                                />
-                              </FormGroup>
-                              {cibilData.status !== "complete" && (
-                                <Button
-                                  colorScheme="blue"
-                                  style={{ backgroundColor: "#b19552" }}
-                                  onClick={submitCibil}
-                                >
-                                  Submit
-                                </Button>
-                              )}
-                            </Form>
-                          </div>
-                        </div>
-                      )}
-                      {openStep.status &&
-                        openStep.data.loan_step === "Bank A/C Open" && (
-                          <div className="row">
-                            <div className="col px-3 pt-3">
-                              <Form className="d-flex justify-content-start align-items-center">
-                                <FormGroup className="px-2">
-                                  <label htmlFor="score">Name</label>
-                                  <Input
-                                    type="text"
-                                    value={accountData.name}
-                                    onChange={(e) => {
-                                      const newAccountData = {
-                                        ...accountData,
-                                        name: e.target.value,
-                                      };
-                                      setAccountData(newAccountData);
-                                    }}
-                                    placeholder="User Name"
-                                    disabled={accountData.status === "complete"}
-                                  />
-                                </FormGroup>
-                                <FormGroup className="px-2">
-                                  <label htmlFor="score">Account Number</label>
-                                  <Input
-                                    type="text"
-                                    value={accountData.account_number}
-                                    onChange={(e) => {
-                                      const newAccountData = {
-                                        ...accountData,
-                                        account_number: e.target.value,
-                                      };
-                                      setAccountData(newAccountData);
-                                    }}
-                                    placeholder="Account Number"
-                                    disabled={accountData.status === "complete"}
-                                  />
-                                </FormGroup>
-                                <FormGroup className="px-2">
-                                  <label htmlFor="score">IFC Number</label>
-                                  <Input
-                                    type="text"
-                                    value={accountData.ifc_number}
-                                    onChange={(e) => {
-                                      const newAccountData = {
-                                        ...accountData,
-                                        ifc_number: e.target.value,
-                                      };
-                                      setAccountData(newAccountData);
-                                    }}
-                                    placeholder="Account IFC Number"
-                                    disabled={accountData.status === "complete"}
-                                  />
-                                </FormGroup>
-                                {accountData.status !== "complete" && (
-                                  <Button
-                                    colorScheme="blue"
-                                    style={{ backgroundColor: "#b19552" }}
-                                    onClick={() => submitAccount()}
-                                  >
-                                    Submit
-                                  </Button>
+
+                        {open.is && open.data.loan_step_id !== "1715149246513" && (
+                          <Form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              submitStep();
+                            }}
+                          >
+                            {open?.data?.inputs?.map((input, index) => (
+                              <FormControl
+                                key={index}
+                                id="step"
+                                className="d-flex justify-content-between align-items-center mt-4"
+                              >
+                                {input.type === "input" ? (
+                                  <div>
+                                    <label>{input.label}</label>
+                                    <Input
+                                      name="step"
+                                      required={input.is_required}
+                                      disabled={open.data.status === "complete"}
+                                      value={input.value}
+                                      placeholder={`Enter ${input.value}`}
+                                      onChange={(e) => handleChange(e, index)}
+                                    />
+                                  </div>
+                                ) : input.type === "checkbox" ? (
+                                  <div>
+                                    <Checkbox
+                                      checked={input.value}
+                                      disabled={open.data.status === "complete"}
+                                      required={input.is_required}
+                                      onChange={(e) => handleChange(e, index)}
+                                    >
+                                      {input.label}
+                                    </Checkbox>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <label>{input.label}</label>
+                                    <Input
+                                      type="file"
+                                      required={input.is_required}
+                                      disabled={open.data.status === "complete"}
+                                      onChange={(e) => handleChange(e, index)}
+                                    />
+                                  </div>
                                 )}
-                              </Form>
-                            </div>
-                          </div>
+                              </FormControl>
+                            ))}
+                            {open.data.status !== "complete" && (
+                              <Button
+                                colorScheme="blue"
+                                className="mt-3"
+                                type="submit"
+                                mr={3}
+                                style={{ backgroundColor: "#b19552" }}
+                              >
+                                Submit
+                              </Button>
+                            )}
+                          </Form>
                         )}
-                      {openStep.status &&
-                        documentData.status !== "complete" &&
-                        openStep.data.loan_step === "Documents" && (
+
+                        {open.is && open.data.loan_step === "Documents" && (
                           <div className="row">
                             <div
                               className="col px-5 pt-3
@@ -747,8 +694,9 @@ function ViewFile() {
                                     </th>
                                   </tr>
                                 </thead>
+                                {console.log(open.data, "yash")}
                                 <tbody>
-                                  {documentData?.pendingData?.map(
+                                  {open.data?.pendingData?.map(
                                     (documentRow, index) => (
                                       <tr key={index}>
                                         <td>{documentRow?.name}</td>
@@ -767,7 +715,7 @@ function ViewFile() {
                                   )}
                                 </tbody>
                               </Table>
-                              {documentData.status !== "complete" && (
+                              {open.data.status !== "complete" && (
                                 <Button
                                   colorScheme="blue"
                                   style={{ backgroundColor: "#b19552" }}
@@ -784,136 +732,7 @@ function ViewFile() {
                             </div>
                           </div>
                         )}
-                      {openStep.status &&
-                        openStep.data.loan_step === "Approval Amount" && (
-                          <div className="row">
-                            <div className="col px-3 pt-3">
-                              <Form className="d-flex justify-content-start align-items-center">
-                                <FormGroup className="px-2">
-                                  <label htmlFor="score">Loan Amount</label>
-                                  <Input
-                                    type="text"
-                                    value={amountData.amount}
-                                    onChange={(e) => {
-                                      const newCibilData = {
-                                        ...amountData,
-                                        amount: e.target.value,
-                                      };
-                                      setAmountData(newCibilData);
-                                    }}
-                                    placeholder="Enter Amount"
-                                    disabled={amountData.status === "complete"}
-                                  />
-                                </FormGroup>
-                                <FormGroup className="px-2">
-                                  <label htmlFor="score">Note</label>
-                                  <Input
-                                    type="text"
-                                    value={amountData.note}
-                                    onChange={(e) => {
-                                      const newCibilData = {
-                                        ...amountData,
-                                        note: e.target.value,
-                                      };
-                                      setAmountData(newCibilData);
-                                    }}
-                                    placeholder="Enter Note"
-                                    disabled={amountData.status === "complete"}
-                                  />
-                                </FormGroup>
-                                {amountData.status !== "complete" && (
-                                  <Button
-                                    colorScheme="blue"
-                                    style={{ backgroundColor: "#b19552" }}
-                                    onClick={submitAmount}
-                                  >
-                                    Submit
-                                  </Button>
-                                )}
-                              </Form>
-                            </div>
-                          </div>
-                        )}
-                      {openStep.status &&
-                        openStep.data.loan_step === "Generate Documents" && (
-                          <div className="row">
-                            <div className="col px-3 pt-3">
-                              <Form>
-                                <FormGroup>
-                                  <label>Stemp Paper Print</label>
-                                  <input
-                                    type="checkbox"
-                                    className="mx-2"
-                                    disabled={cibilData.status === "complete"}
-                                    checked={documentData.stemp_paper_print}
-                                    onChange={(e) => {
-                                      const newDocumentData = {
-                                        ...documentData,
-                                        stemp_paper_print: e.target.checked,
-                                      };
-                                      setDocumentData(newDocumentData);
-                                    }}
-                                    style={{
-                                      fontSize: "1rem",
-                                      fontWeight: "bold",
-                                      cursor: "pointer",
-                                      accentColor: "#b19552",
-                                    }}
-                                  />
-                                  {documentData.status !== "complete" && (
-                                    <Button
-                                      colorScheme="blue"
-                                      style={{ backgroundColor: "#b19552" }}
-                                      onClick={submitChecked}
-                                    >
-                                      Submit
-                                    </Button>
-                                  )}
-                                </FormGroup>
-                              </Form>
-                            </div>
-                          </div>
-                        )}
-                      {openStep.status &&
-                        openStep.data.loan_step === "Dispatch" && (
-                          <div className="row">
-                            <div className="col px-3 pt-3">
-                              <Form>
-                                <FormGroup>
-                                  <label>Loan Dispatch</label>
-                                  <input
-                                    type="checkbox"
-                                    className="mx-2"
-                                    disabled={cibilData.status === "complete"}
-                                    checked={documentData.loan_dispatch}
-                                    onChange={(e) => {
-                                      const newDocumentData = {
-                                        ...documentData,
-                                        loan_dispatch: e.target.checked,
-                                      };
-                                      setDocumentData(newDocumentData);
-                                    }}
-                                    style={{
-                                      fontSize: "1rem",
-                                      fontWeight: "bold",
-                                      cursor: "pointer",
-                                      accentColor: "#b19552",
-                                    }}
-                                  />
-                                  {documentData.status !== "complete" && (
-                                    <Button
-                                      colorScheme="blue"
-                                      style={{ backgroundColor: "#b19552" }}
-                                      onClick={submitChecked}
-                                    >
-                                      Submit
-                                    </Button>
-                                  )}
-                                </FormGroup>
-                              </Form>
-                            </div>
-                          </div>
-                        )}
+                      </div>
                     </div>
                   </div>
                   <div>

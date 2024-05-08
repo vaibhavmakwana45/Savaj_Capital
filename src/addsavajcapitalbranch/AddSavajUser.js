@@ -95,8 +95,10 @@ function AddSavajCapitalBranch() {
           branch_id: data[0].branch_id,
           role_id: data[0].role_id,
           email: data[0].email,
+          number: data[0].number,
           full_name: data[0].full_name,
-          password: "",
+          password: data[0].password,
+          
         };
 
         setFormData(submissionData);
@@ -148,6 +150,7 @@ function AddSavajCapitalBranch() {
     state: "",
     city: "",
     full_name: "",
+    number: "",
     branch_id: "",
     email: "",
     password: "",
@@ -189,9 +192,10 @@ function AddSavajCapitalBranch() {
     try {
       if (id) {
         const response = await AxiosInstance.put("/savaj_user/" + id, formData);
-
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
+        } else if (response.data.statusCode === 202) {
+          toast.error(response.data.message);
         } else if (response.data.success) {
           toast.success("Branch and User Updated successfully!");
           history.push("/superadmin/savajusers?id=" + branch_id);
@@ -200,6 +204,8 @@ function AddSavajCapitalBranch() {
         const response = await AxiosInstance.post("/savaj_user", formData);
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
+        } else if (response.data.statusCode === 202) {
+          toast.error(response.data.message);
         } else if (response.data.success) {
           toast.success("Branch and User added successfully!");
           history.push("/superadmin/savajcapitalbranch");
@@ -402,6 +408,25 @@ function AddSavajCapitalBranch() {
                   onChange={handleChange}
                   disabled={id}
                   value={formData.email}
+                />
+              </FormControl>
+              <FormControl id="password" mt={4} isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="text"
+                  onChange={handleChange}
+                  value={formData.password}
+                  placeholder="Enter your Password"
+                />
+              </FormControl>
+              <FormControl id="number" mt={4} isRequired>
+                <FormLabel>Mobile Number</FormLabel>
+                <Input
+                  name="number"
+                  type="number"
+                  onChange={handleChange}
+                  value={formData.number}
                 />
               </FormControl>
 

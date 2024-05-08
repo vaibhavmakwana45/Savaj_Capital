@@ -343,8 +343,11 @@ export default function CollapsibleTable() {
 
               <Button
                 onClick={() => history.push("/savajcapitaluser/adduserfile")}
-                style={{ border:"2px solid #b19552" }}
-              >
+                colorScheme="blue"
+                style={{
+                backgroundColor: "#b19552",
+                color: "#fff",
+              }}              >
                 Add File
               </Button>
             </div>

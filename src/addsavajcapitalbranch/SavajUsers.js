@@ -104,22 +104,16 @@ function Tables() {
     history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
   };
 
-  const allHeaders = [
-    "Bank Name",
-    "Name",
-    "role",
-    "create",
-    "update",
-    "Action",
-  ];
+  const allHeaders = ["Name", "Email","Mobile Number", "role", "create", "update", "Action"];
 
   const formattedData = filteredUsers.map((bank) => [
-    bank.branchuser_id,
-    bank.email,
-    bank.full_name,
-    bank.role,
-    bank.createdAt,
-    bank.updatedAt,
+    bank?.branchuser_id,
+    bank?.full_name,
+    bank?.email,
+    bank?.number,
+    bank?.role,
+    bank?.createdAt,
+    bank?.updatedAt,
   ]);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -217,7 +211,8 @@ function Tables() {
                 </Button>
                 <Button
                   onClick={navigateToAnotherPage}
-                  style={{
+                colorScheme="blue"
+                    style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
                   }}
