@@ -183,7 +183,8 @@ function AllStep() {
                   onClick={() => {
                     setIsStep(true);
                   }}
-                  style={{
+                  colorScheme="blue"
+                    style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
                   }}
@@ -227,6 +228,7 @@ function AllStep() {
                 <Button
                   ref={cancelRef}
                   onClick={() => setIsDeleteDialogOpen(false)}
+                  
                 >
                   Cancel
                 </Button>
@@ -289,7 +291,7 @@ function AllStep() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    color: "#fff",
+                    color: "#b19552",
                   }}
                 >
                   Cancel

@@ -184,7 +184,11 @@ function AddAllDocuments() {
                   onClick={() => {
                     setIsDocument(true);
                   }}
-                  style={{ border: "2px solid #b19552", color: "#b19552" }}
+                  colorScheme="blue"
+                  style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
                 >
                   Add Documents
                 </Button>
@@ -289,7 +293,7 @@ function AddAllDocuments() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    color: "#fff",
+                    border:"2px solid #b19552"
                   }}
                 >
                   Cancel

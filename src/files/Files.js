@@ -480,12 +480,13 @@ export default function CollapsibleTable() {
             </Text>
             <Flex className="thead">
               <Select
-                placeholder="Select Loan"
+                placeholder=""
                 value={selectedLoan}
                 onChange={(e) => setSelectedLoan(e.target.value)}
                 mr="10px"
                 width="200px"
               >
+                <option>All Loan Types</option>
                 {loans.map((loan) => (
                   <option key={loan._id} value={loan.loan}>
                     {loan.loan}
@@ -502,11 +503,11 @@ export default function CollapsibleTable() {
               <div>
                 <style>
                   {`
-      .dynamicImportantStyle {
-        background-color: #b19552 !important;
-        color: #fff !important;
-      }
-    `}
+                    .dynamicImportantStyle {
+                      background-color: #b19552 !important;
+                      color: #fff !important;
+                    }
+                  `}
                 </style>
                 <Button
                   onClick={() => history.push("/superadmin/addfile")}

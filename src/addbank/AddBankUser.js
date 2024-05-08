@@ -93,13 +93,19 @@ function AddBankUser() {
           bank_id: bankDetails.bank_id,
           bankuser_name: bankDetails.bankuser_name,
           user_id: userDetails.user_id,
+          adress: userDetails.adress,
+          dob: userDetails.dob,
+          mobile: userDetails.mobile,
+          adhar: userDetails.adhar,
+          emergancy_contact: userDetails.emergancy_contact,
           bank_name: bankDetails.bank_name,
           country: bankDetails.country,
+          bankuser_name: userDetails.bankuser_name,
+          password: userDetails.password,
           state: bankDetails.state,
           city: bankDetails.city,
           branch_name: bankDetails.branch_name,
           email: userDetails.email,
-          password: "",
           country_code: bankDetails.country_code,
           state_code: bankDetails.state_code,
         };
@@ -209,6 +215,7 @@ function AddBankUser() {
       dob: formData.dob,
       mobile: formData.mobile,
       adhar: formData.adhar,
+      password: formData.password,
       emergancy_contact: formData.emergancy_contact,
     };
 
@@ -243,7 +250,33 @@ function AddBankUser() {
       setLoading(false);
     }
   };
-
+  const handlephoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "mobile" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handleEmergencyChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "emergancy_contact" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "adhar" && value.length <= 12) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -369,6 +402,7 @@ function AddBankUser() {
                 <Input
                   name="bankuser_name"
                   type="text"
+                  placeholder="Name"
                   onChange={handleChange}
                   value={formData.bankuser_name}
                 />
@@ -387,6 +421,7 @@ function AddBankUser() {
                 <Input
                   name="adress"
                   type="textarea"
+                  placeholder="Address"
                   onChange={handleChange}
                   value={formData.adress}
                 />
@@ -400,34 +435,46 @@ function AddBankUser() {
                   value={formData.dob}
                 />
               </FormControl>
-              <FormControl id="mobile" mt={4}>
+                <FormControl id="mobile" mt={4} isRequired>
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
                   name="mobile"
                   type="number"
-                  onChange={handleChange}
+                  onChange={handlephoneChange}
                   value={formData.mobile}
+                  placeholder="Enter your Number"
                 />
               </FormControl>
-              <FormControl id="adhar" mt={4}>
-                <FormLabel>Aadhar Number</FormLabel>
+                 <FormControl id="adhar" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   name="adhar"
                   type="number"
-                  onChange={handleChange}
+                  onChange={handleadharChange}
                   value={formData.adhar}
+                  placeholder="XXXX - XXXX - XXXX"
                 />
               </FormControl>
-              <FormControl id="emergancy_contact" mt={4}>
+                 <FormControl id="mobile" mt={4} isRequired>
                 <FormLabel>Emergency Contact</FormLabel>
                 <Input
                   name="emergancy_contact"
                   type="number"
-                  onChange={handleChange}
+                  onChange={handleEmergencyChange}
                   value={formData.emergancy_contact}
+                  placeholder="Enter your Number"
                 />
               </FormControl>
-
+              <FormControl id="password" mt={4} isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="text"
+                  onChange={handleChange}
+                  value={formData.password}
+                  placeholder="Enter your Password"
+                />
+              </FormControl>
               <div>
                 <Button
                   mt={4}

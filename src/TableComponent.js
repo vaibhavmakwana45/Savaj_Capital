@@ -297,7 +297,7 @@ const TableComponent = ({
   };
 
   return (
-    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" ,padding:0}}>
       <Table variant="simple" color={"black"}>
         <Thead>
           <Tr my=".8rem" pl="0px" color="gray.400">

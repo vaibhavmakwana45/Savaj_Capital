@@ -288,8 +288,6 @@ function AddFiles() {
     }
   };
 
-
-
   useEffect(() => {
     setCountries(Country.getAllCountries());
     setStates(State.getStatesOfCountry("IN"));
@@ -412,11 +410,11 @@ function AddFiles() {
           title_id: file.title_id,
           key: file.key,
         })),
-        stemp_paper_print: formData.stemp_paper_print,  // Include checkbox state
-        loan_dispatch: formData.loan_dispatch 
+        stemp_paper_print: formData.stemp_paper_print, // Include checkbox state
+        loan_dispatch: formData.loan_dispatch,
       };
       await AxiosInstance.post("/file_upload", payload);
-      console.log('Form Data on Submit:', payload); // Check the state at submit
+      console.log("Form Data on Submit:", payload); // Check the state at submit
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
@@ -431,11 +429,15 @@ function AddFiles() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between"  className="mainnnn">
+            <Flex justifyContent="space-between" className="mainnnn">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
-              <Button onClick={onOpen} colorScheme="blue" style={{backgroundColor:"#b19552"}} >
+              <Button
+                onClick={onOpen}
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
+              >
                 Add New User
               </Button>
             </Flex>
@@ -516,6 +518,14 @@ function AddFiles() {
                             <div
                               key={`${title_id}-${index}-${innerIndex}`}
                               className="upload-area col-xl-12 col-md-12 col-sm-12"
+                              onClick={() => {
+                                document
+                                  .getElementById(
+                                    `fileInput-${title_id}-${index}-${innerIndex}`
+                                  )
+                                  .click();
+                              }}
+                              style={{ cursor: "pointer" }}
                             >
                               <Text
                                 fontSize="xl"
@@ -640,13 +650,17 @@ function AddFiles() {
                                       alignItems: "center",
                                       justifyContent: "center",
                                       flexDirection: "column",
+                                      border: "2px dashed rgb(171, 202, 255)",
+                                      borderRadius: "15px",
+                                      marginTop: "25px",
+                                      cursor: "pointer",
                                     }}
                                   >
                                     <span className="drop-zone__icon">
                                       <i className="bx bxs-file-image"></i>
                                     </span>
                                     <p className="drop-zone__paragraph">
-                                      Drop your file here or click to browse
+                                      Upload Your Documents
                                     </p>
                                   </div>
                                 )}
@@ -833,9 +847,6 @@ function AddFiles() {
                   onChange={handleStateChange}
                   disabled={!selectedCountry}
                   value={selectedState}
-                  // {...register("state", {
-                  //   required: "State is required",
-                  // })}
                 >
                   {states.length ? (
                     states.map((state) => (
@@ -942,7 +953,12 @@ function AddFiles() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} type="submit" style={{backgroundColor:"#b19552"}}>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                type="submit"
+                style={{ backgroundColor: "#b19552" }}
+              >
                 Save
               </Button>
               <Button onClick={onClose}>Cancel</Button>
@@ -950,7 +966,7 @@ function AddFiles() {
           </form>
         </ModalContent>
       </Modal>
-      
+
       <Toaster />
     </>
   );

@@ -96,7 +96,8 @@ function AddSavajCapitalBranch() {
           role_id: data[0].role_id,
           email: data[0].email,
           full_name: data[0].full_name,
-          password: "",
+          password: data[0].password,
+          
         };
 
         setFormData(submissionData);
@@ -404,7 +405,16 @@ function AddSavajCapitalBranch() {
                   value={formData.email}
                 />
               </FormControl>
-
+              <FormControl id="password" mt={4} isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="text"
+                  onChange={handleChange}
+                  value={formData.password}
+                  placeholder="Enter your Password"
+                />
+              </FormControl>
               {/* {
                 !id &&
                 <FormControl id="password" mt={4} isRequired>
