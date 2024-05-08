@@ -42,6 +42,8 @@ function UserTable() {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -59,8 +61,40 @@ function UserTable() {
     fetchUsers();
   }, []);
 
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
+  const requestActivateDeactivate = (userId, activate) => {
+    setCurrentUser({ id: userId, activate });
+    setIsConfirmOpen(true);
+  };
+
+  const handleActivateDeactivate = async () => {
+    try {
+      const { id, activate } = currentUser;
+      const response = await AxiosInstance.put(
+        `/addusers/toggle-active/${id}`,
+        {
+          isActivate: activate,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(
+          `User has been ${
+            activate ? "activated" : "deactivated"
+          } successfully!`
+        );
+        setUsers(
+          users.map((user) =>
+            user.user_id === id ? { ...user, isActivate: activate } : user
+          )
+        );
+        setIsConfirmOpen(false);
+      } else {
+        toast.error("Failed to update user status.");
+      }
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      toast.error("Error updating user status.");
+    }
   };
 
   const filteredUsers =
@@ -79,7 +113,7 @@ function UserTable() {
             .includes(searchTermLower);
           const aadharCardIncludes = user.aadhar_card
             .toString()
-            .includes(searchTermLower); // Directly include Aadhar card in search logic
+            .includes(searchTermLower);
           const panCardIncludes =
             typeof user.pan_card === "string" &&
             user.pan_card.toLowerCase().includes(searchTermLower);
@@ -110,13 +144,13 @@ function UserTable() {
   const getBackgroundColor = (category) => {
     switch (category) {
       case "Poor":
-        return "#FFCCCC"; // Light red
+        return "#FFCCCC";
       case "Average":
-        return "#FFF8CC"; // Light yellow
+        return "#FFF8CC";
       case "Good":
-        return "#E5FFCC"; // Light green
+        return "#E5FFCC";
       case "Excellent":
-        return "#CCE5FF"; // Light blue
+        return "#CCE5FF";
       default:
         return "transparent";
     }
@@ -140,6 +174,7 @@ function UserTable() {
     "create",
     "update",
     "CS Status",
+    "Active/Inactive",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
@@ -162,6 +197,21 @@ function UserTable() {
     >
       {getCibilScoreCategory(item.cibil_score)}
     </Flex>,
+    item.isActivate ? (
+      <Button
+        colorScheme="green"
+        onClick={() => requestActivateDeactivate(item.user_id, false)}
+      >
+        Active
+      </Button>
+    ) : (
+      <Button
+        colorScheme="red"
+        onClick={() => requestActivateDeactivate(item.user_id, true)}
+      >
+        Inactive
+      </Button>
+    ),
   ]);
 
   const handleDelete = (id) => {
@@ -181,8 +231,11 @@ function UserTable() {
   const cancelRef = React.useRef();
   const deletebranch = async (userId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/addusers/deleteuser/${userId}`
+      const response = await AxiosInstance.put(
+        `/addusers/toggle-active/${userId}`,
+        {
+          isActive: activate,
+        }
       );
 
       if (response.data.success) {
@@ -225,7 +278,7 @@ function UserTable() {
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
                   className="buttonss"
-                  style={{background: "#b19552"}}
+                  style={{ background: "#b19552" }}
                 >
                   Add Customer
                 </Button>
@@ -293,6 +346,37 @@ function UserTable() {
                   ml={3}
                 >
                   Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        <AlertDialog
+          isOpen={isConfirmOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsConfirmOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                {currentUser.activate ? "Activate User" : "Deactivate User"}
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure you want to{" "}
+                {currentUser.activate ? "activate" : "deactivate"} this user?
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={() => setIsConfirmOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={handleActivateDeactivate}
+                  ml={3}
+                >
+                  Confirm
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -2,10 +2,15 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const Loan_Step = require("../../models/Loan_Step/Loan_Step");
+const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
+const Loan = require("../../models/Loan/Loan");
+const File_Uplode = require("../../models/File/File_Uplode");
+const { default: axios } = require("axios");
 
 // Post Loan-Step
 router.post("/", async (req, res) => {
   try {
+    console.log(req.body.inputs);
     let findLoanStep = await Loan_Step.findOne({
       loan_step: { $regex: new RegExp(`^${req.body.loan_step}$`, "i") },
     });
@@ -123,6 +128,84 @@ router.delete("/:loan_step_id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/get_steps/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const file = await File_Uplode.findOne({ file_id });
+    const loan = await Loan.findOne({ loan_id: file.loan_id });
+    const steps = [];
+
+    for (const loan_step_id of loan.loan_step_id) {
+      if (loan_step_id === "1715149246513") {
+        try {
+          const res = await axios.get(
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+          );
+          steps.push(res.data.data);
+        } catch (error) {
+          console.error("Error: ", error.message);
+        }
+      } else {
+        const compelete_step = await Compelete_Step.findOne({
+          loan_step_id,
+          file_id,
+        });
+        if (compelete_step) {
+          steps.push(compelete_step);
+        } else {
+          const step = await Loan_Step.findOne({ loan_step_id });
+          const inputs = step.inputs;
+          const isActive = inputs.some((input) => input.is_required);
+          const status = isActive ? "active" : "complete";
+
+          steps.push({ ...step.toObject(), status });
+        }
+      }
+    }
+
+    res.json({
+      statusCode: 200,
+      data: steps,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.post("/steps/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const timestamp = Date.now();
+    const uniqueId = `${timestamp}`;
+
+    req.body["compelete_step_id"] = uniqueId;
+    req.body["file_id"] = file_id;
+    req.body["status"] = "complete";
+    req.body["createdAt"] = moment()
+      .utcOffset(330)
+      .format("YYYY-MM-DD HH:mm:ss");
+    req.body["updatedAt"] = moment()
+      .utcOffset(330)
+      .format("YYYY-MM-DD HH:mm:ss");
+
+    var data = await Compelete_Step.create(req.body);
+    res.status(200).json({
+      statusCode: 200,
+      data: data,
+      message: "Step Completed Successfully.",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
     });
   }
 });

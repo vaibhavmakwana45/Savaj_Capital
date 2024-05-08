@@ -87,7 +87,6 @@ function AddUser(props) {
         setSelectedState(user.state_code);
         setSelectedCountry(user.country_code);
         setFormData(submissionData);
-
         setFormData(user);
       } else {
         alert("Please try again later...!");
