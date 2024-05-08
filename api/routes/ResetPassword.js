@@ -88,41 +88,142 @@ function isTokenValid(email) {
 //   }
 // });
 
+// router.post("/passwordmail", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const encryptedEmail = encrypt(email);
+
+//     const token = encryptedEmail;
+
+//     tokenExpirationMap.set(token, true);
+
+//     const subject = "Welcome to your new resident center with Savaj Capital";
+
+//     const text = `
+//     <p>Hello Sir/Ma'am,</p>
+
+//         <p>Set your password now:</p>
+//         <p><a href="${
+//           `https://admin.savajcapital.com/auth/setpassword?token=` + token
+//         }" style="text-decoration: none;">Set Password Link</a></p>
+
+//         <p>Best regards,<br>
+//         The Savaj Capital Team</p>
+//     `;
+
+//     await emailService.sendWelcomeEmail(req.body.email, subject, text);
+
+//     res.json({
+//       statusCode: 200,
+//       // data: info,
+//       message: "Send Mail Successfully",
+//     });
+
+//     scheduleTokenCleanup();
+//   } catch (error) {
+//     res.json({
+//       statusCode: false,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.post("/passwordmail", async (req, res) => {
   try {
     const { email } = req.body;
     const encryptedEmail = encrypt(email);
-
     const token = encryptedEmail;
 
     tokenExpirationMap.set(token, true);
 
-    const subject = "Welcome to your new resident center with Savaj Capital";
+    const subject = "Welcome to Your New Resident Center with Savaj Capital";
+
+    // Logo URL
+    const logoUrl = "https://cdn.dohost.in/upload/629imgpsh_fullsize_anim.jpg";
 
     const text = `
-    <p>Hello Sir/Ma'am,</p>
-
-        <p>Set your password now:</p>
-        <p><a href="${
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          background-color: #ffffff;
+          width: 100%;
+          max-width: 600px;
+          margin: 30px auto;
+          padding: 40px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+          border-top: 5px solid #b19552;
+          text-align: center; /* Ensure text and elements within the container are centered */
+        }
+        .button {
+          background-color: #b19552;
+          color: #ffffff;
+          padding: 10px 20px; /* Smaller padding for a smaller button */
+          text-align: center;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: bold;
+          margin-top: 20px;
+          display: inline-block; /* This allows the button to be centered via text-align of its parent */
+        }
+        .button:hover {
+          background-color: #967c42;
+        }
+        p {
+          color: rgb(65, 70, 80);
+          line-height: 1.8;
+          font-size: 16px;
+          margin-top: 20px;
+        }
+        .header {
+          color: #b19552;
+          font-size: 24px;
+        }
+        .logo {
+          display: block;
+          margin: 20px auto; /* Center the logo */
+          width: 160px; /* Adjust based on your logo's aspect ratio */
+          height: auto;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <img src="${logoUrl}" alt="Savaj Capital Logo" class="logo">
+        <h1 class="header">Welcome to Savaj Capital</h1>
+        <p>Hello,</p>
+        <p>Thank you for joining Savaj Capital. Please set your password by clicking the button below to activate your account:</p>
+        <a href="${
           `https://admin.savajcapital.com/auth/setpassword?token=` + token
-        }" style="text-decoration: none;">Set Password Link</a></p>
-
-        <p>Best regards,<br>
-        The Savaj Capital Team</p>
+        }" class="button">Set Your Password</a>
+        <p>If you did not request this email, please ignore it.</p>
+        <p>Best regards,<br>The Savaj Capital Team</p>
+      </div>
+    </body>
+    </html>
     `;
 
-    await emailService.sendWelcomeEmail(req.body.email, subject, text);
+    await emailService.sendWelcomeEmail(email, subject, text);
 
     res.json({
       statusCode: 200,
-      // data: info,
       message: "Send Mail Successfully",
     });
 
     scheduleTokenCleanup();
   } catch (error) {
     res.json({
-      statusCode: false,
+      statusCode: 500,
       message: error.message,
     });
   }

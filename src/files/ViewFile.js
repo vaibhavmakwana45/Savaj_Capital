@@ -558,11 +558,11 @@ function ViewFile() {
                             }}
                           >
                             {stepData &&
-                              stepData.map((item, index) => (
+                              stepData?.map((item, index) => (
                                 <li
                                   key={index}
                                   id={`step${index + 1}`}
-                                  className={item.status ? item.status : ""}
+                                  className={item?.status ? item?.status : ""}
                                   style={{
                                     display: "inline-block",
                                     marginRight: "10px",
@@ -613,7 +613,7 @@ function ViewFile() {
                                       <div className="circle-button"></div>
                                     </a>
                                   </div>
-                                  {item.loan_step}
+                                  {item?.loan_step}
                                 </li>
                               ))}
                           </ul>

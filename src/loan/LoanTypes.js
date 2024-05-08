@@ -223,6 +223,7 @@ function UserTable() {
               handleEdit={handleEdit}
               handleRow={handleRow}
               showPagination={true}
+              collapse={true}
             />
           </CardBody>
         </Card>

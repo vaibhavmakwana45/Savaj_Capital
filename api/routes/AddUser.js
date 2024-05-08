@@ -147,7 +147,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `https://localhost:5882/api/setpassword/passwordmail`,
+      `http://admin.savajcapital.com/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }
@@ -459,5 +459,44 @@ router.get("/customer/:user_id", async (req, res) => {
     });
   }
 });
+router.put("/toggle-active/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+  const { isActivate } = req.body;  // Updated to match schema field name
+
+  try {
+      if (typeof isActivate !== "boolean") {
+          return res.status(400).json({
+              success: false,
+              message: "Invalid input for isActivate. Must be boolean.",
+          });
+      }
+
+      const updatedUser = await AddUser.findOneAndUpdate( 
+          { user_id: user_id },
+          { isActivate: isActivate }, 
+          { new: true, runValidators: true }
+      );
+
+      if (!updatedUser) {
+          return res.status(404).json({
+              success: false,
+              message: "User not found",
+          });
+      }
+
+      res.json({
+          success: true,
+          message: "User activation status updated successfully",
+          user: updatedUser,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+      });
+  }
+});
+
 
 module.exports = router;
