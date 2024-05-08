@@ -250,10 +250,11 @@ function AddUser(props) {
   };
   const handleGstChange = (e) => {
     const { name, value } = e.target;
-    if (name === "gst_number" && value.length <= 15) {
+    if (name === "gst_number" && value.toUpperCase().length <= 15) {
       setFormData({
         ...formData,
         [name]: value,
+        [name]: value.toUpperCase(),
       });
     }
   };
@@ -323,7 +324,7 @@ function AddUser(props) {
                 <FormLabel>GST Number</FormLabel>
                 <Input
                   name="gst_number"
-                  type="number"
+                  type="text"
                   onChange={handleGstChange}
                   value={formData.gst_number}
                   placeholder="Enter gst number"
@@ -419,7 +420,7 @@ function AddUser(props) {
                   placeholder="Enter unit address"
                 />
               </FormControl>
-              <FormControl id="reference" mt={4} isRequired>
+              <FormControl id="reference" mt={4}>
                 <FormLabel>Reference</FormLabel>
                 <Input
                   name="reference"
