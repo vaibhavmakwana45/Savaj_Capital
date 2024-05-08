@@ -244,7 +244,7 @@ const TableComponent = ({
                         <Text fontWeight="bold">{name}</Text>
                         <ul>
                           {rowData[documentIndex]
-                            .split(", ")
+                            .split(",")
                             .map((name, index) => (
                               <li key={index}>{name}</li>
                             ))}

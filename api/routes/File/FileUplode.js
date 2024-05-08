@@ -9,12 +9,10 @@ const Loan_Documents = require("../../models/Loan/Loan_Documents");
 const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
 const AddUser = require("../../models/AddUser");
 const AddDocuments = require("../../models/AddDocuments/AddDocuments");
-const SavajCapital_Role = require("../../models/Savaj_Capital/SavajCapital_Role");
 const Title = require("../../models/AddDocuments/Title");
 const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 const BankApproval = require("../../models/Bank/BankApproval");
 const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
-const { default: axios } = require("axios");
 
 router.post("/", async (req, res) => {
   try {
@@ -508,12 +506,16 @@ router.delete("/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
     console.log(fileId, "fileId");
-    const fileAssignToSavajCapitalBranch = await SavajCapital_BranchAssign.findOne({
+    const fileAssignToSavajCapitalBranch = await SavajCapital_BranchAssign.findOne(
+      {
+        file_id: fileId,
+      }
+    );
+
+    const fileAssignToBankApproval = await BankApproval.findOne({
       file_id: fileId,
     });
-    
-    const fileAssignToBankApproval = await BankApproval.findOne({ file_id: fileId });
-    
+
     if (fileAssignToSavajCapitalBranch || fileAssignToBankApproval) {
       return res.status(200).json({
         statusCode: 201,
@@ -814,108 +816,6 @@ router.get("/testfile/:file_id", async (req, res) => {
   }
 });
 
-router.get("/get_steps/:file_id", async (req, res) => {
-  try {
-    const { file_id } = req.params;
-    const file = await File_Uplode.findOne({ file_id });
-    const loan = await Loan.findOne({ loan_id: file.loan_id });
-    const steps = [];
-
-    for (const loan_step_id of loan.loan_step_id) {
-      const step = await Loan_Step.findOne({ loan_step_id });
-      if (step.loan_step === "Cibil") {
-        try {
-          const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_cibil_score/${file_id}`
-          );
-          steps.push(res.data.data);
-        } catch (error) {
-          console.error("Error: ", error.message);
-        }
-      } else if (step.loan_step === "Bank A/C Open") {
-        try {
-          const res = await axios.get(
-            `https://admin.savajcapital.com/api/ibd_account/get_account/${file_id}`
-          );
-          steps.push(res.data.data);
-        } catch (error) {
-          console.error("Error: ", error.message);
-        }
-      } else if (step.loan_step === "Documents") {
-        try {
-          const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
-          );
-          steps.push(res.data.data);
-        } catch (error) {
-          console.error("Error: ", error.message);
-        }
-      } else if (step.loan_step === "Approval Amount") {
-        const data = {
-          loan_step: "Approval Amount",
-          status: file.amount ? "complete" : "active",
-          amount: file?.amount || "",
-          note: file?.note || "",
-        };
-        steps.push(data);
-      } else if (step.loan_step === "Generate Documents") {
-        const data = {
-          loan_step: "Generate Documents",
-          status: file.stemp_paper_print ? "complete" : "active",
-          stemp_paper_print: file?.stemp_paper_print || "",
-        };
-        steps.push(data);
-      } else if (step.loan_step === "Dispatch") {
-        const data = {
-          loan_step: "Dispatch",
-          status: file.loan_dispatch ? "complete" : "active",
-          loan_dispatch: file?.loan_dispatch || "",
-        };
-        steps.push(data);
-      } else {
-        steps.push(step);
-      }
-    }
-
-    res.json({
-      statusCode: 200,
-      data: steps,
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
-
-router.get("/get_cibil_score/:file_id", async (req, res) => {
-  try {
-    const { file_id } = req.params;
-    const file = await File_Uplode.findOne({ file_id });
-    const user = await AddUser.findOne({ user_id: file.user_id });
-
-    const object = {
-      cibil_score: user?.cibil_score,
-      loan_step: "Cibil",
-      status: user?.status || "active",
-      user_id: user.user_id,
-    };
-
-    res.json({
-      statusCode: 200,
-      data: object,
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
-
 router.get("/get_documents/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -980,30 +880,10 @@ router.get("/get_documents/:file_id", async (req, res) => {
       statusCode: 200,
       data: {
         loan_step: "Documents",
+        loan_step_id: "1715149246513",
         pendingData: pendingObject,
         status: pendingObject.length === 0 ? "complete" : "active",
       },
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
-
-router.put("/update_amount/:file_id", async (req, res) => {
-  try {
-    const { file_id } = req.params;
-    const file = await File_Uplode.findOneAndUpdate(
-      { file_id },
-      { $set: req.body },
-      { $new: true }
-    );
-    res.json({
-      statusCode: 200,
-      data: file,
       message: "Read All Request",
     });
   } catch (error) {
