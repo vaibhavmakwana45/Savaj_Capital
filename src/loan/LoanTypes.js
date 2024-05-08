@@ -80,6 +80,7 @@ function UserTable() {
     "Created At",
     "Updated At",
     "Action",
+    "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.loan_id,
@@ -87,8 +88,11 @@ function UserTable() {
     item.loantype_count,
     item.createdAt,
     item.updatedAt,
+    (item.loan_steps && item.loan_steps.map((step) => step.name).join(", ")) ||
+      "No Steps",
   ]);
 
+  console.log(formattedData, "formattedData");
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
@@ -223,6 +227,10 @@ function UserTable() {
               handleEdit={handleEdit}
               handleRow={handleRow}
               showPagination={true}
+              collapse={true}
+              removeIndex={4}
+              documentIndex={5}
+              name={"Steps:"}
             />
           </CardBody>
         </Card>
