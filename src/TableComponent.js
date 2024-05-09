@@ -463,7 +463,7 @@ const TableComponent = ({
   };
 
   return (
-    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", padding: 0,overflow:"auto" }}>
+    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", padding: 0,overflow:"auto" ,scrollbarWidth:"thin"}}>
       <Table variant="simple" color={"black"} >
         <Thead>
           <Tr my=".8rem" pl="0px" color="gray.400">
@@ -584,8 +584,8 @@ const TableComponent = ({
                 </Tr>
                 {myData && collapse && expandedRows.includes(rowIndex) && (
                   <Tr >
-                    <Td colSpan={allHeaders.length + 1}>
-                      <Table variant="simple" color={"black"} width="100%">
+                    <Td colSpan={allHeaders.length + 1} className="" style={{paddingRight:"77px"}}>
+                      <Table variant="simple" color={"black"} width="100%" style={{borderRadius:"20px",boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px"}}>
                         <Thead>
                           <Tr >
                             {Object.entries(myData[rowIndex][0]).map(

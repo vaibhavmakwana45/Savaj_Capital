@@ -34,6 +34,7 @@ import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "./user.css";
+import moment from "moment";
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -213,17 +214,17 @@ function UserTable() {
   const data = filteredUsers.map((item) => [
     {
       Email: item.email,
-      Country: item.country,
+      // Country: item.country,
       "Unit Address": item.unit_address,
       Reference: item.reference,
       "GST Number": item.gst_number,
       State: item.state,
       City: item.city,
-      Dob: item.dob,
-      "Country Code": item.country_code,
+      Dob: moment(item.dob).format("DD/MM/YYYY"),
+      // "Country Code": item.country_code,
       "State Code": item.state_code,
-      "Create At": item.createdAt,
-      "Update At": item.updatedAt,
+      "Create At": moment(item.createdAt).format("DD/MM/YYYY"),
+      "Update At": moment(item.updatedAt).format("DD/MM/YYYY"),
     },
   ]);
 
