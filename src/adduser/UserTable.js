@@ -11,7 +11,9 @@ import {
   Td,
   useColorModeValue,
   Button,
+  Select,
 } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -45,21 +47,57 @@ function UserTable() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
 
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const response = await AxiosInstance.get("/addusers/getusers");
+  //       setUsers(response.data.users);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       setLoading(false);
+
+  //       console.error("Error fetching users:", error);
+  //     }
+  //   };
+
+  //   fetchUsers();
+  // }, []);
+
+  const [pagination, setPagination] = useState({
+    count: 0,
+    totalPages: 0,
+    currentPage: 1,
+  });
+  const [itemsPerPage, setItemsPerPage] = useState(1);
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await AxiosInstance.get("/addusers/getusers");
-        setUsers(response.data.users);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
+    fetchUsers(1, itemsPerPage);
+  }, [itemsPerPage]);
 
-        console.error("Error fetching users:", error);
-      }
-    };
+  const fetchUsers = async (page, limit) => {
+    try {
+      const response = await AxiosInstance.get("/addusers/getusers", {
+        params: {
+          page: page,
+          limit: limit,
+        },
+      });
+      setUsers(response.data.users);
+      setPagination(response.data.pagination);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching users:", error);
+    }
+  };
 
-    fetchUsers();
-  }, []);
+  const handlePageChange = (page) => {
+    fetchUsers(page, itemsPerPage);
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
+  };
 
   const requestActivateDeactivate = (userId, activate) => {
     setCurrentUser({ id: userId, activate });
@@ -286,17 +324,6 @@ function UserTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            {/* <TableComponent
-              data={formattedData}
-              textColor={textColor}
-              borderColor={borderColor}
-              loading={loading}
-              allHeaders={allHeaders}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              handleRow={handleRow}
-              collapse={true}
-            /> */}
             <TableComponent
               // documents={documents}
               data={formattedData}
@@ -308,7 +335,6 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              showPagination={true}
               removeIndex={5}
               removeIndex2={6}
               documentIndex={6}
@@ -316,6 +342,38 @@ function UserTable() {
               name={"Created At:"}
               name2={"Updated At:"}
             />
+            <>
+              {/* Pagination controls */}
+              <Flex justify="center" mt="4">
+                <IconButton
+                  aria-label="Previous Page"
+                  icon={<ChevronLeftIcon />}
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  isDisabled={pagination.currentPage === 1}
+                />
+                <Text mx="4">
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </Text>
+                <IconButton
+                  aria-label="Next Page"
+                  icon={<ChevronRightIcon />}
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  isDisabled={pagination.currentPage === pagination.totalPages}
+                />
+                <Select
+                  value={itemsPerPage}
+                  onChange={(e) =>
+                    handleItemsPerPageChange(parseInt(e.target.value))
+                  }
+                  variant="filled"
+                  ml="4"
+                >
+                  <option value="1">1</option>
+                  <option value="20">20</option>
+                  <option value="30">30</option>
+                </Select>
+              </Flex>
+            </>
           </CardBody>
         </Card>
         <AlertDialog

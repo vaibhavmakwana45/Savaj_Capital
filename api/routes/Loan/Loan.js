@@ -67,30 +67,36 @@ router.post("/", async (req, res) => {
 // Get Loan
 router.get("/", async (req, res) => {
   try {
-    var data = await Loan.aggregate([
-      {
-        $sort: { updatedAt: -1 },
-      },
-    ]);
+    // Fetch and sort loans
+    var loans = await Loan.aggregate([{ $sort: { updatedAt: -1 } }]);
 
-    for (let i = 0; i < data.length; i++) {
-      const loan_id = data[i].loan_id;
+    // Iterate over each loan to enrich data
+    for (let i = 0; i < loans.length; i++) {
+      const loan_id = loans[i].loan_id;
 
-      data[i].loantype_count = 0;
-
+      // Count loan types associated with each loan
       const loanTypeCount = await Loan_Type.countDocuments({ loan_id });
+      loans[i].loantype_count = loanTypeCount || 0;
 
-      if (loanTypeCount) {
-        data[i].loantype_count = loanTypeCount;
+      // Fetch the loan steps associated with the loan
+      if (loans[i].loan_step_id) {
+        // Assuming loan_step_id is an array of IDs
+        const loanSteps = await Loan_Step.find({
+          loan_step_id: { $in: loans[i].loan_step_id },
+        });
+
+        // Map each loan step to its name
+        loans[i].loan_steps = loanSteps.map((step) => ({
+          id: step.loan_step_id,
+          name: step.loan_step,
+        }));
       }
     }
 
-    const count = data.length;
-
     res.json({
       success: true,
-      data: data,
-      count: count,
+      data: loans,
+      count: loans.length,
       message: "Read All Loan",
     });
   } catch (error) {
@@ -191,4 +197,6 @@ router.get("/loan", async (req, res) => {
     });
   }
 });
+
+
 module.exports = router;

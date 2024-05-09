@@ -172,7 +172,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `http://localhost:5882/api/setpassword/passwordmail`,
+      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }
@@ -193,12 +193,51 @@ router.post("/adduserbyadmin", async (req, res) => {
   }
 });
 
+// router.get("/getusers", async (req, res) => {
+//   try {
+//     const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+//     res.json({
+//       success: true,
+//       users,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
+
 router.get("/getusers", async (req, res) => {
   try {
-    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; // Default limit is 10
+
+    // Calculate skip value
+    const skip = (page - 1) * limit;
+
+    // Fetch users with pagination and excluding password field
+    const users = await AddUser.find({}, "-password")
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total users
+    const totalUsers = await AddUser.countDocuments();
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalUsers / limit);
+
     res.json({
       success: true,
       users,
+      pagination: {
+        count: users.length,
+        totalPages,
+        currentPage: page,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -496,42 +535,41 @@ router.get("/customer/:user_id", async (req, res) => {
 });
 router.put("/toggle-active/:user_id", async (req, res) => {
   const { user_id } = req.params;
-  const { isActivate } = req.body;  // Updated to match schema field name
+  const { isActivate } = req.body; // Updated to match schema field name
 
   try {
-      if (typeof isActivate !== "boolean") {
-          return res.status(400).json({
-              success: false,
-              message: "Invalid input for isActivate. Must be boolean.",
-          });
-      }
-
-      const updatedUser = await AddUser.findOneAndUpdate( 
-          { user_id: user_id },
-          { isActivate: isActivate }, 
-          { new: true, runValidators: true }
-      );
-
-      if (!updatedUser) {
-          return res.status(404).json({
-              success: false,
-              message: "User not found",
-          });
-      }
-
-      res.json({
-          success: true,
-          message: "User activation status updated successfully",
-          user: updatedUser,
+    if (typeof isActivate !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid input for isActivate. Must be boolean.",
       });
+    }
+
+    const updatedUser = await AddUser.findOneAndUpdate(
+      { user_id: user_id },
+      { isActivate: isActivate },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "User activation status updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-      });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 });
-
 
 module.exports = router;
