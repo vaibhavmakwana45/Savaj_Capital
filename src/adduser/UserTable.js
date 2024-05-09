@@ -11,7 +11,9 @@ import {
   Td,
   useColorModeValue,
   Button,
+  Select,
 } from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -46,21 +48,44 @@ function UserTable() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
 
+  const [pagination, setPagination] = useState({
+    count: 0,
+    totalPages: 0,
+    currentPage: 1,
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await AxiosInstance.get("/addusers/getusers");
-        setUsers(response.data.users);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
+    fetchUsers(1, itemsPerPage);
+  }, [itemsPerPage]);
 
-        console.error("Error fetching users:", error);
-      }
-    };
+  const fetchUsers = async (page, limit) => {
+    try {
+      const response = await AxiosInstance.get("/addusers/getusers", {
+        params: {
+          page: page,
+          limit: limit,
+        },
+      });
+      setUsers(response.data.users);
+      setPagination(response.data.pagination);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching users:", error);
+    }
+  };
 
-    fetchUsers();
-  }, []);
+  const handlePageChange = (page) => {
+    fetchUsers(page, itemsPerPage);
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
+    fetchUsers(pagination.currentPage, value);
+  };
 
   const requestActivateDeactivate = (userId, activate) => {
     setCurrentUser({ id: userId, activate });
@@ -266,6 +291,25 @@ function UserTable() {
     }
   };
 
+  // Search
+  const handleSearchData = async (value) => {
+    try {
+      const response = await AxiosInstance.post("/addusers/search", {
+        search: value,
+      });
+      if (response.data.statusCode === 200) {
+        // setUsers(response.data.data); // Update users state with search results
+        if (value !== "") {
+          setUsers(response.data.data);
+        } else {
+          fetchUsers();
+        }
+      }
+    } catch (error) {
+      console.error("Error searching users:", error);
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -281,13 +325,16 @@ function UserTable() {
                 All Customers
               </Text>
               <Flex className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
+                <form className="form-inline">
+                  <input
+                    id="serchbar-size"
+                    className="form-control mr-sm-2"
+                    type="search"
+                    onChange={(e) => handleSearchData(e.target.value)}
+                    placeholder="Search"
+                    aria-label="Search"
+                  />
+                </form>
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
@@ -300,17 +347,6 @@ function UserTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            {/* <TableComponent
-              data={formattedData}
-              textColor={textColor}
-              borderColor={borderColor}
-              loading={loading}
-              allHeaders={allHeaders}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              handleRow={handleRow}
-              collapse={true}
-            /> */}
             <TableComponent
               // documents={documents}
               data={formattedData}
@@ -322,9 +358,13 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              showPagination={true}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={setItemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
               myData={data}
             />
+        
           </CardBody>
         </Card>
         <AlertDialog

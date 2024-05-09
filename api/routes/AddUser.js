@@ -193,18 +193,88 @@ router.post("/adduserbyadmin", async (req, res) => {
   }
 });
 
+// router.get("/getusers", async (req, res) => {
+//   try {
+//     const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+//     res.json({
+//       success: true,
+//       users,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
+
 router.get("/getusers", async (req, res) => {
   try {
-    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; // Default limit is 10
+
+    // Fetch users with pagination and excluding password field
+    const users = await AddUser.find({}, "-password")
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Count total users
+    const totalUsers = await AddUser.countDocuments();
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalUsers / limit);
+
     res.json({
       success: true,
       users,
+      pagination: {
+        count: users.length,
+        totalPages,
+        currentPage: page,
+      },
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+
+
+router.post("/search", async (req, res) => {
+  try {
+    let newArray = [];
+    newArray.push({
+      username: !isNaN(req.body.search)
+        ? req.body.search
+        : { $regex: req.body.search, $options: "i" },
+    });
+    // }
+
+    var data = await AddUser.find({
+      $or: newArray,
+    });
+
+    var count = await AddUser.countDocuments({
+      $or: newArray,
+    });
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      count: count,
+      message: "Read Category",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
     });
   }
 });
@@ -496,42 +566,41 @@ router.get("/customer/:user_id", async (req, res) => {
 });
 router.put("/toggle-active/:user_id", async (req, res) => {
   const { user_id } = req.params;
-  const { isActivate } = req.body;  // Updated to match schema field name
+  const { isActivate } = req.body; // Updated to match schema field name
 
   try {
-      if (typeof isActivate !== "boolean") {
-          return res.status(400).json({
-              success: false,
-              message: "Invalid input for isActivate. Must be boolean.",
-          });
-      }
-
-      const updatedUser = await AddUser.findOneAndUpdate( 
-          { user_id: user_id },
-          { isActivate: isActivate }, 
-          { new: true, runValidators: true }
-      );
-
-      if (!updatedUser) {
-          return res.status(404).json({
-              success: false,
-              message: "User not found",
-          });
-      }
-
-      res.json({
-          success: true,
-          message: "User activation status updated successfully",
-          user: updatedUser,
+    if (typeof isActivate !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid input for isActivate. Must be boolean.",
       });
+    }
+
+    const updatedUser = await AddUser.findOneAndUpdate(
+      { user_id: user_id },
+      { isActivate: isActivate },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "User activation status updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-      });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 });
-
 
 module.exports = router;

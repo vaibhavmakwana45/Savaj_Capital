@@ -463,8 +463,14 @@ const TableComponent = ({
   };
 
   return (
-    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", padding: 0,overflow:"auto" ,scrollbarWidth:"thin"}}>
-      <Table variant="simple" color={"black"} >
+    <div
+      style={{
+        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+        padding: 0,
+        overflow: "auto",
+      }}
+    >
+      <Table variant="simple" color={"black"}>
         <Thead>
           <Tr my=".8rem" pl="0px" color="gray.400">
             {allHeaders.map((header, index) => (
@@ -583,14 +589,14 @@ const TableComponent = ({
                   </Td>
                 </Tr>
                 {myData && collapse && expandedRows.includes(rowIndex) && (
-                  <Tr >
-                    <Td colSpan={allHeaders.length + 1} className="" style={{paddingRight:"77px"}}>
-                      <Table variant="simple" color={"black"} width="100%" style={{borderRadius:"20px",boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px"}}>
+                  <Tr>
+                    <Td colSpan={allHeaders.length + 1}>
+                      <Table variant="simple" color={"black"} width="100%">
                         <Thead>
-                          <Tr >
+                          <Tr>
                             {Object.entries(myData[rowIndex][0]).map(
                               ([key, value]) => (
-                                <Th style={{fontSize:"12px"}}>{key}</Th>
+                                <Th style={{ fontSize: "12px" }}>{key}</Th>
                               )
                             )}
                           </Tr>
@@ -599,7 +605,7 @@ const TableComponent = ({
                           <Tr>
                             {Object.entries(myData[rowIndex][0]).map(
                               ([key, value]) => (
-                                <Td style={{fontSize:"12px"}}>{value}</Td>
+                                <Td style={{ fontSize: "12px" }}>{value}</Td>
                               )
                             )}
                           </Tr>
@@ -712,3 +718,4 @@ const TableComponent = ({
 };
 
 export default TableComponent;
+ 
