@@ -22,7 +22,6 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-import axios from "axios";
 import { CloseIcon } from "@chakra-ui/icons";
 import { Form } from "reactstrap";
 
@@ -39,7 +38,7 @@ function AllStep() {
   const getStepData = async () => {
     try {
       const response = await AxiosInstance.get("/loan_step");
-
+      console.log(response, "response");
       if (response.data.success) {
         setSteps(response.data.data);
         setLoading(false);
@@ -117,10 +116,18 @@ function AllStep() {
     setSelectedStepId(id);
     setIsStep(true);
     const doc = steps.find((doc) => doc.loan_step_id === id);
+
     if (doc) {
       setSelectedStep(doc.loan_step);
+      setInputs(
+        doc.inputs
+          ? [...doc.inputs]
+          : [{ type: "input", value: "", is_required: false, label: "" }]
+      );
     } else {
       console.error("Document not found for id:", id);
+      setSelectedStep("");
+      setInputs([{ type: "input", value: "", is_required: false, label: "" }]);
     }
   };
 
@@ -153,8 +160,9 @@ function AllStep() {
     try {
       const response = await AxiosInstance.put("/loan_step/" + selectedStepId, {
         loan_step,
+        inputs: inputs, // Ensure this includes all inputs
       });
-
+      console.log(response, "vaibhav");
       if (response.data.success) {
         toast.success("Document Updated successfully!");
         setIsStep(false);

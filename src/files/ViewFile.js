@@ -375,10 +375,20 @@ function ViewFile() {
 
   const submitStep = async () => {
     try {
-      const response = await AxiosInstance.post(
-        `/loan_step/steps/${id}`,
-        open.data
-      );
+      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
+
+      const cibilScore = open.data.inputs.find(
+        (input) => input.label === "Cibil Score"
+      )?.value;
+
+      const userId = open.data.user_id;
+
+      const formData = {
+        cibil_score: cibilScore,
+      };
+
+      await AxiosInstance.put("/addusers/edituser/" + userId, formData);
+
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -537,7 +547,7 @@ function ViewFile() {
 
                     <div
                       className="container-fluid progress-bar-area"
-                      style={{ height: "20%",overflow:"auto" }}
+                      style={{ height: "20%", overflow: "auto" }}
                     >
                       <div className="row">
                         <div
@@ -568,7 +578,6 @@ function ViewFile() {
                                         "complete" ||
                                         index === 0) &&
                                       "pointer",
-                                      
                                   }}
                                   onClick={() => {
                                     if (
@@ -694,7 +703,7 @@ function ViewFile() {
                                     </th>
                                   </tr>
                                 </thead>
-                                {console.log(open.data, "yash")}
+               
                                 <tbody>
                                   {open.data?.pendingData?.map(
                                     (documentRow, index) => (

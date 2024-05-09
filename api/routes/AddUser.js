@@ -277,10 +277,17 @@ router.put("/edituser/:userId", async (req, res) => {
   const updates = req.body;
 
   try {
-    const status = req.body.cibil_score === "" ? "active" : "complete";
-    const hashedPassword = encrypt(req.body.password);
+    const status =
+      req.body.cibil_score && req.body.cibil_score !== ""
+        ? "complete"
+        : "active";
 
-    req.body.password = hashedPassword;
+    if (req.body.password && req.body.password.trim() !== "") {
+      const hashedPassword = encrypt(req.body.password);
+      req.body.password = hashedPassword;
+    } else {
+      delete req.body.password;
+    }
 
     const updatedUser = await AddUser.findOneAndUpdate(
       { user_id: userId },
@@ -301,10 +308,10 @@ router.put("/edituser/:userId", async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating user:", error);
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: "Internal Server Error: " + error.message,
     });
   }
 });
@@ -496,42 +503,41 @@ router.get("/customer/:user_id", async (req, res) => {
 });
 router.put("/toggle-active/:user_id", async (req, res) => {
   const { user_id } = req.params;
-  const { isActivate } = req.body;  // Updated to match schema field name
+  const { isActivate } = req.body; // Updated to match schema field name
 
   try {
-      if (typeof isActivate !== "boolean") {
-          return res.status(400).json({
-              success: false,
-              message: "Invalid input for isActivate. Must be boolean.",
-          });
-      }
-
-      const updatedUser = await AddUser.findOneAndUpdate( 
-          { user_id: user_id },
-          { isActivate: isActivate }, 
-          { new: true, runValidators: true }
-      );
-
-      if (!updatedUser) {
-          return res.status(404).json({
-              success: false,
-              message: "User not found",
-          });
-      }
-
-      res.json({
-          success: true,
-          message: "User activation status updated successfully",
-          user: updatedUser,
+    if (typeof isActivate !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid input for isActivate. Must be boolean.",
       });
+    }
+
+    const updatedUser = await AddUser.findOneAndUpdate(
+      { user_id: user_id },
+      { isActivate: isActivate },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "User activation status updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-      });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 });
-
 
 module.exports = router;
