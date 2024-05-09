@@ -13,6 +13,7 @@ const Title = require("../../models/AddDocuments/Title");
 const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 const BankApproval = require("../../models/Bank/BankApproval");
 const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
+const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
 
 router.post("/", async (req, res) => {
   try {
@@ -60,14 +61,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-// With Pagination
+
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10; // Default limit is 2 records per page
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Query to fetch paginated data
     var data = await File_Uplode.aggregate([
       {
         $sort: { updatedAt: -1 },
@@ -541,6 +541,8 @@ router.delete("/:fileId", async (req, res) => {
     const deletedFile = await File_Uplode.findOneAndDelete({
       file_id: fileId,
     });
+    const deletedSteps = await Compelete_Step.deleteMany({ file_id: fileId });
+    console.log(deletedSteps, "deletedSteps");
 
     if (!deletedFile) {
       return res.status(404).json({

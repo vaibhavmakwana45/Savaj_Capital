@@ -34,6 +34,7 @@ import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "./user.css";
+import moment from "moment";
 
 function UserTable() {
   const [users, setUsers] = useState([]);
@@ -171,17 +172,21 @@ function UserTable() {
     "Aadhar Card",
     "Pan Card",
     "Cibil Score",
+    // "create",
+    // "update",
     "CS Status",
     "Active/Inactive",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
-    item.username + " (" + item.businessname + ")",
+    item.username,
     item.number,
     item.aadhar_card,
     item.pan_card,
     item.cibil_score,
+    // item.createdAt,
+    // item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -213,17 +218,17 @@ function UserTable() {
   const data = filteredUsers.map((item) => [
     {
       Email: item.email,
-      Country: item.country,
+      // Country: item.country,
       "Unit Address": item.unit_address,
       Reference: item.reference,
       "GST Number": item.gst_number,
-      State: item.state,
-      City: item.city,
-      Dob: item.dob,
-      "Country Code": item.country_code,
-      "State Code": item.state_code,
-      "Create At": item.createdAt,
-      "Update At": item.updatedAt,
+      // State: item.state,
+      // City: item.city,
+      Dob: moment(item.dob).format("DD/MM/YYYY"),
+      // "Country Code": item.country_code,
+      // "State Code": item.state_code,
+      "Create At": moment(item.createdAt).format("DD/MM/YYYY"),
+      "Update At": moment(item.updatedAt).format("DD/MM/YYYY"),
     },
   ]);
 
@@ -299,17 +304,6 @@ function UserTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            {/* <TableComponent
-              data={formattedData}
-              textColor={textColor}
-              borderColor={borderColor}
-              loading={loading}
-              allHeaders={allHeaders}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              handleRow={handleRow}
-              collapse={true}
-            /> */}
             <TableComponent
               // documents={documents}
               data={formattedData}
@@ -322,6 +316,10 @@ function UserTable() {
               handleEdit={handleEdit}
               collapse={true}
               showPagination={true}
+              // itemsPerPage={itemsPerPage}
+              // setItemsPerPage={setItemsPerPage}
+              // currentPage={currentPage}
+              // setCurrentPage={setCurrentPage}
               myData={data}
             />
           </CardBody>

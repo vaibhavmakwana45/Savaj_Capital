@@ -457,6 +457,15 @@
   .mainnnn {
     flex-direction: column !important;
   }
+  .modal-reject {
+    flex-direction: column !important;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+  .modal-reject button{
+    margin-bottom: 10px;
+    margin-left: 0 !important;
+  }
 }
 
 /* 425 */
@@ -885,4 +894,41 @@ button.btn.btn-secondary:focus {
 .yelloButton {
   background: #b19552 !important;
   color: #fff !important;
+}
+
+.css-1ak1ri9 {
+   -webkit-margin-start: 0px !important; 
+  margin-inline-start: 0px !important; 
+   margin-top: 0px !important; 
+   margin-bottom: 0px !important; 
+}
+.css-dwfbw9 {
+  -webkit-margin-start: 0px !important; 
+  margin-inline-start: 0px !important; 
+   margin-top: 0px !important; 
+   margin-bottom: 0px !important; 
+}
+.css-dwfbw9 {
+  background: var(--chakra-colors-white);
+  -webkit-transition: 0.2s linear;
+  transition: 0.2s linear;
+  height: calc(100vh - 32px);
+  margin: 0px;
+  -webkit-filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  border-radius: 0px 20px 20px 0px !important;
+}
+.css-1ak1ri9 {
+  background: var(--chakra-colors-white);
+  -webkit-transition: 0.2s linear;
+  transition: 0.2s linear;
+  height: calc(100vh - 32px);
+  -webkit-padding-start: 20px;
+  padding-inline-start: 20px;
+  -webkit-padding-end: 20px;
+  padding-inline-end: 20px;
+  margin: 0px;
+  -webkit-filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  border-radius: 0px 20px 20px 0px !important;
 }
