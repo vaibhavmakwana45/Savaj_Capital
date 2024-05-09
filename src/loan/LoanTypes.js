@@ -108,6 +108,9 @@ function UserTable() {
       console.error("Data not found for id:", id);
     }
   };
+  // const handleEdit = (id) => {
+  //   history.push("/superadmin/addloantype?id=" + id);
+  // };
 
   const handleRow = (id) => {
     const data = users.find((user) => user.loan_id === id);

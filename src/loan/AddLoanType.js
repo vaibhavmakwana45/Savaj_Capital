@@ -5,10 +5,7 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
   Switch,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
@@ -16,146 +13,26 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import React, { useEffect, useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Country, State, City } from "country-state-city";
-import axios from "axios";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
 function AddLoanType() {
   const location = useLocation();
   const textColor = useColorModeValue("gray.700", "white");
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState("IN");
-  const [selectedState, setSelectedState] = useState("");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-
   const [isSubtype, setIsSubtype] = useState(false);
-
-  const handleSwitchChange = () => {
-    setIsSubtype(!isSubtype);
-  };
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
-
   const subtypeRefs = useRef([]);
-
-  const allBanksName = [
-    "State Bank of India (SBI)",
-    "HDFC Bank",
-    "ICICI Bank",
-    "Punjab National Bank (PNB)",
-    "Axis Bank",
-    "Canara Bank",
-    "Bank of Baroda (BoB)",
-    "Union Bank of India",
-    "Bank of India (BoI)",
-    "IndusInd Bank",
-    "IDBI Bank",
-    "Kotak Mahindra Bank",
-    "Central Bank of India",
-    "Yes Bank",
-    "Indian Bank",
-    "Federal Bank",
-    "UCO Bank",
-    "Syndicate Bank",
-    "Bank of Maharashtra",
-    "South Indian Bank",
-    "Karur Vysya Bank",
-    "Punjab & Sind Bank",
-    "Dena Bank",
-    "Vijaya Bank",
-    "Andhra Bank",
-    "IDFC FIRST Bank",
-    "RBL Bank",
-    "HSBC India",
-    "Standard Chartered Bank India",
-    "Citibank India",
-  ];
 
   const [formData, setFormData] = useState({
     loan_type: "",
     loan_subtype: [""],
   });
 
-  const getData = async () => {
-    try {
-      const response = await AxiosInstance.get("/addusers/bankuser/" + id);
-
-      if (response.data.success) {
-        const { bankDetails, userDetails } = response.data;
-
-        const submissionData = {
-          bank_id: id,
-          user_id: "",
-          bank_name: bankDetails.bank_name,
-          country: bankDetails.country,
-          state: bankDetails.state,
-          city: bankDetails.city,
-          branch_name: bankDetails.branch_name,
-          email: userDetails.email,
-          password: "",
-          country_code: bankDetails.country_code,
-          state_code: bankDetails.state_code,
-        };
-
-        setSelectedState(bankDetails.state_code);
-        setSelectedCountry(bankDetails.country_code);
-        setFormData(submissionData);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      getData();
-    }
-    setCountries(Country.getAllCountries());
-    setStates(State.getStatesOfCountry("IN"));
-  }, []);
-
-  useEffect(() => {
-    if (selectedCountry) {
-      const statesOfSelectedCountry = State.getStatesOfCountry(selectedCountry);
-      setStates(statesOfSelectedCountry);
-      setSelectedState("");
-    }
-  }, [selectedCountry]);
-
-  useEffect(() => {
-    if (selectedState) {
-      const citiesOfState = City.getCitiesOfState(
-        selectedCountry,
-        selectedState
-      );
-      setCities(citiesOfState);
-    } else {
-      setCities([]);
-    }
-  }, [selectedState, selectedCountry]);
-
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const stateObj = states.find((state) => state.isoCode === stateCode);
-    const stateFullName = stateObj ? stateObj.name : "";
-
-    setSelectedState(stateCode);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      state: stateFullName,
-    }));
-  };
-
-  const handleCountryChange = (event) => {
-    setSelectedCountry(event.target.value);
+  const handleSwitchChange = () => {
+    setIsSubtype(!isSubtype);
   };
 
   const handleChange = (e) => {
@@ -278,7 +155,6 @@ function AddLoanType() {
     } else if (!event.target.checked && index !== -1) {
       updatedSelectedLoanStepIds.splice(index, 1);
     }
-
     setSelectedLoanStepIds(updatedSelectedLoanStepIds);
   };
 
