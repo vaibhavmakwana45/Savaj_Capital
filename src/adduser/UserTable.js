@@ -122,36 +122,6 @@ function UserTable() {
     }
   };
 
-  const filteredUsers =
-    searchTerm.length === 0
-      ? users
-      : users.filter((user) => {
-          const searchTermLower = searchTerm.toLowerCase();
-          const usernameIncludes = user.username
-            .toLowerCase()
-            .includes(searchTermLower);
-          const emailIncludes = user.email
-            .toLowerCase()
-            .includes(searchTermLower);
-          const numberIncludes = user.number
-            .toLowerCase()
-            .includes(searchTermLower);
-          const aadharCardIncludes = user.aadhar_card
-            .toString()
-            .includes(searchTermLower);
-          const panCardIncludes =
-            typeof user.pan_card === "string" &&
-            user.pan_card.toLowerCase().includes(searchTermLower);
-
-          return (
-            usernameIncludes ||
-            emailIncludes ||
-            numberIncludes ||
-            aadharCardIncludes ||
-            panCardIncludes
-          );
-        });
-
   const getCibilScoreCategory = (score) => {
     if (score >= 300 && score <= 499) {
       return "Poor";
@@ -200,7 +170,7 @@ function UserTable() {
     "Active/Inactive",
     "Action",
   ];
-  const formattedData = filteredUsers.map((item) => [
+  const formattedData = users.map((item) => [
     item.user_id,
     item.username + " (" + item.businessname + ")",
     item.number,
@@ -235,7 +205,7 @@ function UserTable() {
     ),
   ]);
 
-  const data = filteredUsers.map((item) => [
+  const data = users.map((item) => [
     {
       Email: item.email,
       Country: item.country,
@@ -291,20 +261,26 @@ function UserTable() {
   };
 
   // Search
+  const [searchLoader, setSearchLoader] = useState(false);
   const handleSearchData = async (value) => {
     try {
+      setSearchLoader(true);
       const response = await AxiosInstance.post("/addusers/search", {
         search: value,
       });
       if (response.data.statusCode === 200) {
+        setSearchLoader(false);
         // setUsers(response.data.data); // Update users state with search results
         if (value !== "") {
           setUsers(response.data.data);
-        } else {
+          setSearchLoader(false);
+        } else if (value === "") {
           fetchUsers();
+          setSearchLoader(false);
         }
       }
     } catch (error) {
+      setSearchLoader(false);
       console.error("Error searching users:", error);
     }
   };
@@ -324,7 +300,6 @@ function UserTable() {
                 All Customers
               </Text>
               <Flex className="thead">
-
                 <form className="form-inline">
                   <input
                     id="serchbar-size"
@@ -352,16 +327,12 @@ function UserTable() {
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
-              loading={loading}
+              loading={loading || searchLoader}
               allHeaders={allHeaders}
               handleRow={handleRow}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              itemsPerPage={itemsPerPage}
-              setItemsPerPage={setItemsPerPage}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
               myData={data}
             />
             <>
