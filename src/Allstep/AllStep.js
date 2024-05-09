@@ -351,9 +351,9 @@ function AllStep() {
                     <FormControl
                       key={index}
                       id="step"
-                      className="d-flex row justify-content-between align-items-center mt-4"
+                      className="d-flex row justify-content-between align-items-center mt-4 modal-reject" 
                     >
-                      <div className="col-9">
+                      <div className="col-9 ">
                         {input.type === "input" ? (
                           <Input
                             name="step"
@@ -444,7 +444,7 @@ function AllStep() {
 
                   <FormControl
                     id="step"
-                    className="mt-4 d-flex justify-content-between"
+                    className="mt-4 d-flex justify-content-between modal-reject"
                   >
                     <Button
                       colorScheme="yellow"
