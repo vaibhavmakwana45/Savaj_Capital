@@ -333,7 +333,8 @@ export default function CollapsibleTable() {
   const [files, setFiles] = useState([]);
   let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLoan, setSelectedLoan] = useState("");
+  const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
+
   const [loans, setLoans] = useState([]);
   const filteredUsers = files.filter((file) => {
     const loanSafe =
@@ -352,7 +353,8 @@ export default function CollapsibleTable() {
         : "";
 
     return (
-      (selectedLoan === "" || loanSafe === selectedLoan.toLowerCase()) &&
+      (selectedLoan === "All Loan Types" ||
+        loanSafe.includes(selectedLoan.toLowerCase())) &&
       (loanSafe.includes(searchTerm.toLowerCase()) ||
         fileIdSafe.includes(searchTerm.toLowerCase()) ||
         loanTypeSafe.includes(searchTerm.toLowerCase()) ||
@@ -480,19 +482,20 @@ export default function CollapsibleTable() {
             </Text>
             <Flex className="thead">
               <Select
-                placeholder=""
+                placeholder="Select a loan type"
                 value={selectedLoan}
                 onChange={(e) => setSelectedLoan(e.target.value)}
                 mr="10px"
                 width="200px"
               >
-                <option>All Loan Types</option>
+                <option value="All Loan Types">All Loan Types</option>
                 {loans.map((loan) => (
                   <option key={loan._id} value={loan.loan}>
                     {loan.loan}
                   </option>
                 ))}
               </Select>
+
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

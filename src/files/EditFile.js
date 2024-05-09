@@ -479,13 +479,13 @@ function EditFile() {
                             <div
                               key={`${title_id}-${index}-${innerIndex}`}
                               className="upload-area col-xl-12 col-md-12 col-sm-12"
-                              onClick={() => {
-                                document
-                                  .getElementById(
-                                    `fileInput-${title_id}-${index}-${innerIndex}`
-                                  )
-                                  .click();
-                              }}
+                              // onClick={() => {
+                              //   document
+                              //     .getElementById(
+                              //       `fileInput-${title_id}-${index}-${innerIndex}`
+                              //     )
+                              //     .click();
+                              // }}
                             >
                               <Text
                                 fontSize="xl"
@@ -630,7 +630,7 @@ function EditFile() {
                 </div>
               ))}
             </div>
-            <FormControl id="stemp_paper_print" mt={4}>
+            {/* <FormControl id="stemp_paper_print" mt={4}>
               <Checkbox
                 name="stemp_paper_print"
                 onChange={handleCheckboxChange}
@@ -648,7 +648,7 @@ function EditFile() {
               >
                 Loan Dispatch
               </Checkbox>
-            </FormControl>
+            </FormControl> */}
             {/* Submit and Cancel Buttons */}
             <div>
               <Button
