@@ -171,21 +171,17 @@ function UserTable() {
     "Aadhar Card",
     "Pan Card",
     "Cibil Score",
-    "create",
-    "update",
     "CS Status",
     "Active/Inactive",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
-    item.username,
+    item.username + " (" + item.businessname + ")",
     item.number,
     item.aadhar_card,
     item.pan_card,
     item.cibil_score,
-    item.createdAt,
-    item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -212,6 +208,23 @@ function UserTable() {
         Inactive
       </Button>
     ),
+  ]);
+
+  const data = filteredUsers.map((item) => [
+    {
+      Email: item.email,
+      Country: item.country,
+      "Unit Address": item.unit_address,
+      Reference: item.reference,
+      "GST Number": item.gst_number,
+      State: item.state,
+      City: item.city,
+      Dob: item.dob,
+      "Country Code": item.country_code,
+      "State Code": item.state_code,
+      "Create At": item.createdAt,
+      "Update At": item.updatedAt,
+    },
   ]);
 
   const handleDelete = (id) => {
@@ -309,12 +322,7 @@ function UserTable() {
               handleEdit={handleEdit}
               collapse={true}
               showPagination={true}
-              removeIndex={5}
-              removeIndex2={6}
-              documentIndex={6}
-              documentIndex2={7}
-              name={"Created At:"}
-              name2={"Updated At:"}
+              myData={data}
             />
           </CardBody>
         </Card>

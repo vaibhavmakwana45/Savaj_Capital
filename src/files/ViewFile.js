@@ -538,7 +538,7 @@ function ViewFile() {
 
                     <div
                       className="container-fluid progress-bar-area"
-                      style={{ height: "20%" }}
+                      style={{ height: "20%",overflow:"auto" }}
                     >
                       <div className="row">
                         <div
@@ -569,6 +569,7 @@ function ViewFile() {
                                         "complete" ||
                                         index === 0) &&
                                       "pointer",
+                                      
                                   }}
                                   onClick={() => {
                                     if (
@@ -593,11 +594,11 @@ function ViewFile() {
                                     }
                                   }}
                                 >
-                                  <div className="circle-container">
+                                  {/* <div className="circle-container">
                                     <a href="#">
                                       <div className="circle-button"></div>
                                     </a>
-                                  </div>
+                                  </div> */}
                                   {item?.loan_step}
                                 </li>
                               ))}
