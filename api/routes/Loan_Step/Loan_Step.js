@@ -145,7 +145,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
           const res = await axios.get(
             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
-          steps.push(res.data.data);
+          steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
           console.error("Error: ", error.message);
         }
@@ -153,6 +153,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
         const compelete_step = await Compelete_Step.findOne({
           loan_step_id,
           file_id,
+          user_id: file.user_id,
         });
         if (compelete_step) {
           steps.push(compelete_step);
@@ -161,8 +162,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
           const inputs = step.inputs;
           const isActive = inputs.some((input) => input.is_required);
           const status = isActive ? "active" : "complete";
-
-          steps.push({ ...step.toObject(), status });
+          steps.push({ ...step.toObject(), status, user_id: file.user_id });
         }
       }
     }
@@ -193,6 +193,7 @@ router.post("/steps/:file_id", async (req, res) => {
       loan_step: req.body.loan_step,
       status: "complete",
       file_id: file_id,
+      user_id: req.body.user_id,
       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
     };
