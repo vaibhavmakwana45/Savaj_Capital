@@ -11,9 +11,7 @@ import {
   Td,
   useColorModeValue,
   Button,
-  Select,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -47,44 +45,21 @@ function UserTable() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
 
-  const [pagination, setPagination] = useState({
-    count: 0,
-    totalPages: 0,
-    currentPage: 1,
-  });
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
   useEffect(() => {
-    fetchUsers(1, itemsPerPage);
-  }, [itemsPerPage]);
+    const fetchUsers = async () => {
+      try {
+        const response = await AxiosInstance.get("/addusers/getusers");
+        setUsers(response.data.users);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
 
-  const fetchUsers = async (page, limit) => {
-    try {
-      const response = await AxiosInstance.get("/addusers/getusers", {
-        params: {
-          page: page,
-          limit: limit,
-        },
-      });
-      setUsers(response.data.users);
-      setPagination(response.data.pagination);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error fetching users:", error);
-    }
-  };
+        console.error("Error fetching users:", error);
+      }
+    };
 
-  const handlePageChange = (page) => {
-    fetchUsers(page, itemsPerPage);
-  };
-
-  const handleItemsPerPageChange = (value) => {
-    setItemsPerPage(value);
-    fetchUsers(pagination.currentPage, value);
-  };
+    fetchUsers();
+  }, []);
 
   const requestActivateDeactivate = (userId, activate) => {
     setCurrentUser({ id: userId, activate });
@@ -121,6 +96,36 @@ function UserTable() {
       toast.error("Error updating user status.");
     }
   };
+
+  const filteredUsers =
+    searchTerm.length === 0
+      ? users
+      : users.filter((user) => {
+          const searchTermLower = searchTerm.toLowerCase();
+          const usernameIncludes = user.username
+            .toLowerCase()
+            .includes(searchTermLower);
+          const emailIncludes = user.email
+            .toLowerCase()
+            .includes(searchTermLower);
+          const numberIncludes = user.number
+            .toLowerCase()
+            .includes(searchTermLower);
+          const aadharCardIncludes = user.aadhar_card
+            .toString()
+            .includes(searchTermLower);
+          const panCardIncludes =
+            typeof user.pan_card === "string" &&
+            user.pan_card.toLowerCase().includes(searchTermLower);
+
+          return (
+            usernameIncludes ||
+            emailIncludes ||
+            numberIncludes ||
+            aadharCardIncludes ||
+            panCardIncludes
+          );
+        });
 
   const getCibilScoreCategory = (score) => {
     if (score >= 300 && score <= 499) {
@@ -166,17 +171,21 @@ function UserTable() {
     "Aadhar Card",
     "Pan Card",
     "Cibil Score",
+    "create",
+    "update",
     "CS Status",
     "Active/Inactive",
     "Action",
   ];
-  const formattedData = users.map((item) => [
+  const formattedData = filteredUsers.map((item) => [
     item.user_id,
-    item.username + " (" + item.businessname + ")",
+    item.username,
     item.number,
     item.aadhar_card,
     item.pan_card,
     item.cibil_score,
+    item.createdAt,
+    item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -203,23 +212,6 @@ function UserTable() {
         Inactive
       </Button>
     ),
-  ]);
-
-  const data = users.map((item) => [
-    {
-      Email: item.email,
-      Country: item.country,
-      "Unit Address": item.unit_address,
-      Reference: item.reference,
-      "GST Number": item.gst_number,
-      State: item.state,
-      City: item.city,
-      Dob: item.dob,
-      "Country Code": item.country_code,
-      "State Code": item.state_code,
-      "Create At": item.createdAt,
-      "Update At": item.updatedAt,
-    },
   ]);
 
   const handleDelete = (id) => {
@@ -260,31 +252,6 @@ function UserTable() {
     }
   };
 
-  // Search
-  const [searchLoader, setSearchLoader] = useState(false);
-  const handleSearchData = async (value) => {
-    try {
-      setSearchLoader(true);
-      const response = await AxiosInstance.post("/addusers/search", {
-        search: value,
-      });
-      if (response.data.statusCode === 200) {
-        setSearchLoader(false);
-        // setUsers(response.data.data); // Update users state with search results
-        if (value !== "") {
-          setUsers(response.data.data);
-          setSearchLoader(false);
-        } else if (value === "") {
-          fetchUsers();
-          setSearchLoader(false);
-        }
-      }
-    } catch (error) {
-      setSearchLoader(false);
-      console.error("Error searching users:", error);
-    }
-  };
-
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -300,16 +267,13 @@ function UserTable() {
                 All Customers
               </Text>
               <Flex className="thead">
-                <form className="form-inline">
-                  <input
-                    id="serchbar-size"
-                    className="form-control mr-sm-2"
-                    type="search"
-                    onChange={(e) => handleSearchData(e.target.value)}
-                    placeholder="Search"
-                    aria-label="Search"
-                  />
-                </form>
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  marginRight="10px"
+                />
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
@@ -327,46 +291,20 @@ function UserTable() {
               data={formattedData}
               textColor={textColor}
               borderColor={borderColor}
-              loading={loading || searchLoader}
+              loading={loading}
               allHeaders={allHeaders}
               handleRow={handleRow}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              myData={data}
+              showPagination={true}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
+              name={"Created At:"}
+              name2={"Updated At:"}
             />
-            <>
-              {/* Pagination controls */}
-              <Flex justify="center" mt="4">
-                <IconButton
-                  aria-label="Previous Page"
-                  icon={<ChevronLeftIcon />}
-                  onClick={() => handlePageChange(pagination.currentPage - 1)}
-                  isDisabled={pagination.currentPage === 1}
-                />
-                <Text mx="4">
-                  Page {pagination.currentPage} of {pagination.totalPages}
-                </Text>
-                <IconButton
-                  aria-label="Next Page"
-                  icon={<ChevronRightIcon />}
-                  onClick={() => handlePageChange(pagination.currentPage + 1)}
-                  isDisabled={pagination.currentPage === pagination.totalPages}
-                />
-                <Select
-                  value={itemsPerPage}
-                  onChange={(e) =>
-                    handleItemsPerPageChange(parseInt(e.target.value))
-                  }
-                  variant="filled"
-                  ml="4"
-                >
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
-                </Select>
-              </Flex>
-            </>
           </CardBody>
         </Card>
         <AlertDialog

@@ -193,48 +193,12 @@ router.post("/adduserbyadmin", async (req, res) => {
   }
 });
 
-// router.get("/getusers", async (req, res) => {
-//   try {
-//     const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
-//     res.json({
-//       success: true,
-//       users,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Internal Server Error",
-//     });
-//   }
-// });
-
 router.get("/getusers", async (req, res) => {
   try {
-    // Pagination parameters
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10; // Default limit is 10
-
-    // Fetch users with pagination and excluding password field
-    const users = await AddUser.find({}, "-password")
-      .sort({ updatedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    // Count total users
-    const totalUsers = await AddUser.countDocuments();
-
-    // Calculate total pages
-    const totalPages = Math.ceil(totalUsers / limit);
-
+    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
     res.json({
       success: true,
       users,
-      pagination: {
-        count: users.length,
-        totalPages,
-        currentPage: page,
-      },
     });
   } catch (error) {
     console.error(error);
@@ -244,6 +208,43 @@ router.get("/getusers", async (req, res) => {
     });
   }
 });
+
+// Paination
+// router.get("/getusers", async (req, res) => {
+//   try {
+//     // Pagination parameters
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10; // Default limit is 10
+
+//     // Fetch users with pagination and excluding password field
+//     const users = await AddUser.find({}, "-password")
+//       .sort({ updatedAt: -1 })
+//       .skip((page - 1) * limit)
+//       .limit(limit);
+
+//     // Count total users
+//     const totalUsers = await AddUser.countDocuments();
+
+//     // Calculate total pages
+//     const totalPages = Math.ceil(totalUsers / limit);
+
+//     res.json({
+//       success: true,
+//       users,
+//       pagination: {
+//         count: users.length,
+//         totalPages,
+//         currentPage: page,
+//       },
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
 
 router.post("/search", async (req, res) => {
   try {
