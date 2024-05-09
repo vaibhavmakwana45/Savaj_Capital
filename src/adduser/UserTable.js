@@ -47,28 +47,14 @@ function UserTable() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
 
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const response = await AxiosInstance.get("/addusers/getusers");
-  //       setUsers(response.data.users);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       setLoading(false);
-
-  //       console.error("Error fetching users:", error);
-  //     }
-  //   };
-
-  //   fetchUsers();
-  // }, []);
-
   const [pagination, setPagination] = useState({
     count: 0,
     totalPages: 0,
     currentPage: 1,
   });
-  const [itemsPerPage, setItemsPerPage] = useState(1);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchUsers(1, itemsPerPage);
@@ -97,6 +83,7 @@ function UserTable() {
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
+    fetchUsers(pagination.currentPage, value);
   };
 
   const requestActivateDeactivate = (userId, activate) => {
@@ -209,21 +196,17 @@ function UserTable() {
     "Aadhar Card",
     "Pan Card",
     "Cibil Score",
-    "create",
-    "update",
     "CS Status",
     "Active/Inactive",
     "Action",
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
-    item.username,
+    item.username + " (" + item.businessname + ")",
     item.number,
     item.aadhar_card,
     item.pan_card,
     item.cibil_score,
-    item.createdAt,
-    item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -250,6 +233,23 @@ function UserTable() {
         Inactive
       </Button>
     ),
+  ]);
+
+  const data = filteredUsers.map((item) => [
+    {
+      Email: item.email,
+      Country: item.country,
+      "Unit Address": item.unit_address,
+      Reference: item.reference,
+      "GST Number": item.gst_number,
+      State: item.state,
+      City: item.city,
+      Dob: item.dob,
+      "Country Code": item.country_code,
+      "State Code": item.state_code,
+      "Create At": item.createdAt,
+      "Update At": item.updatedAt,
+    },
   ]);
 
   const handleDelete = (id) => {
@@ -290,6 +290,25 @@ function UserTable() {
     }
   };
 
+  // Search
+  const handleSearchData = async (value) => {
+    try {
+      const response = await AxiosInstance.post("/addusers/search", {
+        search: value,
+      });
+      if (response.data.statusCode === 200) {
+        // setUsers(response.data.data); // Update users state with search results
+        if (value !== "") {
+          setUsers(response.data.data);
+        } else {
+          fetchUsers();
+        }
+      }
+    } catch (error) {
+      console.error("Error searching users:", error);
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -305,13 +324,17 @@ function UserTable() {
                 All Customers
               </Text>
               <Flex className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
+
+                <form className="form-inline">
+                  <input
+                    id="serchbar-size"
+                    className="form-control mr-sm-2"
+                    type="search"
+                    onChange={(e) => handleSearchData(e.target.value)}
+                    placeholder="Search"
+                    aria-label="Search"
+                  />
+                </form>
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
@@ -335,12 +358,11 @@ function UserTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={5}
-              removeIndex2={6}
-              documentIndex={6}
-              documentIndex2={7}
-              name={"Created At:"}
-              name2={"Updated At:"}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={setItemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              myData={data}
             />
             <>
               {/* Pagination controls */}
@@ -368,7 +390,7 @@ function UserTable() {
                   variant="filled"
                   ml="4"
                 >
-                  <option value="1">1</option>
+                  <option value="10">10</option>
                   <option value="20">20</option>
                   <option value="30">30</option>
                 </Select>

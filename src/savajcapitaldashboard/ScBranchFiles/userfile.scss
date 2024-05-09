@@ -563,11 +563,11 @@ div.h4 {
 .progressbar li.active + li:after {
   background: orange; }
 
-.progressbar li.complete {
-  color: #55b776; }
+// .progressbar li.complete {
+//   color: #55b776; }
 
-.progressbar li.complete + li:after {
-  background-color: #55b776; }
+// .progressbar li.complete + li:after {
+//   background-color: #55b776; }
 
 .progressbar li.complete:before {
   background-color: #55b776;
@@ -603,8 +603,8 @@ div.h4 {
   .circle-button:hover {
     border: 3px solid #8ed48e; }
 
-.circle-button:hover {
-  border: 3px solid #ff0012; }
+// .circle-button:hover {
+//   border: 3px solid #ff0012; }
 
-.complete .circle-button:hover {
-  border: 4px dashed #55b776; }
+// .complete .circle-button:hover {
+//   border: 4px dashed #55b776; }

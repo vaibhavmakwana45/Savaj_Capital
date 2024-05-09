@@ -215,13 +215,10 @@ router.get("/getusers", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10; // Default limit is 10
 
-    // Calculate skip value
-    const skip = (page - 1) * limit;
-
     // Fetch users with pagination and excluding password field
     const users = await AddUser.find({}, "-password")
       .sort({ updatedAt: -1 })
-      .skip(skip)
+      .skip((page - 1) * limit)
       .limit(limit);
 
     // Count total users
@@ -244,6 +241,40 @@ router.get("/getusers", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+});
+
+
+
+router.post("/search", async (req, res) => {
+  try {
+    let newArray = [];
+    newArray.push({
+      username: !isNaN(req.body.search)
+        ? req.body.search
+        : { $regex: req.body.search, $options: "i" },
+    });
+    // }
+
+    var data = await AddUser.find({
+      $or: newArray,
+    });
+
+    var count = await AddUser.countDocuments({
+      $or: newArray,
+    });
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      count: count,
+      message: "Read Category",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
     });
   }
 });
