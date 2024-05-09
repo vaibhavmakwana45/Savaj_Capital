@@ -538,7 +538,7 @@ function ViewFile() {
 
                     <div
                       className="container-fluid progress-bar-area"
-                      style={{ height: "20%",overflow:"auto" }}
+                      style={{ height: "20%", overflow: "auto" }}
                     >
                       <div className="row">
                         <div
@@ -569,7 +569,6 @@ function ViewFile() {
                                         "complete" ||
                                         index === 0) &&
                                       "pointer",
-                                      
                                   }}
                                   onClick={() => {
                                     if (
@@ -582,7 +581,7 @@ function ViewFile() {
                                         setOpen({
                                           is: false,
                                           data: {},
-                                          index: 0,
+                                          index: "",
                                         });
                                       } else {
                                         setOpen({
@@ -630,7 +629,8 @@ function ViewFile() {
                                       onChange={(e) => handleChange(e, index)}
                                     />
                                   </div>
-                                ) : input.type === "checkbox" ? (
+                                ) : input.type === "checkbox" &&
+                                  open.data.status !== "complete" ? (
                                   <div>
                                     <Checkbox
                                       checked={input.value}
@@ -642,15 +642,19 @@ function ViewFile() {
                                     </Checkbox>
                                   </div>
                                 ) : (
-                                  <div>
-                                    <label>{input.label}</label>
-                                    <Input
-                                      type="file"
-                                      required={input.is_required}
-                                      disabled={open.data.status === "complete"}
-                                      onChange={(e) => handleChange(e, index)}
-                                    />
-                                  </div>
+                                  input.type === "file" && (
+                                    <div>
+                                      <label>{input.label}</label>
+                                      <Input
+                                        type="file"
+                                        required={input.is_required}
+                                        disabled={
+                                          open.data.status === "complete"
+                                        }
+                                        onChange={(e) => handleChange(e, index)}
+                                      />
+                                    </div>
+                                  )
                                 )}
                               </FormControl>
                             ))}
@@ -668,71 +672,72 @@ function ViewFile() {
                           </Form>
                         )}
 
-                        {open.is && open.data.loan_step === "Documents" && (
-                          <div className="row">
-                            <div
-                              className="col px-5 pt-3
+                        {open.is &&
+                          open.data.loan_step === "Documents" &&
+                          open.data.pendingData.length !== 0 && (
+                            <div className="row">
+                              <div
+                                className="col px-5 pt-3
                             d-flex justify-content-start align-items-top"
-                            >
-                              <Table
-                                size="sm"
-                                aria-label="documents"
-                                className="mx-4"
                               >
-                                <thead>
-                                  <tr className="py-2">
-                                    <th
-                                      className="font-weight-bold"
-                                      style={{ fontSize: "1rem" }}
-                                    >
-                                      Document
-                                    </th>
-                                    <th
-                                      className="status font-weight-bold"
-                                      style={{ fontSize: "1rem" }}
-                                    >
-                                      Status
-                                    </th>
-                                  </tr>
-                                </thead>
-                                {console.log(open.data, "yash")}
-                                <tbody>
-                                  {open.data?.pendingData?.map(
-                                    (documentRow, index) => (
-                                      <tr key={index}>
-                                        <td>{documentRow?.name}</td>
-                                        <td>
-                                          <span
-                                            style={{
-                                              color: "#FFB302",
-                                              fontWeight: "bold",
-                                            }}
-                                          >
-                                            Pending
-                                          </span>
-                                        </td>
-                                      </tr>
-                                    )
-                                  )}
-                                </tbody>
-                              </Table>
-                              {open.data.status !== "complete" && (
-                                <Button
-                                  colorScheme="blue"
-                                  style={{ backgroundColor: "#b19552" }}
-                                  className="mx-3"
-                                  onClick={() =>
-                                    history.push(
-                                      `/superadmin/editfile?id=${id}`
-                                    )
-                                  }
+                                <Table
+                                  size="sm"
+                                  aria-label="documents"
+                                  className="mx-4"
                                 >
-                                  Upload
-                                </Button>
-                              )}
+                                  <thead>
+                                    <tr className="py-2">
+                                      <th
+                                        className="font-weight-bold"
+                                        style={{ fontSize: "1rem" }}
+                                      >
+                                        Document
+                                      </th>
+                                      <th
+                                        className="status font-weight-bold"
+                                        style={{ fontSize: "1rem" }}
+                                      >
+                                        Status
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {open.data?.pendingData?.map(
+                                      (documentRow, index) => (
+                                        <tr key={index}>
+                                          <td>{documentRow?.name}</td>
+                                          <td>
+                                            <span
+                                              style={{
+                                                color: "#FFB302",
+                                                fontWeight: "bold",
+                                              }}
+                                            >
+                                              Pending
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      )
+                                    )}
+                                  </tbody>
+                                </Table>
+                                {open.data.status !== "complete" && (
+                                  <Button
+                                    colorScheme="blue"
+                                    style={{ backgroundColor: "#b19552" }}
+                                    className="mx-3"
+                                    onClick={() =>
+                                      history.push(
+                                        `/superadmin/editfile?id=${id}`
+                                      )
+                                    }
+                                  >
+                                    Upload
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     </div>
                   </div>
