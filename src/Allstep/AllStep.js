@@ -63,14 +63,29 @@ function AllStep() {
     getStepData();
   }, []);
 
-  const allHeaders = ["Document", "create date", "update date", "Action"];
+  const allHeaders = [
+    "Document",
+    "create date",
+    "update date",
+    "Action",
+    "Action",
+  ];
 
-  const formattedData = fllteredSteps.map((stp) => [
-    stp.loan_step_id,
-    stp.loan_step,
-    stp.createdAt,
-    stp.updatedAt,
-  ]);
+  const formattedData = fllteredSteps.map((stp) => {
+    const inputsDescription = stp.inputs
+      .map((input) => {
+        return `${input.label} (Type: ${input.type})`;
+      })
+      .join(", ");
+
+    return [
+      stp.loan_step_id,
+      stp.loan_step,
+      stp.createdAt,
+      stp.updatedAt,
+      inputsDescription,
+    ];
+  });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isStep, setIsStep] = useState(false);
@@ -223,7 +238,6 @@ function AllStep() {
                   onClick={() => {
                     setIsStep(true);
                   }}
-              
                   style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
@@ -246,6 +260,10 @@ function AllStep() {
               handleEdit={handleEdit}
               handleRow={handleRow}
               showPagination={true}
+              collapse={true}
+              documentIndex={4}
+              removeIndex={3}
+              name={"Inputs:"}
             />
           </CardBody>
         </Card>

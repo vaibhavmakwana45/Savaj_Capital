@@ -186,17 +186,18 @@ router.post("/steps/:file_id", async (req, res) => {
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
 
-    req.body["compelete_step_id"] = uniqueId;
-    req.body["file_id"] = file_id;
-    req.body["status"] = "complete";
-    req.body["createdAt"] = moment()
-      .utcOffset(330)
-      .format("YYYY-MM-DD HH:mm:ss");
-    req.body["updatedAt"] = moment()
-      .utcOffset(330)
-      .format("YYYY-MM-DD HH:mm:ss");
+    const object = {
+      compelete_step_id: uniqueId,
+      loan_step_id: req.body.loan_step_id,
+      inputs: req.body.inputs,
+      loan_step: req.body.loan_step,
+      status: "complete",
+      file_id: file_id,
+      createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+    };
 
-    var data = await Compelete_Step.create(req.body);
+    var data = await Compelete_Step.create(object);
     res.status(200).json({
       statusCode: 200,
       data: data,

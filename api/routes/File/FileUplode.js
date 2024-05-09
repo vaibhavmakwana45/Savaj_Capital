@@ -16,6 +16,21 @@ const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Ass
 
 router.post("/", async (req, res) => {
   try {
+    const { user_id, loan_id, loantype_id } = req.body;
+
+    let query = { user_id, loan_id };
+    if (loantype_id) {
+      query.loantype_id = loantype_id;
+    }
+
+    const existingEntry = await File_Uplode.findOne(query);
+
+    if (existingEntry) {
+      return res.status(400).json({
+        success: false,
+        message: "File already exists.",
+      });
+    }
     const uniqueId = `F${moment().format("YYYYMMDDHHmmss")}`;
     const timestampForDocId = Date.now();
 
@@ -35,7 +50,7 @@ router.post("/", async (req, res) => {
     res.json({
       success: true,
       data: data,
-      message: "Add Role Successfully",
+      message: "Add File Successfully",
     });
   } catch (error) {
     res.json({

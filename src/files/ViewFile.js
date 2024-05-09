@@ -16,7 +16,6 @@ import {
   ModalBody,
   ModalCloseButton,
   Input,
-  Divider,
   Checkbox,
 } from "@chakra-ui/react";
 
@@ -581,7 +580,7 @@ function ViewFile() {
                                         setOpen({
                                           is: false,
                                           data: {},
-                                          index: 0,
+                                          index: "",
                                         });
                                       } else {
                                         setOpen({
