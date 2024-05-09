@@ -529,13 +529,13 @@ function AddFiles() {
                             <div
                               key={`${title_id}-${index}-${innerIndex}`}
                               className="upload-area col-xl-12 col-md-12 col-sm-12"
-                              onClick={() => {
-                                document
-                                  .getElementById(
-                                    `fileInput-${title_id}-${index}-${innerIndex}`
-                                  )
-                                  .click();
-                              }}
+                              // onClick={() => {
+                              //   document
+                              //     .getElementById(
+                              //       `fileInput-${title_id}-${index}-${innerIndex}`
+                              //     )
+                              //     .click();
+                              // }}
                               style={{ cursor: "pointer" }}
                             >
                               <Text
