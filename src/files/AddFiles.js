@@ -111,6 +111,7 @@ function AddFiles() {
 
   const handleLoanTypeChange = async (event) => {
     const loanId = event.target.value;
+    setSelectedLoanId(loanId);
     const selectedType = loanType.find((loan) => loan.loan_id === loanId);
     setSelectedLoanType(selectedType || {});
 
@@ -259,6 +260,7 @@ function AddFiles() {
 
   const handleLoanChange = (event) => {
     setSelectedLoanId(event.target.value);
+    setSelectedLoanSubtypeId("");
   };
 
   const handleLoanSubtypeChange = (event) => {
@@ -419,7 +421,16 @@ function AddFiles() {
       toast.success("All data submitted successfully!");
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
-      toast.error("Submission failed! Please try again.");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.status === 400
+      ) {
+        // Display custom error message from server
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message || "Submission failed! Please try again.");
+      }
     } finally {
       setLoading(false);
     }

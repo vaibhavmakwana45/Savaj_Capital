@@ -16,7 +16,6 @@ import {
   ModalBody,
   ModalCloseButton,
   Input,
-  Divider,
   Checkbox,
 } from "@chakra-ui/react";
 
@@ -376,10 +375,20 @@ function ViewFile() {
 
   const submitStep = async () => {
     try {
-      const response = await AxiosInstance.post(
-        `/loan_step/steps/${id}`,
-        open.data
-      );
+      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
+
+      const cibilScore = open.data.inputs.find(
+        (input) => input.label === "Cibil Score"
+      )?.value;
+
+      const userId = open.data.user_id;
+
+      const formData = {
+        cibil_score: cibilScore,
+      };
+
+      await AxiosInstance.put("/addusers/edituser/" + userId, formData);
+
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
