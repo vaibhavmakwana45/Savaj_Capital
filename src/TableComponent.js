@@ -470,7 +470,7 @@ const TableComponent = ({
             {allHeaders.map((header, index) => (
               <Th
                 key={index}
-                pl="0px"
+                pl="10px"
                 borderColor={"gray.600"}
                 color="gray.400"
                 display={
@@ -510,7 +510,7 @@ const TableComponent = ({
                   {rowData.slice(1).map((cellData, cellIndex) => (
                     <Td
                       key={cellIndex}
-                      pl="0px"
+                      pl="10px"
                       onClick={() => handleRow(rowData[0])}
                       style={{ cursor: handleRow ? "pointer" : "auto" }}
                       display={

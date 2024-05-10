@@ -40,6 +40,7 @@ import {
 } from "@mui/icons-material";
 import Loader from "react-js-loader";
 import AxiosInstance from "config/AxiosInstance";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 
 const theme = createTheme();
 
@@ -334,7 +335,8 @@ export default function CollapsibleTable() {
   let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
-
+  const location = useLocation();
+  const { loan } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
   const filteredUsers = files.filter((file) => {
     const loanSafe =
@@ -380,6 +382,13 @@ export default function CollapsibleTable() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (loan) {
+      console.log(loan);
+      setSelectedLoan(loan);
+    }
+  }, [loan, loans]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
