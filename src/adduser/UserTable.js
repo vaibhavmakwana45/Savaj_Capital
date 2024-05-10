@@ -249,11 +249,8 @@ function UserTable() {
   const cancelRef = React.useRef();
   const deletebranch = async (userId) => {
     try {
-      const response = await AxiosInstance.put(
-        `/addusers/toggle-active/${userId}`,
-        {
-          isActive: activate,
-        }
+      const response = await AxiosInstance.delete(
+        `/addusers/deleteuser/${userId}`
       );
 
       if (response.data.success) {
