@@ -592,7 +592,7 @@ function CreateUserFile() {
                                       <i className="bx bxs-file-image"></i>
                                     </span>
                                     <p className="drop-zone__paragraph">
-                                    Upload Your Documents
+                                      Upload Your Documents
                                     </p>
                                   </div>
                                 )}

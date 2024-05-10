@@ -63,7 +63,7 @@ export default function Dashboard() {
     superadmin: 0,
     loans: [],
   });
-
+  console.log(apiData, "apiData");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -398,10 +398,15 @@ export default function Dashboard() {
         </Card>
         {apiData.loans.map((loan) => (
           <Card
-            key={loan._id}
+            key={loan.loan_id}
             minH="125px"
             style={{ cursor: "pointer" }}
-            onClick={() => history.push(`/superadmin/filetable`)}
+            onClick={() =>
+              {history.push(`/superadmin/filetable`, {
+                state: { loan: loan.loan },
+              })
+                console.log(loan.loan_id,"vaibahv")}
+            }
           >
             <Flex direction="column">
               <Flex
@@ -448,188 +453,6 @@ export default function Dashboard() {
           </Card>
         ))}
       </SimpleGrid>
-      {/* <Grid
-        templateColumns={{ sm: "1fr", lg: "2fr 1fr" }}
-        templateRows={{ lg: "repeat(2, auto)" }}
-        gap='20px'>
-        <Card
-          bg={
-            colorMode === "dark"
-              ? "navy.800"
-              : "linear-gradient(81.62deg, #313860 2.25%, #151928 79.87%)"
-          }
-          p='0px'
-          maxW={{ sm: "320px", md: "100%" }}>
-          <Flex direction='column' mb='40px' p='28px 0px 0px 22px'>
-            <Text color='#fff' fontSize='lg' fontWeight='bold' mb='6px'>
-              Sales Overview
-            </Text>
-            <Text color='#fff' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
-                (+5) more{" "}
-              </Text>
-              in 2022
-            </Text>
-          </Flex>
-          <Box minH='300px'>
-            <LineChart
-              chartData={lineChartData}
-              chartOptions={lineChartOptions}
-            />
-          </Box>
-        </Card>
-        <Card p='0px' maxW={{ sm: "320px", md: "100%" }}>
-          <Flex direction='column' mb='40px' p='28px 0px 0px 22px'>
-            <Text color='gray.400' fontSize='sm' fontWeight='bold' mb='6px'>
-              PERFORMANCE
-            </Text>
-            <Text color={textColor} fontSize='lg' fontWeight='bold'>
-              Total orders
-            </Text>
-          </Flex>
-          <Box minH='300px'>
-            <BarChart chartData={barChartData} chartOptions={barChartOptions} />
-          </Box>
-        </Card>
-        <Card p='0px' maxW={{ sm: "320px", md: "100%" }}>
-          <Flex direction='column'>
-            <Flex align='center' justify='space-between' p='22px'>
-              <Text fontSize='lg' color={textColor} fontWeight='bold'>
-                Page visits
-              </Text>
-              <Button variant='primary' maxH='30px'>
-                SEE ALL
-              </Button>
-            </Flex>
-            <Box overflow={{ sm: "scroll", lg: "hidden" }}>
-              <Table>
-                <Thead>
-                  <Tr bg={tableRowColor}>
-                    <Th color='gray.400' borderColor={borderColor}>
-                      Page name
-                    </Th>
-                    <Th color='gray.400' borderColor={borderColor}>
-                      Visitors
-                    </Th>
-                    <Th color='gray.400' borderColor={borderColor}>
-                      Unique users
-                    </Th>
-                    <Th color='gray.400' borderColor={borderColor}>
-                      Bounce rate
-                    </Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {pageVisits.map((el, index, arr) => {
-                    return (
-                      <Tr key={index}>
-                        <Td
-                          color={textTableColor}
-                          fontSize='sm'
-                          fontWeight='bold'
-                          borderColor={borderColor}
-                          border={index === arr.length - 1 ? "none" : null}>
-                          {el.pageName}
-                        </Td>
-                        <Td
-                          color={textTableColor}
-                          fontSize='sm'
-                          border={index === arr.length - 1 ? "none" : null}
-                          borderColor={borderColor}>
-                          {el.visitors}
-                        </Td>
-                        <Td
-                          color={textTableColor}
-                          fontSize='sm'
-                          border={index === arr.length - 1 ? "none" : null}
-                          borderColor={borderColor}>
-                          {el.uniqueUsers}
-                        </Td>
-                        <Td
-                          color={textTableColor}
-                          fontSize='sm'
-                          border={index === arr.length - 1 ? "none" : null}
-                          borderColor={borderColor}>
-                          {el.bounceRate}
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </Box>
-          </Flex>
-        </Card>
-        <Card p='0px' maxW={{ sm: "320px", md: "100%" }}>
-          <Flex direction='column'>
-            <Flex align='center' justify='space-between' p='22px'>
-              <Text fontSize='lg' color={textColor} fontWeight='bold'>
-                Social traffic
-              </Text>
-              <Button variant='primary' maxH='30px'>
-                SEE ALL
-              </Button>
-            </Flex>
-          </Flex>
-          <Box overflow={{ sm: "scroll", lg: "hidden" }}>
-            <Table>
-              <Thead>
-                <Tr bg={tableRowColor}>
-                  <Th color='gray.400' borderColor={borderColor}>
-                    Referral
-                  </Th>
-                  <Th color='gray.400' borderColor={borderColor}>
-                    Visitors
-                  </Th>
-                  <Th color='gray.400' borderColor={borderColor}></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {socialTraffic.map((el, index, arr) => {
-                  return (
-                    <Tr key={index}>
-                      <Td
-                        color={textTableColor}
-                        fontSize='sm'
-                        fontWeight='bold'
-                        borderColor={borderColor}
-                        border={index === arr.length - 1 ? "none" : null}>
-                        {el.referral}
-                      </Td>
-                      <Td
-                        color={textTableColor}
-                        fontSize='sm'
-                        borderColor={borderColor}
-                        border={index === arr.length - 1 ? "none" : null}>
-                        {el.visitors}
-                      </Td>
-                      <Td
-                        color={textTableColor}
-                        fontSize='sm'
-                        borderColor={borderColor}
-                        border={index === arr.length - 1 ? "none" : null}>
-                        <Flex align='center'>
-                          <Text
-                            color={textTableColor}
-                            fontWeight='bold'
-                            fontSize='sm'
-                            me='12px'>{`${el.percentage}%`}</Text>
-                          <Progress
-                            size='xs'
-                            colorScheme={el.color}
-                            value={el.percentage}
-                            minW='120px'
-                          />
-                        </Flex>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </Box>
-        </Card>
-      </Grid> */}
     </Flex>
   );
 }

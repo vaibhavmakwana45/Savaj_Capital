@@ -22,6 +22,8 @@ import {
   IconButton,
   Input,
   FormControl,
+  Switch,
+  FormLabel,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
@@ -97,17 +99,52 @@ function UserTable() {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
   };
+  const [steps, setSteps] = useState([]);
+  const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
+  console.log(selectedLoanStepIds,"selectedLoanStepIds")
+  const getStepData = async () => {
+    try {
+      const response = await AxiosInstance.get("/loan_step");
+      console.log(response, "response");
+      if (response.data.success) {
+        setSteps(response.data.data);
+        setLoading(false);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    getStepData();
+  }, []);
 
+  const handleSwitchToggle = (event, stepId) => {
+    const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
+    const index = updatedSelectedLoanStepIds.indexOf(stepId);
+    if (event.target.checked && index === -1) {
+      updatedSelectedLoanStepIds.push(stepId);
+    } else if (!event.target.checked && index !== -1) {
+      updatedSelectedLoanStepIds.splice(index, 1);
+    }
+    setSelectedLoanStepIds(updatedSelectedLoanStepIds);
+  };
+
+  console.log(steps, "steps");
   const handleEdit = (id) => {
     setisEditLoan(true);
     setSelectedLoanId(id);
-    const data = users.find((user) => user.loan_id == id);
+    const data = users.find((user) => user.loan_id === id);
     if (data) {
       setSelectedLoan(data.loan);
+      setSelectedLoanStepIds(data.loan_step_id || []); // Ensure step IDs are set
     } else {
       console.error("Data not found for id:", id);
     }
   };
+
   // const handleEdit = (id) => {
   //   history.push("/superadmin/addloantype?id=" + id);
   // };
@@ -151,14 +188,23 @@ function UserTable() {
 
   const editRole = async (loan) => {
     try {
-      const response = await AxiosInstance.put("/loan/" + selectedLoanId, {
-        loan,
-      });
+      setLoading(true);
 
+      const payload = {
+        loan,
+        steps: selectedLoanStepIds,
+      };
+
+      const response = await AxiosInstance.put(
+        `/loan/${selectedLoanId}`,
+        payload
+      );
+      console.log(response, "responce");
       if (response.data.success) {
-        toast.success("Role Updated successfully!");
+        toast.success("Loan and steps updated successfully!");
         setisEditLoan(false);
         setSelectedLoan("");
+        setSelectedLoanStepIds([]);
         fetchUsers();
         setSelectedLoanId("");
       } else {
@@ -166,7 +212,7 @@ function UserTable() {
       }
     } catch (error) {
       console.error("Submission error", error);
-      toast.error("Failed to add. Please try again.");
+      toast.error("Failed to update. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -301,6 +347,50 @@ function UserTable() {
                     }}
                   />
                 </FormControl>
+                <div
+                  className="card"
+                  style={{
+                    padding: "30px",
+                    borderRadius: "15px",
+                    marginTop: "30px",
+                    boxShadow:
+                      "rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px",
+                  }}
+                >
+                  <div className="d-flex flex-wrap">
+                    {steps.map((step) => (
+                      <FormControl
+                        key={step._id}
+                        alignItems="center"
+                        mt="5"
+                        style={{ width: "25%" }}
+                      >
+                        <Switch
+                          id={`email-alerts-${step.loan_step_id}`}
+                          isChecked={selectedLoanStepIds.includes(
+                            step.loan_step_id
+                          )}
+                          onChange={(event) =>
+                            handleSwitchToggle(event, step.loan_step_id)
+                          }
+                          style={{
+                            boxShadow:
+                              "rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px",
+                            borderRadius: "30px",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <FormLabel
+                          htmlFor={`email-alerts-${step.loan_step_id}`}
+                          mb="0"
+                          style={{ fontSize: "14px", fontWeight: 600 }}
+                        >
+                          <i>{step.loan_step}</i>
+                        </FormLabel>
+                      </FormControl>
+                    ))}
+                  </div>
+                </div>
               </AlertDialogBody>
 
               <AlertDialogFooter>
