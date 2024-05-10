@@ -167,7 +167,7 @@ function UserTable() {
   };
 
   const allHeaders = [
-    "Name",
+    "Name (Business Name)",
     "Number",
     "Aadhar Card",
     "Pan Card",
@@ -180,7 +180,7 @@ function UserTable() {
   ];
   const formattedData = filteredUsers.map((item) => [
     item.user_id,
-    item.username,
+    `${item.username} (${item.businessname})`,
     item.number,
     item.aadhar_card,
     item.pan_card,
