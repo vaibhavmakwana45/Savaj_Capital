@@ -18,6 +18,7 @@ import {
   Input,
   Checkbox,
 } from "@chakra-ui/react";
+import { CircularProgress } from "@material-ui/core";
 
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -328,12 +329,16 @@ function ViewFile() {
   };
 
   const [stepData, setStepData] = useState([]);
+  const [stepLoader, setStepLoader] = useState(false);
   const fetchStepsData = async () => {
     try {
+      setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
       setStepData(response.data.data);
+      setStepLoader(false);
     } catch (error) {
       console.error("Error: ", error.message);
+      setStepLoader(false);
     }
   };
 
@@ -545,210 +550,234 @@ function ViewFile() {
                       </div>
                     </FormLabel>
 
-                    <div
-                      className="container-fluid progress-bar-area"
-                      style={{ height: "20%", overflow: "auto" }}
-                    >
-                      <div className="row">
-                        <div
-                          className="col"
-                          style={{ position: "relative", zIndex: "9" }}
-                        >
-                          <ul
-                            className="progressbar"
-                            style={{
-                              display: "flex",
-                              listStyle: "none",
-                              padding: 0,
-                            }}
+                    {stepLoader ? ( // Render loader if loading is true
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100px",
+                        }}
+                      >
+                        <CircularProgress />
+                      </div>
+                    ) : (
+                      <div
+                        className="container-fluid progress-bar-area"
+                        style={{ height: "20%", overflow: "auto" }}
+                      >
+                        <div className="row">
+                          <div
+                            className="col"
+                            style={{ position: "relative", zIndex: "9" }}
                           >
-                            {stepData &&
-                              stepData?.map((item, index) => (
-                                <li
-                                  key={index}
-                                  id={`step${index + 1}`}
-                                  className={
-                                    item.status ? item.status : "active"
-                                  }
-                                  style={{
-                                    display: "inline-block",
-                                    marginRight: "10px",
-                                    cursor:
-                                      (stepData[index - 1]?.status ===
-                                        "complete" ||
-                                        index === 0) &&
-                                      "pointer",
-                                  }}
-                                  onClick={() => {
-                                    if (
-                                      item?.status === "complete" ||
-                                      stepData[index - 1]?.status ===
-                                        "complete" ||
-                                      index === 0
-                                    ) {
-                                      if (open.index === index) {
-                                        setOpen({
-                                          is: false,
-                                          data: {},
-                                          index: "",
-                                        });
-                                      } else {
-                                        setOpen({
-                                          is: true,
-                                          data: item,
-                                          index,
-                                        });
-                                      }
+                            <ul
+                              className="progressbar"
+                              style={{
+                                display: "flex",
+                                listStyle: "none",
+                                padding: 0,
+                              }}
+                            >
+                              {stepData &&
+                                stepData?.map((item, index) => (
+                                  <li
+                                    key={index}
+                                    id={`step${index + 1}`}
+                                    className={
+                                      item.status ? item.status : "active"
                                     }
-                                  }}
-                                >
-                                  {/* <div className="circle-container">
+                                    style={{
+                                      display: "inline-block",
+                                      marginRight: "10px",
+                                      cursor:
+                                        (stepData[index - 1]?.status ===
+                                          "complete" ||
+                                          index === 0) &&
+                                        "pointer",
+                                    }}
+                                    onClick={() => {
+                                      if (
+                                        item?.status === "complete" ||
+                                        stepData[index - 1]?.status ===
+                                          "complete" ||
+                                        index === 0
+                                      ) {
+                                        if (open.index === index) {
+                                          setOpen({
+                                            is: false,
+                                            data: {},
+                                            index: "",
+                                          });
+                                        } else {
+                                          setOpen({
+                                            is: true,
+                                            data: item,
+                                            index,
+                                          });
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    {/* <div className="circle-container">
                                     <a href="#">
                                       <div className="circle-button"></div>
                                     </a>
                                   </div> */}
-                                  {item?.loan_step}
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
+                                    {item?.loan_step}
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
 
-                        {open.is && open.data.loan_step_id !== "1715149246513" && (
-                          <Form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              submitStep();
-                            }}
-                          >
-                            {open?.data?.inputs?.map((input, index) => (
-                              <FormControl
-                                key={index}
-                                id="step"
-                                className="d-flex justify-content-between align-items-center mt-4"
+                          {open.is &&
+                            open.data.loan_step_id !== "1715149246513" && (
+                              <Form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  submitStep();
+                                }}
                               >
-                                {input.type === "input" ? (
-                                  <div>
-                                    <label>{input.label}</label>
-                                    <Input
-                                      name="step"
-                                      required={input.is_required}
-                                      disabled={open.data.status === "complete"}
-                                      value={input.value}
-                                      placeholder={`Enter ${input.value}`}
-                                      onChange={(e) => handleChange(e, index)}
-                                    />
-                                  </div>
-                                ) : input.type === "checkbox" &&
-                                  open.data.status !== "complete" ? (
-                                  <div>
-                                    <Checkbox
-                                      checked={input.value}
-                                      disabled={open.data.status === "complete"}
-                                      required={input.is_required}
-                                      onChange={(e) => handleChange(e, index)}
-                                    >
-                                      {input.label}
-                                    </Checkbox>
-                                  </div>
-                                ) : (
-                                  input.type === "file" && (
-                                    <div>
-                                      <label>{input.label}</label>
-                                      <Input
-                                        type="file"
-                                        required={input.is_required}
-                                        disabled={
-                                          open.data.status === "complete"
-                                        }
-                                        onChange={(e) => handleChange(e, index)}
-                                      />
-                                    </div>
-                                  )
-                                )}
-                              </FormControl>
-                            ))}
-                            {open.data.status !== "complete" && (
-                              <Button
-                                colorScheme="blue"
-                                className="mt-3"
-                                type="submit"
-                                mr={3}
-                                style={{ backgroundColor: "#b19552" }}
-                              >
-                                Submit
-                              </Button>
-                            )}
-                          </Form>
-                        )}
-
-                        {open.is &&
-                          open.data.loan_step === "Documents" &&
-                          open.data.pendingData.length !== 0 && (
-                            <div className="row">
-                              <div
-                                className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                              >
-                                <Table
-                                  size="sm"
-                                  aria-label="documents"
-                                  className="mx-4"
-                                >
-                                  <thead>
-                                    <tr className="py-2">
-                                      <th
-                                        className="font-weight-bold"
-                                        style={{ fontSize: "1rem" }}
-                                      >
-                                        Document
-                                      </th>
-                                      <th
-                                        className="status font-weight-bold"
-                                        style={{ fontSize: "1rem" }}
-                                      >
-                                        Status
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {open.data?.pendingData?.map(
-                                      (documentRow, index) => (
-                                        <tr key={index}>
-                                          <td>{documentRow?.name}</td>
-                                          <td>
-                                            <span
-                                              style={{
-                                                color: "#FFB302",
-                                                fontWeight: "bold",
-                                              }}
-                                            >
-                                              Pending
-                                            </span>
-                                          </td>
-                                        </tr>
+                                {open?.data?.inputs?.map((input, index) => (
+                                  <FormControl
+                                    key={index}
+                                    id="step"
+                                    className="d-flex justify-content-between align-items-center mt-4"
+                                  >
+                                    {input.type === "input" ? (
+                                      <div>
+                                        <label>{input.label}</label>
+                                        <Input
+                                          name="step"
+                                          required={input.is_required}
+                                          disabled={
+                                            open.data.status === "complete"
+                                          }
+                                          value={input.value}
+                                          placeholder={`Enter ${input.value}`}
+                                          onChange={(e) =>
+                                            handleChange(e, index)
+                                          }
+                                        />
+                                      </div>
+                                    ) : input.type === "checkbox" &&
+                                      open.data.status !== "complete" ? (
+                                      <div>
+                                        <Checkbox
+                                          checked={input.value}
+                                          disabled={
+                                            open.data.status === "complete"
+                                          }
+                                          required={input.is_required}
+                                          onChange={(e) =>
+                                            handleChange(e, index)
+                                          }
+                                        >
+                                          {input.label}
+                                        </Checkbox>
+                                      </div>
+                                    ) : (
+                                      input.type === "file" && (
+                                        <div>
+                                          <label>{input.label}</label>
+                                          <Input
+                                            type="file"
+                                            required={input.is_required}
+                                            disabled={
+                                              open.data.status === "complete"
+                                            }
+                                            onChange={(e) =>
+                                              handleChange(e, index)
+                                            }
+                                          />
+                                        </div>
                                       )
                                     )}
-                                  </tbody>
-                                </Table>
+                                  </FormControl>
+                                ))}
                                 {open.data.status !== "complete" && (
                                   <Button
                                     colorScheme="blue"
+                                    className="mt-3"
+                                    type="submit"
+                                    mr={3}
                                     style={{ backgroundColor: "#b19552" }}
-                                    className="mx-3"
-                                    onClick={() =>
-                                      history.push(
-                                        `/superadmin/editfile?id=${id}`
-                                      )
-                                    }
                                   >
-                                    Upload
+                                    Submit
                                   </Button>
                                 )}
+                              </Form>
+                            )}
+
+                          {open.is &&
+                            open.data.loan_step === "Documents" &&
+                            open.data.pendingData.length !== 0 && (
+                              <div className="row">
+                                <div
+                                  className="col px-5 pt-3
+                            d-flex justify-content-start align-items-top"
+                                >
+                                  <Table
+                                    size="sm"
+                                    aria-label="documents"
+                                    className="mx-4"
+                                  >
+                                    <thead>
+                                      <tr className="py-2">
+                                        <th
+                                          className="font-weight-bold"
+                                          style={{ fontSize: "1rem" }}
+                                        >
+                                          Document
+                                        </th>
+                                        <th
+                                          className="status font-weight-bold"
+                                          style={{ fontSize: "1rem" }}
+                                        >
+                                          Status
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {open.data?.pendingData?.map(
+                                        (documentRow, index) => (
+                                          <tr key={index}>
+                                            <td>{documentRow?.name}</td>
+                                            <td>
+                                              <span
+                                                style={{
+                                                  color: "#FFB302",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                Pending
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        )
+                                      )}
+                                    </tbody>
+                                  </Table>
+                                  {open.data.status !== "complete" && (
+                                    <Button
+                                      colorScheme="blue"
+                                      style={{ backgroundColor: "#b19552" }}
+                                      className="mx-3"
+                                      onClick={() =>
+                                        history.push(
+                                          `/superadmin/editfile?id=${id}`
+                                        )
+                                      }
+                                    >
+                                      Upload
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <div>
                     {fileData?.documents && (
