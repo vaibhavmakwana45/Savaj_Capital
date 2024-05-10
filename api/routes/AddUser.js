@@ -246,53 +246,53 @@ router.get("/getusers", async (req, res) => {
 //   }
 // });
 
-router.post("/search", async (req, res) => {
-  try {
-    const searchValue = req.body.search;
+// router.post("/search", async (req, res) => {
+//   try {
+//     const searchValue = req.body.search;
     
-    if (!searchValue) {
-      return res.status(400).json({ statusCode: 400, message: "Search parameter is required." });
-    }
+//     if (!searchValue) {
+//       return res.status(400).json({ statusCode: 400, message: "Search parameter is required." });
+//     }
 
-    const regexSearch = new RegExp(searchValue, "i");
+//     const regexSearch = new RegExp(searchValue, "i");
 
-    const searchCriteria = [
-      { username: regexSearch },
-      { email: regexSearch },
-      { businessname: regexSearch },
-      { number: regexSearch },
-      { cibil_score: regexSearch },
-      { unit_address: regexSearch },
-      { reference: regexSearch },
-      { gst_number: regexSearch },
-      { state: regexSearch },
-      { city: regexSearch },
-      { pan_card: regexSearch },
-    ];
+//     const searchCriteria = [
+//       { username: regexSearch },
+//       { email: regexSearch },
+//       { businessname: regexSearch },
+//       { number: regexSearch },
+//       { cibil_score: regexSearch },
+//       { unit_address: regexSearch },
+//       { reference: regexSearch },
+//       { gst_number: regexSearch },
+//       { state: regexSearch },
+//       { city: regexSearch },
+//       { pan_card: regexSearch },
+//     ];
 
-    // Check if the search value is a valid number
-    const searchValueAsNumber = parseInt(searchValue);
-    if (!isNaN(searchValueAsNumber)) {
-      // If valid, include aadhar_card field in search criteria
-      searchCriteria.push({ aadhar_card: searchValueAsNumber });
-    }
+//     // Check if the search value is a valid number
+//     const searchValueAsNumber = parseInt(searchValue);
+//     if (!isNaN(searchValueAsNumber)) {
+//       // If valid, include aadhar_card field in search criteria
+//       searchCriteria.push({ aadhar_card: searchValueAsNumber });
+//     }
 
-    const data = await AddUser.find({ $or: searchCriteria });
-    const count = await AddUser.countDocuments({ $or: searchCriteria });
+//     const data = await AddUser.find({ $or: searchCriteria });
+//     const count = await AddUser.countDocuments({ $or: searchCriteria });
 
-    res.json({
-      statusCode: 200,
-      data: data,
-      count: count,
-      message: "Category Read Successful",
-    });
-  } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: error.message || "An error occurred while searching.",
-    });
-  }
-});
+//     res.json({
+//       statusCode: 200,
+//       data: data,
+//       count: count,
+//       message: "Category Read Successful",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       statusCode: 500,
+//       message: error.message || "An error occurred while searching.",
+//     });
+//   }
+// });
 
 
 
