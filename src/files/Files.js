@@ -556,9 +556,10 @@ export default function CollapsibleTable() {
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Status
                     </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      IDB
-                    </TableCell>
+                    <TableCell
+                      align=""
+                      style={{ color: "#BEC7D4" }}
+                    ></TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Action
                     </TableCell>

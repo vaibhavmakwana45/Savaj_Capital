@@ -61,103 +61,231 @@ router.post("/", async (req, res) => {
   }
 });
 
+// router.get("/", async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
 
+//     var data = await File_Uplode.aggregate([
+//       {
+//         $sort: { updatedAt: -1 },
+//       },
+//       {
+//         $skip: skip,
+//       },
+//       {
+//         $limit: limit,
+//       },
+//     ]);
+
+//     // Loop through the data to populate additional fields
+//     for (let i = 0; i < data.length; i++) {
+//       const branchuser_id = data[i].branchuser_id;
+//       const user_id = data[i].user_id;
+//       const loan_id = data[i].loan_id;
+//       const loantype_id = data[i].loantype_id;
+
+//       const branchUserData = await SavajCapital_User.findOne({
+//         branchuser_id: branchuser_id,
+//       });
+
+//       const userData = await AddUser.findOne({ user_id: user_id });
+//       const loanData = await Loan.findOne({
+//         loan_id: loan_id,
+//       });
+//       const loanTypeData = await Loan_Type.findOne({
+//         loantype_id: loantype_id,
+//       });
+
+//       if (branchUserData) {
+//         data[i].brachuser_full_name = branchUserData.full_name;
+//       }
+
+//       if (userData) {
+//         data[i].user_username = userData.username;
+//         data[i].pan_card = userData.pan_card;
+//       }
+//       if (loanData) {
+//         data[i].loan = loanData.loan;
+//       }
+//       if (loanTypeData) {
+//         data[i].loan_type = loanTypeData.loan_type;
+//       }
+
+//       let documentCount;
+//       if (loantype_id === "") {
+//         documentCount = await Loan_Documents.countDocuments({
+//           loan_id: loan_id,
+//         });
+//       } else {
+//         documentCount = await Loan_Documents.countDocuments({
+//           loantype_id: loantype_id,
+//         });
+//       }
+
+//       let loan_doc_data;
+//       if (loantype_id === "") {
+//         loan_doc_data = await Loan_Documents.find({
+//           loan_id: loan_id,
+//         }).limit(documentCount);
+//       } else {
+//         loan_doc_data = await Loan_Documents.find({
+//           loantype_id: loantype_id,
+//         }).limit(documentCount);
+//       }
+
+//       data[i].loan_document_ids = loan_doc_data.map((doc) => ({
+//         loan_document_id: doc.loan_document_id,
+//         loan_document: doc.loan_document,
+//       }));
+
+//       data[i].loan_document_ids.forEach((doc) => {
+//         const found = data[i].documents.some(
+//           (d) => d.loan_document_id === doc.loan_document_id
+//         );
+//         doc.is_uploaded = found;
+//       });
+
+//       // const uploadedDocumentsCount = data[i].documents.length;
+//       // let percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(
+//       //   2
+//       // );
+
+//       // data[i].document_count = documentCount;
+//       // data[i].document_percentage = parseFloat(percentage);
+
+//       // data[i].uploaded_documents_count = uploadedDocumentsCount;
+//     }
+
+//     // Query to fetch total count of documents
+//     const totalCount = await File_Uplode.countDocuments();
+
+//     // Calculate total page count
+//     const totalPages = Math.ceil(totalCount / limit);
+
+//     res.json({
+//       statusCode: 200,
+//       data: data,
+//       count: totalCount,
+//       totalPages: totalPages,
+//       currentPage: page,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
+// Fast Responce with pagination
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    var data = await File_Uplode.aggregate([
-      {
-        $sort: { updatedAt: -1 },
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
-      },
+    // Fetch data with aggregation pipeline
+    const data = await File_Uplode.aggregate([
+      { $sort: { updatedAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
-    // Loop through the data to populate additional fields
-    for (let i = 0; i < data.length; i++) {
-      const branchuser_id = data[i].branchuser_id;
-      const user_id = data[i].user_id;
-      const loan_id = data[i].loan_id;
-      const loantype_id = data[i].loantype_id;
+    // Get IDs for parallel queries
+    const branchUserIds = data.map((item) => item.branchuser_id);
+    const userIds = data.map((item) => item.user_id);
+    const loanIds = data.map((item) => item.loan_id);
+    const loanTypeIds = data.map((item) => item.loantype_id);
 
-      const branchUserData = await SavajCapital_User.findOne({
-        branchuser_id: branchuser_id,
-      });
+    // Execute parallel queries
+    const [
+      branchUserData,
+      userData,
+      loanData,
+      loanTypeData,
+    ] = await Promise.all([
+      SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
+      AddUser.find({ user_id: { $in: userIds } }),
+      Loan.find({ loan_id: { $in: loanIds } }),
+      Loan_Type.find({ loantype_id: { $in: loanTypeIds } }),
+    ]);
 
-      const userData = await AddUser.findOne({ user_id: user_id });
-      const loanData = await Loan.findOne({
-        loan_id: loan_id,
-      });
-      const loanTypeData = await Loan_Type.findOne({
-        loantype_id: loantype_id,
-      });
+    // Create maps for faster lookup
+    const branchUserMap = new Map(
+      branchUserData.map((user) => [user.branchuser_id, user])
+    );
+    const userMap = new Map(userData.map((user) => [user.user_id, user]));
+    const loanMap = new Map(loanData.map((loan) => [loan.loan_id, loan]));
+    const loanTypeMap = new Map(
+      loanTypeData.map((loanType) => [loanType.loantype_id, loanType])
+    );
 
-      if (branchUserData) {
-        data[i].brachuser_full_name = branchUserData.full_name;
-      }
-
-      if (userData) {
-        data[i].user_username = userData.username;
-        data[i].pan_card = userData.pan_card;
-      }
-      if (loanData) {
-        data[i].loan = loanData.loan;
-      }
-      if (loanTypeData) {
-        data[i].loan_type = loanTypeData.loan_type;
-      }
-
-      let documentCount;
-      if (loantype_id === "") {
-        documentCount = await Loan_Documents.countDocuments({
-          loan_id: loan_id,
-        });
-      } else {
-        documentCount = await Loan_Documents.countDocuments({
-          loantype_id: loantype_id,
-        });
-      }
-
-      let loan_doc_data;
-      if (loantype_id === "") {
-        loan_doc_data = await Loan_Documents.find({
-          loan_id: loan_id,
-        }).limit(documentCount);
-      } else {
-        loan_doc_data = await Loan_Documents.find({
-          loantype_id: loantype_id,
-        }).limit(documentCount);
-      }
-
-      data[i].loan_document_ids = loan_doc_data.map((doc) => ({
-        loan_document_id: doc.loan_document_id,
-        loan_document: doc.loan_document,
-      }));
-
-      data[i].loan_document_ids.forEach((doc) => {
-        const found = data[i].documents.some(
-          (d) => d.loan_document_id === doc.loan_document_id
+    // Fetch documents count for each loan/loantype
+    const documentCounts = await Promise.all(
+      data.map(async (item) => {
+        const count = await Loan_Documents.countDocuments(
+          item.loantype_id === ""
+            ? { loan_id: item.loan_id }
+            : { loantype_id: item.loantype_id }
         );
-        doc.is_uploaded = found;
-      });
+        return { itemId: item._id, count };
+      })
+    );
 
-      const uploadedDocumentsCount = data[i].documents.length;
-      let percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(
-        2
-      );
+    // Fetch documents for each loan/loantype
+    const documentData = await Promise.all(
+      data.map(async (item) => {
+        const docs = await Loan_Documents.find(
+          item.loantype_id === ""
+            ? { loan_id: item.loan_id }
+            : { loantype_id: item.loantype_id }
+        ).limit(item.documentCount);
+        return { itemId: item._id, docs };
+      })
+    );
 
-      data[i].document_count = documentCount;
-      data[i].document_percentage = parseFloat(percentage);
+    // Combine fetched data with original data
+    data.forEach((item) => {
+      if (branchUserMap.has(item.branchuser_id)) {
+        const branchUserData = branchUserMap.get(item.branchuser_id);
+        item.brachuser_full_name = branchUserData.full_name;
+      }
+      if (userMap.has(item.user_id)) {
+        const userData = userMap.get(item.user_id);
+        item.user_username = userData.username;
+        item.pan_card = userData.pan_card;
+      }
+      if (loanMap.has(item.loan_id)) {
+        const loanData = loanMap.get(item.loan_id);
+        item.loan = loanData.loan;
+      }
+      if (loanTypeMap.has(item.loantype_id)) {
+        const loanTypeData = loanTypeMap.get(item.loantype_id);
+        item.loan_type = loanTypeData.loan_type;
+      }
 
-      data[i].uploaded_documents_count = uploadedDocumentsCount;
-    }
+      // const documentCount = documentCounts.find(dc => dc.itemId === item._id)?.count || 0;
+      // item.document_count = documentCount;
+
+      // const uploadedDocumentsCount = documentData.find(dd => dd.itemId === item._id)?.docs.length || 0;
+      // item.uploaded_documents_count = uploadedDocumentsCount;
+
+      // const percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(2);
+      // item.document_percentage = parseFloat(percentage);
+
+      const loanDocs =
+        documentData.find((dd) => dd.itemId === item._id)?.docs || [];
+      item.loan_document_ids = loanDocs.map((doc) => ({
+        loan_document_id: doc.loan_document_id,
+        loan_document: doc?.loan_document,
+        is_uploaded: item.documents.some(
+          (d) => d.loan_document_id === doc.loan_document_id
+        ),
+      }));
+    });
 
     // Query to fetch total count of documents
     const totalCount = await File_Uplode.countDocuments();
@@ -167,9 +295,9 @@ router.get("/", async (req, res) => {
 
     res.json({
       statusCode: 200,
-      data: data,
+      data,
       count: totalCount,
-      totalPages: totalPages,
+      totalPages,
       currentPage: page,
       message: "Read All Request",
     });
@@ -907,6 +1035,133 @@ router.get("/get_documents/:file_id", async (req, res) => {
     res.json({
       statusCode: 500,
       message: error.message,
+    });
+  }
+});
+
+// router.post("/search", async (req, res) => {
+//   try {
+//     const searchValue = req.body.search;
+
+//     if (!searchValue) {
+//       return res.status(400).json({ statusCode: 400, message: "Search parameter is required." });
+//     }
+
+//     const regexSearch = new RegExp(searchValue, "i");
+
+//     const searchCriteria = [
+//       { file_id: regexSearch },
+//       // { email: regexSearch },
+//       // { businessname: regexSearch },
+//       // { number: regexSearch },
+//       // { cibil_score: regexSearch },
+//       // { unit_address: regexSearch },
+//       // { reference: regexSearch },
+//       // { gst_number: regexSearch },
+//       // { state: regexSearch },
+//       // { city: regexSearch },
+//       // { pan_card: regexSearch },
+//     ];
+
+//     // Check if the search value is a valid number
+//     // const searchValueAsNumber = parseInt(searchValue);
+//     // if (!isNaN(searchValueAsNumber)) {
+//     //   // If valid, include aadhar_card field in search criteria
+//     //   searchCriteria.push({ aadhar_card: searchValueAsNumber });
+//     // }
+
+//     const data = await File_Uplode.find({ $or: searchCriteria });
+//     const count = await File_Uplode.countDocuments({ $or: searchCriteria });
+
+//     res.json({
+//       statusCode: 200,
+//       data: data,
+//       count: count,
+//       message: "Category Read Successful",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       statusCode: 500,
+//       message: error.message || "An error occurred while searching.",
+//     });
+//   }
+// });
+
+router.post("/search", async (req, res) => {
+  try {
+    const searchValue = req.body.search;
+
+    if (!searchValue) {
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: "Search parameter is required." });
+    }
+
+    const regexSearch = new RegExp(searchValue, "i");
+
+    const searchCriteria = [
+      { file_id: regexSearch },
+      // Add more search criteria if needed
+    ];
+
+    const data = await File_Uplode.find({ $or: searchCriteria });
+
+    // Get additional data from related collections
+    const branchUserIds = data.map((item) => item.branchuser_id);
+    const userIds = data.map((item) => item.user_id);
+    console.log(userIds, "userIds");
+    const loanIds = data.map((item) => item.loan_id);
+
+    const [branchUserData, userData, loanData] = await Promise.all([
+      SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
+      AddUser.find({ user_id: { $in: userIds } }),
+      Loan.find({ loan_id: { $in: loanIds } }),
+    ]);
+
+    console.log(userIds, "userIds");
+    console.log(userData, "userData");
+
+    const branchUserMap = new Map(
+      branchUserData.map((user) => [user.branchuser_id, user])
+    );
+    const userMap = new Map(userData.map((user) => [user.user_id, user]));
+    const loanMap = new Map(loanData.map((loan) => [loan.loan_id, loan]));
+
+    data.forEach((item) => {
+      const branchUserData = branchUserMap.get(item.branchuser_id);
+      const userDataItem = userData.find(
+        (user) => user.user_id === item.user_id
+      ); // Find the user data for the current item
+      console.log(userDataItem.username, "userDataItem");
+      const loanData = loanMap.get(item.loan_id);
+
+      item.username = userDataItem ? userDataItem.username : ""; // Assign username
+      item.pan_card = userDataItem ? userDataItem.pan_card : ""; // Assign pan_card
+
+      item.loan = loanData ? loanData.loan : "";
+      item.loan_dispatch = item.loan_dispatch || false;
+      item.stemp_paper_print = item.stemp_paper_print || false;
+      item.__v = item.__v || 0;
+
+      const loanDocs = item.documents.map((doc) => ({
+        loan_document_id: doc.loan_document_id,
+        is_uploaded: doc.is_uploaded || false,
+      }));
+      item.loan_document_ids = loanDocs;
+    });
+
+    const count = data.length;
+
+    res.json({
+      statusCode: 200,
+      data: data,
+      count: count,
+      message: "Category Read Successful",
+    });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message || "An error occurred while searching.",
     });
   }
 });
