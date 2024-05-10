@@ -347,7 +347,7 @@ function UserTable() {
                     }}
                   />
                 </FormControl>
-                <div
+                {/* <div
                   className="card"
                   style={{
                     padding: "30px",
@@ -390,7 +390,7 @@ function UserTable() {
                       </FormControl>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </AlertDialogBody>
 
               <AlertDialogFooter>

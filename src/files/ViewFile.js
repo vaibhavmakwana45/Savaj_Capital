@@ -550,7 +550,7 @@ function ViewFile() {
                       </div>
                     </FormLabel>
 
-                    {stepLoader ? ( // Render loader if loading is true
+                    {/* {stepLoader ? ( // Render loader if loading is true
                       <div
                         style={{
                           display: "flex",
@@ -561,7 +561,7 @@ function ViewFile() {
                       >
                         <CircularProgress />
                       </div>
-                    ) : (
+                    ) : ( */}
                       <div
                         className="container-fluid progress-bar-area"
                         style={{ height: "20%", overflow: "auto" }}
@@ -631,7 +631,7 @@ function ViewFile() {
                           </div>
 
                           {open.is &&
-                            open.data.loan_step_id !== "1715149246513" && (
+                            open.data.loan_step_id !== "1715348523661" && (
                               <Form
                                 onSubmit={(e) => {
                                   e.preventDefault();
@@ -777,7 +777,7 @@ function ViewFile() {
                             )}
                         </div>
                       </div>
-                    )}
+                    {/* )} */}
                   </div>
                   <div>
                     {fileData?.documents && (

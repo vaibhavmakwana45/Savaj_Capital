@@ -107,13 +107,21 @@ router.delete("/:loan_step_id", async (req, res) => {
   try {
     const { loan_step_id } = req.params;
 
+    const loan = await Loan.findOne({ loan_step_id: { $in: [loan_step_id] } });
+    if (loan) {
+      return res.status(403).json({
+        success: false,
+        message: "Deletion not allowed: Loan-Step is referenced in a Loan",
+      });
+    }
+
     const deletedDocument = await Loan_Step.findOneAndDelete({
       loan_step_id: loan_step_id,
     });
 
     if (!deletedDocument) {
-      return res.status(200).json({
-        statusCode: 202,
+      return res.status(404).json({
+        success: false,
         message: "Loan-Step not found",
       });
     }
@@ -137,10 +145,11 @@ router.get("/get_steps/:file_id", async (req, res) => {
     const { file_id } = req.params;
     const file = await File_Uplode.findOne({ file_id });
     const loan = await Loan.findOne({ loan_id: file.loan_id });
+    console.log(loan);
     const steps = [];
 
     for (const loan_step_id of loan.loan_step_id) {
-      if (loan_step_id === "1715149246513") {
+      if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
@@ -166,6 +175,8 @@ router.get("/get_steps/:file_id", async (req, res) => {
         }
       }
     }
+
+    // console.log(steps);
 
     res.json({
       statusCode: 200,
