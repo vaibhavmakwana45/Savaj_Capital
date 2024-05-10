@@ -353,7 +353,7 @@ function AddFiles() {
   };
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    console.log(`Checkbox ${name} set to ${checked}`); // Check the immediate state change
+    console.log(`Checkbox ${name} set to ${checked}`);
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: checked,
@@ -412,11 +412,11 @@ function AddFiles() {
           title_id: file.title_id,
           key: file.key,
         })),
-        stemp_paper_print: formData.stemp_paper_print, // Include checkbox state
+        stemp_paper_print: formData.stemp_paper_print,
         loan_dispatch: formData.loan_dispatch,
       };
       await AxiosInstance.post("/file_upload", payload);
-      console.log("Form Data on Submit:", payload); // Check the state at submit
+      console.log("Form Data on Submit:", payload);
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
