@@ -145,7 +145,6 @@ router.get("/get_steps/:file_id", async (req, res) => {
     const { file_id } = req.params;
     const file = await File_Uplode.findOne({ file_id });
     const loan = await Loan.findOne({ loan_id: file.loan_id });
-    console.log(loan);
     const steps = [];
 
     for (const loan_step_id of loan.loan_step_id) {
