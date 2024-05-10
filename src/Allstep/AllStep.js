@@ -96,14 +96,26 @@ function AllStep() {
       const response = await AxiosInstance.delete(`/loan_step/${documentId}`);
       getStepData();
       setIsDeleteDialogOpen(false);
+
       if (response.data.success) {
-        toast.success("Document deleted successfully!");
+        toast.success("Step deleted successfully!");
       } else {
-        toast.error(response.data.message || "Please try again later!");
+        toast.error(
+          response.data.message ||
+            "Unable to delete the step. Please try again later!"
+        );
       }
     } catch (error) {
-      console.error("Error deleting bank:", error);
-      toast.error("Role not delete");
+      console.error("Error deleting the step:", error);
+      if (error.response && error.response.status === 403) {
+        toast.error("Deletion not allowed: This step is currently in use.");
+      } else if (error.response && error.response.status === 404) {
+        toast.error("Error: The step you are trying to delete does not exist.");
+      } else {
+        toast.error(
+          "Error: Unable to delete the step. Please try again later."
+        );
+      }
     }
   };
 
@@ -351,7 +363,7 @@ function AllStep() {
                     <FormControl
                       key={index}
                       id="step"
-                      className="d-flex row justify-content-between align-items-center mt-4 modal-reject" 
+                      className="d-flex row justify-content-between align-items-center mt-4 modal-reject"
                     >
                       <div className="col-9 ">
                         {input.type === "input" ? (
