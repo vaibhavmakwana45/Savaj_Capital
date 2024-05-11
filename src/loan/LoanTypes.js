@@ -1,17 +1,4 @@
-// Add axios to your imports
-import axios from "axios";
-import {
-  Flex,
-  Table,
-  Tbody,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  Td,
-  useColorModeValue,
-  Button,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -19,27 +6,23 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
   Input,
   FormControl,
   Switch,
   FormLabel,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "./loan.css";
 
-function UserTable() {
-  const [users, setUsers] = useState([]);
+function LoanTypes() {
+  const [loans, setLoans] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -49,31 +32,28 @@ function UserTable() {
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [isEditLoan, setisEditLoan] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchLoans = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
-      setUsers(response.data.data);
+      setLoans(response.data.data);
+      console.log(response.data.data, "response.data.data");
       setLoading(false);
     } catch (error) {
       setLoading(false);
 
-      console.error("Error fetching users:", error);
+      console.error("Error fetching loans:", error);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchLoans();
   }, []);
-
-  const navigateToAnotherPage = () => {
-    history.push("/superadmin/adduser");
-  };
 
   const filteredUsers =
     searchTerm.length === 0
-      ? users
-      : users.filter((user) =>
-          user.loan.toLowerCase().includes(searchTerm.toLowerCase())
+      ? loans
+      : loans.filter((loan) =>
+          loan.loan.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
   const allHeaders = [
@@ -94,18 +74,16 @@ function UserTable() {
       "No Steps",
   ]);
 
-  console.log(formattedData, "formattedData");
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
   };
   const [steps, setSteps] = useState([]);
   const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
-  console.log(selectedLoanStepIds,"selectedLoanStepIds")
+
   const getStepData = async () => {
     try {
       const response = await AxiosInstance.get("/loan_step");
-      console.log(response, "response");
       if (response.data.success) {
         setSteps(response.data.data);
         setLoading(false);
@@ -132,25 +110,20 @@ function UserTable() {
     setSelectedLoanStepIds(updatedSelectedLoanStepIds);
   };
 
-  console.log(steps, "steps");
   const handleEdit = (id) => {
     setisEditLoan(true);
     setSelectedLoanId(id);
-    const data = users.find((user) => user.loan_id === id);
+    const data = loans.find((user) => user.loan_id === id);
     if (data) {
       setSelectedLoan(data.loan);
-      setSelectedLoanStepIds(data.loan_step_id || []); // Ensure step IDs are set
+      setSelectedLoanStepIds(data.loan_step_id || []);
     } else {
       console.error("Data not found for id:", id);
     }
   };
 
-  // const handleEdit = (id) => {
-  //   history.push("/superadmin/addloantype?id=" + id);
-  // };
-
   const handleRow = (id) => {
-    const data = users.find((user) => user.loan_id === id);
+    const data = loans.find((user) => user.loan_id === id);
     if (!data) {
       console.error("No data found for loan with ID:", id);
       return;
@@ -170,29 +143,29 @@ function UserTable() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const cancelRef = React.useRef();
-  const deletebranch = async (userId) => {
+  const deletebranch = async (loanId) => {
     try {
-      const response = await AxiosInstance.delete(`/loan/${userId}`);
+      const response = await AxiosInstance.delete(`/loan/${loanId}`);
       if (response.data.success) {
-        setUsers(users.filter((user) => user.loan_id !== userId));
-        toast.success("User deleted successfully!");
+        setLoans(loans.filter((loan) => loan.loan_id !== loanId));
+        toast.success("loan deleted successfully!");
       } else {
         toast.error(response.data.message || "Please try again later!");
       }
       setIsDeleteDialogOpen(false);
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("user not delete");
+      console.error("Error deleting loan:", error);
+      toast.error("loan not delete");
     }
   };
 
-  const editRole = async (loan) => {
+  const editLoan = async (loan) => {
     try {
       setLoading(true);
 
       const payload = {
         loan,
-        steps: selectedLoanStepIds,
+        loan_step_id: selectedLoanStepIds,
       };
 
       const response = await AxiosInstance.put(
@@ -205,7 +178,7 @@ function UserTable() {
         setisEditLoan(false);
         setSelectedLoan("");
         setSelectedLoanStepIds([]);
-        fetchUsers();
+        fetchLoans();
         setSelectedLoanId("");
       } else {
         toast.error(response.data.message || "Please try again later!");
@@ -342,12 +315,12 @@ function UserTable() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        editRole(selectedLoan);
+                        editLoan(selectedLoan);
                       }
                     }}
                   />
                 </FormControl>
-                {/* <div
+                <div
                   className="card"
                   style={{
                     padding: "30px",
@@ -390,7 +363,7 @@ function UserTable() {
                       </FormControl>
                     ))}
                   </div>
-                </div> */}
+                </div>
               </AlertDialogBody>
 
               <AlertDialogFooter>
@@ -412,8 +385,8 @@ function UserTable() {
                   colorScheme="blue"
                   onClick={() =>
                     selectedLoanId !== ""
-                      ? editRole(selectedLoan)
-                      : AddRole(selectedLoan)
+                      ? editLoan(selectedLoan)
+                      : AddLoan(selectedLoan)
                   }
                   ml={3}
                   type="submit"
@@ -434,4 +407,4 @@ function UserTable() {
   );
 }
 
-export default UserTable;
+export default LoanTypes;

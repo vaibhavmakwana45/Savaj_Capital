@@ -386,9 +386,12 @@ function AllStep() {
                         ) : input.type === "checkbox" ? (
                           <div className="row align-items-center">
                             <div className="col">
-                              <Checkbox checked={input.value} disabled>
-                                {checkboxLabels[index]}
-                              </Checkbox>
+                              <input
+                                type="checkbox"
+                                checked={input.value}
+                                disabled
+                              />
+                              {checkboxLabels[index]}
                             </div>
                             <div className="col">
                               <FormControl id="step">
@@ -427,7 +430,8 @@ function AllStep() {
                         )}
                       </div>
                       <div className="col-3 d-flex justify-content-between align-items-center">
-                        <Checkbox
+                        <input
+                          type="checkbox"
                           onChange={(e) => {
                             setInputs((prevInputs) =>
                               prevInputs.map((input, i) =>
@@ -441,9 +445,8 @@ function AllStep() {
                             );
                           }}
                           checked={input.is_required}
-                        >
-                          Required
-                        </Checkbox>
+                        />
+                        Required
                         <CloseIcon
                           className="mx-2"
                           cursor="pointer"

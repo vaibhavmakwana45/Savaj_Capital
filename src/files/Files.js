@@ -400,14 +400,14 @@ export default function CollapsibleTable() {
       try {
         const response = await AxiosInstance.get("/file_upload", {
           params: {
-            page: currentPage, // Current page
-            limit: itemsPerPage, // Items per page
+            page: currentPage,
+            limit: itemsPerPage,
           },
         });
 
         setFiles(response.data.data);
-        setTotalPages(response.data.totalPages); // Set total pages from API response
-        setCurrentPage(response.data.currentPage); // Set current page from API response
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -487,24 +487,27 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "30px" }} className="card-main">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
-              Add Files
+              {loan ? `${loan}` : "All Files"}
             </Text>
             <Flex className="thead">
-              <Select
-                placeholder="Select a loan type"
-                value={selectedLoan}
-                onChange={(e) => setSelectedLoan(e.target.value)}
-                mr="10px"
-                width="200px"
-              >
-                <option value="All Loan Types">All Loan Types</option>
-                {loans.map((loan) => (
-                  <option key={loan._id} value={loan.loan}>
-                    {loan.loan}
-                  </option>
-                ))}
-              </Select>
-
+              {!loan && (
+                <Flex className="thead">
+                  <Select
+                    placeholder="Select a loan type"
+                    value={selectedLoan}
+                    onChange={(e) => setSelectedLoan(e.target.value)}
+                    mr="10px"
+                    width="200px"
+                  >
+                    <option value="All Loan Types">All Loan Types</option>
+                    {loans.map((loan) => (
+                      <option key={loan.loan_id} value={loan.loan}>
+                        {loan.loan}
+                      </option>
+                    ))}
+                  </Select>
+                </Flex>
+              )}
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

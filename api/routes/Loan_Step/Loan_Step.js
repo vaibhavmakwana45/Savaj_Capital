@@ -151,8 +151,9 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
           );
+
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
           console.error("Error: ", error.message);

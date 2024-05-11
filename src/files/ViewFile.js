@@ -638,7 +638,7 @@ function ViewFile() {
                               ))}
                           </ul>
                         </div>
-
+                        {console.log(open.data, "yash")}
                         {open.is && open.data.loan_step_id !== "1715348523661" && (
                           <Form
                             onSubmit={(e) => {
