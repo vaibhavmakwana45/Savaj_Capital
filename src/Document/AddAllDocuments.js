@@ -58,10 +58,17 @@ function AddAllDocuments() {
     getDocumentData();
   }, []);
 
-  const allHeaders = ["Document", "create date", "update date", "Action"];
+  const allHeaders = [
+    "Index",
+    "Document",
+    "create date",
+    "update date",
+    "Action",
+  ];
 
-  const formattedData = fllteredDocument.map((bank) => [
+  const formattedData = fllteredDocument.map((bank, index) => [
     bank.document_id,
+    index + 1,
     bank.document,
     bank.createdAt,
     bank.updatedAt,
@@ -185,9 +192,9 @@ function AddAllDocuments() {
                   }}
                   colorScheme="blue"
                   style={{
-                  backgroundColor: "#b19552",
-                  color: "#fff",
-                }}
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Documents
                 </Button>
@@ -292,7 +299,7 @@ function AddAllDocuments() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    border:"2px solid #b19552"
+                    border: "2px solid #b19552",
                   }}
                 >
                   Cancel

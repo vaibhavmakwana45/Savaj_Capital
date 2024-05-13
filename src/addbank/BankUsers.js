@@ -99,6 +99,7 @@ function BankUsers() {
   };
 
   const allHeaders = [
+    "Index",
     "email",
     "mobile",
     "aadhar",
@@ -108,8 +109,9 @@ function BankUsers() {
     "Action",
   ];
 
-  const formattedData = filteredUsers.map((bank) => [
+  const formattedData = filteredUsers.map((bank,index) => [
     bank.bankuser_id,
+    index + 1,
     bank.email,
     bank.mobile,
     bank.adhar,
@@ -248,10 +250,10 @@ function BankUsers() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={4}
-              removeIndex2={5}
-              documentIndex={5}
-              documentIndex2={6}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}

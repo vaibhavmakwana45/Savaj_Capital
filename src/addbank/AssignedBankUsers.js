@@ -79,6 +79,7 @@ function AssignedBankUsers() {
         );
 
   const allHeaders = [
+    "Index",
     "File Id",
     "User Name",
     "Loan",
@@ -87,8 +88,9 @@ function AssignedBankUsers() {
     "UpdatedAt",
     "Action",
   ];
-  const formattedData = filteredUsers?.map((item) => [
+  const formattedData = filteredUsers?.map((item,index) => [
     item?.file_id,
+    index + 1,
     item?.file_id,
     item?.username,
     item?.loan,

@@ -9,7 +9,7 @@ import {
   Flex,
   Text,
   IconButton,
-  Checkbox
+  Checkbox,
 } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -33,17 +33,17 @@ function EditFile() {
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
   const [fileData, setFileData] = useState({});
-  const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
+  const CDN_BASE_URL = "https://cdn.savajcapital.com/cdn/files/";
   const fileInputRefs = useRef({});
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
-  const [formData, setFormData] = useState({
-    stemp_paper_print: false,
-    loan_dispatch: false,
-    // any other fields that need to be managed
-  });
+  // const [formData, setFormData] = useState({
+  //   // stemp_paper_print: false,
+  //   // loan_dispatch: false,
+  //   // any other fields that need to be managed
+  // });
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -56,12 +56,12 @@ function EditFile() {
           setSelectedUser(details.user_id);
           setSelectedLoanId(details.loan_id);
           setSelectedLoanSubtypeId(details.loantype_id);
-          setFormData({
-            stemp_paper_print: details.stemp_paper_print,
-            loan_dispatch: details.loan_dispatch,
-            // set other necessary fields here
-          });
-  
+          // setFormData({
+          //   stemp_paper_print: details.stemp_paper_print,
+          //   loan_dispatch: details.loan_dispatch,
+          //   // set other necessary fields here
+          // });
+
           const documentsWithCDN = details.documents.map((document) => ({
             ...document,
             file_path: `${CDN_BASE_URL}${document.file_path}`,
@@ -296,10 +296,10 @@ function EditFile() {
       const uploadedFiles = await Promise.all(
         uploadedFileName.map(async (item) => {
           const formData = new FormData();
-          formData.append("b_video", item.file);
+          formData.append("files", item.file);
 
           const response = await axios.post(
-            "https://cdn.dohost.in/image_upload.php/",
+            "https://cdn.savajcapital.com/api/upload",
             formData,
             {
               headers: {
@@ -308,15 +308,15 @@ function EditFile() {
             }
           );
 
-          if (!response.data.success) {
-            throw new Error(response.data.msg || "File upload failed");
+          if (response.data.status !== "ok") {
+            throw new Error(response.data.message || "File upload failed");
           }
 
-          if (!response.data.iamge_path) {
-            throw new Error("Image path is missing in the response");
+          if (!response.data.files || response.data.files.length === 0) {
+            throw new Error("No file paths returned in the response");
           }
 
-          const imageName = response.data.iamge_path.split("/").pop();
+          const imageName = response.data.files[0].filename.split("/").pop();
           return {
             ...item,
             path: imageName,
@@ -361,8 +361,8 @@ function EditFile() {
           loan_document_id: file.loan_document_id,
           key: file.key,
         })),
-        stemp_paper_print: formData.stemp_paper_print,
-        loan_dispatch: formData.loan_dispatch 
+        // stemp_paper_print: formData.stemp_paper_print,
+        // loan_dispatch: formData.loan_dispatch,
       };
 
       console.log(payload, "payload");
@@ -379,14 +379,15 @@ function EditFile() {
       setLoading(false);
     }
   };
-  const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
-    console.log(`Checkbox ${name} set to ${checked}`);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: checked,
-    }));
-  };
+
+  // const handleCheckboxChange = (event) => {
+  //   const { name, checked } = event.target;
+  //   console.log(`Checkbox ${name} set to ${checked}`);
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     [name]: checked,
+  //   }));
+  // };
 
   return (
     <>
@@ -617,7 +618,7 @@ function EditFile() {
                                       <i className="bx bxs-file-image"></i>
                                     </span>
                                     <p className="drop-zone__paragraph">
-                                    Upload Your Documents
+                                      Upload Your Documents
                                     </p>
                                   </div>
                                 )}

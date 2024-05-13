@@ -21,6 +21,7 @@ import {
   AlertDialogOverlay,
   IconButton,
   Input,
+  Select,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
@@ -35,7 +36,7 @@ import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "./user.css";
 import moment from "moment";
-
+import { Country, State, City } from "country-state-city";
 function UserTable() {
   const [users, setUsers] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
@@ -45,6 +46,27 @@ function UserTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const states = State.getStatesOfCountry("IN"); // Assuming 'IN' is the country code for India
+
+  // Retrieve cities whenever the selectedState changes
+  // Here we find the state object first to get the correct ISO code for fetching cities
+  const cities = selectedState
+    ? City.getCitiesOfState(
+      "IN",
+      states.find((state) => state.name === selectedState)?.isoCode
+    )
+    : [];
+
+  const handleStateChange = (event) => {
+    setSelectedState(event.target.value);
+    setSelectedCity(""); // Reset city selection when state changes
+  };
+
+  const handleCityChange = (event) => {
+    setSelectedCity(event.target.value);
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -79,8 +101,7 @@ function UserTable() {
 
       if (response.data.success) {
         toast.success(
-          `User has been ${
-            activate ? "activated" : "deactivated"
+          `User has been ${activate ? "activated" : "deactivated"
           } successfully!`
         );
         setUsers(
@@ -97,36 +118,6 @@ function UserTable() {
       toast.error("Error updating user status.");
     }
   };
-
-  const filteredUsers =
-    searchTerm.length === 0
-      ? users
-      : users.filter((user) => {
-          const searchTermLower = searchTerm.toLowerCase();
-          const usernameIncludes = user.username
-            .toLowerCase()
-            .includes(searchTermLower);
-          const emailIncludes = user.email
-            .toLowerCase()
-            .includes(searchTermLower);
-          const numberIncludes = user.number
-            .toLowerCase()
-            .includes(searchTermLower);
-          const aadharCardIncludes = user.aadhar_card
-            .toString()
-            .includes(searchTermLower);
-          const panCardIncludes =
-            typeof user.pan_card === "string" &&
-            user.pan_card.toLowerCase().includes(searchTermLower);
-
-          return (
-            usernameIncludes ||
-            emailIncludes ||
-            numberIncludes ||
-            aadharCardIncludes ||
-            panCardIncludes
-          );
-        });
 
   const getCibilScoreCategory = (score) => {
     if (score >= 300 && score <= 499) {
@@ -165,12 +156,30 @@ function UserTable() {
         return "black";
     }
   };
+  // Adjusted filteredUsers with state and city filters
+  const filteredUsers = users.filter((user) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      user.username.toLowerCase().includes(searchTermLower) ||
+      user.email.toLowerCase().includes(searchTermLower) ||
+      user.number.toLowerCase().includes(searchTermLower) ||
+      user.aadhar_card.toString().includes(searchTermLower) ||
+      (user.pan_card && user.pan_card.toLowerCase().includes(searchTermLower));
+
+    const matchesState = selectedState ? user.state === selectedState : true;
+    const matchesCity = selectedCity ? user.city === selectedCity : true;
+
+    return matchesSearch && matchesState && matchesCity;
+  });
 
   const allHeaders = [
+    "index",
     "Name",
+    "Business",
     "Number",
-    "Aadhar Card",
-    "Pan Card",
+    "Reference",
+    // "Aadhar Card",
+    // "Pan Card",
     "Cibil Score",
     // "create",
     // "update",
@@ -178,15 +187,16 @@ function UserTable() {
     "Active/Inactive",
     "Action",
   ];
-  const formattedData = filteredUsers.map((item) => [
-    item.user_id,
-    item.username,
+  const formattedData = filteredUsers.map((item, index) => [
+    `${item.user_id}`,
+    `${index + 1}`,
+    `${item.username}`,
+    `${item.businessname}`,
     item.number,
-    item.aadhar_card,
-    item.pan_card,
+    item.reference,
+    // item.aadhar_card,
+    // item.pan_card,
     item.cibil_score,
-    // item.createdAt,
-    // item.updatedAt,
     <Flex
       alignItems="center"
       backgroundColor={getBackgroundColor(
@@ -220,15 +230,17 @@ function UserTable() {
       Email: item.email,
       // Country: item.country,
       "Unit Address": item.unit_address,
-      Reference: item.reference,
+      // Reference: item.reference,
       "GST Number": item.gst_number,
-      // State: item.state,
-      // City: item.city,
-      Dob: moment(item.dob).format("DD/MM/YYYY"),
+      "Aadhar Card": item.aadhar_card,
+      "Pan Card": item.pan_card,
+      State: item.state,
+      City: item.city,
+      // Dob: moment(item.dob).format("DD/MM/YYYY"),
       // "Country Code": item.country_code,
       // "State Code": item.state_code,
       "Create At": moment(item.createdAt).format("DD/MM/YYYY"),
-      "Update At": moment(item.updatedAt).format("DD/MM/YYYY"),
+      // "Update At": moment(item.updatedAt).format("DD/MM/YYYY"),
     },
   ]);
 
@@ -242,7 +254,7 @@ function UserTable() {
     history.push("/superadmin/adduser?id=" + id);
   };
 
-  const handleRow = (id) => {};
+  const handleRow = (id) => { };
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -281,7 +293,34 @@ function UserTable() {
               >
                 All Customers
               </Text>
-              <Flex className="thead">
+              <Flex className="thead" alignItems="center" justifyContent="space-between">
+              <Select
+        value={selectedState}
+        onChange={handleStateChange}
+        placeholder="Select State"
+        width="250px"
+        marginRight="10px"
+      >
+        {states.map((state) => (
+          <option key={state.isoCode} value={state.name}>
+            {state.name}
+          </option>
+        ))}
+      </Select>
+      <Select
+        value={selectedCity}
+        onChange={handleCityChange}
+        placeholder="Select City"
+        disabled={!selectedState}
+        width="250px"
+        marginRight="10px"
+      >
+        {cities.map((city) => (
+          <option key={city.name} value={city.name}>
+            {city.name}
+          </option>
+        ))}
+      </Select>
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -292,7 +331,6 @@ function UserTable() {
                 <Button
                   onClick={() => history.push("/superadmin/adduser")}
                   colorScheme="blue"
-                  className="buttonss"
                   style={{ background: "#b19552" }}
                 >
                   Add Customer

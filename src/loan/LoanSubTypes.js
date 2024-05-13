@@ -84,9 +84,10 @@ function LoanSubTypes() {
             user.number.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-  const allHeaders = ["Loan", "Created At", "Updated At", "Action"];
-  const formattedData = filteredUsers.map((item) => [
+  const allHeaders = ["Index", "Loan", "Created At", "Updated At", "Action"];
+  const formattedData = filteredUsers.map((item,index) => [
     item.loantype_id,
+    index + 1,
     item.loan_type,
     item.createdAt,
     item.updatedAt,
@@ -228,7 +229,11 @@ function LoanSubTypes() {
                   width="250px"
                   marginRight="10px"
                 />
-                <Button onClick={() => setisEditLoan(true)} colorScheme="blue" style={{backgroundColor:"#b19552"}}>
+                <Button
+                  onClick={() => setisEditLoan(true)}
+                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552" }}
+                >
                   Add Loan
                 </Button>
               </Flex>
@@ -389,7 +394,7 @@ function LoanSubTypes() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    border:"2px solid #b19552"
+                    border: "2px solid #b19552",
                   }}
                 >
                   Cancel
