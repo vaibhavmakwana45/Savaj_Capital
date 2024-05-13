@@ -257,6 +257,7 @@ router.get("/", async (req, res) => {
         const userData = userMap.get(item.user_id);
         item.user_username = userData.username;
         item.pan_card = userData.pan_card;
+        item.businessname = userData.businessname;
       }
       if (loanMap.has(item.loan_id)) {
         const loanData = loanMap.get(item.loan_id);
@@ -413,7 +414,6 @@ router.get("/", async (req, res) => {
 // });
 
 // Assuming Title model is imported and available
-
 router.get("/file_upload/:file_id", async (req, res) => {
   try {
     const file_id = req.params.file_id;
@@ -1162,6 +1162,50 @@ router.post("/search", async (req, res) => {
     res.status(500).json({
       statusCode: 500,
       message: error.message || "An error occurred while searching.",
+    });
+  }
+});
+
+router.put("/updatestatus/:fileId", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { fileId } = req.params;
+
+    const validStatuses = ["running", "approved", "rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid status. Must be 'running', 'approved', or 'rejected'.",
+      });
+    }
+
+    const updatedFile = await File_Uplode.findOneAndUpdate(
+      { file_id: fileId },
+      {
+        $set: {
+          status: status,
+          updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedFile) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updatedFile,
+      message: "File status updated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 });

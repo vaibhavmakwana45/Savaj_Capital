@@ -8,8 +8,7 @@ import {
   AlertDialogOverlay,
   Input,
   FormControl,
-  Switch,
-  FormLabel,
+  Select,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
@@ -20,6 +19,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "./loan.css";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 function LoanTypes() {
   const [loans, setLoans] = useState([]);
@@ -57,6 +57,7 @@ function LoanTypes() {
         );
 
   const allHeaders = [
+    "Index",
     "Loan",
     "Loan Types",
     "Created At",
@@ -64,8 +65,9 @@ function LoanTypes() {
     "Action",
     "Action",
   ];
-  const formattedData = filteredUsers.map((item) => [
+  const formattedData = filteredUsers.map((item ,index) => [
     item.loan_id,
+    index + 1,
     item.loan,
     item.loantype_count,
     item.createdAt,
@@ -99,16 +101,16 @@ function LoanTypes() {
     getStepData();
   }, []);
 
-  const handleSwitchToggle = (event, stepId) => {
-    const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
-    const index = updatedSelectedLoanStepIds.indexOf(stepId);
-    if (event.target.checked && index === -1) {
-      updatedSelectedLoanStepIds.push(stepId);
-    } else if (!event.target.checked && index !== -1) {
-      updatedSelectedLoanStepIds.splice(index, 1);
-    }
-    setSelectedLoanStepIds(updatedSelectedLoanStepIds);
-  };
+  // const handleSwitchToggle = (event, stepId) => {
+  //   const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
+  //   const index = updatedSelectedLoanStepIds.indexOf(stepId);
+  //   if (event.target.checked && index === -1) {
+  //     updatedSelectedLoanStepIds.push(stepId);
+  //   } else if (!event.target.checked && index !== -1) {
+  //     updatedSelectedLoanStepIds.splice(index, 1);
+  //   }
+  //   setSelectedLoanStepIds(updatedSelectedLoanStepIds);
+  // };
 
   const handleEdit = (id) => {
     setisEditLoan(true);
@@ -190,7 +192,40 @@ function LoanTypes() {
       setLoading(false);
     }
   };
+  // const moveStep = (direction, index) => {
+  //   if (direction === "up" && index > 0) {
+  //     const newSteps = [...selectedLoanStepIds];
+  //     [newSteps[index - 1], newSteps[index]] = [
+  //       newSteps[index],
+  //       newSteps[index - 1],
+  //     ];
+  //     setSelectedLoanStepIds(newSteps);
+  //   } else if (direction === "down" && index < selectedLoanStepIds.length - 1) {
+  //     const newSteps = [...selectedLoanStepIds];
+  //     [newSteps[index + 1], newSteps[index]] = [
+  //       newSteps[index],
+  //       newSteps[index + 1],
+  //     ];
+  //     setSelectedLoanStepIds(newSteps);
+  //   }
+  // };
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(selectedLoanStepIds);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
+    setSelectedLoanStepIds(items);
+  };
+  const addStep = (stepId) => {
+    if (!selectedLoanStepIds.includes(stepId)) {
+      setSelectedLoanStepIds((prev) => [...prev, stepId]);
+    }
+  };
+
+  const removeStep = (stepId) => {
+    setSelectedLoanStepIds((prev) => prev.filter((id) => id !== stepId));
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -250,8 +285,8 @@ function LoanTypes() {
               handleRow={handleRow}
               showPagination={true}
               collapse={true}
-              removeIndex={4}
-              documentIndex={5}
+              removeIndex={5}
+              documentIndex={6}
               name={"Steps:"}
             />
           </CardBody>
@@ -307,63 +342,69 @@ function LoanTypes() {
                 <FormControl id="branch_name" isRequired>
                   <Input
                     name="branch_name"
-                    onChange={(e) => {
-                      setSelectedLoan(e.target.value);
-                    }}
+                    onChange={(e) => setSelectedLoan(e.target.value)}
                     value={selectedLoan}
                     placeholder="Edit Loan"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        editLoan(selectedLoan);
-                      }
-                    }}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && editLoan(selectedLoan)
+                    }
                   />
                 </FormControl>
-                <div
-                  className="card"
-                  style={{
-                    padding: "30px",
-                    borderRadius: "15px",
-                    marginTop: "30px",
-                    boxShadow:
-                      "rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px",
-                  }}
+                <Select
+                  placeholder="Add a step"
+                  onChange={(e) => addStep(e.target.value)}
+                  style={{ marginTop: "10px" }}
                 >
-                  <div className="d-flex flex-wrap">
-                    {steps.map((step) => (
-                      <FormControl
-                        key={step._id}
-                        alignItems="center"
-                        mt="5"
-                        style={{ width: "25%" }}
-                      >
-                        <Switch
-                          id={`email-alerts-${step.loan_step_id}`}
-                          isChecked={selectedLoanStepIds.includes(
-                            step.loan_step_id
-                          )}
-                          onChange={(event) =>
-                            handleSwitchToggle(event, step.loan_step_id)
-                          }
-                          style={{
-                            boxShadow:
-                              "rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px",
-                            borderRadius: "30px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                        <FormLabel
-                          htmlFor={`email-alerts-${step.loan_step_id}`}
-                          mb="0"
-                          style={{ fontSize: "14px", fontWeight: 600 }}
-                        >
-                          <i>{step.loan_step}</i>
-                        </FormLabel>
-                      </FormControl>
+                  {steps
+                    .filter(
+                      (step) => !selectedLoanStepIds.includes(step.loan_step_id)
+                    )
+                    .map((step) => (
+                      <option key={step.loan_step_id} value={step.loan_step_id}>
+                        {step.loan_step}
+                      </option>
                     ))}
-                  </div>
-                </div>
+                </Select>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="steps">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef}>
+                        {selectedLoanStepIds.map((id, index) => {
+                          const step = steps.find((s) => s.loan_step_id === id);
+                          return (
+                            <Draggable
+                              key={id}
+                              draggableId={String(id)}
+                              index={index}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <Flex alignItems="center" mt="5">
+                                    <Text pr="2">
+                                      {index + 1}. {step.loan_step}
+                                    </Text>{" "}
+                                    <Button
+                                      onClick={() => removeStep(id)}
+                                      size="sm"
+                                      ml="2"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </Flex>
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </AlertDialogBody>
 
               <AlertDialogFooter>

@@ -480,7 +480,7 @@ function AddBankUser() {
               </FormControl>
 
 
-              <FormControl id="password" mt={4}>
+              {/* <FormControl id="password" mt={4}>
                 <FormLabel>Password</FormLabel>
                 <Input
                   name="password"
@@ -488,7 +488,7 @@ function AddBankUser() {
                   onChange={handleChange}
                   value={formData.password}
                 />
-              </FormControl>
+              </FormControl> */}
 
               <div>
                 <Button

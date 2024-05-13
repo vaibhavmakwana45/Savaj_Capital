@@ -34,7 +34,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const FileDisplay = ({ groupedFiles }) => {
-  const basePath = "https://cdn.dohost.in/upload/";
+  const basePath = "https://cdn.savajcapital.com/cdn/files/";
   if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
     return <div>No documents available</div>;
   }
@@ -388,8 +388,11 @@ function ViewFile() {
 
   const submitStep = async () => {
     try {
-      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
-
+      const responce = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        open.data
+      );
+      console.log(responce, "responce---------------");
       const cibilScore = open.data.inputs.find(
         (input) => input.label === "Cibil Score"
       )?.value;
@@ -399,7 +402,7 @@ function ViewFile() {
       const formData = {
         cibil_score: cibilScore,
       };
-
+ 
       await AxiosInstance.put("/addusers/edituser/" + userId, formData);
 
       fetchData();

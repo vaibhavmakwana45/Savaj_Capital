@@ -63,6 +63,7 @@ function AllStep() {
   }, []);
 
   const allHeaders = [
+    "Index",
     "Document",
     "create date",
     "update date",
@@ -70,7 +71,7 @@ function AllStep() {
     "Action",
   ];
 
-  const formattedData = fllteredSteps.map((stp) => {
+  const formattedData = fllteredSteps.map((stp, index) => {
     const inputsDescription = stp.inputs
       .map((input) => {
         return `${input.label} (Type: ${input.type})`;
@@ -79,6 +80,7 @@ function AllStep() {
 
     return [
       stp.loan_step_id,
+      index + 1,
       stp.loan_step,
       stp.createdAt,
       stp.updatedAt,
@@ -281,8 +283,8 @@ function AllStep() {
               handleRow={handleRow}
               showPagination={true}
               collapse={true}
-              documentIndex={4}
-              removeIndex={3}
+              removeIndex={4}
+              documentIndex={5}
               name={"Inputs:"}
             />
           </CardBody>

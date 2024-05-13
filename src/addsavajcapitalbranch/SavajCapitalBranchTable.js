@@ -59,6 +59,7 @@ function SavajCapitalBranchTable() {
         );
 
   const allHeaders = [
+    "Index",
     "Savaj Capital Branch",
     "City",
     "State",
@@ -70,8 +71,9 @@ function SavajCapitalBranchTable() {
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
 
-  const formattedData = filteredUsers?.map((item) => [
+  const formattedData = filteredUsers?.map((item,index) => [
     item.branch_id,
+    index + 1,
     item.branch_name,
     item.city,
     item.state,

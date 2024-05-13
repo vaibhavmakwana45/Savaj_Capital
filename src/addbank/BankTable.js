@@ -91,6 +91,7 @@ function Tables() {
   };
 
   const allHeaders = [
+    "Index",
     "Bank Name",
     "Branch Name",
     "City",
@@ -101,8 +102,9 @@ function Tables() {
     "Action",
   ];
 
-  const formattedData = filteredUsers.map((bank) => [
+  const formattedData = filteredUsers.map((bank, index) => [
     bank.bank_id,
+    index + 1,
     bank.bank_name,
     bank.branch_name,
     bank.city,
@@ -121,7 +123,7 @@ function Tables() {
   const deleteBankUser = async (bankId) => {
     try {
       const response = await AxiosInstance.delete(`/bank_user/${bankId}`);
-      console.log(response.data, "shivam")
+      console.log(response.data, "shivam");
 
       if (response.data.success) {
         setIsDeleteDialogOpen(false);
@@ -162,7 +164,7 @@ function Tables() {
                 fontWeight="bold"
                 className="ttext"
               >
-                Banks and Users
+                Banks
               </Text>
               <div className="thead">
                 <Input
@@ -240,7 +242,7 @@ function Tables() {
               handleEdit={handleEdit}
               handleRow={handleRow}
             /> */}
-                <TableComponent
+            <TableComponent
               // documents={documents}
               banks={banks}
               data={formattedData}
@@ -252,10 +254,10 @@ function Tables() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={5}
-              removeIndex2={6}
-              documentIndex={6}
-              documentIndex2={7}
+              removeIndex={6}
+              removeIndex2={7}
+              documentIndex={7}
+              documentIndex2={8}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
