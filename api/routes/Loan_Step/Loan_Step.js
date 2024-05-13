@@ -153,6 +153,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
           const res = await axios.get(
             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
+
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
           console.error("Error: ", error.message);

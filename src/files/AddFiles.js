@@ -74,8 +74,8 @@ function AddFiles() {
     unit_address: "",
     gst_number: "",
     reference: "",
-    stemp_paper_print: false, // Initialize as false
-    loan_dispatch: false, // Initialize as false
+    // stemp_paper_print: false, // Initialize as false
+    // loan_dispatch: false, // Initialize as false
   });
 
   const {
@@ -251,11 +251,23 @@ function AddFiles() {
   }, [groupedLoanDocuments]);
 
   const [selectedUser, setSelectedUser] = useState("");
+  const [cibilMessage, setCibilMessage] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
+  const [cibilScore, setCibilScore] = useState(null);
 
   const handleUserChange = (event) => {
-    setSelectedUser(event.target.value);
+    const userId = event.target.value;
+    const user = users.find((u) => u.user_id === userId);
+    setSelectedUser(userId);
+    if (user) {
+      setCibilScore(user.cibil_score);
+      if (user.cibil_score < 730) {
+        setCibilMessage("User's cibil score is less than 730.");
+      } else {
+        setCibilMessage("");
+      }
+    }
   };
 
   const handleLoanChange = (event) => {
@@ -376,10 +388,10 @@ function AddFiles() {
     try {
       const uploadPromises = uploadedFileName.map(async (item) => {
         const formData = new FormData();
-        formData.append("b_video", item.file);
+        formData.append("files", item.file);
 
         const response = await axios.post(
-          "https://cdn.dohost.in/image_upload.php/",
+          "https://cdn.savajcapital.com/api/upload",
           formData,
           {
             headers: {
@@ -388,19 +400,27 @@ function AddFiles() {
           }
         );
 
-        if (!response.data.success) {
-          throw new Error(response.data.msg || "File upload failed");
+        if (response.data.status !== "ok") {
+          throw new Error(response.data.message || "File upload failed");
         }
 
-        if (!response.data.iamge_path) {
-          throw new Error("Image path is missing in the response");
+        const uploadedFilesInfo = response.data.files.map((file) => ({
+          filename: file.filename,
+          fileType: file.fileType,
+        }));
+
+        if (!uploadedFilesInfo.length) {
+          throw new Error("No files were processed.");
         }
 
-        const imageName = response.data.iamge_path.split("/").pop();
-        return { ...item, path: imageName, documentId: item.documentId };
+        return uploadedFilesInfo.map((file) => ({
+          ...item,
+          path: file.filename,
+          documentId: item.documentId,
+        }));
       });
 
-      const uploadedFiles = await Promise.all(uploadPromises);
+      const uploadedFiles = (await Promise.all(uploadPromises)).flat(); // Flatten in case of multiple file responses per item
 
       const payload = {
         user_id: selectedUser,
@@ -412,8 +432,8 @@ function AddFiles() {
           title_id: file.title_id,
           key: file.key,
         })),
-        stemp_paper_print: formData.stemp_paper_print,
-        loan_dispatch: formData.loan_dispatch,
+        // stemp_paper_print: formData.stemp_paper_print,
+        // loan_dispatch: formData.loan_dispatch,
       };
       await AxiosInstance.post("/file_upload", payload);
       console.log("Form Data on Submit:", payload);
@@ -435,6 +455,7 @@ function AddFiles() {
       setLoading(false);
     }
   };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -454,15 +475,24 @@ function AddFiles() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <FormControl id="user_id" mt={4} isRequired>
+            <FormControl>
               <FormLabel>User</FormLabel>
-              <Select placeholder="Select user" onChange={handleUserChange}>
+              <Select
+                placeholder="Select user"
+                onChange={handleUserChange}
+                value={selectedUser}
+              >
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
                     {`${user.username} (${user.email})`}
                   </option>
                 ))}
               </Select>
+              {cibilMessage && (
+                <p style={{ color: "red", marginTop: "10px" }}>
+                  {cibilMessage}
+                </p>
+              )}
             </FormControl>
 
             <FormControl
@@ -711,6 +741,7 @@ function AddFiles() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
+                disabled={cibilScore < 730}
                 style={{
                   marginTop: 40,
                   backgroundColor: "#b19552",

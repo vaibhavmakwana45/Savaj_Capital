@@ -104,10 +104,20 @@ function Tables() {
     history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
   };
 
-  const allHeaders = ["Name", "Email","Mobile Number", "role", "create", "update", "Action"];
+  const allHeaders = [
+    "Index",
+    "Name",
+    "Email",
+    "Mobile Number",
+    "role",
+    "create",
+    "update",
+    "Action",
+  ];
 
-  const formattedData = filteredUsers.map((bank) => [
+  const formattedData = filteredUsers.map((bank,index) => [
     bank?.branchuser_id,
+    index + 1,
     bank?.full_name,
     bank?.email,
     bank?.number,
@@ -211,8 +221,8 @@ function Tables() {
                 </Button>
                 <Button
                   onClick={navigateToAnotherPage}
-                colorScheme="blue"
-                    style={{
+                  colorScheme="blue"
+                  style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
                   }}
@@ -281,10 +291,10 @@ function Tables() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={3}
-              removeIndex2={4}
-              documentIndex={4}
-              documentIndex2={5}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}

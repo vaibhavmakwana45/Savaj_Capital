@@ -37,13 +37,10 @@ const UserSchema = new mongoose.Schema({
   updatedAt: {
     type: String,
   },
-  loan_dispatch: {
-    type: Boolean,
-    default: false,
-  },
-  stemp_paper_print: {
-    type: Boolean,
-    default: false,
+  status: {
+    type: String,
+    enum: ["running", "approved", "rejected"],
+    default: "running",
   },
 });
 

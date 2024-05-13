@@ -59,10 +59,17 @@ function Title() {
     getTitleData();
   }, []);
 
-  const allHeaders = ["Document", "create date", "update date", "Action"];
+  const allHeaders = [
+    "Index",
+    "Document",
+    "create date",
+    "update date",
+    "Action",
+  ];
 
-  const formattedData = fllteredDocument.map((bank) => [
+  const formattedData = fllteredDocument.map((bank, index) => [
     bank.title_id,
+    index + 1,
     bank.title,
     bank.createdAt,
     bank.updatedAt,
@@ -182,9 +189,9 @@ function Title() {
                   }}
                   colorScheme="blue"
                   style={{
-                  backgroundColor: "#b19552",
-                  color: "#fff",
-                }}
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Title
                 </Button>
@@ -287,7 +294,7 @@ function Title() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    border:"2px solid #b19552"
+                    border: "2px solid #b19552",
                   }}
                 >
                   Cancel

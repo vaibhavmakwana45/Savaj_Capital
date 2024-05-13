@@ -67,29 +67,32 @@ router.post("/", async (req, res) => {
 // Get Loan
 router.get("/", async (req, res) => {
   try {
-    // Fetch and sort loans
     var loans = await Loan.aggregate([{ $sort: { updatedAt: -1 } }]);
 
-    // Iterate over each loan to enrich data
     for (let i = 0; i < loans.length; i++) {
       const loan_id = loans[i].loan_id;
 
-      // Count loan types associated with each loan
       const loanTypeCount = await Loan_Type.countDocuments({ loan_id });
       loans[i].loantype_count = loanTypeCount || 0;
 
-      // Fetch the loan steps associated with the loan
-      if (loans[i].loan_step_id) {
-        // Assuming loan_step_id is an array of IDs
+      if (loans[i].loan_step_id && loans[i].loan_step_id.length) {
         const loanSteps = await Loan_Step.find({
           loan_step_id: { $in: loans[i].loan_step_id },
         });
 
-        // Map each loan step to its name
-        loans[i].loan_steps = loanSteps.map((step) => ({
-          id: step.loan_step_id,
-          name: step.loan_step,
-        }));
+        const stepMap = {};
+        loanSteps.forEach((step) => {
+          stepMap[step.loan_step_id] = {
+            id: step.loan_step_id,
+            name: step.loan_step,
+          };
+        });
+
+        loans[i].loan_steps = loans[i].loan_step_id.map(
+          (id) => stepMap[id] || { id, name: "Unknown" }
+        );
+      } else {
+        loans[i].loan_steps = [];
       }
     }
 

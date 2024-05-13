@@ -32,7 +32,7 @@ import {
   AlertDialogOverlay,
 } from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
@@ -45,7 +45,15 @@ import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick, handleDelete, pan_card } = props;
+  const {
+    id,
+    file,
+    handleEditClick,
+    handleDelete,
+    pan_card,
+    handleUpdate,
+    index,
+  } = props;
   const history = useHistory();
   const [open, setOpen] = useState(false);
 
@@ -138,11 +146,64 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="">{file?.user_username}</TableCell>
-        <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{index}</TableCell>
+        <TableCell align="">
+          <span
+            style={{
+              color:
+                file?.status === "approved"
+                  ? "#4CAF50"
+                  : file?.status === "rejected"
+                  ? "#F44336"
+                  : "#f5c71a",
+              padding: "4px 8px",
+              fontWeight: "bold",
+            }}
+          >
+            {file?.file_id}
+          </span>
+        </TableCell>
+        <TableCell align="">
+          <span
+            style={{
+              color:
+                file?.status === "approved"
+                  ? "#4CAF50"
+                  : file?.status === "rejected"
+                  ? "#F44336"
+                  : "#f5c71a",
+              padding: "4px 8px",
+              fontWeight: "bold",
+            }}
+          >
+            {file?.user_username} ({file?.businessname})
+          </span>
+        </TableCell>
+
         <TableCell align="">{file?.pan_card}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
-        <TableCell align="">{file?.loan_type || "-"}</TableCell>
+        <TableCell align="">
+          <span
+            style={{
+              color: "white",
+              backgroundColor:
+                file?.status === "approved"
+                  ? "#4CAF50"
+                  : file?.status === "rejected"
+                  ? "#F44336"
+                  : "#f5c71a",
+              padding: "4px 8px",
+              borderRadius: "10px",
+            }}
+          >
+            {file?.status === "approved"
+              ? "Approved"
+              : file?.status === "rejected"
+              ? "Rejected"
+              : "Running"}
+          </span>
+        </TableCell>
+
         <TableCell align="center">
           {filePercentageData && (
             <div class="progress " data-value={Number(filePercentageData)}>
@@ -211,6 +272,15 @@ function Row(props) {
               }}
               aria-label="Edit bank"
               icon={<EditIcon />}
+              style={{ marginRight: 15, fontSize: "20px" }}
+            />
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdate(file.file_id);
+              }}
+              aria-label="Edit status"
+              icon={<AddIcon />}
               style={{ fontSize: "20px" }}
             />
           </Flex>
@@ -338,6 +408,8 @@ export default function CollapsibleTable() {
   const location = useLocation();
   const { loan } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
+  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
+
   const filteredUsers = files.filter((file) => {
     const loanSafe =
       file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
@@ -353,6 +425,10 @@ export default function CollapsibleTable() {
       file.user_username && typeof file.user_username === "string"
         ? file.user_username.toLowerCase()
         : "";
+    const statusSafe =
+      file.status && typeof file.status === "string"
+        ? file.status.toLowerCase()
+        : "";
 
     return (
       (selectedLoan === "All Loan Types" ||
@@ -360,7 +436,9 @@ export default function CollapsibleTable() {
       (loanSafe.includes(searchTerm.toLowerCase()) ||
         fileIdSafe.includes(searchTerm.toLowerCase()) ||
         loanTypeSafe.includes(searchTerm.toLowerCase()) ||
-        usernameSafe.includes(searchTerm.toLowerCase()))
+        usernameSafe.includes(searchTerm.toLowerCase())) &&
+      (selectedStatusSearch === "" ||
+        statusSafe === selectedStatusSearch.toLowerCase())
     );
   });
 
@@ -395,26 +473,25 @@ export default function CollapsibleTable() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    try {
+      const response = await AxiosInstance.get("/file_upload", {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+        },
+      });
+      console.log(response, "response");
+      setFiles(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(response.data.currentPage);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await AxiosInstance.get("/file_upload", {
-          params: {
-            page: currentPage, // Current page
-            limit: itemsPerPage, // Items per page
-          },
-        });
-
-        setFiles(response.data.data);
-        setTotalPages(response.data.totalPages); // Set total pages from API response
-        setCurrentPage(response.data.currentPage); // Set current page from API response
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [currentPage, itemsPerPage]);
 
@@ -455,29 +532,119 @@ export default function CollapsibleTable() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
+
   const deletefile = async (fileId) => {
     try {
-      const response = await AxiosInstance.delete(`/file_upload/${fileId}`);
-      if (response.data.success) {
-        setFiles(files.filter((file) => file.file_id !== fileId));
+      const fileData = files.find((file) => file.file_id === fileId);
+      if (!fileData || !fileData.documents || fileData.documents.length === 0) {
+        console.error("No documents found for the file");
+        toast.error("No documents found for the file");
         setIsDeleteDialogOpen(false);
-        toast.success("File deleted successfully!");
-      } else if (response.data.statusCode === 201) {
-        toast.error(response.data.message);
-        setIsDeleteDialogOpen(false);
+        return;
+      }
+
+      let allDeleted = true;
+      for (const document of fileData.documents) {
+        if (!document.file_path) {
+          console.error("File path is missing for document");
+          toast.error("File path is missing for document");
+          allDeleted = false;
+          continue;
+        }
+
+        try {
+          const cdnResponse = await axios.delete(
+            `https://cdn.savajcapital.com/api/upload/${document.file_path}`
+          );
+          if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
+            console.error("Failed to delete file from CDN:", cdnResponse.data);
+            toast.error("Failed to delete file from CDN");
+            allDeleted = false;
+          }
+        } catch (cdnError) {
+          console.error("Error deleting from CDN:", cdnError);
+          toast.error("Error deleting from CDN");
+          allDeleted = false;
+        }
+      }
+
+      if (allDeleted) {
+        const dbResponse = await AxiosInstance.delete(`/file_upload/${fileId}`);
+        if (dbResponse.status === 200) {
+          setFiles((prevFiles) =>
+            prevFiles.filter((file) => file.file_id !== fileId)
+          );
+          toast.success("File deleted successfully!");
+        } else {
+          console.error("Failed to delete file metadata:", dbResponse.data);
+          toast.error("Failed to delete file metadata");
+          allDeleted = false;
+        }
+      }
+
+      if (!allDeleted) {
+        toast.error("Not all files/documents could be deleted successfully");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("file not delete");
+      console.error("Error deleting files:", error);
+      toast.error("Files could not be deleted");
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
+
   const handleEditClick = (id) => {
     history.push(`/superadmin/editfile?id=${id}`);
   };
+
   const handleDelete = (id) => {
     setSelectedFileId(id);
     setIsDeleteDialogOpen(true);
   };
+
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const cancelRef1 = React.useRef();
+
+  const updateFile = async (fileId, newStatus) => {
+    try {
+      if (!newStatus) {
+        console.error("Status not selected");
+        toast.error("Please select a status before updating.");
+        return;
+      }
+
+      const response = await AxiosInstance.put(
+        `/file_upload/updatestatus/${fileId}`,
+        {
+          status: newStatus,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("File status updated successfully!");
+        fetchData();
+      } else {
+        throw new Error(
+          response.data.message || "Failed to update the status."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating file status:", error);
+      toast.error("File status could not be updated: " + error.message);
+    } finally {
+      setIsUpdateDialogOpen(false);
+      setSelectedStatus("");
+      setSelecteUpdateFileId(null);
+    }
+  };
+
+  const handleUpdate = (id) => {
+    setSelecteUpdateFileId(id);
+    setIsUpdateDialogOpen(true);
+  };
+
   return (
     <>
       <div
@@ -487,22 +654,37 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "30px" }} className="card-main">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
-              Add Files
+              {loan ? `${loan}` : "All Files"}
             </Text>
             <Flex className="thead">
+              {!loan && (
+                <Flex className="thead">
+                  <Select
+                    placeholder="Select a loan type"
+                    value={selectedLoan}
+                    onChange={(e) => setSelectedLoan(e.target.value)}
+                    mr="10px"
+                    width="200px"
+                  >
+                    <option value="All Loan Types">All Loan Types</option>
+                    {loans.map((loan) => (
+                      <option key={loan.loan_id} value={loan.loan}>
+                        {loan.loan}
+                      </option>
+                    ))}
+                  </Select>
+                </Flex>
+              )}
               <Select
-                placeholder="Select a loan type"
-                value={selectedLoan}
-                onChange={(e) => setSelectedLoan(e.target.value)}
+                value={selectedStatusSearch}
+                onChange={(e) => setSelectedStatusSearch(e.target.value)}
                 mr="10px"
                 width="200px"
               >
-                <option value="All Loan Types">All Loan Types</option>
-                {loans.map((loan) => (
-                  <option key={loan._id} value={loan.loan}>
-                    {loan.loan}
-                  </option>
-                ))}
+                <option value="">Select a Status</option>
+                <option value="running">Running</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
               </Select>
 
               <Input
@@ -548,10 +730,13 @@ export default function CollapsibleTable() {
                   <TableRow>
                     <TableCell />
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      User Name
+                      Index
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       File Id
+                    </TableCell>
+                    <TableCell align="" style={{ color: "#BEC7D4" }}>
+                      Customer (Business)
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
                       Pan Card
@@ -560,10 +745,10 @@ export default function CollapsibleTable() {
                       Loan
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan Type
+                      File Status
                     </TableCell>
                     <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Status
+                      Document Status
                     </TableCell>
                     <TableCell
                       align=""
@@ -575,15 +760,17 @@ export default function CollapsibleTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((file) => (
+                  {filteredUsers.map((file, index) => (
                     <Row
                       key={file._id}
                       file={file}
                       id={file.file_id}
                       pan_card={file.pan_card}
+                      index={index + 1}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
                       handleDelete={handleDelete}
+                      handleUpdate={handleUpdate}
                     />
                   ))}
                 </TableBody>
@@ -624,8 +811,62 @@ export default function CollapsibleTable() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        <AlertDialog
+          isOpen={isUpdateDialogOpen}
+          leastDestructiveRef={cancelRef1}
+          onClose={() => {
+            setIsUpdateDialogOpen(false);
+            setSelectedStatus(""); // Reset the selected status when closing the dialog
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Update File Status
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure you want to update the status of this file?
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  style={{
+                    marginLeft: "10px",
+                    marginTop: "20px",
+                    width: "100%",
+                    height: "35px",
+                  }}
+                >
+                  <option value="">Select a Status</option>
+                  <option value="running">Running</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef1}
+                  onClick={() => setIsUpdateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => {
+                    updateFile(selecteUpdateFileId, selectedStatus); // Pass selectedStatus to update function
+                    setIsUpdateDialogOpen(false);
+                  }}
+                  ml={3}
+                  isDisabled={!selectedStatus} // Disable the button if no status is selected
+                >
+                  Update
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </div>
-      {/* pagination */}
       <Flex justifyContent="flex-end" alignItems="center" p="4">
         <Text mr="4">Total Records: {files.length}</Text>
         <Text mr="2">Rows per page:</Text>
