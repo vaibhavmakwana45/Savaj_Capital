@@ -6,6 +6,7 @@ const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const Title = require("../../models/AddDocuments/Title");
+const File_Uplode = require("../../models/File/File_Uplode");
 
 router.get("/:loan_id", async (req, res) => {
   try {
@@ -184,20 +185,33 @@ router.delete("/:loan_document_id", async (req, res) => {
   try {
     const { loan_document_id } = req.params;
 
-    const deletedLoanDocument = await Loan_Documents.findOneAndDelete({
-      loan_document_id: loan_document_id,
-    });
-
-    if (!deletedLoanDocument) {
-      return res.status(200).json({
-        statusCode: 202,
-        message: "Loan-Type not found",
+    // Fetch the loan document to get associated document IDs
+    const loanDocument = await Loan_Documents.findOne({ loan_document_id: loan_document_id });
+    if (!loanDocument) {
+      return res.status(404).json({
+        success: false,
+        message: "Loan document not found",
       });
     }
 
+    // Extract document_ids from the loanDocument
+    const documentIds = loanDocument.document_ids;
+
+    // Check if any of these document IDs are referenced in the nested 'documents' array in File Uploads
+    const isReferenced = await File_Uplode.findOne({ 'documents.loan_document_id': { $in: documentIds } });
+    if (isReferenced) {
+      return res.status(400).json({
+        success: false,
+        message: "Loan document cannot be deleted as its IDs are referenced in file uploads",
+      });
+    }
+
+    // If not referenced, proceed to delete the loan document
+    const deletedLoanDocument = await Loan_Documents.findOneAndDelete({ loan_document_id: loan_document_id });
+    console.log(deletedLoanDocument,"deletedLoanDocument")
     res.json({
       success: true,
-      message: "Loan-Type deleted successfully",
+      message: "Loan document deleted successfully",
       deletedLoanDocumentId: loan_document_id,
     });
   } catch (error) {
