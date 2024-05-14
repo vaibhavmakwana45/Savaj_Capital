@@ -361,12 +361,18 @@
   .linksss {
     margin-bottom: 60px !important;
   }
+  .pagination-main{
+    flex-direction: column !important;
+  }
 }
 
 /* 576 */
 @media (max-width: 767px) {
   .navbar-responsive {
     display: flex !important;
+  }
+  .pagination-main{
+    flex-direction: column !important;
   }
 
   .bradcrub-navbar {
@@ -392,6 +398,9 @@
   .mainnnn {
     flex-direction: column !important;
   }
+  .drop-arrow{
+    flex-direction: column;
+  }
 }
 
 /* 525 */
@@ -402,6 +411,9 @@
   .back-responsive {
     display: flex !important;
     margin-bottom: 1px;
+  }
+  .pagination-main{
+    flex-direction: column !important;
   }
   .back-responsive b {
     font-size: 16px;
@@ -462,10 +474,21 @@
     align-items: start;
     margin-bottom: 10px;
   }
-  .modal-reject button{
+  .modal-reject button {
     margin-bottom: 10px;
     margin-left: 0 !important;
   }
+  .page-main{
+    width: 100% !important;
+  }
+  .drop-arrow{
+    display: flex !important;
+  }
+  .pagination-main{
+    display: flex !important;
+
+  }
+  
 }
 
 /* 425 */
@@ -553,8 +576,14 @@
   .progressbar {
     width: 500px;
   }
-  .progressbar li{
+  .progressbar li {
     font-size: 11px !important;
+  }
+  .drop{
+    width: 60% !important;
+  }
+  .css-zj2dqk{
+    right: 6.5rem !important;
   }
 }
 
@@ -640,7 +669,7 @@
   .progressbar {
     width: 500px;
   }
-  .progressbar li{
+  .progressbar li {
     font-size: 11px !important;
   }
 }
@@ -897,16 +926,16 @@ button.btn.btn-secondary:focus {
 }
 
 .css-1ak1ri9 {
-   -webkit-margin-start: 0px !important; 
-  margin-inline-start: 0px !important; 
-   margin-top: 0px !important; 
-   margin-bottom: 0px !important; 
+  -webkit-margin-start: 0px !important;
+  margin-inline-start: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
 }
 .css-dwfbw9 {
-  -webkit-margin-start: 0px !important; 
-  margin-inline-start: 0px !important; 
-   margin-top: 0px !important; 
-   margin-bottom: 0px !important; 
+  -webkit-margin-start: 0px !important;
+  margin-inline-start: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
 }
 .css-dwfbw9 {
   background: var(--chakra-colors-white);
@@ -931,4 +960,20 @@ button.btn.btn-secondary:focus {
   -webkit-filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
   filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
   border-radius: 0px 20px 20px 0px !important;
+}
+.css-1ak1ri9 {
+  background: var(--chakra-colors-white);
+  -webkit-transition: 0.2s linear;
+  transition: 0.2s linear;
+  height: calc(100vh - 32px);
+  -webkit-padding-start: 20px;
+  padding-inline-start: 20px;
+  -webkit-padding-end: 20px;
+  padding-inline-end: 20px;
+  margin: 0px;
+  -webkit-filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  filter: drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05));
+  border-radius: 20px;
+  overflow: auto;
+  height: 100vh !important;
 }

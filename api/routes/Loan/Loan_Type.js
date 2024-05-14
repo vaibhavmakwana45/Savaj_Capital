@@ -3,6 +3,7 @@ const router = express.Router();
 const moment = require("moment");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
+const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
 // Post Loan-Type
 router.post("/", async (req, res) => {
@@ -125,16 +126,13 @@ router.delete("/:loantype_id", async (req, res) => {
   try {
     const { loantype_id } = req.params;
 
-    //   const user = await Loan_Type.findOne({
-    //     loantype_id: loantype_id,
-    //   });
-
-    //   if (user) {
-    //     return res.status(200).json({
-    //       statusCode: 201,
-    //       message: "This Role is already in use",
-    //     });
-    //   }
+    const loanTypeInUse = await Loan_Documents.findOne({ loantype_id: loantype_id });
+    if (loanTypeInUse) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "Documemnt are found with this loan type",
+      });
+    }
 
     const deletedUser = await Loan_Type.findOneAndDelete({
       loantype_id: loantype_id,
