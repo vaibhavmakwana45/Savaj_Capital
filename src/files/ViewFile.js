@@ -19,7 +19,6 @@ import {
   Checkbox,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
-
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import AxiosInstance from "config/AxiosInstance";
@@ -345,6 +344,7 @@ function ViewFile() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      console.log(response.data.data.file, "response.data.data.file");
     } catch (error) {
       console.error("Error fetching file data:", error);
     } finally {
@@ -575,8 +575,6 @@ function ViewFile() {
                           <strong>Cibil Score:</strong>{" "}
                           {fileData?.user?.cibil_score || "N/A"}
                           <br />
-                        </div>
-                        <div className="col-md-6">
                           <strong id="gstNumber">Gst Number:</strong>{" "}
                           <span
                             id="gstNumberText"
@@ -584,7 +582,8 @@ function ViewFile() {
                           >
                             {fileData?.user?.gst_number || "N/A"}
                           </span>
-                          <br />
+                        </div>
+                        <div className="col-md-6">
                           <strong id="panCard">PAN Card:</strong>{" "}
                           <span
                             id="panCardText"
@@ -600,6 +599,14 @@ function ViewFile() {
                           >
                             {fileData?.user?.aadhar_card || "N/A"}
                           </span>
+                          <br />
+                          <strong>City:</strong> {fileData?.user?.city || "N/A"}
+                          <br />
+                          <strong>State:</strong>{" "}
+                          {fileData?.user?.state || "N/A"}
+                          <br />
+                          <strong>Country:</strong>{" "}
+                          {fileData?.user?.country || "N/A"}
                           <br />
                         </div>
                       </div>
