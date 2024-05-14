@@ -701,7 +701,7 @@ export default function CollapsibleTable() {
   return (
     <>
       <div className="card" style={{ marginTop: "80px", borderRadius: "30px" }}>
-        <CardHeader style={{ padding: "30px" }} className="card-main ">
+        <CardHeader style={{ padding: "10px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
               {loan ? `${loan}` : "All Files"}
@@ -713,7 +713,7 @@ export default function CollapsibleTable() {
               Add File
             </Button>
           </Flex>
-          <Flex justifyContent="end" p="4" className="mainnnn">
+          <Flex justifyContent="end" py="1" className="mainnnn">
             <Flex className="thead p-2 ">
               {!loan && (
                 <Flex className="thead ">
