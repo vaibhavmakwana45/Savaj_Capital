@@ -65,7 +65,7 @@ function LoanTypes() {
     "Action",
     "Action",
   ];
-  const formattedData = filteredUsers.map((item ,index) => [
+  const formattedData = filteredUsers.map((item, index) => [
     item.loan_id,
     index + 1,
     item.loan,
@@ -149,15 +149,31 @@ function LoanTypes() {
     try {
       const response = await AxiosInstance.delete(`/loan/${loanId}`);
       if (response.data.success) {
-        setLoans(loans.filter((loan) => loan.loan_id !== loanId));
-        toast.success("loan deleted successfully!");
+        setLoans((prevLoans) =>
+          prevLoans.filter((loan) => loan.loan_id !== loanId)
+        );
+        toast.success("Loan deleted successfully!");
       } else {
-        toast.error(response.data.message || "Please try again later!");
+        toast.error(
+          response.data.message ||
+            "An unexpected error occurred while deleting the loan."
+        );
       }
-      setIsDeleteDialogOpen(false);
     } catch (error) {
+
       console.error("Error deleting loan:", error);
-      toast.error("loan not delete");
+      if (error.response) {
+
+        toast.error(
+          error.response.data.message || "Loan not deleted due to an error."
+        );
+      } else {
+   
+        toast.error("Network error or no response received.");
+      }
+    } finally {
+
+      setIsDeleteDialogOpen(false);
     }
   };
 

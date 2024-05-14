@@ -59,26 +59,34 @@ function Document() {
 
   const updateDocumentIndex = async (documentId, newIndex) => {
     try {
-        const response = await AxiosInstance.put(`/loan_docs/update-index/${documentId}`, {
-            newIndex,
-        });
-        if (response.data.success) {
-            toast.success("Index updated successfully!");
-            fetchDocuments();
-            setDocuments(prevDocs =>
-                prevDocs.map(doc =>
-                    doc.loan_document_id === documentId ? { ...doc, index: newIndex } : doc
-                )
-            );
-        } else {
-            throw new Error(response.data.message);
+      const response = await AxiosInstance.put(
+        `/loan_docs/update-index/${documentId}`,
+        {
+          newIndex,
         }
+      );
+      if (response.data.success) {
+        toast.success("Index updated successfully!");
+        fetchDocuments();
+        setDocuments((prevDocs) =>
+          prevDocs.map((doc) =>
+            doc.loan_document_id === documentId
+              ? { ...doc, index: newIndex }
+              : doc
+          )
+        );
+      } else {
+        throw new Error(response.data.message);
+      }
     } catch (error) {
-        console.error("Error updating document index:", error);
-        toast.error(error.response?.data.message || error.message || "Error updating index. Please try again.");
+      console.error("Error updating document index:", error);
+      toast.error(
+        error.response?.data.message ||
+          error.message ||
+          "Error updating index. Please try again."
+      );
     }
-};
-
+  };
 
   const handleInputIndexSubmit = () => {
     console.log("Index submitted:", inputIndex);
@@ -274,13 +282,13 @@ function Document() {
                   width="250px"
                   marginRight="10px"
                 />
-                {/* <Button
+                <Button
                   className="add-doc-button"
                   onClick={() => history.push("/superadmin/addloandocs")}
                   style={{ backgroundColor: "red" }}
                 >
                   Add Document
-                </Button> */}
+                </Button>
               </div>
             </Flex>
           </CardHeader>

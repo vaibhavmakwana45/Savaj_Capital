@@ -89,7 +89,7 @@ function Row(props) {
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
       } else if (value >= 20 && value < 40) {
-        progressBars.addClass("yellow");
+        progressBars.addClass("#FF9C00"); // Change yellow to #FF9C00
       } else if (value >= 40 && value < 60) {
         progressBars.addClass("purple");
       } else if (value >= 60 && value < 80) {
@@ -150,12 +150,12 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              color:
-                file?.status === "approved"
-                  ? "#4CAF50"
-                  : file?.status === "rejected"
-                  ? "#F44336"
-                  : "#f5c71a",
+              // color:
+              //   file?.status === "approved"
+              //     ? "#4CAF50"
+              //     : file?.status === "rejected"
+              //     ? "#F44336"
+              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -166,12 +166,12 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              color:
-                file?.status === "approved"
-                  ? "#4CAF50"
-                  : file?.status === "rejected"
-                  ? "#F44336"
-                  : "#f5c71a",
+              // color:
+              //   file?.status === "approved"
+              //     ? "#4CAF50"
+              //     : file?.status === "rejected"
+              //     ? "#F44336"
+              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -191,7 +191,7 @@ function Row(props) {
                   ? "#4CAF50"
                   : file?.status === "rejected"
                   ? "#F44336"
-                  : "#f5c71a",
+                  : " #FF9C00",
               padding: "4px 8px",
               borderRadius: "10px",
             }}
@@ -328,14 +328,14 @@ function Row(props) {
                         <TableCell>
                           {documentRow?.status === "Uploaded" ? (
                             <span
-                              style={{ color: "green", fontWeight: "bold" }}
+                            // style={{ color: "green", fontWeight: "bold" }}
                             >
                               <i class="fa-regular fa-circle-check"></i>
                               &nbsp;&nbsp;Uploaded
                             </span>
                           ) : (
                             <span
-                              style={{ color: "#FFB302 ", fontWeight: "bold" }}
+                            // style={{ color: "#FF9C00 ", fontWeight: "bold" }}
                             >
                               <i class="fa-regular fa-clock"></i>
                               &nbsp;&nbsp;Pending
@@ -651,20 +651,21 @@ export default function CollapsibleTable() {
         className="card"
         style={{ marginTop: "120px", borderRadius: "30px" }}
       >
-        <CardHeader style={{ padding: "30px" }} className="card-main">
+        <CardHeader style={{ padding: "30px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
               {loan ? `${loan}` : "All Files"}
             </Text>
-            <Flex className="thead">
+            <Flex className="thead p-2 ">
               {!loan && (
-                <Flex className="thead">
+                <Flex className="thead ">
                   <Select
                     placeholder="Select a loan type"
                     value={selectedLoan}
                     onChange={(e) => setSelectedLoan(e.target.value)}
                     mr="10px"
                     width="200px"
+                    className="mb-2"
                   >
                     <option value="All Loan Types">All Loan Types</option>
                     {loans.map((loan) => (
@@ -680,6 +681,7 @@ export default function CollapsibleTable() {
                 onChange={(e) => setSelectedStatusSearch(e.target.value)}
                 mr="10px"
                 width="200px"
+                className="mb-2"
               >
                 <option value="">Select a Status</option>
                 <option value="running">Running</option>
@@ -729,34 +731,18 @@ export default function CollapsibleTable() {
                 <TableHead style={{ borderBottom: "1px solid red" }}>
                   <TableRow>
                     <TableCell />
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Index
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      File Id
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Customer (Business)
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Pan Card
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      File Status
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Document Status
-                    </TableCell>
+                    <TableCell align="">Index</TableCell>
+                    <TableCell align="">File Id</TableCell>
+                    <TableCell align="">Customer (Business)</TableCell>
+                    <TableCell align="">Pan Card</TableCell>
+                    <TableCell align="">Loan</TableCell>
+                    <TableCell align="">File Status</TableCell>
+                    <TableCell align="">Document Status</TableCell>
                     <TableCell
                       align=""
-                      style={{ color: "#BEC7D4" }}
+                      // }
                     ></TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Action
-                    </TableCell>
+                    <TableCell align="">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -827,7 +813,7 @@ export default function CollapsibleTable() {
 
               <AlertDialogBody>
                 Are you sure you want to update the status of this file?
-                <select
+                <select 
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   style={{
