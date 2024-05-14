@@ -361,18 +361,12 @@
   .linksss {
     margin-bottom: 60px !important;
   }
-  .pagination-main{
-    flex-direction: column !important;
-  }
 }
 
 /* 576 */
 @media (max-width: 767px) {
   .navbar-responsive {
     display: flex !important;
-  }
-  .pagination-main{
-    flex-direction: column !important;
   }
 
   .bradcrub-navbar {
@@ -398,9 +392,6 @@
   .mainnnn {
     flex-direction: column !important;
   }
-  .drop-arrow{
-    flex-direction: column;
-  }
 }
 
 /* 525 */
@@ -411,9 +402,6 @@
   .back-responsive {
     display: flex !important;
     margin-bottom: 1px;
-  }
-  .pagination-main{
-    flex-direction: column !important;
   }
   .back-responsive b {
     font-size: 16px;
@@ -463,6 +451,13 @@
     // margin-left: 30px !important;
     margin-top: 7px !important;
   }
+
+  .pagination-main {
+    flex-direction: column !important;
+  }
+  .drop-arrow {
+    display: flex !important;
+  }
   .css-1ece9uh {
     margin-top: -9px;
   }
@@ -478,17 +473,9 @@
     margin-bottom: 10px;
     margin-left: 0 !important;
   }
-  .page-main{
+  .page-main {
     width: 100% !important;
   }
-  .drop-arrow{
-    display: flex !important;
-  }
-  .pagination-main{
-    display: flex !important;
-
-  }
-  
 }
 
 /* 425 */
@@ -547,6 +534,12 @@
   .progressbar {
     width: 500px;
   }
+  .drop-arrow {
+    display: flex !important;
+  }
+  .pagination-main {
+    display: flex !important;
+  }
 }
 
 /* 320 */
@@ -561,6 +554,12 @@
   }
   .css-1ece9uh {
     margin-top: -9px;
+  }
+  .drop-arrow {
+    flex-direction: column;
+  }
+  .pagination-main {
+    display: flex !important;
   }
   .buttonss {
     width: 50% !important;
@@ -579,11 +578,21 @@
   .progressbar li {
     font-size: 11px !important;
   }
-  .drop{
+  .drop {
     width: 60% !important;
   }
-  .css-zj2dqk{
+  .css-zj2dqk {
     right: 6.5rem !important;
+  }
+  .pag-main {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    padding: 1px;
+    border-radius: 1px;
+    margin-bottom: 1px;
+    margin-top: 10px;
+    margin-right: 33px;
   }
 }
 
@@ -591,6 +600,12 @@
 @media (max-width: 319px) {
   .cardss {
     padding: 0 !important;
+  }
+  .drop-arrow {
+    display: flex !important;
+  }
+  .pagination-main {
+    display: flex !important;
   }
   .back-responsive {
     display: flex !important;
