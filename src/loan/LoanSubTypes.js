@@ -85,7 +85,7 @@ function LoanSubTypes() {
         );
 
   const allHeaders = ["Index", "Loan", "Created At", "Updated At", "Action"];
-  const formattedData = filteredUsers.map((item,index) => [
+  const formattedData = filteredUsers.map((item, index) => [
     item.loantype_id,
     index + 1,
     item.loan_type,
@@ -123,18 +123,42 @@ function LoanSubTypes() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const cancelRef = React.useRef();
+  // const deletebranch = async (userId) => {
+  //   try {
+  //     const response = await AxiosInstance.delete(`/loan_type/${userId}`);
+  //     setUsers(users.filter((user) => user.loantype_id !== userId));
+  //     setIsDeleteDialogOpen(false);
+  //     toast.success("Loan deleted successfully!");
+  //   } catch (error) {
+  //     console.error("Error deleting user:", error);
+  //     toast.error("loan type not delete");
+  //   }
+  // };
   const deletebranch = async (userId) => {
     try {
       const response = await AxiosInstance.delete(`/loan_type/${userId}`);
-      setUsers(users.filter((user) => user.loantype_id !== userId));
-      setIsDeleteDialogOpen(false);
-      toast.success("Loan deleted successfully!");
+      if (response.data.success) {
+        setUsers(users.filter((user) => user.loantype_id !== userId));
+        toast.success("Loan deleted successfully!");
+      } else {
+        toast.error(
+          response.data.message ||
+            "An unexpected error occurred while deleting the loan."
+        );
+      }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("user not delete");
+      console.error("Error deleting loan:", error);
+      if (error.response) {
+        toast.error(
+          error.response.data.message || "Loan not deleted due to an error."
+        );
+      } else {
+        toast.error("Network error or no response received.");
+      }
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
-
   const AddRole = async (loan_type) => {
     try {
       const response = await AxiosInstance.post("/loan_type/", {

@@ -4,6 +4,8 @@ const moment = require("moment");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const Loan_Step = require("../../models/Loan_Step/Loan_Step");
+const File_Uplode = require("../../models/File/File_Uplode");
+const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
 // Post Loan
 let loanTypeCounter = 0;
@@ -148,24 +150,34 @@ router.delete("/:loan_id", async (req, res) => {
   try {
     const { loan_id } = req.params;
 
-    const loan = await Loan_Type.findOne({
-      loan_id: loan_id,
-    });
-
-    if (loan) {
-      return res.status(200).json({
-        statusCode: 201,
-        message: "This Loan_Type is already in use",
+    const loanInUse = await Loan_Documents.findOne({ loan_id: loan_id });
+    if (loanInUse) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "Documemnt are found with this loan",
       });
     }
 
-    const deletedUser = await Loan.findOneAndDelete({
-      loan_id: loan_id,
-    });
+    const fileInUse = await File_Uplode.findOne({ loan_id: loan_id });
+    if (fileInUse) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "Loan cannot be deleted as it is in use in file",
+      });
+    }
 
-    if (!deletedUser) {
-      return res.status(200).json({
-        statusCode: 202,
+    const loanTypeInUse = await Loan_Type.findOne({ loan_id: loan_id });
+    if (loanTypeInUse) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "This Loan_Type is already in use and cannot be deleted",
+      });
+    }
+
+    const deletedLoan = await Loan.findOneAndDelete({ loan_id: loan_id });
+    if (!deletedLoan) {
+      return res.status(404).json({
+        statusCode: 404,
         message: "Loan not found",
       });
     }
@@ -173,7 +185,7 @@ router.delete("/:loan_id", async (req, res) => {
     res.json({
       success: true,
       message: "Loan successfully deleted",
-      deletedRoleId: loan_id,
+      deletedLoanId: loan_id,
     });
   } catch (error) {
     console.error(error);
