@@ -139,7 +139,7 @@ const FileDisplay = ({ groupedFiles }) => {
                   />
                 </button>
               </h2>
-              <div
+              {/* <div
                 id={`panelsStayOpen-collapse-${index}`}
                 className={`accordion-collapse collapse  ${
                   index === openPanelIndex ? "show" : ""
@@ -185,6 +185,58 @@ const FileDisplay = ({ groupedFiles }) => {
                     )}
                   </div>
                 ))}
+              </div> */}
+              <div
+                id={`panelsStayOpen-collapse-${index}`}
+                className={`accordion-collapse collapse ${
+                  index === openPanelIndex ? "show" : ""
+                }`}
+                aria-labelledby={`panelsStayOpen-heading-${index}`}
+              >
+                <div
+                  className="accordion-body"
+                  style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
+                >
+                  {files.map((file, idx) => (
+                    <div key={idx} style={{ width: "45%" }}>
+                      <p className="mb-3">{file.document_name}</p>
+                      {file.file_path.endsWith(".pdf") ? (
+                        <iframe
+                          src={`${basePath}${file.file_path}`}
+                          type="application/pdf"
+                          className="col-xl-6 col-md-6 col-sm-12"
+                          height="260"
+                          style={{
+                            border: "none",
+                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                            borderRadius: "12px",
+                            width: "100%",
+                          }}
+                          title="PDF Viewer"
+                        />
+                      ) : (
+                        <img
+                          src={`${basePath}${file.file_path}`}
+                          alt={file.loan_document_id}
+                          style={{
+                            width: "100%",
+                            height: "260px",
+                            borderRadius: "12px",
+                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                            cursor: "pointer",
+                          }}
+                          className="details-image"
+                          onClick={() =>
+                            handleDownload(
+                              `${basePath}${file.file_path}`,
+                              file.loan_document_id
+                            )
+                          }
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -402,7 +454,7 @@ function ViewFile() {
       const formData = {
         cibil_score: cibilScore,
       };
- 
+
       await AxiosInstance.put("/addusers/edituser/" + userId, formData);
 
       fetchData();
@@ -478,14 +530,6 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  {/* <Button
-                    colorScheme="blue"
-                    style={{ backgroundColor: "#b19552"}}
-                    onClick={onOpen}
-                    className="buttonss"
-                  >
-                    Add Status
-                  </Button> */}
                 </Flex>
               </FormLabel>
 

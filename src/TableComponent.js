@@ -472,7 +472,7 @@ const TableComponent = ({
                 key={index}
                 pl="10px"
                 borderColor={"gray.600"}
-                color="gray.400"
+                // color="gray.400"
                 display={
                   index === removeIndex || index === removeIndex2
                     ? "none"
@@ -647,65 +647,66 @@ const TableComponent = ({
       </Table>
 
       {showPagination && (
-        <div
-          className="text-end"
-          style={{ display: "flex", justifyContent: "end" }}
+        <div className="text-end" style={{ display: "flex", justifyContent: "end" }}>
+  <div
+    className="card text-center page-main"
+    style={{
+      width: "40%",
+      display: "flex",
+      justifyContent: "center",
+      padding: "10px",
+      borderRadius: "10px",
+      boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
+      marginBottom: "40px",
+      marginTop: "20px",
+      marginRight: "20px",
+    }}
+  >
+    <Flex
+      justify="space-between"
+      align="center"
+      p="0.5rem"
+      style={{ gap: "20px" }}
+      className="pagination-main"
+    >
+      <Text>
+        {startIndex + 1}-{endIndex} of {data.length}
+      </Text>
+      <Flex align="center" className="drop-arrow">
+        <Select
+          value={itemsPerPage}
+          onChange={(e) =>
+            handleItemsPerPageChange(parseInt(e.target.value))
+          }
+          variant="filled"
+          mr="1rem"
         >
-          <div
-            className="card text-center"
-            style={{
-              width: "30%",
-              display: "flex",
-              justifyContent: "center",
-              padding: "10px",
-              borderRadius: "10px",
-              boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
-              marginBottom: "40px",
-              marginTop: "20px",
-              marginRight: "20px",
-            }}
-          >
-            <Flex
-              justify="space-between"
-              align="center"
-              p="0.5rem"
-              style={{ gap: "20px" }}
-            >
-              <Text>
-                {startIndex + 1}-{endIndex} of {data.length}
-              </Text>
-              <Flex align="center">
-                <Select
-                  value={itemsPerPage}
-                  onChange={(e) =>
-                    handleItemsPerPageChange(parseInt(e.target.value))
-                  }
-                  variant="filled"
-                  mr="1rem"
-                >
-                  {itemsPerPageOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-                <IconButton
-                  aria-label="Previous Page"
-                  icon={<ChevronLeftIcon />}
-                  onClick={previousPage}
-                  disabled={currentPage === 1}
-                  mr={2}
-                />
-                <IconButton
-                  aria-label="Next Page"
-                  icon={<ChevronRightIcon />}
-                  onClick={nextPage}
-                  disabled={currentPage === totalPages}
-                />
-              </Flex>
-            </Flex>
-          </div>
+          {itemsPerPageOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
+        <div className="d-flex">
+        <IconButton
+          aria-label="Previous Page"
+          icon={<ChevronLeftIcon />}
+          onClick={previousPage}
+          disabled={currentPage === 1}
+          mr={2}
+        />
+        <IconButton
+          aria-label="Next Page"
+          icon={<ChevronRightIcon />}
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+        />
         </div>
+      </Flex>
+    </Flex>
+  </div>
+</div>
+
       )}
     </div>
   );

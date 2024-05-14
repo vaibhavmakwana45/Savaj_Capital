@@ -54,9 +54,9 @@ function UserTable() {
   // Here we find the state object first to get the correct ISO code for fetching cities
   const cities = selectedState
     ? City.getCitiesOfState(
-      "IN",
-      states.find((state) => state.name === selectedState)?.isoCode
-    )
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
     : [];
 
   const handleStateChange = (event) => {
@@ -101,7 +101,8 @@ function UserTable() {
 
       if (response.data.success) {
         toast.success(
-          `User has been ${activate ? "activated" : "deactivated"
+          `User has been ${
+            activate ? "activated" : "deactivated"
           } successfully!`
         );
         setUsers(
@@ -254,7 +255,7 @@ function UserTable() {
     history.push("/superadmin/adduser?id=" + id);
   };
 
-  const handleRow = (id) => { };
+  const handleRow = (id) => {};
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -284,7 +285,7 @@ function UserTable() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" className="thead">
+            <Flex justifyContent="space-between" className="mainnnn">
               <Text
                 fontSize="xl"
                 color={textColor}
@@ -293,34 +294,36 @@ function UserTable() {
               >
                 All Customers
               </Text>
-              <Flex className="thead" alignItems="center" justifyContent="space-between">
-              <Select
-        value={selectedState}
-        onChange={handleStateChange}
-        placeholder="Select State"
-        width="250px"
-        marginRight="10px"
-      >
-        {states.map((state) => (
-          <option key={state.isoCode} value={state.name}>
-            {state.name}
-          </option>
-        ))}
-      </Select>
-      <Select
-        value={selectedCity}
-        onChange={handleCityChange}
-        placeholder="Select City"
-        disabled={!selectedState}
-        width="250px"
-        marginRight="10px"
-      >
-        {cities.map((city) => (
-          <option key={city.name} value={city.name}>
-            {city.name}
-          </option>
-        ))}
-      </Select>
+              <Flex className="thead" justifyContent="space-between">
+                <Select
+                  value={selectedState}
+                  onChange={handleStateChange}
+                  placeholder="Select State"
+                  width="250px"
+                  marginRight="10px"
+                  className="mb-2 drop"
+                >
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  placeholder="Select City"
+                  disabled={!selectedState}
+                  width="250px"
+                  marginRight="10px"
+                  className="mb-2 drop"
+                >
+                  {cities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {city.name}
+                    </option>
+                  ))}
+                </Select>
                 <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
