@@ -258,6 +258,8 @@ router.get("/", async (req, res) => {
         item.user_username = userData.username;
         item.pan_card = userData.pan_card;
         item.businessname = userData.businessname;
+        item.state = userData.state;
+        item.city = userData.city;
       }
       if (loanMap.has(item.loan_id)) {
         const loanData = loanMap.get(item.loan_id);

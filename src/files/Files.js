@@ -41,7 +41,7 @@ import {
 import Loader from "react-js-loader";
 import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
-
+import { Country, State, City } from "country-state-city";
 const theme = createTheme();
 
 function Row(props) {
@@ -179,8 +179,8 @@ function Row(props) {
             {file?.user_username} ({file?.businessname})
           </span>
         </TableCell>
-
-        <TableCell align="">{file?.pan_card}</TableCell>
+        <TableCell align="">{file?.city}</TableCell>
+        {/* <TableCell align="">{file?.pan_card}</TableCell> */}
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">
           <span
@@ -409,36 +409,85 @@ export default function CollapsibleTable() {
   const { loan } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const states = State.getStatesOfCountry("IN"); // Assuming 'IN' is the country code for India
 
+  // Retrieve cities whenever the selectedState changes
+  // Here we find the state object first to get the correct ISO code for fetching cities
+  const cities = selectedState
+    ? City.getCitiesOfState(
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
+    : [];
+
+  const handleStateChange = (event) => {
+    setSelectedState(event.target.value);
+    setSelectedCity(""); // Reset city selection when state changes
+  };
+
+  const handleCityChange = (event) => {
+    setSelectedCity(event.target.value);
+  };
+
+  // const filteredUsers = files.filter((file) => {
+  //   const loanSafe =
+  //     file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
+  //   const fileIdSafe =
+  //     file.file_id && typeof file.file_id === "string"
+  //       ? file.file_id.toLowerCase()
+  //       : "";
+  //   const loanTypeSafe =
+  //     file.loan_type && typeof file.loan_type === "string"
+  //       ? file.loan_type.toLowerCase()
+  //       : "";
+  //   const usernameSafe =
+  //     file.user_username && typeof file.user_username === "string"
+  //       ? file.user_username.toLowerCase()
+  //       : "";
+  //   const statusSafe =
+  //     file.status && typeof file.status === "string"
+  //       ? file.status.toLowerCase()
+  //       : "";
+
+  //   return (
+  //     (selectedLoan === "All Loan Types" ||
+  //       loanSafe.includes(selectedLoan.toLowerCase())) &&
+  //     (loanSafe.includes(searchTerm.toLowerCase()) ||
+  //       fileIdSafe.includes(searchTerm.toLowerCase()) ||
+  //       loanTypeSafe.includes(searchTerm.toLowerCase()) ||
+  //       usernameSafe.includes(searchTerm.toLowerCase())) &&
+  //     (selectedStatusSearch === "" ||
+  //       statusSafe === selectedStatusSearch.toLowerCase())
+  //   );
+  // });
   const filteredUsers = files.filter((file) => {
-    const loanSafe =
-      file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
-    const fileIdSafe =
-      file.file_id && typeof file.file_id === "string"
-        ? file.file_id.toLowerCase()
-        : "";
-    const loanTypeSafe =
-      file.loan_type && typeof file.loan_type === "string"
-        ? file.loan_type.toLowerCase()
-        : "";
-    const usernameSafe =
-      file.user_username && typeof file.user_username === "string"
-        ? file.user_username.toLowerCase()
-        : "";
-    const statusSafe =
-      file.status && typeof file.status === "string"
-        ? file.status.toLowerCase()
-        : "";
+    const searchTermLower = searchTerm.toLowerCase();
+    const selectedLoanLower = selectedLoan.toLowerCase();
+    const selectedStatusLower = selectedStatusSearch.toLowerCase();
 
+    const matchesSearch =
+      file.file_id?.toLowerCase().includes(searchTermLower) ||
+      file.loan_type?.toLowerCase().includes(searchTermLower) ||
+      file.user_username?.toLowerCase().includes(searchTermLower) ||
+      file.loan?.toLowerCase().includes(searchTermLower) ||
+      file.status?.toLowerCase().includes(searchTermLower);
+
+    const matchesLoan =
+      selectedLoan === "All Loan Types" ||
+      file.loan?.toLowerCase().includes(selectedLoanLower);
+    const matchesStatus =
+      selectedStatusSearch === "" ||
+      file.status?.toLowerCase() === selectedStatusLower;
+    const matchesState = selectedState ? file.state === selectedState : true;
+    const matchesCity = selectedCity ? file.city === selectedCity : true;
     return (
-      (selectedLoan === "All Loan Types" ||
-        loanSafe.includes(selectedLoan.toLowerCase())) &&
-      (loanSafe.includes(searchTerm.toLowerCase()) ||
-        fileIdSafe.includes(searchTerm.toLowerCase()) ||
-        loanTypeSafe.includes(searchTerm.toLowerCase()) ||
-        usernameSafe.includes(searchTerm.toLowerCase())) &&
-      (selectedStatusSearch === "" ||
-        statusSafe === selectedStatusSearch.toLowerCase())
+      matchesSearch &&
+      matchesLoan &&
+      matchesStatus &&
+      matchesState &&
+      matchesCity
     );
   });
 
@@ -535,8 +584,12 @@ export default function CollapsibleTable() {
 
   const deletefile = async (fileId) => {
     try {
-      const fileData = files.find((file) => file.file_id === fileId);
-      if (!fileData || !fileData.documents || fileData.documents.length === 0) {
+      const fileData = files?.find((file) => file?.file_id === fileId);
+      if (
+        !fileData ||
+        !fileData?.documents ||
+        fileData?.documents.length === 0
+      ) {
         console.error("No documents found for the file");
         toast.error("No documents found for the file");
         setIsDeleteDialogOpen(false);
@@ -647,15 +700,20 @@ export default function CollapsibleTable() {
 
   return (
     <>
-      <div
-        className="card"
-        style={{ marginTop: "120px", borderRadius: "30px" }}
-      >
+      <div className="card" style={{ marginTop: "80px", borderRadius: "30px" }}>
         <CardHeader style={{ padding: "30px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
               {loan ? `${loan}` : "All Files"}
             </Text>
+            <Button
+              onClick={() => history.push("/superadmin/addfile")}
+              className="dynamicImportantStyle"
+            >
+              Add File
+            </Button>
+          </Flex>
+          <Flex justifyContent="end" p="4" className="mainnnn">
             <Flex className="thead p-2 ">
               {!loan && (
                 <Flex className="thead ">
@@ -676,6 +734,35 @@ export default function CollapsibleTable() {
                   </Select>
                 </Flex>
               )}
+              <Select
+                value={selectedState}
+                onChange={handleStateChange}
+                placeholder="Select State"
+                width="200px"
+                marginRight="10px"
+                className="mb-2 drop"
+              >
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                value={selectedCity}
+                onChange={handleCityChange}
+                placeholder="Select City"
+                disabled={!selectedState}
+                width="200px"
+                marginRight="10px"
+                className="mb-2 drop"
+              >
+                {cities.map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </Select>
               <Select
                 value={selectedStatusSearch}
                 onChange={(e) => setSelectedStatusSearch(e.target.value)}
@@ -705,12 +792,6 @@ export default function CollapsibleTable() {
                     }
                   `}
                 </style>
-                <Button
-                  onClick={() => history.push("/superadmin/addfile")}
-                  className="dynamicImportantStyle"
-                >
-                  Add File
-                </Button>
               </div>
             </Flex>
           </Flex>
@@ -734,7 +815,8 @@ export default function CollapsibleTable() {
                     <TableCell align="">Index</TableCell>
                     <TableCell align="">File Id</TableCell>
                     <TableCell align="">Customer (Business)</TableCell>
-                    <TableCell align="">Pan Card</TableCell>
+                    <TableCell align="">City</TableCell>
+                    {/* <TableCell align="">Pan Card</TableCell> */}
                     <TableCell align="">Loan</TableCell>
                     <TableCell align="">File Status</TableCell>
                     <TableCell align="">Document Status</TableCell>
@@ -813,7 +895,7 @@ export default function CollapsibleTable() {
 
               <AlertDialogBody>
                 Are you sure you want to update the status of this file?
-                <select 
+                <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   style={{
