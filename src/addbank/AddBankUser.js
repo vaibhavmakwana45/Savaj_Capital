@@ -235,7 +235,6 @@ function AddBankUser() {
       } else {
         const response = await AxiosInstance.post("/bank_user", submissionData);
 
-        console.log(response.data, "shivam")
         if (response.data?.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.statusCode === 202) {

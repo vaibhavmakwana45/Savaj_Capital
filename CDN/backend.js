@@ -71,15 +71,12 @@ app.get("/upload/:filename", async (req, res) => {
     if (fs.existsSync(filePath)) {
       let contentType;
       if (filename.endsWith(".pdf")) {
-        console.log("first.......1");
         contentType = "application/pdf";
       } else if (filename.endsWith(".doc") || filename.endsWith(".docx")) {
-        console.log("first.......2");
         contentType =
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
           "application/msword";
       } else if (filename.endsWith(".jpeg") || filename.endsWith(".jpg")) {
-        console.log("first.......3");
         contentType = "image/jpeg";
       } else if (filename.endsWith(".png")) {
         contentType = "image/png";

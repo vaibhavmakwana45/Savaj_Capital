@@ -149,8 +149,6 @@ function AddUser(props) {
           submissionData
         );
 
-        console.log(response.data, "shivam");
-
         if (response.data.statusCode === 201) {
           toast.error("Email already in use");
         } else if (response.data.statusCode === 202) {

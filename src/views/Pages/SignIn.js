@@ -95,8 +95,6 @@ function SignIn() {
         email,
         password,
       });
-      // console.log(response.data.message, "abc")
-      // console.log(response.data.statusCode  , "statuscode")
       if (response.data.statusCode === 201) {
         toast.error("user not exists");
       } else if (response.data.statusCode === 202) {

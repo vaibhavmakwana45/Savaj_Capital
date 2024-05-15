@@ -72,7 +72,6 @@ router.get("/", async (req, res) => {
 //   try {
 //     // Pagination parameters
 //     const page = parseInt(req.query.page) || 1;
-//     console.log(page, "page")
 //     const limit = parseInt(req.query.limit) || 10; // Default limit to 10 documents per page
 
 //     // Calculate skip value

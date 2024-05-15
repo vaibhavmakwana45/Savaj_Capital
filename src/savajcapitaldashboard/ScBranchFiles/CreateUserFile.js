@@ -126,7 +126,6 @@ function CreateUserFile() {
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-      console.log(documentId, "documentId");
       const key = `${title_id}-${index}-${innerIndex}`;
       const filePreview = {
         name: file.name,
@@ -135,8 +134,6 @@ function CreateUserFile() {
         documentId: documentId,
         key: key,
       };
-
-      console.log(filePreview, "meet");
 
       setFileData((prevData) => ({
         ...prevData,
