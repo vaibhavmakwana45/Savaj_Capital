@@ -355,11 +355,7 @@ function EditFile() {
         // loan_dispatch: formData.loan_dispatch,
       };
 
-      console.log(payload, "payload");
-      console.log(uploadedFiles, "uploadedFiles");
-      console.log(adjustedFileData, "adjustedFileData");
-      const response = await AxiosInstance.put(`/file_upload/${id}`, payload);
-      console.log(response, "response");
+      await AxiosInstance.put(`/file_upload/${id}`, payload);
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
@@ -372,7 +368,6 @@ function EditFile() {
 
   // const handleCheckboxChange = (event) => {
   //   const { name, checked } = event.target;
-  //   console.log(`Checkbox ${name} set to ${checked}`);
   //   setFormData((prevFormData) => ({
   //     ...prevFormData,
   //     [name]: checked,

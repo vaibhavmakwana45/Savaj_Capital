@@ -36,7 +36,6 @@ function LoanTypes() {
     try {
       const response = await AxiosInstance.get("/loan");
       setLoans(response.data.data);
-      console.log(response.data.data, "response.data.data");
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -160,19 +159,15 @@ function LoanTypes() {
         );
       }
     } catch (error) {
-
       console.error("Error deleting loan:", error);
       if (error.response) {
-
         toast.error(
           error.response.data.message || "Loan not deleted due to an error."
         );
       } else {
-   
         toast.error("Network error or no response received.");
       }
     } finally {
-
       setIsDeleteDialogOpen(false);
     }
   };
@@ -190,7 +185,7 @@ function LoanTypes() {
         `/loan/${selectedLoanId}`,
         payload
       );
-      console.log(response, "responce");
+
       if (response.data.success) {
         toast.success("Loan and steps updated successfully!");
         setisEditLoan(false);

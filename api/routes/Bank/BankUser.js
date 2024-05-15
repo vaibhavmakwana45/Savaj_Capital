@@ -174,7 +174,7 @@ router.put("/:bankuser_id", async (req, res) => {
 
     const hashedPassword = encrypt(req.body.password);
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
-    req.body.password = hashedPassword
+    req.body.password = hashedPassword;
     // if (!req.body.password) {
     //   delete req.body.password;
     // }
@@ -323,16 +323,6 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
 
         const hasMissingDetail =
           !fileData || !loanData || !loanTypeData || !userData;
-        if (hasMissingDetail) {
-          console.log(
-            "Missing detail for BankApproval with file_id:",
-            approval.file_id
-          );
-          console.log("File data:", fileData);
-          console.log("Loan data:", loanData);
-          console.log("Loan type data:", loanTypeData);
-          console.log("User data:", userData);
-        }
 
         return entry;
       })

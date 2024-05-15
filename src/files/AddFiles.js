@@ -356,7 +356,6 @@ function AddFiles() {
   };
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    console.log(`Checkbox ${name} set to ${checked}`);
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: checked,
@@ -427,7 +426,6 @@ function AddFiles() {
         // loan_dispatch: formData.loan_dispatch,
       };
       await AxiosInstance.post("/file_upload", payload);
-      console.log("Form Data on Submit:", payload);
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {

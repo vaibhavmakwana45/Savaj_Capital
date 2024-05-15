@@ -294,7 +294,6 @@ function BankFileDetailPage() {
           "/file_upload/file_upload/" + id
         );
         setFileData(response.data.data.file);
-        console.log(response.data.data.file, "response.data.data.file");
       } catch (error) {
         console.error("Error fetching file data:", error);
       } finally {
@@ -321,7 +320,6 @@ function BankFileDetailPage() {
 
     try {
       await AxiosInstance.post("/file-status/file-status", statusData);
-      console.log("Status added successfully!");
       onClose();
       setStatusReason("");
     } catch (error) {
@@ -334,7 +332,6 @@ function BankFileDetailPage() {
     try {
       const response = await AxiosInstance.get(`/file_upload/get_steps/${id}`);
       setStepData(response.data.data);
-      console.log(response.data.data, "filesy");
     } catch (error) {
       console.error("Error: ", error.message);
     }

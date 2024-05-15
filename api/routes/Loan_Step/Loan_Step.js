@@ -10,7 +10,6 @@ const { default: axios } = require("axios");
 // Post Loan-Step
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body.inputs);
     let findLoanStep = await Loan_Step.findOne({
       loan_step: { $regex: new RegExp(`^${req.body.loan_step}$`, "i") },
     });
@@ -140,6 +139,55 @@ router.delete("/:loan_step_id", async (req, res) => {
   }
 });
 
+// router.get("/get_steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const file = await File_Uplode.findOne({ file_id });
+//     const loan = await Loan.findOne({ loan_id: file.loan_id });
+//     const steps = [];
+
+//     for (const loan_step_id of loan.loan_step_id) {
+//       if (loan_step_id === "1715348523661") {
+//         try {
+//           const res = await axios.get(
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//           );
+
+//           steps.push({ ...res.data.data, user_id: file.user_id });
+//         } catch (error) {
+//           console.error("Error: ", error.message);
+//         }
+//       } else {
+//         const compelete_step = await Compelete_Step.findOne({
+//           loan_step_id,
+//           file_id,
+//           user_id: file.user_id,
+//         });
+//         if (compelete_step) {
+//           steps.push(compelete_step);
+//         } else {
+//           const step = await Loan_Step.findOne({ loan_step_id });
+//           const inputs = step.inputs;
+//           const isActive = inputs.some((input) => input.is_required);
+//           const status = isActive ? "active" : "complete";
+//           steps.push({ ...step.toObject(), status, user_id: file.user_id });
+//         }
+//       }
+//     }
+
+//     res.json({
+//       statusCode: 200,
+//       data: steps,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.get("/get_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -148,35 +196,52 @@ router.get("/get_steps/:file_id", async (req, res) => {
     const steps = [];
 
     for (const loan_step_id of loan.loan_step_id) {
+      const stepData = await Loan_Step.findOne({ loan_step_id });
+
+      if (!stepData) {
+        continue;
+      }
+
       if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
-
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
           console.error("Error: ", error.message);
         }
       } else {
-        const compelete_step = await Compelete_Step.findOne({
+        const compeleteStep = await Compelete_Step.findOne({
           loan_step_id,
           file_id,
           user_id: file.user_id,
         });
-        if (compelete_step) {
-          steps.push(compelete_step);
+
+        if (compeleteStep) {
+          const updatedInputs = stepData.inputs.map((input) => {
+            const existingInput = compeleteStep.inputs.find(
+              (ci) => ci.label === input.label
+            );
+            return existingInput || input;
+          });
+
+          steps.push({
+            ...compeleteStep.toObject(),
+            inputs: updatedInputs,
+            user_id: file.user_id,
+          });
         } else {
-          const step = await Loan_Step.findOne({ loan_step_id });
-          const inputs = step.inputs;
-          const isActive = inputs.some((input) => input.is_required);
+          const isActive = stepData.inputs.some((input) => input.is_required);
           const status = isActive ? "active" : "complete";
-          steps.push({ ...step.toObject(), status, user_id: file.user_id });
+          steps.push({
+            ...stepData.toObject(),
+            status,
+            user_id: file.user_id,
+          });
         }
       }
     }
-
-    // console.log(steps);
 
     res.json({
       statusCode: 200,
@@ -191,32 +256,101 @@ router.get("/get_steps/:file_id", async (req, res) => {
   }
 });
 
+// router.post("/steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const timestamp = Date.now();
+//     const uniqueId = `${timestamp}`;
+
+//     const object = {
+//       compelete_step_id: uniqueId,
+//       loan_step_id: req.body.loan_step_id,
+//       inputs: req.body.inputs,
+//       loan_step: req.body.loan_step,
+//       status: "complete",
+//       file_id: file_id,
+//       user_id: req.body.user_id,
+//       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//     };
+
+//     var data = await Compelete_Step.create(object);
+//     res.status(200).json({
+//       statusCode: 200,
+//       data: data,
+//       message: "Step Completed Successfully.",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.post("/steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
-    const timestamp = Date.now();
-    const uniqueId = `${timestamp}`;
+    const { loan_step_id, inputs, user_id, loan_step } = req.body;
 
-    const object = {
-      compelete_step_id: uniqueId,
-      loan_step_id: req.body.loan_step_id,
-      inputs: req.body.inputs,
-      loan_step: req.body.loan_step,
-      status: "complete",
-      file_id: file_id,
-      user_id: req.body.user_id,
-      createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
-      updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
-    };
-
-    var data = await Compelete_Step.create(object);
-    res.status(200).json({
-      statusCode: 200,
-      data: data,
-      message: "Step Completed Successfully.",
+    const existingStep = await Compelete_Step.findOne({
+      loan_step_id,
+      file_id,
+      user_id,
     });
+
+    if (existingStep) {
+      const newInputMap = new Map(inputs.map((input) => [input.label, input]));
+
+      existingStep.inputs = existingStep.inputs.map((input) => {
+        if (newInputMap.has(input.label)) {
+          return {
+            ...input,
+            ...newInputMap.get(input.label),
+          };
+        }
+        return input;
+      });
+
+      newInputMap.forEach((value, key) => {
+        if (!existingStep.inputs.some((input) => input.label === key)) {
+          existingStep.inputs.push(value);
+        }
+      });
+
+      existingStep.updatedAt = moment()
+        .utcOffset(330)
+        .format("YYYY-MM-DD HH:mm:ss");
+      await existingStep.save();
+
+      res.status(200).json({
+        statusCode: 200,
+        message: "Step Updated Successfully.",
+      });
+    } else {
+      const timestamp = Date.now();
+      const uniqueId = `${timestamp}`;
+      const newStep = {
+        compelete_step_id: uniqueId,
+        loan_step_id,
+        inputs,
+        loan_step,
+        status: "complete",
+        file_id,
+        user_id,
+        createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      };
+
+      await Compelete_Step.create(newStep);
+
+      res.status(200).json({
+        statusCode: 200,
+        message: "Step Created Successfully.",
+      });
+    }
   } catch (error) {
-    res.json({
+    res.status(500).json({
       statusCode: 500,
       message: error.message,
     });

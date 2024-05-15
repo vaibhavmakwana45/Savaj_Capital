@@ -650,7 +650,6 @@ router.get("/edit_file_upload/:file_id", async (req, res) => {
 router.delete("/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
-    console.log(fileId, "fileId");
     const fileAssignToSavajCapitalBranch = await SavajCapital_BranchAssign.findOne(
       {
         file_id: fileId,
@@ -672,7 +671,6 @@ router.delete("/:fileId", async (req, res) => {
       file_id: fileId,
     });
     const deletedSteps = await Compelete_Step.deleteMany({ file_id: fileId });
-    console.log(deletedSteps, "deletedSteps");
 
     if (!deletedFile) {
       return res.status(404).json({
@@ -873,7 +871,7 @@ router.get("/allfiles", async (req, res) => {
   }
 });
 
-router.get("/testfile/:file_id", async (req, res) => {
+router.get("/file-count/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
     const data = await File_Uplode.findOne({ file_id });
@@ -1111,7 +1109,6 @@ router.post("/search", async (req, res) => {
     // Get additional data from related collections
     const branchUserIds = data.map((item) => item.branchuser_id);
     const userIds = data.map((item) => item.user_id);
-    console.log(userIds, "userIds");
     const loanIds = data.map((item) => item.loan_id);
 
     const [branchUserData, userData, loanData] = await Promise.all([
@@ -1119,9 +1116,6 @@ router.post("/search", async (req, res) => {
       AddUser.find({ user_id: { $in: userIds } }),
       Loan.find({ loan_id: { $in: loanIds } }),
     ]);
-
-    console.log(userIds, "userIds");
-    console.log(userData, "userData");
 
     const branchUserMap = new Map(
       branchUserData.map((user) => [user.branchuser_id, user])
@@ -1134,7 +1128,6 @@ router.post("/search", async (req, res) => {
       const userDataItem = userData.find(
         (user) => user.user_id === item.user_id
       ); // Find the user data for the current item
-      console.log(userDataItem.username, "userDataItem");
       const loanData = loanMap.get(item.loan_id);
 
       item.username = userDataItem ? userDataItem.username : ""; // Assign username

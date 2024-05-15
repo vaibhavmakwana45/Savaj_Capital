@@ -63,7 +63,7 @@ function Row(props) {
     try {
       const file_id = file.file_id;
       const response = await AxiosInstance.get(
-        `/file_upload/testfile/${file_id}`
+        `/file_upload/file-count/${file_id}`
       );
       setFileData([
         ...response.data.data.approvedData,
@@ -71,7 +71,7 @@ function Row(props) {
       ]);
       setFilePercentageData(response.data.data.document_percentage);
     } catch (error) {
-      console.log("Error: ", error.message);
+      console.error("Error: ", error.message);
     }
   };
 
@@ -119,9 +119,7 @@ function Row(props) {
 
   const handleClick = () => {
     AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
-      .then((response) => {
-        console.log("Response:", response.data);
-      })
+      .then((response) => {})
       .catch((error) => {
         console.error("Error:", error);
       });
@@ -512,7 +510,6 @@ export default function CollapsibleTable() {
 
   useEffect(() => {
     if (loan) {
-      console.log(loan);
       setSelectedLoan(loan);
     }
   }, [loan, loans]);
@@ -530,7 +527,6 @@ export default function CollapsibleTable() {
           limit: itemsPerPage,
         },
       });
-      console.log(response, "response");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setCurrentPage(response.data.currentPage);
@@ -706,12 +702,6 @@ export default function CollapsibleTable() {
             <Text fontSize="xl" fontWeight="bold">
               {loan ? `${loan}` : "All Files"}
             </Text>
-            <Button
-              onClick={() => history.push("/superadmin/addfile")}
-              className="dynamicImportantStyle"
-            >
-              Add File
-            </Button>
           </Flex>
           <Flex justifyContent="end" py="1" className="mainnnn">
             <Flex className="thead p-2 ">
@@ -793,6 +783,12 @@ export default function CollapsibleTable() {
                   `}
                 </style>
               </div>
+              <Button
+                onClick={() => history.push("/superadmin/addfile")}
+                className="dynamicImportantStyle"
+              >
+                Add File
+              </Button>
             </Flex>
           </Flex>
         </CardHeader>

@@ -174,7 +174,6 @@ function EditFileScBranch() {
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-      console.log(documentId, "documentId");
       const key = `${title_id}-${index}-${innerIndex}`;
       const isImage = file.type.startsWith("image/");
       const filePreview = {
@@ -184,8 +183,6 @@ function EditFileScBranch() {
         documentId: documentId,
         key: key,
       };
-
-      console.log(filePreview, "meet");
 
       setFileData((prevData) => ({
         ...prevData,
@@ -350,12 +347,7 @@ function EditFileScBranch() {
           key: file.key,
         })),
       };
-
-      console.log(payload, "payload");
-      console.log(uploadedFiles, "uploadedFiles");
-      console.log(adjustedFileData, "adjustedFileData");
-      const response = await AxiosInstance.put(`/file_upload/${id}`, payload);
-      console.log(response, "response");
+      await AxiosInstance.put(`/file_upload/${id}`, payload);
       history.push("/savajcapitaluser/userfile");
       toast.success("All data submitted successfully!");
     } catch (error) {

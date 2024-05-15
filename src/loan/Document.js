@@ -89,7 +89,6 @@ function Document() {
   };
 
   const handleInputIndexSubmit = () => {
-    console.log("Index submitted:", inputIndex);
     if (inputIndex.trim() !== "" && !isNaN(inputIndex) && selectedDocumentId) {
       updateDocumentIndex(selectedDocumentId, parseInt(inputIndex, 10));
       setIsTitleModalOpen(false);
@@ -106,7 +105,6 @@ function Document() {
   };
 
   const handleTitle = (rowData) => {
-    console.log("Row data:", rowData);
     openTitleModal(rowData);
   };
 
@@ -116,7 +114,6 @@ function Document() {
       const url = loantype_id
         ? `/loan_docs/documents/${loan_id}/${loantype_id}`
         : `/loan_docs/${loan_id}`;
-      console.log(url, "url");
       const response = await AxiosInstance.get(url);
       setDocuments(response.data.data || []);
     } catch (error) {
@@ -174,9 +171,29 @@ function Document() {
     history.push(`/superadmin/editloandocs?id=${id}`);
   };
   // const handleTitle = (rowData) => {
-  //   console.log("Row data:", rowData);
   // };
 
+  // const deleteDocument = async (loanDocumentId) => {
+  //   try {
+  //     const response = await AxiosInstance.delete(
+  //       `/loan_docs/${loanDocumentId}`
+  //     );
+  //     if (response.data.success) {
+  //       setDocuments(
+  //         documents.filter(
+  //           (document) => document.loan_document_id !== loanDocumentId
+  //         )
+  //       );
+  //       toast.success("Document deleted successfully!");
+  //     } else {
+  //       toast.error(response.data.message || "Please try again later!");
+  //     }
+  //     setIsDeleteDialogOpen(false);
+  //   } catch (error) {
+  //     console.error("Error deleting document:", error);
+  //     toast.error("document not delete");
+  //   }
+  // };
   const deleteDocument = async (loanDocumentId) => {
     try {
       const response = await AxiosInstance.delete(
@@ -190,15 +207,24 @@ function Document() {
         );
         toast.success("Document deleted successfully!");
       } else {
-        toast.error(response.data.message || "Please try again later!");
+        toast.error(
+          response.data.message ||
+            "An unexpected error occurred while deleting the document."
+        );
       }
-      setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting document:", error);
-      toast.error("document not delete");
+      if (error.response) {
+        toast.error(
+          error.response.data.message || "Document not deleted due to an error."
+        );
+      } else {
+        toast.error("Network error or no response received.");
+      }
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
-
   const AddDocument = async (loan_document) => {
     try {
       const response = await AxiosInstance.post("/loan_docs/", {

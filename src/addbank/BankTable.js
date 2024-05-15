@@ -123,7 +123,6 @@ function Tables() {
   const deleteBankUser = async (bankId) => {
     try {
       const response = await AxiosInstance.delete(`/bank_user/${bankId}`);
-      console.log(response.data, "shivam");
 
       if (response.data.success) {
         setIsDeleteDialogOpen(false);

@@ -403,7 +403,6 @@ function Sidebar(props) {
     });
   };
   const { logo, routes } = props;
-  console.log(props, "props----");
   var links = <>{createLinks(routes)}</>;
   let sidebarBg = useColorModeValue("white", "navy.800");
   let sidebarRadius = "20px";

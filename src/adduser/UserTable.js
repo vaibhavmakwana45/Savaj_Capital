@@ -248,7 +248,6 @@ function UserTable() {
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
-    console.log("id", id);
   };
 
   const handleEdit = (id) => {
