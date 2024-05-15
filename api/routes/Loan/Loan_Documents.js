@@ -185,8 +185,9 @@ router.delete("/:loan_document_id", async (req, res) => {
   try {
     const { loan_document_id } = req.params;
 
-    // Fetch the loan document to get associated document IDs
-    const loanDocument = await Loan_Documents.findOne({ loan_document_id: loan_document_id });
+    const loanDocument = await Loan_Documents.findOne({
+      loan_document_id: loan_document_id,
+    });
     if (!loanDocument) {
       return res.status(404).json({
         success: false,
@@ -194,21 +195,22 @@ router.delete("/:loan_document_id", async (req, res) => {
       });
     }
 
-    // Extract document_ids from the loanDocument
     const documentIds = loanDocument.document_ids;
 
-    // Check if any of these document IDs are referenced in the nested 'documents' array in File Uploads
-    const isReferenced = await File_Uplode.findOne({ 'documents.loan_document_id': { $in: documentIds } });
+    const isReferenced = await File_Uplode.findOne({
+      "documents.loan_document_id": { $in: documentIds },
+    });
     if (isReferenced) {
       return res.status(400).json({
         success: false,
-        message: "Loan document cannot be deleted as its IDs are referenced in file uploads",
+        message: "Loan document cannot be deleted as its referenced in file",
       });
     }
 
-    // If not referenced, proceed to delete the loan document
-    const deletedLoanDocument = await Loan_Documents.findOneAndDelete({ loan_document_id: loan_document_id });
-    console.log(deletedLoanDocument,"deletedLoanDocument")
+    const deletedLoanDocument = await Loan_Documents.findOneAndDelete({
+      loan_document_id: loan_document_id,
+    });
+
     res.json({
       success: true,
       message: "Loan document deleted successfully",

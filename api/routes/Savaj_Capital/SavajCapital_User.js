@@ -394,16 +394,7 @@ router.get("/assigned_file/:branchuser_id", async (req, res) => {
 
         const hasMissingDetail =
           !fileData || !loanData || !loanTypeData || !userData;
-        if (hasMissingDetail) {
-          console.log(
-            "Missing detail for BankApproval with file_id:",
-            approval.file_id
-          );
-          console.log("File data:", fileData);
-          console.log("Loan data:", loanData);
-          console.log("Loan type data:", loanTypeData);
-          console.log("User data:", userData);
-        }
+    
 
         return entry;
       })

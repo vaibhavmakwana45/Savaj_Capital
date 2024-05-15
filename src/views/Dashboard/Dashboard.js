@@ -63,7 +63,7 @@ export default function Dashboard() {
     superadmin: 0,
     loans: [],
   });
-  console.log(apiData, "apiData");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,7 +71,7 @@ export default function Dashboard() {
           AxiosInstance.get("/allcount/data-count"),
           AxiosInstance.get("/allcount/loan-files"),
         ]);
-        console.log(responses, "responses");
+
         setApiData((prev) => ({
           ...prev,
           ...responses[0].data,
@@ -402,10 +402,9 @@ export default function Dashboard() {
             minH="125px"
             style={{ cursor: "pointer" }}
             onClick={() =>
-              {history.push(`/superadmin/filetable`, {
+              history.push(`/superadmin/filetable`, {
                 state: { loan: loan.loan },
               })
-                console.log(loan.loan_id,"vaibahv")}
             }
           >
             <Flex direction="column">

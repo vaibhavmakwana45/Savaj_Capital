@@ -38,7 +38,6 @@ function AllStep() {
   const getStepData = async () => {
     try {
       const response = await AxiosInstance.get("/loan_step");
-      console.log(response, "response");
       if (response.data.success) {
         setSteps(response.data.data);
         setLoading(false);
@@ -176,7 +175,6 @@ function AllStep() {
         loan_step,
         inputs: inputs, // Ensure this includes all inputs
       });
-      console.log(response, "vaibhav");
       if (response.data.success) {
         toast.success("Document Updated successfully!");
         setIsStep(false);

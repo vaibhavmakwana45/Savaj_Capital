@@ -7,6 +7,7 @@ import {
   Flex,
   IconButton,
   Button,
+  Input,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -15,7 +16,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Input,
   Checkbox,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
@@ -29,7 +29,6 @@ import axios from "axios";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const FileDisplay = ({ groupedFiles }) => {
@@ -63,6 +62,7 @@ const FileDisplay = ({ groupedFiles }) => {
   };
 
   const [accordionStatus, setAccordionStatus] = useState();
+
   return (
     <>
       <nav
@@ -304,37 +304,29 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [statusReason, setStatusReason] = useState("");
-  const [statusImage, setStatusImage] = useState(null);
-  const [statusImageFile, setStatusImageFile] = useState(null);
 
   const uploadImageToCDN = async (file) => {
     const formData = new FormData();
-    formData.append("b_video", file);
+    formData.append("files", file);
 
     try {
       const response = await axios.post(
-        "https://cdn.dohost.in/image_upload.php/",
+        "https://cdn.savajcapital.com/api/upload",
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-      if (response.data && response.data.iamge_path) {
-        const imageName = response.data.iamge_path.split("/").pop();
-        setStatusImage(imageName);
 
-        return imageName;
+      if (response.data && response.data.files && response.data.files.length) {
+        const uploadedFilesInfo = response.data.files.map(
+          (file) => file.filename
+        );
+        return uploadedFilesInfo[0];
       } else {
-        throw new Error("Image path is missing in the response");
+        throw new Error("No files were processed.");
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-
-      return null;
+      throw error;
     }
   };
 
@@ -344,7 +336,6 @@ function ViewFile() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
-      console.log(response.data.data.file, "response.data.data.file");
     } catch (error) {
       console.error("Error fetching file data:", error);
     } finally {
@@ -357,35 +348,13 @@ function ViewFile() {
     fetchStepsData();
   }, [id]);
 
-  const handleAddStatus = async () => {
-    let imgUrl = statusImage;
-    if (statusImageFile) {
-      imgUrl = (await uploadImageToCDN(statusImageFile)) || imgUrl;
-    }
-
-    const statusData = {
-      file_id: fileData.file_id,
-      user_id: fileData.user_id,
-      reason: statusReason,
-      status_img: imgUrl,
-    };
-
-    try {
-      await AxiosInstance.post("/file-status/file-status", statusData);
-      console.log("Status added successfully!");
-      onClose();
-      setStatusReason("");
-    } catch (error) {
-      console.error("Error adding status:", error);
-    }
-  };
-
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
+      console.log(response, "response");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -395,6 +364,7 @@ function ViewFile() {
   };
 
   const [open, setOpen] = useState({ is: false, data: {}, index: "" });
+  console.log(open, "open");
   function allPreviousComplete(stepData, currentIndex) {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -404,7 +374,7 @@ function ViewFile() {
     return true;
   }
 
-  const handleChange = (e, index) => {
+  const handleChange = async (e, index) => {
     const { name, value, checked, type, files } = e.target;
     const newData = { ...open.data };
     const inputs = [...newData.inputs];
@@ -425,10 +395,16 @@ function ViewFile() {
         inputs[index].is_required =
           stepData[open?.index]?.inputs[index]?.is_required;
       }
-    } else {
-      inputs[index].value = files[0] || "";
+    } else if (type === "file") {
       if (files.length > 0) {
-        inputs[index].is_required = false;
+        try {
+          const uploadedFilePath = await uploadImageToCDN(files[0]);
+          inputs[index].value = uploadedFilePath;
+          inputs[index].is_required = false;
+        } catch (error) {
+          console.error("Failed to upload file:", error);
+          inputs[index].is_required = true;
+        }
       } else {
         inputs[index].is_required =
           stepData[open?.index]?.inputs[index]?.is_required;
@@ -440,11 +416,7 @@ function ViewFile() {
 
   const submitStep = async () => {
     try {
-      const responce = await AxiosInstance.post(
-        `/loan_step/steps/${id}`,
-        open.data
-      );
-      console.log(responce, "responce---------------");
+      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
       const cibilScore = open.data.inputs.find(
         (input) => input.label === "Cibil Score"
       )?.value;
@@ -497,6 +469,7 @@ function ViewFile() {
       messageElement.parentNode.removeChild(messageElement);
     }, 2000);
   }
+
   return (
     <div>
       {loading ? (
@@ -612,7 +585,7 @@ function ViewFile() {
                       </div>
                     </FormLabel>
 
-                    {/* {stepLoader ? ( // Render loader if loading is true
+                    {stepLoader ? (
                       <div
                         style={{
                           display: "flex",
@@ -623,212 +596,243 @@ function ViewFile() {
                       >
                         <CircularProgress />
                       </div>
-                    ) : ( */}
-                    <div
-                      className="container-fluid progress-bar-area"
-                      style={{ height: "20%", overflow: "auto" }}
-                    >
-                      <div className="row">
-                        <div
-                          className="col"
-                          style={{ position: "relative", zIndex: "9" }}
-                        >
-                          <ul
-                            className="progressbar"
-                            style={{
-                              display: "flex",
-                              listStyle: "none",
-                              padding: 0,
-                            }}
+                    ) : (
+                      <div
+                        className="container-fluid progress-bar-area"
+                        style={{ height: "20%", overflow: "auto" }}
+                      >
+                        <div className="row">
+                          <div
+                            className="col"
+                            style={{ position: "relative", zIndex: "9" }}
                           >
-                            {stepData &&
-                              stepData?.map((item, index) => (
-                                <li
-                                  key={index}
-                                  id={`step${index + 1}`}
-                                  className={
-                                    item.status ? item.status : "active"
-                                  }
-                                  style={{
-                                    display: "inline-block",
-                                    marginRight: "10px",
-                                    cursor:
-                                      (item?.status === "complete" ||
-                                        allPreviousComplete(stepData, index) ||
-                                        index === 0) &&
-                                      "pointer",
-                                  }}
-                                  onClick={() => {
-                                    // Check if the current item is 'complete', all previous items are 'complete', or if this is the first item
-                                    if (
-                                      item?.status === "complete" ||
-                                      allPreviousComplete(stepData, index) ||
-                                      index === 0
-                                    ) {
-                                      // Toggle open/close based on the current state and the index
-                                      if (open.index === index) {
-                                        setOpen({
-                                          is: false,
-                                          data: {},
-                                          index: "",
-                                        });
-                                      } else {
-                                        setOpen({
-                                          is: true,
-                                          data: item,
-                                          index,
-                                        });
-                                      }
+                            <ul
+                              className="progressbar"
+                              style={{
+                                display: "flex",
+                                listStyle: "none",
+                                padding: 0,
+                              }}
+                            >
+                              {stepData &&
+                                stepData?.map((item, index) => (
+                                  <li
+                                    key={index}
+                                    id={`step${index + 1}`}
+                                    className={
+                                      item.status ? item.status : "active"
                                     }
-                                  }}
-                                >
-                                  {/* <div className="circle-container">
+                                    style={{
+                                      display: "inline-block",
+                                      marginRight: "10px",
+                                      cursor:
+                                        (item?.status === "complete" ||
+                                          allPreviousComplete(
+                                            stepData,
+                                            index
+                                          ) ||
+                                          index === 0) &&
+                                        "pointer",
+                                    }}
+                                    onClick={() => {
+                                      if (
+                                        item?.status === "complete" ||
+                                        allPreviousComplete(stepData, index) ||
+                                        index === 0
+                                      ) {
+                                        if (open.index === index) {
+                                          setOpen({
+                                            is: false,
+                                            data: {},
+                                            index: "",
+                                          });
+                                        } else {
+                                          setOpen({
+                                            is: true,
+                                            data: item,
+                                            index,
+                                          });
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    {/* <div className="circle-container">
                                     <a href="#">
                                       <div className="circle-button"></div>
                                     </a>
                                   </div> */}
-                                  {item?.loan_step}
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
-                        {console.log(open.data, "yash")}
-                        {open.is && open.data.loan_step_id !== "1715348523661" && (
-                          <Form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              submitStep();
-                            }}
-                          >
-                            {open?.data?.inputs?.map((input, index) => (
-                              <FormControl
-                                key={index}
-                                id="step"
-                                className="d-flex justify-content-between align-items-center mt-4"
+                                    {item?.loan_step}
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                          {open.is &&
+                            open.data.loan_step_id !== "1715348523661" && (
+                              <Form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  submitStep();
+                                }}
                               >
-                                {input.type === "input" ? (
-                                  <div>
-                                    <label>{input.label}</label>
-                                    <Input
-                                      name="step"
-                                      required={input.is_required}
-                                      disabled={open.data.status === "complete"}
-                                      value={input.value}
-                                      placeholder={`Enter ${input.value}`}
-                                      onChange={(e) => handleChange(e, index)}
-                                    />
-                                  </div>
-                                ) : input.type === "checkbox" ? (
-                                  <div>
-                                    <input
-                                      type="checkbox"
-                                      checked={input.value}
-                                      disabled={open.data.status === "complete"}
-                                      required={input.is_required}
-                                      onChange={(e) => handleChange(e, index)}
-                                    />{" "}
-                                    {input.label}
-                                  </div>
-                                ) : (
-                                  input.type === "file" && (
-                                    <div>
-                                      <label>{input.label}</label>
-                                      <Input
-                                        type="file"
-                                        required={input.is_required}
-                                        disabled={
-                                          open.data.status === "complete"
-                                        }
-                                        onChange={(e) => handleChange(e, index)}
-                                      />
-                                    </div>
-                                  )
-                                )}
-                              </FormControl>
-                            ))}
-                            {open.data.status !== "complete" && (
-                              <Button
-                                colorScheme="blue"
-                                className="mt-3"
-                                type="submit"
-                                mr={3}
-                                style={{ backgroundColor: "#b19552" }}
-                              >
-                                Submit
-                              </Button>
-                            )}
-                          </Form>
-                        )}
-
-                        {open.is &&
-                          open.data.loan_step === "Documents" &&
-                          open.data.pendingData.length !== 0 && (
-                            <div className="row">
-                              <div
-                                className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                              >
-                                <Table
-                                  size="sm"
-                                  aria-label="documents"
-                                  className="mx-4"
-                                >
-                                  <thead>
-                                    <tr className="py-2">
-                                      <th
-                                        className="font-weight-bold"
-                                        style={{ fontSize: "1rem" }}
-                                      >
-                                        Document
-                                      </th>
-                                      <th
-                                        className="status font-weight-bold"
-                                        style={{ fontSize: "1rem" }}
-                                      >
-                                        Status
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {open.data?.pendingData?.map(
-                                      (documentRow, index) => (
-                                        <tr key={index}>
-                                          <td>{documentRow?.name}</td>
-                                          <td>
-                                            <span
-                                              style={{
-                                                color: "#FFB302",
-                                                fontWeight: "bold",
-                                              }}
-                                            >
-                                              Pending
-                                            </span>
-                                          </td>
-                                        </tr>
+                                {open?.data?.inputs?.map((input, index) => (
+                                  <FormControl
+                                    key={index}
+                                    id="step"
+                                    className="d-flex justify-content-between align-items-center mt-4"
+                                  >
+                                    {input.type === "input" ? (
+                                      <div>
+                                        <label>{input.label}</label>
+                                        <Input
+                                          name="step"
+                                          required={input.is_required}
+                                          // disabled={open.data.status === "complete"}
+                                          value={input.value}
+                                          placeholder={`Enter ${input.value}`}
+                                          onChange={(e) =>
+                                            handleChange(e, index)
+                                          }
+                                        />
+                                      </div>
+                                    ) : input.type === "checkbox" ? (
+                                      <div>
+                                        <input
+                                          type="checkbox"
+                                          checked={input.value}
+                                          // disabled={open.data.status === "complete"}
+                                          required={input.is_required}
+                                          onChange={(e) =>
+                                            handleChange(e, index)
+                                          }
+                                        />{" "}
+                                        {input.label}
+                                      </div>
+                                    ) : (
+                                      input.type === "file" && (
+                                        <div>
+                                          <label>{input.label}</label>
+                                          <Input
+                                            type="file"
+                                            required={input.is_required}
+                                            // disabled={
+                                            //   open.data.status === "complete"
+                                            // }
+                                            onChange={(e) =>
+                                              handleChange(e, index)
+                                            }
+                                          />
+                                          {console.log(input, "input.value")}
+                                          {input.value && (
+                                            <div style={{ marginTop: "10px" }}>
+                                              {input.value
+                                                .toLowerCase()
+                                                .endsWith(".pdf") ? (
+                                                <embed
+                                                  src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                  type="application/pdf"
+                                                  width="100%"
+                                                  height="200px"
+                                                />
+                                              ) : (
+                                                <img
+                                                  src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                  alt="Uploaded"
+                                                  style={{
+                                                    width: "100%",
+                                                    height: "200px",
+                                                  }}
+                                                />
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
                                       )
                                     )}
-                                  </tbody>
-                                </Table>
-                                {open.data.status !== "complete" && (
-                                  <Button
-                                    colorScheme="blue"
-                                    style={{ backgroundColor: "#b19552" }}
-                                    className="mx-3"
-                                    onClick={() =>
-                                      history.push(
-                                        `/superadmin/editfile?id=${id}`
-                                      )
-                                    }
+                                  </FormControl>
+                                ))}
+                                {/* {open.data.status !== "complete" && ( */}
+                                <Button
+                                  colorScheme="blue"
+                                  className="mt-3"
+                                  type="submit"
+                                  mr={3}
+                                  style={{ backgroundColor: "#b19552" }}
+                                >
+                                  Submit
+                                </Button>
+                                {/* )} */}
+                              </Form>
+                            )}
+
+                          {open.is &&
+                            open.data.loan_step_id === "1715348523661" &&
+                            open.data.pendingData.length !== 0 && (
+                              <div className="row">
+                                <div
+                                  className="col px-5 pt-3
+                            d-flex justify-content-start align-items-top"
+                                >
+                                  <Table
+                                    size="sm"
+                                    aria-label="documents"
+                                    className="mx-4"
                                   >
-                                    Upload
-                                  </Button>
-                                )}
+                                    <thead>
+                                      <tr className="py-2">
+                                        <th
+                                          className="font-weight-bold"
+                                          style={{ fontSize: "1rem" }}
+                                        >
+                                          Document
+                                        </th>
+                                        <th
+                                          className="status font-weight-bold"
+                                          style={{ fontSize: "1rem" }}
+                                        >
+                                          Status
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {open.data?.pendingData?.map(
+                                        (documentRow, index) => (
+                                          <tr key={index}>
+                                            <td>{documentRow?.name}</td>
+                                            <td>
+                                              <span
+                                                style={{
+                                                  color: "#FFB302",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                Pending
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        )
+                                      )}
+                                    </tbody>
+                                  </Table>
+                                  {open.data.status !== "complete" && (
+                                    <Button
+                                      colorScheme="blue"
+                                      style={{ backgroundColor: "#b19552" }}
+                                      className="mx-3"
+                                      onClick={() =>
+                                        history.push(
+                                          `/superadmin/editfile?id=${id}`
+                                        )
+                                      }
+                                    >
+                                      Upload
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                        </div>
                       </div>
-                    </div>
-                    {/* )} */}
+                    )}
                   </div>
                   <div>
                     {fileData?.documents && (
@@ -841,45 +845,6 @@ function ViewFile() {
           </Card>
         </Flex>
       )}
-
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Add a New Status</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormControl>
-              <FormLabel>Reason for status</FormLabel>
-              <Input
-                placeholder="Enter reason"
-                value={statusReason}
-                onChange={(e) => setStatusReason(e.target.value)}
-              />
-            </FormControl>
-            <FormControl mt={4}>
-              <FormLabel>Status Image (optional)</FormLabel>
-              <Input
-                type="file"
-                onChange={(e) => setStatusImageFile(e.target.files[0])}
-              />
-            </FormControl>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button
-              colorScheme="blue"
-              mr={3}
-              onClick={handleAddStatus}
-              style={{ backgroundColor: "#b19552" }}
-            >
-              Save
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </div>
   );
 }

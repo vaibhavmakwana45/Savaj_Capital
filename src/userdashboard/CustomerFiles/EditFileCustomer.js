@@ -174,7 +174,6 @@ function EditFileCustomer() {
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-      console.log(documentId, "documentId");
       const key = `${title_id}-${index}-${innerIndex}`;
       const isImage = file.type.startsWith("image/");
       const filePreview = {
@@ -185,7 +184,7 @@ function EditFileCustomer() {
         key: key,
       };
 
-      console.log(filePreview, "meet");
+
 
       setFileData((prevData) => ({
         ...prevData,
@@ -351,11 +350,8 @@ function EditFileCustomer() {
         })),
       };
 
-      console.log(payload, "payload");
-      console.log(uploadedFiles, "uploadedFiles");
-      console.log(adjustedFileData, "adjustedFileData");
       const response = await AxiosInstance.put(`/file_upload/${id}`, payload);
-      console.log(response, "response");
+
       history.push("/user/userfile");
       toast.success("All data submitted successfully!");
     } catch (error) {

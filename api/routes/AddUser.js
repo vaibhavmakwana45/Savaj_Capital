@@ -324,7 +324,6 @@ router.delete("/deleteuser/:userId", async (req, res) => {
   try {
     // const { userId } = req.params;
     const userId = req.params.userId;
-    console.log(userId, "userId");
 
     const user = await File_Uplode.findOne({ user_id: userId });
 

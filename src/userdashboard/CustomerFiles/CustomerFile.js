@@ -48,14 +48,13 @@ function Row(props) {
   const { id, file, handleEditClick, handleDelete } = props;
   const history = useHistory();
   const [open, setOpen] = useState(false);
-  console.log(file,"files")
   const [fileData, setFileData] = useState([]);
   const [filePercentageData, setFilePercentageData] = useState("");
   const fetchFileData = async () => {
     try {
       const file_id = file.file_id;
       const response = await AxiosInstance.get(
-        `/file_upload/testfile/${file_id}`
+        `/file_upload/file-count/${file_id}`
       );
       setFileData([
         ...response.data.data.approvedData,
@@ -63,7 +62,7 @@ function Row(props) {
       ]);
       setFilePercentageData(response.data.data.document_percentage);
     } catch (error) {
-      console.log("Error: ", error.message);
+      console.error("Error: ", error.message);
     }
   };
 

@@ -54,7 +54,7 @@ function Row(props) {
     try {
       const file_id = file.file_id;
       const response = await AxiosInstance.get(
-        `/file_upload/testfile/${file_id}`
+        `/file_upload/file-count/${file_id}`
       );
       setFileData([
         ...response.data.data.approvedData,
@@ -62,7 +62,7 @@ function Row(props) {
       ]);
       setFilePercentageData(response.data.data.document_percentage);
     } catch (error) {
-      console.log("Error: ", error.message);
+      console.error("Error: ", error.message);
     }
   };
 
@@ -288,7 +288,6 @@ export default function CollapsibleTable() {
             `/branch_assign/branch_user/${accessType.branchuser_id}`
           );
           setFiles(response.data.data);
-          console.log(response.data.data, "response.data.data");
           setLoading(false);
         } catch (error) {
           console.error("Error fetching files:", error);
