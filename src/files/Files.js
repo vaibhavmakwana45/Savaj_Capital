@@ -581,40 +581,39 @@ export default function CollapsibleTable() {
   const deletefile = async (fileId) => {
     try {
       const fileData = files?.find((file) => file?.file_id === fileId);
-      if (
-        !fileData ||
-        !fileData?.documents ||
-        fileData?.documents.length === 0
-      ) {
-        console.error("No documents found for the file");
-        toast.error("No documents found for the file");
-        setIsDeleteDialogOpen(false);
-        return;
-      }
-
       let allDeleted = true;
-      for (const document of fileData.documents) {
-        if (!document.file_path) {
-          console.error("File path is missing for document");
-          toast.error("File path is missing for document");
-          allDeleted = false;
-          continue;
-        }
 
-        try {
-          const cdnResponse = await axios.delete(
-            `https://cdn.savajcapital.com/api/upload/${document.file_path}`
-          );
-          if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
-            console.error("Failed to delete file from CDN:", cdnResponse.data);
-            toast.error("Failed to delete file from CDN");
+      if (fileData?.documents?.length > 0) {
+        for (const document of fileData.documents) {
+          if (!document.file_path) {
+            console.error("File path is missing for document");
+            toast.error("File path is missing for document");
+            allDeleted = false;
+            continue;
+          }
+
+          try {
+            const cdnResponse = await axios.delete(
+              `https://cdn.savajcapital.com/api/upload/${document.file_path}`
+            );
+            if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
+              console.error(
+                "Failed to delete file from CDN:",
+                cdnResponse.data
+              );
+              toast.error("Failed to delete file from CDN");
+              allDeleted = false;
+            }
+          } catch (cdnError) {
+            console.error("Error deleting from CDN:", cdnError);
+            toast.error("Error deleting from CDN");
             allDeleted = false;
           }
-        } catch (cdnError) {
-          console.error("Error deleting from CDN:", cdnError);
-          toast.error("Error deleting from CDN");
-          allDeleted = false;
         }
+      } else {
+        console.warn(
+          "No documents found for the file, but will attempt to delete file metadata."
+        );
       }
 
       if (allDeleted) {
