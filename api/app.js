@@ -30,7 +30,7 @@ const LoanStepRoutes = require("./routes/Loan_Step/Loan_Step"); // Loan-Step
 const AddDocumentsRoutes = require("./routes/AddDocumens/AddDocuments"); // Add-Documents
 const TitleRoutes = require("./routes/AddDocumens/Title"); // Title
 const BranchAssignRoutes = require("./routes/Savaj_Capital/Branch_Assign");
-const FileStatusRoutes = require("./routes/FileStatus/FileStatus");
+const GuarantorRoutes = require("./routes/AddGuarantor/AddGuarantor");
 // const IDBAccountRoutes = require("./routes/Bank/IDB_Account");
 
 // view engine setup
@@ -64,7 +64,7 @@ app.use("/api/loan_step", LoanStepRoutes);
 app.use("/api/document", AddDocumentsRoutes);
 app.use("/api/title", TitleRoutes);
 app.use("/api/branch_assign", BranchAssignRoutes);
-app.use("/api/file-status", FileStatusRoutes);
+app.use("/api/add-guarantor", GuarantorRoutes);
 // app.use("/api/ibd_account", IDBAccountRoutes);
 
 // catch 404 and forward to error handler

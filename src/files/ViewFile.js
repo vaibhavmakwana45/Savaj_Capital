@@ -26,10 +26,12 @@ import { useLocation } from "react-router-dom";
 import { ArrowBackIcon, CloseIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { useForm } from "react-hook-form";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
@@ -304,31 +306,27 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const uploadImageToCDN = async (file) => {
-    const formData = new FormData();
-    formData.append("files", file);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
-    try {
-      const response = await axios.post(
-        "https://cdn.savajcapital.com/api/upload",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      if (response.data && response.data.files && response.data.files.length) {
-        const uploadedFilesInfo = response.data.files.map(
-          (file) => file.filename
-        );
-        return uploadedFilesInfo[0];
-      } else {
-        throw new Error("No files were processed.");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  };
+  const [formData, setFormData] = useState({
+    user_id: "",
+    file_id: "",
+    username: "",
+    number: "",
+    email: "",
+    pan_card: "",
+    aadhar_card: "",
+    unit_address: "",
+    occupation: "",
+    reference: "",
+  });
 
   const fetchData = async () => {
     try {
@@ -347,6 +345,11 @@ function ViewFile() {
     fetchData();
     fetchStepsData();
   }, [id]);
+  const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
+
+  const handleAccordionClick = () => {
+    setIsOpenGuarantor(!isOpenGuarantor);
+  };
 
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
@@ -449,6 +452,7 @@ function ViewFile() {
       </Flex>
     );
   }
+
   function copyText(elementId) {
     var textToCopy = document.getElementById(elementId).innerText;
     var tempInput = document.createElement("input");
@@ -469,6 +473,61 @@ function ViewFile() {
       messageElement.parentNode.removeChild(messageElement);
     }, 2000);
   }
+
+  const onSubmit = async (data) => {
+    // Ensure `data` contains all form fields
+    const payload = {
+      username: formData.username,
+      number: formData.number,
+      email: formData.email,
+      pan_card: formData.pan_card,
+      aadhar_card: formData.aadhar_card,
+      unit_address: formData.unit_address,
+      occupation: formData.occupation,
+      reference: formData.reference,
+      user_id: fileData.user_id, // Assuming `user_id` is stored in `fileData`
+      file_id: fileData.file_id, // Assuming `file_id` is stored in `fileData`
+    };
+    try {
+      await AxiosInstance.post("/add-guarantor/add-guarantor", payload);
+      toast.success("Guarantor Added Successfully!");
+      onClose(); // Closes the modal
+      fetchData(); // Refresh the list of users/guarantors
+      reset(); // Resets the form fields
+    } catch (error) {
+      console.error("Error adding guarantor:", error);
+      toast.error("Please try again later!");
+    }
+  };
+
+  const handleChangeGuarantor = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handlePanChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
 
   return (
     <div>
@@ -503,6 +562,14 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
+                  <Button
+                    colorScheme="blue"
+                    style={{ backgroundColor: "#b19552" }}
+                    onClick={onOpen}
+                    className="buttonss"
+                  >
+                    Add Guarantor
+                  </Button>
                 </Flex>
               </FormLabel>
 
@@ -584,7 +651,59 @@ function ViewFile() {
                         </div>
                       </div>
                     </FormLabel>
-
+                    <div className="accordion my-3 mx-3">
+                      <div className={`accordion-item ${isOpen ? "show" : ""}`}>
+                        <h2
+                          className="accordion-header"
+                          id="panelsStayOpen-heading-0"
+                        >
+                          <button
+                            className="accordion-button"
+                            type="button"
+                            onClick={handleAccordionClick}
+                            aria-expanded={isOpen ? "true" : "false"}
+                            style={{
+                              color: "white",
+                              fontWeight: 700,
+                              fontSize: "14px",
+                              backgroundColor: "#414650",
+                              justifyContent: "space-between",
+                            }}
+                            id="staticTitle"
+                          >
+                            All Guarantor
+                            <FontAwesomeIcon
+                              icon={
+                                isOpenGuarantor ? faChevronUp : faChevronDown
+                              }
+                            />
+                          </button>
+                        </h2>
+                        <div
+                          id="panelsStayOpen-collapse-0"
+                          className={`accordion-collapse collapse ${
+                            isOpenGuarantor ? "show" : ""
+                          }`}
+                          aria-labelledby="panelsStayOpen-heading-0"
+                        >
+                          <div
+                            className="accordion-body"
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "15px",
+                            }}
+                          >
+                            <div style={{ width: "45%" }}>
+                              <p className="mb-3">Example Document Name 1</p>
+                            </div>
+                            <div style={{ width: "45%" }}>
+                              <p className="mb-3">Example Document Name 2</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     {stepLoader ? (
                       <div
                         style={{
@@ -845,6 +964,116 @@ function ViewFile() {
           </Card>
         </Flex>
       )}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent
+          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
+        >
+          <ModalHeader>Add New User</ModalHeader>
+          <ModalCloseButton />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <ModalBody pb={6}>
+              <FormControl>
+                <FormLabel>Guarantor Name</FormLabel>
+                <Input
+                  name="username"
+                  type="string"
+                  onChange={handleChangeGuarantor}
+                  value={formData.username}
+                  placeholder="Enter username"
+                />
+                {errors.username && <p>{errors.username.message}</p>}
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Mobile Number</FormLabel>
+                <Input
+                  name="number"
+                  type="number"
+                  onChange={handleChangeGuarantor}
+                  value={formData.number}
+                  placeholder="Enter number"
+                />
+                {errors.number && <p>{errors.number.message}</p>}
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  name="email"
+                  type="string"
+                  onChange={handleChangeGuarantor}
+                  value={formData.email}
+                  placeholder="Enter email"
+                />
+                {errors.email && <p>{errors.email.message}</p>}
+              </FormControl>
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handlePanChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
+              <FormControl id="unit_address" mt={4} isRequired>
+                <FormLabel>Unit Address</FormLabel>
+                <Input
+                  name="unit_address"
+                  type="string"
+                  onChange={handleChangeGuarantor}
+                  value={formData.unit_address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <FormControl id="reference" mt={4} isRequired>
+                <FormLabel>Reference</FormLabel>
+                <Input
+                  name="reference"
+                  type="string"
+                  onChange={handleChangeGuarantor}
+                  value={formData.reference}
+                  placeholder="Enter reference"
+                />
+              </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Occupation</FormLabel>
+                <Input
+                  name="occupation"
+                  type="string"
+                  onChange={handleChangeGuarantor}
+                  value={formData.occupation}
+                  placeholder="Enter occupation"
+                />
+                {errors.occupation && <p>{errors.occupation.message}</p>}
+              </FormControl>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                type="submit"
+                style={{ backgroundColor: "#b19552" }}
+              >
+                Save
+              </Button>
+              <Button onClick={onClose}>Cancel</Button>
+            </ModalFooter>
+          </form>
+        </ModalContent>
+      </Modal>
+      <Toaster />
     </div>
   );
 }
