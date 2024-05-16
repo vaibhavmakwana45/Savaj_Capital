@@ -485,6 +485,70 @@ function ViewFile() {
     }
   };
 
+  const [modalOpen, setModalOpen] = useState(null);
+  const handleClick = (data) => {
+    setModalOpen({
+      ...data,
+      data: {
+        ...data.data,
+        inputs: data.data.inputs.map((item) => {
+          if (item.type === "input" || item.type === "file") {
+            const data = { ...item, value: "" };
+            return data;
+          }
+          if (item.type === "checkbox") {
+            const data = { ...item, value: false };
+            return data;
+          }
+        }),
+      },
+    });
+  };
+
+  const handleModalChange = async (e, index) => {
+    const { name, value, checked, type, files } = e.target;
+    const newData = { ...modalOpen.data };
+    const inputs = [...newData.inputs];
+
+    if (type === "checkbox") {
+      inputs[index].value = checked;
+      if (checked) {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    } else if (type === "text") {
+      inputs[index].value = value;
+      if (value !== "") {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    } else if (type === "file") {
+      if (files.length > 0) {
+        try {
+          const uploadedFilePath = await uploadImageToCDN(files[0]);
+          inputs[index].value = uploadedFilePath;
+          inputs[index].is_required = false;
+        } catch (error) {
+          console.error("Failed to upload file:", error);
+          inputs[index].is_required = true;
+        }
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    }
+
+    setModalOpen({
+      is: modalOpen.is,
+      data: { ...newData, inputs },
+      index: modalOpen.index,
+    });
+  };
+
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
@@ -901,14 +965,10 @@ function ViewFile() {
                                           <Input
                                             type="file"
                                             required={input.is_required}
-                                            // disabled={
-                                            //   open.data.status === "complete"
-                                            // }
                                             onChange={(e) =>
                                               handleChange(e, index)
                                             }
                                           />
-                                          {console.log(input, "input.value")}
                                           {input.value && (
                                             <div style={{ marginTop: "10px" }}>
                                               {input.value
@@ -937,7 +997,6 @@ function ViewFile() {
                                     )}
                                   </FormControl>
                                 ))}
-                                {/* {open.data.status !== "complete" && ( */}
                                 <Button
                                   colorScheme="blue"
                                   className="mt-3"
@@ -951,13 +1010,84 @@ function ViewFile() {
                                 <Button
                                   colorScheme="blue"
                                   style={{ backgroundColor: "#b19552" }}
-                                  onClick={onOpensGuarantor}
+                                  onClick={() => {
+                                    onOpensGuarantor();
+                                    handleClick(open);
+                                  }}
                                   className="buttonss"
                                 >
                                   Add
                                 </Button>
 
                                 {/* )} */}
+                              </Form>
+                            )}
+
+                          {modalOpen &&
+                            modalOpen.is &&
+                            !isOpensGuarantor &&
+                            modalOpen.data.loan_step_id !== "1715348523661" && (
+                              <Form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  submitStep();
+                                }}
+                              >
+                                {modalOpen?.data?.inputs?.map(
+                                  (input, index) => (
+                                    <FormControl
+                                      key={index}
+                                      id="step"
+                                      className="d-flex justify-content-between align-items-center mt-4"
+                                    >
+                                      {input.type === "input" ? (
+                                        <div>
+                                          <label>{input.label}</label>
+                                          <Input
+                                            name="step"
+                                            value={input.value}
+                                            placeholder={`Enter ${input.value}`}
+                                            onChange={(e) =>
+                                              handleModalChange(e, index)
+                                            }
+                                          />
+                                        </div>
+                                      ) : input.type === "checkbox" ? (
+                                        <div>
+                                          <input
+                                            type="checkbox"
+                                            checked={input.value}
+                                            onChange={(e) =>
+                                              handleModalChange(e, index)
+                                            }
+                                          />{" "}
+                                          {input.label}
+                                        </div>
+                                      ) : (
+                                        input.type === "file" && (
+                                          <div>
+                                            <label>{input.label}</label>
+                                            <Input
+                                              type="file"
+                                              onChange={(e) =>
+                                                handleModalChange(e, index)
+                                              }
+                                            />
+                                          </div>
+                                        )
+                                      )}
+                                    </FormControl>
+                                  )
+                                )}
+                                <Button
+                                  colorScheme="blue"
+                                  className="mt-3"
+                                  type="submit"
+                                  mr={3}
+                                  style={{ backgroundColor: "#b19552" }}
+                                >
+                                  Submit
+                                </Button>
                               </Form>
                             )}
 
@@ -1179,74 +1309,6 @@ function ViewFile() {
                     <option value="guest">Guest</option>
                   </Select>
                 </FormControl>
-
-                {open.is && open.data.loan_step_id !== "1715348523661" && (
-                  <Form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      submitStep();
-                    }}
-                  >
-                    {open?.data?.inputs?.map((input, index) => (
-                      <FormControl
-                        key={index}
-                        id="step"
-                        className="d-flex justify-content-between align-items-center mt-4"
-                      >
-                        {input.type === "input" ? (
-                          <div>
-                            <label>{input.label}</label>
-                            <Input
-                              name="step"
-                              required={input.is_required}
-                              // disabled={open.data.status === "complete"}
-                              value={input.value}
-                              placeholder={`Enter ${input.value}`}
-                              onChange={(e) => handleChange(e, index)}
-                            />
-                          </div>
-                        ) : input.type === "checkbox" ? (
-                          <div>
-                            <input
-                              type="checkbox"
-                              checked={input.value}
-                              // disabled={open.data.status === "complete"}
-                              required={input.is_required}
-                              onChange={(e) => handleChange(e, index)}
-                            />{" "}
-                            {input.label}
-                          </div>
-                        ) : (
-                          input.type === "file" && (
-                            <div>
-                              <label>{input.label}</label>
-                              <Input
-                                type="file"
-                                required={input.is_required}
-                                // disabled={
-                                //   open.data.status === "complete"
-                                // }
-                                onChange={(e) => handleChange(e, index)}
-                              />
-                            </div>
-                          )
-                        )}
-                      </FormControl>
-                    ))}
-                    {/* {open.data.status !== "complete" && ( */}
-                    <Button
-                      colorScheme="blue"
-                      className="mt-3"
-                      type="submit"
-                      mr={3}
-                      style={{ backgroundColor: "#b19552" }}
-                    >
-                      Submit
-                    </Button>
-
-                    {/* )} */}
-                  </Form>
-                )}
               </ModalBody>
             </form>
           </ModalContent>
