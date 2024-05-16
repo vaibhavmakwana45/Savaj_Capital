@@ -17,6 +17,7 @@ import {
   ModalBody,
   ModalCloseButton,
   Checkbox,
+  Select,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import Card from "components/Card/Card.js";
@@ -307,6 +308,11 @@ function ViewFile() {
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpensGuarantor,
+    onOpen: onOpensGuarantor,
+    onClose: onClosesGuarantor,
+  } = useDisclosure();
 
   const {
     register,
@@ -345,7 +351,6 @@ function ViewFile() {
     fetchData();
     fetchStepsData();
   }, [id]);
-
   const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
 
   const handleAccordionClick = () => {
@@ -367,32 +372,6 @@ function ViewFile() {
 
     fetchGuarantors();
   }, []);
-
-  const [stepData, setStepData] = useState([]);
-  const [stepLoader, setStepLoader] = useState(false);
-  const fetchStepsData = async () => {
-    try {
-      setStepLoader(true);
-      const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "response");
-      setStepData(response.data.data);
-      setStepLoader(false);
-    } catch (error) {
-      console.error("Error: ", error.message);
-      setStepLoader(false);
-    }
-  };
-
-  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-
-  function allPreviousComplete(stepData, currentIndex) {
-    for (let i = 0; i < currentIndex; i++) {
-      if (stepData[i]?.status !== "complete") {
-        return false;
-      }
-    }
-    return true;
-  }
 
   const uploadImageToCDN = async (file) => {
     const formData = new FormData();
@@ -418,6 +397,32 @@ function ViewFile() {
       throw error;
     }
   };
+
+  const [stepData, setStepData] = useState([]);
+  const [stepLoader, setStepLoader] = useState(false);
+
+  const fetchStepsData = async () => {
+    try {
+      setStepLoader(true);
+      const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
+      console.log(response, "response");
+      setStepData(response.data.data);
+      setStepLoader(false);
+    } catch (error) {
+      console.error("Error: ", error.message);
+      setStepLoader(false);
+    }
+  };
+
+  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
+  function allPreviousComplete(stepData, currentIndex) {
+    for (let i = 0; i < currentIndex; i++) {
+      if (stepData[i]?.status !== "complete") {
+        return false;
+      }
+    }
+    return true;
+  }
 
   const handleChange = async (e, index) => {
     const { name, value, checked, type, files } = e.target;
@@ -472,14 +477,81 @@ function ViewFile() {
         cibil_score: cibilScore,
       };
 
-      await AxiosInstance.put("/addusers/edituser/" + userId, formData);
-
+      const response = await AxiosInstance.put(
+        "/addusers/edituser/" + userId,
+        formData
+      );
+      console.log(response, "response");
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
     } catch (error) {
       console.error("Error: ", error.message);
     }
+  };
+
+  const [modalOpen, setModalOpen] = useState(null);
+  const handleClick = (data) => {
+    setModalOpen({
+      ...data,
+      data: {
+        ...data.data,
+        inputs: data.data.inputs.map((item) => {
+          if (item.type === "input" || item.type === "file") {
+            const data = { ...item, value: "" };
+            return data;
+          }
+          if (item.type === "checkbox") {
+            const data = { ...item, value: false };
+            return data;
+          }
+        }),
+      },
+    });
+  };
+
+  const handleModalChange = async (e, index) => {
+    const { name, value, checked, type, files } = e.target;
+    const newData = { ...modalOpen.data };
+    const inputs = [...newData.inputs];
+
+    if (type === "checkbox") {
+      inputs[index].value = checked;
+      if (checked) {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    } else if (type === "text") {
+      inputs[index].value = value;
+      if (value !== "") {
+        inputs[index].is_required = false;
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    } else if (type === "file") {
+      if (files.length > 0) {
+        try {
+          const uploadedFilePath = await uploadImageToCDN(files[0]);
+          inputs[index].value = uploadedFilePath;
+          inputs[index].is_required = false;
+        } catch (error) {
+          console.error("Failed to upload file:", error);
+          inputs[index].is_required = true;
+        }
+      } else {
+        inputs[index].is_required =
+          stepData[modalOpen?.index]?.inputs[index]?.is_required;
+      }
+    }
+
+    setModalOpen({
+      is: modalOpen.is,
+      data: { ...newData, inputs },
+      index: modalOpen.index,
+    });
   };
 
   if (loading) {
@@ -516,7 +588,7 @@ function ViewFile() {
     }, 2000);
   }
 
-  const onSubmit = async (data) => {
+  const onSubmit = async () => {
     const payload = {
       username: formData.username,
       number: formData.number,
@@ -692,7 +764,6 @@ function ViewFile() {
                         </div>
                       </div>
                     </FormLabel>
-
                     <div className="accordion my-3 mx-3">
                       <div
                         className={`accordion-item ${
@@ -898,9 +969,6 @@ function ViewFile() {
                                           <Input
                                             type="file"
                                             required={input.is_required}
-                                            // disabled={
-                                            //   open.data.status === "complete"
-                                            // }
                                             onChange={(e) =>
                                               handleChange(e, index)
                                             }
@@ -933,7 +1001,6 @@ function ViewFile() {
                                     )}
                                   </FormControl>
                                 ))}
-                                {/* {open.data.status !== "complete" && ( */}
                                 <Button
                                   colorScheme="blue"
                                   className="mt-3"
@@ -943,7 +1010,88 @@ function ViewFile() {
                                 >
                                   Submit
                                 </Button>
+
+                                <Button
+                                  colorScheme="blue"
+                                  className="buttonss mt-3"
+                                  style={{ backgroundColor: "#b19552" }}
+                                  onClick={() => {
+                                    onOpensGuarantor();
+                                    handleClick(open);
+                                  }}
+                                >
+                                  Add
+                                </Button>
+
                                 {/* )} */}
+                              </Form>
+                            )}
+
+                          {modalOpen &&
+                            modalOpen.is &&
+                            !isOpensGuarantor &&
+                            modalOpen.data.loan_step_id !== "1715348523661" && (
+                              <Form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  submitStep();
+                                }}
+                              >
+                                {modalOpen?.data?.inputs?.map(
+                                  (input, index) => (
+                                    <FormControl
+                                      key={index}
+                                      id="step"
+                                      className="d-flex justify-content-between align-items-center mt-4"
+                                    >
+                                      {input.type === "input" ? (
+                                        <div>
+                                          <label>{input.label}</label>
+                                          <Input
+                                            name="step"
+                                            value={input.value}
+                                            placeholder={`Enter ${input.value}`}
+                                            onChange={(e) =>
+                                              handleModalChange(e, index)
+                                            }
+                                          />
+                                        </div>
+                                      ) : input.type === "checkbox" ? (
+                                        <div>
+                                          <input
+                                            type="checkbox"
+                                            checked={input.value}
+                                            onChange={(e) =>
+                                              handleModalChange(e, index)
+                                            }
+                                          />{" "}
+                                          {input.label}
+                                        </div>
+                                      ) : (
+                                        input.type === "file" && (
+                                          <div>
+                                            <label>{input.label}</label>
+                                            <Input
+                                              type="file"
+                                              onChange={(e) =>
+                                                handleModalChange(e, index)
+                                              }
+                                            />
+                                          </div>
+                                        )
+                                      )}
+                                    </FormControl>
+                                  )
+                                )}
+                                <Button
+                                  colorScheme="blue"
+                                  className="mt-3"
+                                  type="submit"
+                                  mr={3}
+                                  style={{ backgroundColor: "#b19552" }}
+                                >
+                                  Submit
+                                </Button>
                               </Form>
                             )}
 
@@ -1028,115 +1176,161 @@ function ViewFile() {
           </Card>
         </Flex>
       )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent
-          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
-        >
-          <ModalHeader>Add New User</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalBody pb={6}>
-              <FormControl>
-                <FormLabel>Guarantor Name</FormLabel>
-                <Input
-                  name="username"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.username}
-                  placeholder="Enter username"
-                />
-                {errors.username && <p>{errors.username.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Mobile Number</FormLabel>
-                <Input
-                  name="number"
-                  type="number"
-                  onChange={handleChangeGuarantor}
-                  value={formData.number}
-                  placeholder="Enter number"
-                />
-                {errors.number && <p>{errors.number.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  name="email"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.email}
-                  placeholder="Enter email"
-                />
-                {errors.email && <p>{errors.email.message}</p>}
-              </FormControl>
-              <FormControl id="aadharcard" mt={4} isRequired>
-                <FormLabel>Aadhar Card</FormLabel>
-                <Input
-                  name="aadhar_card"
-                  type="number"
-                  onChange={handleadharChange}
-                  value={formData.aadhar_card}
-                  placeholder="XXXX - XXXX - XXXX"
-                />
-              </FormControl>
-              <FormControl id="pancard" mt={4} isRequired>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  name="pan_card"
-                  type="text"
-                  onChange={handlePanChange}
-                  value={formData.pan_card}
-                  placeholder="Enyrt your PAN"
-                />
-              </FormControl>
-              <FormControl id="unit_address" mt={4} isRequired>
-                <FormLabel>Unit Address</FormLabel>
-                <Input
-                  name="unit_address"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.unit_address}
-                  placeholder="Enter unit address"
-                />
-              </FormControl>
-              <FormControl id="reference" mt={4} isRequired>
-                <FormLabel>Reference</FormLabel>
-                <Input
-                  name="reference"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.reference}
-                  placeholder="Enter reference"
-                />
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Occupation</FormLabel>
-                <Input
-                  name="occupation"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.occupation}
-                  placeholder="Enter occupation"
-                />
-                {errors.occupation && <p>{errors.occupation.message}</p>}
-              </FormControl>
-            </ModalBody>
+      <>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              height: "80%",
+              overflow: "scroll",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <ModalHeader>Add New Guarantor</ModalHeader>
+            <ModalCloseButton />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>Guarantor Name</FormLabel>
+                  <Input
+                    name="username"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.username}
+                    placeholder="Enter username"
+                  />
+                  {errors.username && <p>{errors.username.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Mobile Number</FormLabel>
+                  <Input
+                    name="number"
+                    type="number"
+                    onChange={handleChangeGuarantor}
+                    value={formData.number}
+                    placeholder="Enter number"
+                  />
+                  {errors.number && <p>{errors.number.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input
+                    name="email"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.email}
+                    placeholder="Enter email"
+                  />
+                  {errors.email && <p>{errors.email.message}</p>}
+                </FormControl>
+                <FormControl id="aadharcard" mt={4} isRequired>
+                  <FormLabel>Aadhar Card</FormLabel>
+                  <Input
+                    name="aadhar_card"
+                    type="number"
+                    onChange={handleadharChange}
+                    value={formData.aadhar_card}
+                    placeholder="XXXX - XXXX - XXXX"
+                  />
+                </FormControl>
+                <FormControl id="pancard" mt={4} isRequired>
+                  <FormLabel>Pan Card</FormLabel>
+                  <Input
+                    name="pan_card"
+                    type="text"
+                    onChange={handlePanChange}
+                    value={formData.pan_card}
+                    placeholder="Enyrt your PAN"
+                  />
+                </FormControl>
+                <FormControl id="unit_address" mt={4} isRequired>
+                  <FormLabel>Unit Address</FormLabel>
+                  <Input
+                    name="unit_address"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.unit_address}
+                    placeholder="Enter unit address"
+                  />
+                </FormControl>
+                <FormControl id="reference" mt={4} isRequired>
+                  <FormLabel>Reference</FormLabel>
+                  <Input
+                    name="reference"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.reference}
+                    placeholder="Enter reference"
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Occupation</FormLabel>
+                  <Input
+                    name="occupation"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.occupation}
+                    placeholder="Enter occupation"
+                  />
+                  {errors.occupation && <p>{errors.occupation.message}</p>}
+                </FormControl>
+              </ModalBody>
 
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                type="submit"
-                style={{ backgroundColor: "#b19552" }}
-              >
-                Save
-              </Button>
-              <Button onClick={onClose}>Cancel</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="submit"
+                  style={{ backgroundColor: "#b19552" }}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClose}>Cancel</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
+      <>
+        <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              height: "40%",
+              overflow: "scroll",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <ModalHeader>Add Guarantor</ModalHeader>
+            <ModalCloseButton />
+            <form>
+              <ModalBody pb={6}>
+                <FormControl id="role" mt={4}>
+                  <FormLabel>Guarantor</FormLabel>
+                  <Select placeholder="Select Guarantor">
+                    {guarantors.map((guarantor, index) => (
+                      <option key={index} value={guarantor.username}>
+                        {guarantor.username}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="button"
+                  onClick={onClosesGuarantor}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClosesGuarantor}>Cancel</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
       <Toaster />
     </div>
   );

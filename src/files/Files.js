@@ -89,7 +89,7 @@ function Row(props) {
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
       } else if (value >= 20 && value < 40) {
-        progressBars.addClass("#FF9C00"); // Change yellow to #FF9C00
+        progressBars.addClass("#FF9C00");
       } else if (value >= 40 && value < 60) {
         progressBars.addClass("purple");
       } else if (value >= 60 && value < 80) {

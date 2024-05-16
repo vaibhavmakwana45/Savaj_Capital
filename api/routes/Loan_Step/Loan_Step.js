@@ -289,6 +289,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
 // });
 
 router.post("/steps/:file_id", async (req, res) => {
+  console.log(req.body);
   try {
     const { file_id } = req.params;
     const { loan_step_id, inputs, user_id, loan_step } = req.body;
