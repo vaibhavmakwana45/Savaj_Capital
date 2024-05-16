@@ -350,6 +350,21 @@ function ViewFile() {
   const handleAccordionClick = () => {
     setIsOpenGuarantor(!isOpenGuarantor);
   };
+  const [guarantors, setGuarantors] = useState([]);
+  useEffect(() => {
+    const fetchGuarantors = async () => {
+      try {
+        const response = await AxiosInstance.get(
+          `/add-guarantor/guarantors/${id}`
+        );
+        setGuarantors(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch guarantors", error);
+      }
+    };
+
+    fetchGuarantors();
+  }, []);
 
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
@@ -652,7 +667,11 @@ function ViewFile() {
                       </div>
                     </FormLabel>
                     <div className="accordion my-3 mx-3">
-                      <div className={`accordion-item ${isOpen ? "show" : ""}`}>
+                      <div
+                        className={`accordion-item ${
+                          isOpenGuarantor ? "show" : ""
+                        }`}
+                      >
                         <h2
                           className="accordion-header"
                           id="panelsStayOpen-heading-0"
@@ -661,7 +680,7 @@ function ViewFile() {
                             className="accordion-button"
                             type="button"
                             onClick={handleAccordionClick}
-                            aria-expanded={isOpen ? "true" : "false"}
+                            aria-expanded={isOpenGuarantor ? "true" : "false"}
                             style={{
                               color: "white",
                               fontWeight: 700,
@@ -671,7 +690,7 @@ function ViewFile() {
                             }}
                             id="staticTitle"
                           >
-                            All Guarantor
+                            All Guarantors
                             <FontAwesomeIcon
                               icon={
                                 isOpenGuarantor ? faChevronUp : faChevronDown
@@ -688,22 +707,41 @@ function ViewFile() {
                         >
                           <div
                             className="accordion-body"
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "15px",
-                            }}
+                            style={{ padding: "1rem" }}
                           >
-                            <div style={{ width: "45%" }}>
-                              <p className="mb-3">Example Document Name 1</p>
-                            </div>
-                            <div style={{ width: "45%" }}>
-                              <p className="mb-3">Example Document Name 2</p>
-                            </div>
+                            <table className="table">
+                              <thead>
+                                <tr>
+                                  <th>Username</th>
+                                  <th>Contact Number</th>
+                                  <th>Email</th>
+                                  <th>PAN Card</th>
+                                  <th>Aadhar Card</th>
+                                  <th>Unit Address</th>
+                                  <th>Occupation</th>
+                                  <th>Reference</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {guarantors.map((guarantor, index) => (
+                                  <tr key={index}>
+                                    <td>{guarantor.username}</td>
+                                    <td>{guarantor.number}</td>
+                                    <td>{guarantor.email}</td>
+                                    <td>{guarantor.pan_card}</td>
+                                    <td>{guarantor.aadhar_card}</td>
+                                    <td>{guarantor.unit_address}</td>
+                                    <td>{guarantor.occupation}</td>
+                                    <td>{guarantor.reference}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>
                     </div>
+
                     {stepLoader ? (
                       <div
                         style={{
