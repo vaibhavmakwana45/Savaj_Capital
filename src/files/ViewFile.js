@@ -306,14 +306,6 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -345,12 +337,14 @@ function ViewFile() {
     fetchData();
     fetchStepsData();
   }, [id]);
+
   const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
 
   const handleAccordionClick = () => {
     setIsOpenGuarantor(!isOpenGuarantor);
   };
   const [guarantors, setGuarantors] = useState([]);
+
   useEffect(() => {
     const fetchGuarantors = async () => {
       try {
@@ -382,7 +376,7 @@ function ViewFile() {
   };
 
   const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-  console.log(open, "open");
+
   function allPreviousComplete(stepData, currentIndex) {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -391,6 +385,31 @@ function ViewFile() {
     }
     return true;
   }
+
+  const uploadImageToCDN = async (file) => {
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      const response = await axios.post(
+        "https://cdn.savajcapital.com/api/upload",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (response.data && response.data.files && response.data.files.length) {
+        const uploadedFilesInfo = response.data.files.map(
+          (file) => file.filename
+        );
+        return uploadedFilesInfo[0];
+      } else {
+        throw new Error("No files were processed.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
 
   const handleChange = async (e, index) => {
     const { name, value, checked, type, files } = e.target;
@@ -490,7 +509,6 @@ function ViewFile() {
   }
 
   const onSubmit = async (data) => {
-    // Ensure `data` contains all form fields
     const payload = {
       username: formData.username,
       number: formData.number,
@@ -500,15 +518,15 @@ function ViewFile() {
       unit_address: formData.unit_address,
       occupation: formData.occupation,
       reference: formData.reference,
-      user_id: fileData.user_id, // Assuming `user_id` is stored in `fileData`
-      file_id: fileData.file_id, // Assuming `file_id` is stored in `fileData`
+      user_id: fileData.user_id,
+      file_id: fileData.file_id,
     };
     try {
       await AxiosInstance.post("/add-guarantor/add-guarantor", payload);
       toast.success("Guarantor Added Successfully!");
-      onClose(); // Closes the modal
-      fetchData(); // Refresh the list of users/guarantors
-      reset(); // Resets the form fields
+      onClose();
+      fetchData();
+      reset();
     } catch (error) {
       console.error("Error adding guarantor:", error);
       toast.error("Please try again later!");
@@ -543,7 +561,14 @@ function ViewFile() {
       });
     }
   };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
   return (
     <div>
       {loading ? (
@@ -666,6 +691,7 @@ function ViewFile() {
                         </div>
                       </div>
                     </FormLabel>
+
                     <div className="accordion my-3 mx-3">
                       <div
                         className={`accordion-item ${
@@ -878,7 +904,6 @@ function ViewFile() {
                                               handleChange(e, index)
                                             }
                                           />
-                                          {console.log(input, "input.value")}
                                           {input.value && (
                                             <div style={{ marginTop: "10px" }}>
                                               {input.value
