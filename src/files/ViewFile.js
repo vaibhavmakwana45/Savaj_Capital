@@ -17,6 +17,7 @@ import {
   ModalBody,
   ModalCloseButton,
   Checkbox,
+  Select,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import Card from "components/Card/Card.js";
@@ -307,6 +308,11 @@ function ViewFile() {
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpensGuarantor,
+    onOpen: onOpensGuarantor,
+    onClose: onClosesGuarantor,
+  } = useDisclosure();
 
   const {
     register,
@@ -366,6 +372,31 @@ function ViewFile() {
     fetchGuarantors();
   }, []);
 
+  const uploadImageToCDN = async (file) => {
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      const response = await axios.post(
+        "https://cdn.savajcapital.com/api/upload",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (response.data && response.data.files && response.data.files.length) {
+        const uploadedFilesInfo = response.data.files.map(
+          (file) => file.filename
+        );
+        return uploadedFilesInfo[0];
+      } else {
+        throw new Error("No files were processed.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
   const fetchStepsData = async () => {
@@ -382,7 +413,6 @@ function ViewFile() {
   };
 
   const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-  console.log(open, "open");
   function allPreviousComplete(stepData, currentIndex) {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -917,6 +947,16 @@ function ViewFile() {
                                 >
                                   Submit
                                 </Button>
+
+                                <Button
+                                  colorScheme="blue"
+                                  style={{ backgroundColor: "#b19552" }}
+                                  onClick={onOpensGuarantor}
+                                  className="buttonss"
+                                >
+                                  Add
+                                </Button>
+
                                 {/* )} */}
                               </Form>
                             )}
@@ -1002,115 +1042,216 @@ function ViewFile() {
           </Card>
         </Flex>
       )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent
-          style={{ height: "80%", overflow: "scroll", scrollbarWidth: "thin" }}
-        >
-          <ModalHeader>Add New User</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalBody pb={6}>
-              <FormControl>
-                <FormLabel>Guarantor Name</FormLabel>
-                <Input
-                  name="username"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.username}
-                  placeholder="Enter username"
-                />
-                {errors.username && <p>{errors.username.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Mobile Number</FormLabel>
-                <Input
-                  name="number"
-                  type="number"
-                  onChange={handleChangeGuarantor}
-                  value={formData.number}
-                  placeholder="Enter number"
-                />
-                {errors.number && <p>{errors.number.message}</p>}
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  name="email"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.email}
-                  placeholder="Enter email"
-                />
-                {errors.email && <p>{errors.email.message}</p>}
-              </FormControl>
-              <FormControl id="aadharcard" mt={4} isRequired>
-                <FormLabel>Aadhar Card</FormLabel>
-                <Input
-                  name="aadhar_card"
-                  type="number"
-                  onChange={handleadharChange}
-                  value={formData.aadhar_card}
-                  placeholder="XXXX - XXXX - XXXX"
-                />
-              </FormControl>
-              <FormControl id="pancard" mt={4} isRequired>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  name="pan_card"
-                  type="text"
-                  onChange={handlePanChange}
-                  value={formData.pan_card}
-                  placeholder="Enyrt your PAN"
-                />
-              </FormControl>
-              <FormControl id="unit_address" mt={4} isRequired>
-                <FormLabel>Unit Address</FormLabel>
-                <Input
-                  name="unit_address"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.unit_address}
-                  placeholder="Enter unit address"
-                />
-              </FormControl>
-              <FormControl id="reference" mt={4} isRequired>
-                <FormLabel>Reference</FormLabel>
-                <Input
-                  name="reference"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.reference}
-                  placeholder="Enter reference"
-                />
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Occupation</FormLabel>
-                <Input
-                  name="occupation"
-                  type="string"
-                  onChange={handleChangeGuarantor}
-                  value={formData.occupation}
-                  placeholder="Enter occupation"
-                />
-                {errors.occupation && <p>{errors.occupation.message}</p>}
-              </FormControl>
-            </ModalBody>
+      <>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              height: "80%",
+              overflow: "scroll",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <ModalHeader>Add New User</ModalHeader>
+            <ModalCloseButton />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>Guarantor Name</FormLabel>
+                  <Input
+                    name="username"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.username}
+                    placeholder="Enter username"
+                  />
+                  {errors.username && <p>{errors.username.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Mobile Number</FormLabel>
+                  <Input
+                    name="number"
+                    type="number"
+                    onChange={handleChangeGuarantor}
+                    value={formData.number}
+                    placeholder="Enter number"
+                  />
+                  {errors.number && <p>{errors.number.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input
+                    name="email"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.email}
+                    placeholder="Enter email"
+                  />
+                  {errors.email && <p>{errors.email.message}</p>}
+                </FormControl>
+                <FormControl id="aadharcard" mt={4} isRequired>
+                  <FormLabel>Aadhar Card</FormLabel>
+                  <Input
+                    name="aadhar_card"
+                    type="number"
+                    onChange={handleadharChange}
+                    value={formData.aadhar_card}
+                    placeholder="XXXX - XXXX - XXXX"
+                  />
+                </FormControl>
+                <FormControl id="pancard" mt={4} isRequired>
+                  <FormLabel>Pan Card</FormLabel>
+                  <Input
+                    name="pan_card"
+                    type="text"
+                    onChange={handlePanChange}
+                    value={formData.pan_card}
+                    placeholder="Enyrt your PAN"
+                  />
+                </FormControl>
+                <FormControl id="unit_address" mt={4} isRequired>
+                  <FormLabel>Unit Address</FormLabel>
+                  <Input
+                    name="unit_address"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.unit_address}
+                    placeholder="Enter unit address"
+                  />
+                </FormControl>
+                <FormControl id="reference" mt={4} isRequired>
+                  <FormLabel>Reference</FormLabel>
+                  <Input
+                    name="reference"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.reference}
+                    placeholder="Enter reference"
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Occupation</FormLabel>
+                  <Input
+                    name="occupation"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    value={formData.occupation}
+                    placeholder="Enter occupation"
+                  />
+                  {errors.occupation && <p>{errors.occupation.message}</p>}
+                </FormControl>
+              </ModalBody>
 
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                type="submit"
-                style={{ backgroundColor: "#b19552" }}
-              >
-                Save
-              </Button>
-              <Button onClick={onClose}>Cancel</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="submit"
+                  style={{ backgroundColor: "#b19552" }}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClose}>Cancel</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
+      <>
+        <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              height: "40%",
+              overflow: "scroll",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <ModalHeader>Add New User</ModalHeader>
+            <ModalCloseButton />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <ModalBody pb={6}>
+                <FormControl id="role" mt={4}>
+                  <FormLabel>Role</FormLabel>
+                  <Select placeholder="Select role">
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                    <option value="guest">Guest</option>
+                  </Select>
+                </FormControl>
+
+                {open.is && open.data.loan_step_id !== "1715348523661" && (
+                  <Form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      submitStep();
+                    }}
+                  >
+                    {open?.data?.inputs?.map((input, index) => (
+                      <FormControl
+                        key={index}
+                        id="step"
+                        className="d-flex justify-content-between align-items-center mt-4"
+                      >
+                        {input.type === "input" ? (
+                          <div>
+                            <label>{input.label}</label>
+                            <Input
+                              name="step"
+                              required={input.is_required}
+                              // disabled={open.data.status === "complete"}
+                              value={input.value}
+                              placeholder={`Enter ${input.value}`}
+                              onChange={(e) => handleChange(e, index)}
+                            />
+                          </div>
+                        ) : input.type === "checkbox" ? (
+                          <div>
+                            <input
+                              type="checkbox"
+                              checked={input.value}
+                              // disabled={open.data.status === "complete"}
+                              required={input.is_required}
+                              onChange={(e) => handleChange(e, index)}
+                            />{" "}
+                            {input.label}
+                          </div>
+                        ) : (
+                          input.type === "file" && (
+                            <div>
+                              <label>{input.label}</label>
+                              <Input
+                                type="file"
+                                required={input.is_required}
+                                // disabled={
+                                //   open.data.status === "complete"
+                                // }
+                                onChange={(e) => handleChange(e, index)}
+                              />
+                            </div>
+                          )
+                        )}
+                      </FormControl>
+                    ))}
+                    {/* {open.data.status !== "complete" && ( */}
+                    <Button
+                      colorScheme="blue"
+                      className="mt-3"
+                      type="submit"
+                      mr={3}
+                      style={{ backgroundColor: "#b19552" }}
+                    >
+                      Submit
+                    </Button>
+
+                    {/* )} */}
+                  </Form>
+                )}
+              </ModalBody>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
       <Toaster />
     </div>
   );
