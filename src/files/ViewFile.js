@@ -306,6 +306,14 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -561,14 +569,7 @@ function ViewFile() {
       });
     }
   };
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
   return (
     <div>
       {loading ? (
