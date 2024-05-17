@@ -4,6 +4,13 @@ const moment = require("moment");
 const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 
 router.post("/add-guarantor", async (req, res) => {
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substr(2, 9);
+  const randomNumber = Math.floor(Math.random() * Math.pow(10, 10))
+    .toString()
+    .padStart(10, "0");
+  const guarantorId = `${timestamp}${randomString}${randomNumber}`;
+
   try {
     const {
       username,
@@ -19,6 +26,7 @@ router.post("/add-guarantor", async (req, res) => {
     } = req.body;
 
     const newGuarantor = new Guarantor({
+      guarantor_id: guarantorId,
       file_id,
       user_id,
       username,

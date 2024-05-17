@@ -406,7 +406,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "response");
+      console.log(response, "responseeeee");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -416,6 +416,7 @@ function ViewFile() {
   };
 
   const [open, setOpen] = useState({ is: false, data: {}, index: "" });
+
   function allPreviousComplete(stepData, currentIndex) {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -490,6 +491,21 @@ function ViewFile() {
       console.error("Error: ", error.message);
     }
   };
+  const submitGuarantorStep = async () => {
+    try {
+      const response = await AxiosInstance.post(
+        `/guarantor-step/guarantor-step/${id}`,
+        open.data
+      );
+
+      console.log(response, "response");
+      fetchData();
+      fetchStepsData();
+      setOpen({ is: false, data: {}, index: "" });
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
 
   const [modalOpen, setModalOpen] = useState(null);
   const [selectedGuarantor, setSelectedGuarantor] = useState("");
@@ -509,9 +525,10 @@ function ViewFile() {
       ...prevState,
       data: prevState?.data
         ? [
-            ...prevState?.data,
+            ...prevState.data,
             {
               ...newData,
+              is: false,
               data: {
                 ...newData.data,
                 inputs: updatedInputs,
@@ -521,6 +538,7 @@ function ViewFile() {
         : [
             {
               ...newData,
+              is: false,
               data: {
                 ...newData.data,
                 inputs: updatedInputs,
@@ -535,9 +553,11 @@ function ViewFile() {
       if (!prevState?.data || prevState.data.length === 0) {
         return prevState;
       }
+
       const updatedData = [...prevState.data];
       updatedData[updatedData.length - 1] = {
         ...updatedData[updatedData.length - 1],
+        is: true,
         username: selectedGuarantor,
       };
 
@@ -548,29 +568,55 @@ function ViewFile() {
     });
   };
 
-  const handleModalChange = async (e, index) => {
-    const { name, value, checked, type, files } = e.target;
-    const newData = { ...modalOpen.data };
-    const inputs = [...newData.inputs];
+  const handleModalChange = async (e, dataIndex, inputIndex) => {
+    const { type, checked, value, files } = e.target;
 
-    if (type === "checkbox") {
-      inputs[index].value = checked;
-    } else if (type === "text") {
-      inputs[index].value = value;
-    } else if (type === "file") {
-      if (files.length > 0) {
-        try {
-          const uploadedFilePath = await uploadImageToCDN(files[0]);
-          inputs[index].value = uploadedFilePath;
-        } catch (error) {
-          console.error("Failed to upload file:", error);
-        }
+    if (type === "file" && files.length > 0) {
+      try {
+        const uploadedFilePath = await uploadImageToCDN(files[0]);
+        setModalOpen((prevState) => {
+          if (!prevState || !prevState.data) {
+            console.error("Modal state is not properly initialized.");
+            return prevState;
+          }
+
+          const updatedData = [...prevState.data];
+          const updatedInputs = [...updatedData[dataIndex].data.inputs];
+          updatedInputs[inputIndex].value = uploadedFilePath;
+          updatedData[dataIndex].data.inputs = updatedInputs;
+
+          return {
+            ...prevState,
+            data: updatedData,
+          };
+        });
+      } catch (error) {
+        console.error("Failed to upload file:", error);
       }
+      return;
     }
 
-    setModalOpen({
-      ...modalOpen,
-      data: { ...newData, inputs },
+    setModalOpen((prevState) => {
+      if (!prevState || !prevState.data) {
+        console.error("Modal state is not properly initialized.");
+        return prevState;
+      }
+
+      const updatedData = [...prevState.data];
+      const updatedInputs = [...updatedData[dataIndex].data.inputs];
+
+      if (type === "checkbox") {
+        updatedInputs[inputIndex].value = checked;
+      } else {
+        updatedInputs[inputIndex].value = value;
+      }
+
+      updatedData[dataIndex].data.inputs = updatedInputs;
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
     });
   };
 
@@ -1068,71 +1114,88 @@ function ViewFile() {
 
                           {modalOpen &&
                             !isOpenGuarantor &&
-                            modalOpen?.data?.map((item, index) => (
-                              <Form
-                                onSubmit={(e) => {
-                                  e.preventDefault();
-                                  submitStep();
-                                }}
-                                style={{ marginTop: "20px" }}
-                              >
-                                <p>{item?.username} Cibil Score</p>
-                                {item?.data?.loan_step_id !== "1715348523661" &&
-                                  item?.data?.inputs?.map((input, index) => (
-                                    <FormControl
-                                      key={index}
-                                      id="step"
-                                      className="d-flex justify-content-between align-items-center mt-4"
-                                    >
-                                      {input.type === "input" ? (
-                                        <div>
-                                          <label>{input.label}</label>
-                                          <Input
-                                            name="step"
-                                            value={input.value}
-                                            placeholder={`Enter ${input.value}`}
-                                            onChange={(e) =>
-                                              handleModalChange(e, index)
-                                            }
-                                          />
-                                        </div>
-                                      ) : input.type === "checkbox" ? (
-                                        <div>
-                                          <input
-                                            type="checkbox"
-                                            checked={input.value}
-                                            onChange={(e) =>
-                                              handleModalChange(e, index)
-                                            }
-                                          />{" "}
-                                          {input.label}
-                                        </div>
-                                      ) : (
-                                        input.type === "file" && (
+                            modalOpen.data?.map((item, dataIndex) =>
+                              item.is &&
+                              item.data.loan_step_id !== "1715348523661" ? (
+                                <Form
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    submitGuarantorStep();
+                                  }}
+                                  style={{ marginTop: "20px" }}
+                                  key={dataIndex}
+                                >
+                                  <p>{item.username} Cibil Score</p>
+                                  {item.data.inputs?.map(
+                                    (input, inputIndex) => (
+                                      <FormControl
+                                        key={`${dataIndex}-${inputIndex}`}
+                                        id="step"
+                                        className="d-flex justify-content-between align-items-center mt-4"
+                                      >
+                                        {input.type === "input" ? (
                                           <div>
                                             <label>{input.label}</label>
                                             <Input
-                                              type="file"
+                                              name="step"
+                                              value={input.value}
+                                              placeholder={`Enter ${input.label}`}
                                               onChange={(e) =>
-                                                handleModalChange(e, index)
+                                                handleModalChange(
+                                                  e,
+                                                  dataIndex,
+                                                  inputIndex
+                                                )
                                               }
                                             />
                                           </div>
-                                        )
-                                      )}
-                                    </FormControl>
-                                  ))}
-                                <Button
-                                  colorScheme="blue"
-                                  className="mt-3"
-                                  type="submit"
-                                  mr={3}
-                                  style={{ backgroundColor: "#b19552" }}
-                                >
-                                  Submit
-                                </Button>
-                              </Form>
-                            ))}
+                                        ) : input.type === "checkbox" ? (
+                                          <div>
+                                            <input
+                                              type="checkbox"
+                                              checked={input.value}
+                                              onChange={(e) =>
+                                                handleModalChange(
+                                                  e,
+                                                  dataIndex,
+                                                  inputIndex
+                                                )
+                                              }
+                                            />{" "}
+                                            {input.label}
+                                          </div>
+                                        ) : (
+                                          input.type === "file" && (
+                                            <div>
+                                              <label>{input.label}</label>
+                                              <Input
+                                                type="file"
+                                                onChange={(e) =>
+                                                  handleModalChange(
+                                                    e,
+                                                    dataIndex,
+                                                    inputIndex
+                                                  )
+                                                }
+                                              />
+                                            </div>
+                                          )
+                                        )}
+                                      </FormControl>
+                                    )
+                                  )}
+                                  <Button
+                                    colorScheme="blue"
+                                    className="mt-3"
+                                    type="submit"
+                                    mr={3}
+                                    style={{ backgroundColor: "#b19552" }}
+                                  >
+                                    Submit
+                                  </Button>
+                                </Form>
+                              ) : null
+                            )}
 
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
