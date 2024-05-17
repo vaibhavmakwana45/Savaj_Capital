@@ -33,6 +33,7 @@ import { CheckBox } from "@mui/icons-material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
+import { Typography } from "@mui/material";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
@@ -491,22 +492,59 @@ function ViewFile() {
   };
 
   const [modalOpen, setModalOpen] = useState(null);
-  const handleClick = (data) => {
-    setModalOpen({
-      ...data,
-      data: {
-        ...data.data,
-        inputs: data.data.inputs.map((item) => {
-          if (item.type === "input" || item.type === "file") {
-            const data = { ...item, value: "" };
-            return data;
-          }
-          if (item.type === "checkbox") {
-            const data = { ...item, value: false };
-            return data;
-          }
-        }),
-      },
+  const [selectedGuarantor, setSelectedGuarantor] = useState("");
+
+  const handleClick = (newData) => {
+    const updatedInputs = newData.data.inputs.map((item) => {
+      if (item.type === "input" || item.type === "file") {
+        return { ...item, value: "" };
+      }
+      if (item.type === "checkbox") {
+        return { ...item, value: false };
+      }
+      return item;
+    });
+
+    setModalOpen((prevState) => ({
+      ...prevState,
+      data: prevState?.data
+        ? [
+            ...prevState?.data,
+            {
+              ...newData,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
+            },
+          ]
+        : [
+            {
+              ...newData,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
+            },
+          ],
+    }));
+  };
+
+  const addUserToModel = () => {
+    setModalOpen((prevState) => {
+      if (!prevState?.data || prevState.data.length === 0) {
+        return prevState;
+      }
+      const updatedData = [...prevState.data];
+      updatedData[updatedData.length - 1] = {
+        ...updatedData[updatedData.length - 1],
+        username: selectedGuarantor,
+      };
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
     });
   };
 
@@ -517,40 +555,22 @@ function ViewFile() {
 
     if (type === "checkbox") {
       inputs[index].value = checked;
-      if (checked) {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[modalOpen?.index]?.inputs[index]?.is_required;
-      }
     } else if (type === "text") {
       inputs[index].value = value;
-      if (value !== "") {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[modalOpen?.index]?.inputs[index]?.is_required;
-      }
     } else if (type === "file") {
       if (files.length > 0) {
         try {
           const uploadedFilePath = await uploadImageToCDN(files[0]);
           inputs[index].value = uploadedFilePath;
-          inputs[index].is_required = false;
         } catch (error) {
           console.error("Failed to upload file:", error);
-          inputs[index].is_required = true;
         }
-      } else {
-        inputs[index].is_required =
-          stepData[modalOpen?.index]?.inputs[index]?.is_required;
       }
     }
 
     setModalOpen({
-      is: modalOpen.is,
+      ...modalOpen,
       data: { ...newData, inputs },
-      index: modalOpen.index,
     });
   };
 
@@ -716,51 +736,71 @@ function ViewFile() {
                     >
                       <div className="row">
                         <div className="col-md-6">
-                          <strong>Loan User:</strong>{" "}
-                          {fileData?.user?.username || "N/A"}
-                          <br />
-                          <strong>Email:</strong>{" "}
-                          {fileData?.user?.email || "N/A"}
-                          <br />
-                          <strong>Phone Number:</strong>{" "}
-                          {fileData?.user?.number || "N/A"}
-                          <br />
-                          <strong>Cibil Score:</strong>{" "}
-                          {fileData?.user?.cibil_score || "N/A"}
-                          <br />
-                          <strong id="gstNumber">Gst Number:</strong>{" "}
-                          <span
-                            id="gstNumberText"
-                            onClick={() => copyText("gstNumberText")}
-                          >
-                            {fileData?.user?.gst_number || "N/A"}
-                          </span>
+                          <div>
+                            <strong>Loan User :</strong>{" "}
+                            <span> {fileData?.user?.username || "N/A"}</span>
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong>Email :</strong>{" "}
+                            <span> {fileData?.user?.email || "N/A"}</span>
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong>Phone Number :</strong>{" "}
+                            <span> {fileData?.user?.number || "N/A"}</span>
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong>Cibil Score :</strong>{" "}
+                            <span> {fileData?.user?.cibil_score || "N/A"}</span>
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong id="gstNumber">Gst Number :</strong>{" "}
+                            <span
+                              id="gstNumberText"
+                              onClick={() => copyText("gstNumberText")}
+                            >
+                              {fileData?.user?.gst_number || "N/A"}
+                            </span>
+                          </div>
                         </div>
                         <div className="col-md-6">
-                          <strong id="panCard">PAN Card:</strong>{" "}
-                          <span
-                            id="panCardText"
-                            onClick={() => copyText("panCardText")}
-                          >
-                            {fileData?.user?.pan_card || "N/A"}
-                          </span>
-                          <br />
-                          <strong id="aadharCard">Aadhar Card:</strong>{" "}
-                          <span
-                            id="aadharCardText"
-                            onClick={() => copyText("aadharCardText")}
-                          >
-                            {fileData?.user?.aadhar_card || "N/A"}
-                          </span>
-                          <br />
-                          <strong>City:</strong> {fileData?.user?.city || "N/A"}
-                          <br />
-                          <strong>State:</strong>{" "}
-                          {fileData?.user?.state || "N/A"}
-                          <br />
-                          <strong>Country:</strong>{" "}
-                          {fileData?.user?.country || "N/A"}
-                          <br />
+                          <div>
+                            <strong id="panCard">PAN Card :</strong>{" "}
+                            <span
+                              id="panCardText"
+                              onClick={() => copyText("panCardText")}
+                            >
+                              {fileData?.user?.pan_card || "N/A"}
+                            </span>
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong id="aadharCard">Aadhar Card :</strong>{" "}
+                            <span
+                              id="aadharCardText"
+                              onClick={() => copyText("aadharCardText")}
+                            >
+                              {fileData?.user?.aadhar_card || "N/A"}
+                            </span>
+                          </div>
+                          <div>
+                            <strong>City :</strong>{" "}
+                            {fileData?.user?.city || "N/A"}
+                          </div>
+                          <div>
+                            {/* <br /> */}
+                            <strong>State :</strong>{" "}
+                            {fileData?.user?.state || "N/A"}
+                          </div>
+                          {/* <br /> */}
+                          <div>
+                            <strong>Country :</strong>{" "}
+                            {fileData?.user?.country || "N/A"}
+                            {/* <br /> */}
+                          </div>
                         </div>
                       </div>
                     </FormLabel>
@@ -907,6 +947,7 @@ function ViewFile() {
                                             data: item,
                                             index,
                                           });
+                                          setModalOpen();
                                         }
                                       }
                                     }}
@@ -1022,23 +1063,22 @@ function ViewFile() {
                                 >
                                   Add
                                 </Button>
-
-                                {/* )} */}
                               </Form>
                             )}
 
                           {modalOpen &&
-                            modalOpen.is &&
-                            !isOpensGuarantor &&
-                            modalOpen.data.loan_step_id !== "1715348523661" && (
+                            !isOpenGuarantor &&
+                            modalOpen?.data?.map((item, index) => (
                               <Form
                                 onSubmit={(e) => {
                                   e.preventDefault();
                                   submitStep();
                                 }}
+                                style={{ marginTop: "20px" }}
                               >
-                                {modalOpen?.data?.inputs?.map(
-                                  (input, index) => (
+                                <p>{item?.username} Cibil Score</p>
+                                {item?.data?.loan_step_id !== "1715348523661" &&
+                                  item?.data?.inputs?.map((input, index) => (
                                     <FormControl
                                       key={index}
                                       id="step"
@@ -1081,8 +1121,7 @@ function ViewFile() {
                                         )
                                       )}
                                     </FormControl>
-                                  )
-                                )}
+                                  ))}
                                 <Button
                                   colorScheme="blue"
                                   className="mt-3"
@@ -1093,7 +1132,7 @@ function ViewFile() {
                                   Submit
                                 </Button>
                               </Form>
-                            )}
+                            ))}
 
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
@@ -1307,7 +1346,10 @@ function ViewFile() {
               <ModalBody pb={6}>
                 <FormControl id="role" mt={4}>
                   <FormLabel>Guarantor</FormLabel>
-                  <Select placeholder="Select Guarantor">
+                  <Select
+                    placeholder="Select Guarantor"
+                    onChange={(e) => setSelectedGuarantor(e.target.value)}
+                  >
                     {guarantors.map((guarantor, index) => (
                       <option key={index} value={guarantor.username}>
                         {guarantor.username}
@@ -1321,7 +1363,10 @@ function ViewFile() {
                   colorScheme="blue"
                   mr={3}
                   type="button"
-                  onClick={onClosesGuarantor}
+                  onClick={() => {
+                    onClosesGuarantor();
+                    addUserToModel();
+                  }}
                 >
                   Save
                 </Button>
