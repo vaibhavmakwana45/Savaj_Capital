@@ -200,7 +200,7 @@ const FileDisplay = ({ groupedFiles }) => {
                   style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
                 >
                   {files.map((file, idx) => (
-                    <div key={idx} style={{ width: "45%" }}>
+                    <div key={idx} className="image-responsive" style={{ width: "45%" }}>
                       <p className="mb-3">{file.document_name}</p>
                       {file.file_path.endsWith(".pdf") ? (
                         <iframe
@@ -732,8 +732,9 @@ function ViewFile() {
                           <span
                             id="gstNumberText"
                             onClick={() => copyText("gstNumberText")}
+                            style={{cursor:"pointer"}}
                           >
-                            {fileData?.user?.gst_number || "N/A"}
+                            {fileData?.user?.gst_number || "N/A"} <i class="fa-solid fa-copy" style={{color:"#B19552",marginLeft:"5px"}}></i>
                           </span>
                         </div>
                         <div className="col-md-6">
@@ -741,16 +742,18 @@ function ViewFile() {
                           <span
                             id="panCardText"
                             onClick={() => copyText("panCardText")}
+                            style={{cursor:"pointer"}}
                           >
-                            {fileData?.user?.pan_card || "N/A"}
+                            {fileData?.user?.pan_card || "N/A"} <i class="fa-solid fa-copy" style={{color:"#B19552",marginLeft:"10px"}}></i>
                           </span>
                           <br />
                           <strong id="aadharCard">Aadhar Card:</strong>{" "}
                           <span
                             id="aadharCardText"
                             onClick={() => copyText("aadharCardText")}
+                            style={{cursor:"pointer"}}
                           >
-                            {fileData?.user?.aadhar_card || "N/A"}
+                            {fileData?.user?.aadhar_card || "N/A"} <i class="fa-solid fa-copy" style={{color:"#B19552",marginLeft:"10px"}}></i>
                           </span>
                           <br />
                           <strong>City:</strong> {fileData?.user?.city || "N/A"}
@@ -911,16 +914,12 @@ function ViewFile() {
                                       }
                                     }}
                                   >
-                                    {/* <div className="circle-container">
-                                    <a href="#">
-                                      <div className="circle-button"></div>
-                                    </a>
-                                  </div> */}
                                     {item?.loan_step}
                                   </li>
                                 ))}
                             </ul>
                           </div>
+                          <div className="d-flex gap-3">
                           {open.is &&
                             open.data.loan_step_id !== "1715348523661" && (
                               <Form
@@ -1031,7 +1030,8 @@ function ViewFile() {
                             modalOpen.is &&
                             !isOpensGuarantor &&
                             modalOpen.data.loan_step_id !== "1715348523661" && (
-                              <Form
+                              <Form 
+                              style={{marginTop:"150px"}}
                                 onSubmit={(e) => {
                                   e.preventDefault();
                                   submitStep();
@@ -1094,7 +1094,7 @@ function ViewFile() {
                                 </Button>
                               </Form>
                             )}
-
+</div>
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
                             open.data.pendingData.length !== 0 && (
@@ -1295,11 +1295,11 @@ function ViewFile() {
         <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
           <ModalOverlay />
           <ModalContent
-            style={{
-              height: "40%",
-              overflow: "scroll",
-              scrollbarWidth: "thin",
-            }}
+            // style={{
+            //   height: "40%",
+            //   overflow: "scroll",
+            //   scrollbarWidth: "thin",
+            // }}
           >
             <ModalHeader>Add Guarantor</ModalHeader>
             <ModalCloseButton />
