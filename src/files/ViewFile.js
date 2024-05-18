@@ -466,46 +466,6 @@ function ViewFile() {
     setOpen({ is: open.is, data: { ...newData, inputs }, index: open.index });
   };
 
-  const submitStep = async () => {
-    try {
-      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
-      const cibilScore = open.data.inputs.find(
-        (input) => input.label === "Cibil Score"
-      )?.value;
-
-      const userId = open.data.user_id;
-
-      const formData = {
-        cibil_score: cibilScore,
-      };
-
-      const response = await AxiosInstance.put(
-        "/addusers/edituser/" + userId,
-        formData
-      );
-      console.log(response, "response");
-      fetchData();
-      fetchStepsData();
-      setOpen({ is: false, data: {}, index: "" });
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
-  const submitGuarantorStep = async () => {
-    try {
-      const response = await AxiosInstance.post(
-        `/guarantor-step/guarantor-step/${id}`,
-        open.data
-      );
-
-      console.log(response, "response");
-      fetchData();
-      fetchStepsData();
-      setOpen({ is: false, data: {}, index: "" });
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
 
   const [modalOpen, setModalOpen] = useState(null);
   const [selectedGuarantor, setSelectedGuarantor] = useState("");
@@ -619,7 +579,48 @@ function ViewFile() {
       };
     });
   };
+  
+  const submitStep = async () => {
+    try {
+      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
+      const cibilScore = open.data.inputs.find(
+        (input) => input.label === "Cibil Score"
+      )?.value;
 
+      const userId = open.data.user_id;
+
+      const formData = {
+        cibil_score: cibilScore,
+      };
+
+      const response = await AxiosInstance.put(
+        "/addusers/edituser/" + userId,
+        formData
+      );
+      console.log(response, "response");
+      fetchData();
+      fetchStepsData();
+      setOpen({ is: false, data: {}, index: "" });
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  const submitGuarantorStep = async () => {
+    try {
+      const response = await AxiosInstance.post(
+        `/guarantor-step/guarantor-step/${id}`,
+        open.data
+      );
+
+      console.log(response, "response");
+      fetchData();
+      fetchStepsData();
+      setOpen({ is: false, data: {}, index: "" });
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
@@ -1113,7 +1114,6 @@ function ViewFile() {
                             )}
 
                           {modalOpen &&
-                            !isOpenGuarantor &&
                             modalOpen.data?.map((item, dataIndex) =>
                               item.is &&
                               item.data.loan_step_id !== "1715348523661" ? (
