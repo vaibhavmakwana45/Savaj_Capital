@@ -410,7 +410,6 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "responseeeee");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -600,7 +599,6 @@ function ViewFile() {
         "/addusers/edituser/" + userId,
         formData
       );
-      console.log(response, "response");
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -615,8 +613,6 @@ function ViewFile() {
         `/guarantor-step/guarantor-step/${id}`,
         open.data
       );
-
-      console.log(response, "response");
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -790,22 +786,18 @@ function ViewFile() {
                             <strong>Loan User :</strong>{" "}
                             <span> {fileData?.user?.username || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Email :</strong>{" "}
                             <span> {fileData?.user?.email || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Phone Number :</strong>{" "}
                             <span> {fileData?.user?.number || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Cibil Score :</strong>{" "}
                             <span> {fileData?.user?.cibil_score || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="gstNumber">Gst Number :</strong>{" "}
                             <span
@@ -836,7 +828,6 @@ function ViewFile() {
                               ></i>
                             </span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="aadharCard">Aadhar Card :</strong>{" "}
                             <span
@@ -856,15 +847,12 @@ function ViewFile() {
                             {fileData?.user?.city || "N/A"}
                           </div>
                           <div>
-                            {/* <br /> */}
                             <strong>State :</strong>{" "}
                             {fileData?.user?.state || "N/A"}
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Country :</strong>{" "}
                             {fileData?.user?.country || "N/A"}
-                            {/* <br /> */}
                           </div>
                         </div>
                       </div>
@@ -961,68 +949,65 @@ function ViewFile() {
                         className="container-fluid progress-bar-area"
                         style={{ height: "20%", overflow: "auto" }}
                       >
-                        <div className="row">
-                          <div
-                            className="col"
-                            style={{ position: "relative", zIndex: "9" }}
+                        <div
+                          className="col"
+                          style={{ position: "relative", zIndex: "9" }}
+                        >
+                          <ul
+                            className="progressbar"
+                            style={{
+                              display: "flex",
+                              listStyle: "none",
+                              padding: 0,
+                            }}
                           >
-                            <ul
-                              className="progressbar"
-                              style={{
-                                display: "flex",
-                                listStyle: "none",
-                                padding: 0,
-                              }}
-                            >
-                              {stepData &&
-                                stepData?.map((item, index) => (
-                                  <li
-                                    key={index}
-                                    id={`step${index + 1}`}
-                                    className={
-                                      item.status ? item.status : "active"
-                                    }
-                                    style={{
-                                      display: "inline-block",
-                                      marginRight: "10px",
-                                      cursor:
-                                        (item?.status === "complete" ||
-                                          allPreviousComplete(
-                                            stepData,
-                                            index
-                                          ) ||
-                                          index === 0) &&
-                                        "pointer",
-                                    }}
-                                    onClick={() => {
-                                      if (
-                                        item?.status === "complete" ||
+                            {stepData &&
+                              stepData?.map((item, index) => (
+                                <li
+                                  key={index}
+                                  id={`step${index + 1}`}
+                                  className={
+                                    item.status ? item.status : "active"
+                                  }
+                                  style={{
+                                    display: "inline-block",
+                                    marginRight: "10px",
+                                    cursor:
+                                      (item?.status === "complete" ||
                                         allPreviousComplete(stepData, index) ||
-                                        index === 0
-                                      ) {
-                                        if (open.index === index) {
-                                          setOpen({
-                                            is: false,
-                                            data: {},
-                                            index: "",
-                                          });
-                                        } else {
-                                          setOpen({
-                                            is: true,
-                                            data: item,
-                                            index,
-                                          });
-                                          setModalOpen();
-                                        }
+                                        index === 0) &&
+                                      "pointer",
+                                  }}
+                                  onClick={() => {
+                                    if (
+                                      item?.status === "complete" ||
+                                      allPreviousComplete(stepData, index) ||
+                                      index === 0
+                                    ) {
+                                      if (open.index === index) {
+                                        setOpen({
+                                          is: false,
+                                          data: {},
+                                          index: "",
+                                        });
+                                      } else {
+                                        setOpen({
+                                          is: true,
+                                          data: item,
+                                          index,
+                                        });
+                                        setModalOpen();
                                       }
-                                    }}
-                                  >
-                                    {item?.loan_step}
-                                  </li>
-                                ))}
-                            </ul>
-                          </div>
-                          <div className="d-flex gap-3">
+                                    }
+                                  }}
+                                >
+                                  {item?.loan_step}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                        <div className="row add-main">
+                          <div className="d-flex gap-3 add-sec">
                             {open.is &&
                               open.data.loan_step_id !== "1715348523661" && (
                                 <Form
@@ -1038,12 +1023,11 @@ function ViewFile() {
                                       className="d-flex justify-content-between align-items-center mt-4"
                                     >
                                       {input.type === "input" ? (
-                                        <div>
+                                        <div className="  col-8">
                                           <label>{input.label}</label>
                                           <Input
                                             name="step"
                                             required={input.is_required}
-                                            // disabled={open.data.status === "complete"}
                                             value={input.value}
                                             placeholder={`Enter ${input.value}`}
                                             onChange={(e) =>
@@ -1052,11 +1036,10 @@ function ViewFile() {
                                           />
                                         </div>
                                       ) : input.type === "checkbox" ? (
-                                        <div>
+                                        <div className="col-4 ">
                                           <input
                                             type="checkbox"
                                             checked={input.value}
-                                            // disabled={open.data.status === "complete"}
                                             required={input.is_required}
                                             onChange={(e) =>
                                               handleChange(e, index)
@@ -1128,64 +1111,35 @@ function ViewFile() {
                                   </Button>
                                 </Form>
                               )}
-
-                            {modalOpen &&
-                              modalOpen.data?.map((item, dataIndex) =>
-                                item.is &&
-                                item.data.loan_step_id !== "1715348523661" ? (
-                                  <Form
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      submitGuarantorStep();
-                                    }}
-                                    style={{ marginTop: "20px" }}
-                                    key={dataIndex}
-                                  >
-                                    <p>{item.username} Cibil Score</p>
-                                    {item.data.inputs?.map(
-                                      (input, inputIndex) => (
-                                        <FormControl
-                                          key={`${dataIndex}-${inputIndex}`}
-                                          id="step"
-                                          className="d-flex justify-content-between align-items-center mt-4"
-                                        >
-                                          {input.type === "input" ? (
-                                            <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                name="step"
-                                                value={input.value}
-                                                placeholder={`Enter ${input.label}`}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          ) : input.type === "checkbox" ? (
-                                            <div>
-                                              <input
-                                                type="checkbox"
-                                                checked={input.value}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex
-                                                  )
-                                                }
-                                              />{" "}
-                                              {input.label}
-                                            </div>
-                                          ) : (
-                                            input.type === "file" && (
+                            <div className="row">
+                              {modalOpen &&
+                                modalOpen.data?.map((item, dataIndex) =>
+                                  item.is &&
+                                  item.data.loan_step_id !== "1715348523661" ? (
+                                    <Form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitGuarantorStep();
+                                      }}
+                                      style={{ marginTop: "20px" }}
+                                      key={dataIndex}
+                                      className="col-6 mb-4 inutss"
+                                    >
+                                      <p>{item.username} Cibil Score</p>
+                                      {item.data.inputs?.map(
+                                        (input, inputIndex) => (
+                                          <FormControl
+                                            key={`${dataIndex}-${inputIndex}`}
+                                            id="step"
+                                            className="d-flex justify-content-between align-items-center mt-4"
+                                          >
+                                            {input.type === "input" ? (
                                               <div>
                                                 <label>{input.label}</label>
                                                 <Input
-                                                  type="file"
+                                                  name="step"
+                                                  value={input.value}
+                                                  placeholder={`Enter ${input.label}`}
                                                   onChange={(e) =>
                                                     handleModalChange(
                                                       e,
@@ -1195,32 +1149,60 @@ function ViewFile() {
                                                   }
                                                 />
                                               </div>
-                                            )
-                                          )}
-                                        </FormControl>
-                                      )
-                                    )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
-                                  </Form>
-                                ) : null
-                              )}
+                                            ) : input.type === "checkbox" ? (
+                                              <div>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={input.value}
+                                                  onChange={(e) =>
+                                                    handleModalChange(
+                                                      e,
+                                                      dataIndex,
+                                                      inputIndex
+                                                    )
+                                                  }
+                                                />{" "}
+                                                {input.label}
+                                              </div>
+                                            ) : (
+                                              input.type === "file" && (
+                                                <div>
+                                                  <label>{input.label}</label>
+                                                  <Input
+                                                    type="file"
+                                                    onChange={(e) =>
+                                                      handleModalChange(
+                                                        e,
+                                                        dataIndex,
+                                                        inputIndex
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              )
+                                            )}
+                                          </FormControl>
+                                        )
+                                      )}
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    </Form>
+                                  ) : null
+                                )}
+                            </div>
                           </div>
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
                             open.data.pendingData.length !== 0 && (
                               <div className="row">
-                                <div
-                                  className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                                >
+                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
                                   <Table
                                     size="sm"
                                     aria-label="documents"
@@ -1412,13 +1394,7 @@ function ViewFile() {
       <>
         <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
           <ModalOverlay />
-          <ModalContent
-          // style={{
-          //   height: "40%",
-          //   overflow: "scroll",
-          //   scrollbarWidth: "thin",
-          // }}
-          >
+          <ModalContent>
             <ModalHeader>Add Guarantor</ModalHeader>
             <ModalCloseButton />
             <form>
