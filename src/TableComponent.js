@@ -463,8 +463,14 @@ const TableComponent = ({
   };
 
   return (
-    <div style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", padding: 0,overflow:"auto" }}>
-      <Table variant="simple" color={"black"} >
+    <div
+      style={{
+        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+        padding: 0,
+        overflow: "auto",
+      }}
+    >
+      <Table variant="simple" color={"black"}>
         <Thead>
           <Tr my=".8rem" pl="0px" color="gray.400">
             {allHeaders.map((header, index) => (
@@ -583,14 +589,14 @@ const TableComponent = ({
                   </Td>
                 </Tr>
                 {myData && collapse && expandedRows.includes(rowIndex) && (
-                  <Tr >
+                  <Tr>
                     <Td colSpan={allHeaders.length + 1}>
                       <Table variant="simple" color={"black"} width="100%">
                         <Thead>
-                          <Tr >
+                          <Tr>
                             {Object.entries(myData[rowIndex][0]).map(
                               ([key, value]) => (
-                                <Th style={{fontSize:"12px"}}>{key}</Th>
+                                <Th style={{ fontSize: "12px" }}>{key}</Th>
                               )
                             )}
                           </Tr>
@@ -599,7 +605,7 @@ const TableComponent = ({
                           <Tr>
                             {Object.entries(myData[rowIndex][0]).map(
                               ([key, value]) => (
-                                <Td style={{fontSize:"12px"}}>{value}</Td>
+                                <Td style={{ fontSize: "12px" }}>{value}</Td>
                               )
                             )}
                           </Tr>
@@ -647,70 +653,71 @@ const TableComponent = ({
       </Table>
 
       {showPagination && (
-        <div className="text-end" style={{ display: "flex", justifyContent: "end" }}>
-  <div
-    className="card text-center page-main"
-    style={{
-      width: "40%",
-      display: "flex",
-      justifyContent: "center",
-      padding: "10px",
-      borderRadius: "10px",
-      boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
-      marginBottom: "40px",
-      marginTop: "20px",
-      marginRight: "20px",
-    }}
-  >
-    <Flex
-      justify="space-between"
-      align="center"
-      p="0.5rem"
-      style={{ gap: "20px" }}
-      className="pagination-main"
-    >
-      <Text>
-        {startIndex + 1}-{endIndex} of {data.length}
-      </Text>
-      <Flex align="center" className="drop-arrow">
-        <Select
-          value={itemsPerPage}
-          onChange={(e) =>
-            handleItemsPerPageChange(parseInt(e.target.value))
-          }
-          variant="filled"
-          mr="1rem"
+        <div
+          className="text-end"
+          style={{ display: "flex", justifyContent: "end" }}
         >
-          {itemsPerPageOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </Select>
-        <div className="d-flex">
-        <IconButton
-          aria-label="Previous Page"
-          icon={<ChevronLeftIcon />}
-          onClick={previousPage}
-          disabled={currentPage === 1}
-          mr={2}
-        />
-        <IconButton
-          aria-label="Next Page"
-          icon={<ChevronRightIcon />}
-          onClick={nextPage}
-          disabled={currentPage === totalPages}
-        />
+          <div
+            className="card text-center page-main"
+            style={{
+              width: "40%",
+              display: "flex",
+              justifyContent: "center",
+              padding: "10px",
+              borderRadius: "10px",
+              boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
+              marginBottom: "40px",
+              marginTop: "20px",
+              marginRight: "20px",
+            }}
+          >
+            <Flex
+              justify="space-between"
+              align="center"
+              p="0.5rem"
+              style={{ gap: "20px" }}
+              className="pagination-main"
+            >
+              <Text>
+                {startIndex + 1}-{endIndex} of {data.length}
+              </Text>
+              <Flex align="center" className="drop-arrow">
+                <Select
+                  value={itemsPerPage}
+                  onChange={(e) =>
+                    handleItemsPerPageChange(parseInt(e.target.value))
+                  }
+                  variant="filled"
+                  mr="1rem"
+                >
+                  {itemsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </Select>
+                <div className="d-flex">
+                  <IconButton
+                    aria-label="Previous Page"
+                    icon={<ChevronLeftIcon />}
+                    onClick={previousPage}
+                    disabled={currentPage === 1}
+                    mr={2}
+                  />
+                  <IconButton
+                    aria-label="Next Page"
+                    icon={<ChevronRightIcon />}
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                  />
+                </div>
+              </Flex>
+            </Flex>
+          </div>
         </div>
-      </Flex>
-    </Flex>
-  </div>
-</div>
-
       )}
     </div>
   );
 };
 
 export default TableComponent;
- 

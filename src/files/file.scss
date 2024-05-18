@@ -313,12 +313,20 @@
   .bradcrub-navbar {
     margin-left: 1px !important;
   }
+  .css-16dj9gd {
+    height: 100vh !important;
+    padding-top: 0px;
+  }
 }
 
 /* 1500 */
 @media (max-width: 1680px) {
   .bradcrub-navbar {
     margin-left: 1px !important;
+  }
+  .css-16dj9gd {
+    height: 100vh !important;
+    padding-top: 0px;
   }
 }
 
@@ -341,6 +349,10 @@
   .bradcrub-navbar {
     margin-left: 30px !important;
   }
+  .css-16dj9gd {
+    height: 100vh !important;
+    padding-top: 0px;
+  }
 }
 
 /* 768 */
@@ -352,6 +364,11 @@
     margin-left: 30px !important;
     // margin-top: -7px !important;
   }
+  .css-16dj9gd {
+    height: 100vh !important;
+    padding-top: 0px;
+  }
+
   .paper {
     width: 100% !important;
   }
@@ -361,7 +378,7 @@
   .linksss {
     margin-bottom: 60px !important;
   }
-  .pagination-main{
+  .pagination-main {
     flex-direction: column !important;
   }
 }
@@ -371,8 +388,11 @@
   .navbar-responsive {
     display: flex !important;
   }
-  .pagination-main{
+  .pagination-main {
     flex-direction: column !important;
+  }
+  .image-responsive {
+    width: 100% !important;
   }
 
   .bradcrub-navbar {
@@ -398,7 +418,7 @@
   .mainnnn {
     flex-direction: column !important;
   }
-  .drop-arrow{
+  .drop-arrow {
     flex-direction: column;
   }
 }
@@ -412,7 +432,7 @@
     display: flex !important;
     margin-bottom: 1px;
   }
-  .pagination-main{
+  .pagination-main {
     flex-direction: column !important;
   }
   .back-responsive b {
@@ -478,17 +498,15 @@
     margin-bottom: 10px;
     margin-left: 0 !important;
   }
-  .page-main{
+  .page-main {
     width: 100% !important;
   }
-  .drop-arrow{
+  .drop-arrow {
     display: flex !important;
   }
-  .pagination-main{
+  .pagination-main {
     display: flex !important;
-
   }
-  
 }
 
 /* 425 */
@@ -579,10 +597,10 @@
   .progressbar li {
     font-size: 11px !important;
   }
-  .drop{
+  .drop {
     width: 60% !important;
   }
-  .css-zj2dqk{
+  .css-zj2dqk {
     right: 6.5rem !important;
   }
 }
@@ -891,15 +909,6 @@ div.h4 {
   transform: none;
   /* border-color: var(--chakra-colors-transparent); */
 }
-
-.css-14x89dr:focus,
-.css-14x89dr[data-focus] {
-  /* box-shadow: var(--chakra-shadows-outline); */
-}
-
-button.chakra-button.css-1sd9pju {
-  // padding: 0 !important;
-}
 button.btn.btn-secondary {
   padding: 0;
 }
@@ -907,16 +916,11 @@ button.btn.btn-secondary:focus {
   box-shadow: none;
   background-color: none;
 }
-
-/* Custom CSS to change accordion icon color to white */
 .accordion-button:not(.collapsed)::after {
-  // color: white !important; /* Force override with !important */
-  // background-image: url("../assets/svg/down.svg");
   display: none;
 }
 
 .add-doc-button {
-  // background:"#b19552" !important;
   border: 2px solid #b19552 !important;
 }
 
@@ -976,6 +980,18 @@ button.btn.btn-secondary:focus {
   border-radius: 20px;
   overflow: auto;
   height: 100vh !important;
+}
+.css-otanfb {
+  width: 89% !important;
+  margin-bottom: 30px !important;
+  margin-top: 30px !important;
+}
+.css-s8nip3 {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+}
+.css-5xmg3k {
+  width: 94% !important;
 }
 .col-md-6{
   display: flex;

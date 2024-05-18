@@ -326,14 +326,14 @@ function Row(props) {
                         <TableCell>
                           {documentRow?.status === "Uploaded" ? (
                             <span
-                            // style={{ color: "green", fontWeight: "bold" }}
+                            style={{ color: "green", fontWeight: "bold" }}
                             >
                               <i class="fa-regular fa-circle-check"></i>
                               &nbsp;&nbsp;Uploaded
                             </span>
                           ) : (
                             <span
-                            // style={{ color: "#FF9C00 ", fontWeight: "bold" }}
+                            style={{ color: "#FF9C00 ", fontWeight: "bold" }}
                             >
                               <i class="fa-regular fa-clock"></i>
                               &nbsp;&nbsp;Pending
@@ -695,7 +695,7 @@ export default function CollapsibleTable() {
 
   return (
     <>
-      <div className="card" style={{ marginTop: "80px", borderRadius: "30px" }}>
+      <div className="card" style={{ marginTop: "99px ", borderRadius: "30px" }}>
         <CardHeader style={{ padding: "10px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
