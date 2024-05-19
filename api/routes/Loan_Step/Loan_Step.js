@@ -227,11 +227,23 @@ router.get("/get_steps/:file_id", async (req, res) => {
             return existingInput || input;
           });
 
-          steps.push({
+          const mergedStep = {
             ...compeleteStep.toObject(),
             inputs: updatedInputs,
             user_id: file.user_id,
+          };
+
+          // Fetch guarantor steps and merge
+          const guarantorSteps = await Guarantor_Step.find({
+            file_id,
+            loan_step_id: compeleteStep.loan_step_id,
           });
+
+          if (guarantorSteps.length > 0) {
+            mergedStep.guarantorSteps = guarantorSteps;
+          }
+
+          steps.push(mergedStep);
         } else {
           const isActive = stepData.inputs.some((input) => input.is_required);
           const status = isActive ? "active" : "complete";
