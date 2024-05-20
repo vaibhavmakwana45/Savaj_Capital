@@ -30,8 +30,14 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
+import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faChevronUp,
+  faEdit,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { Typography } from "@mui/material";
 
@@ -339,6 +345,66 @@ function ViewFile() {
     reference: "",
   });
 
+  const handleAddGuarantor = () => {
+    setIsEditMode(false);
+    setFormData({
+      user_id: "",
+      file_id: "",
+      username: "",
+      number: "",
+      email: "",
+      pan_card: "",
+      aadhar_card: "",
+      unit_address: "",
+      occupation: "",
+      reference: "",
+    });
+    onOpen();
+  };
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentGuarantorId, setCurrentGuarantorId] = useState(null);
+  const handleEditGuarantor = (guarantor) => {
+    setIsEditMode(true);
+    setCurrentGuarantorId(guarantor.guarantor_id);
+    setFormData(guarantor);
+
+    for (const key in guarantor) {
+      setValue(key, guarantor[key]);
+    }
+
+    onOpen();
+  };
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedGuarantorId, setSelectedGuarantorId] = useState(null);
+
+  const openDeleteModal = (id) => {
+    setSelectedGuarantorId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+  const handleDeleteGuarantor = async () => {
+    if (selectedGuarantorId) {
+      try {
+        await AxiosInstance.delete(
+          `/add-guarantor/delete-guarantor/${selectedGuarantorId}`
+        );
+        toast.success("Guarantor Deleted Successfully!");
+        setGuarantors((prevGuarantors) =>
+          prevGuarantors.filter((g) => g.guarantor_id !== selectedGuarantorId)
+        );
+        closeDeleteModal();
+      } catch (error) {
+        console.error("Error deleting guarantor:", error);
+        toast.error("Please try again later!");
+        closeDeleteModal();
+      }
+    }
+  };
+
   const fetchData = async () => {
     try {
       const response = await AxiosInstance.get(
@@ -405,34 +471,25 @@ function ViewFile() {
 
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
+  const [open, setOpen] = useState({
+    is: false,
+    data: {},
+    index: "",
+    guarantors: [],
+  });
+  const [selectedGuarantor, setSelectedGuarantor] = useState();
+  const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
+
+  useEffect(() => {
+    fetchStepsData();
+  }, []);
 
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      const steps = response.data.data;
-
-      // Assuming the main step is the first one in the stepData array
-      const mainStepInputs = steps[0]?.inputs || [];
-
-      // Iterate through each step and update guarantor steps if necessary
-      const updatedSteps = steps.map((step) => {
-        if (step.guarantorSteps) {
-          step.guarantorSteps = step.guarantorSteps.map((guarantorStep) => {
-            const existingInputs = guarantorStep.inputs || [];
-            const updatedInputs = mainStepInputs.map((mainInput) => {
-              const existingInput = existingInputs.find(
-                (input) => input.label === mainInput.label
-              );
-              return existingInput || { ...mainInput, value: "" };
-            });
-            return { ...guarantorStep, inputs: updatedInputs };
-          });
-        }
-        return step;
-      });
-
-      setStepData(updatedSteps);
+      console.log(response, "responseeeee");
+      setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
       console.error("Error: ", error.message);
@@ -440,41 +497,29 @@ function ViewFile() {
     }
   };
 
-  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-
-  function allPreviousComplete(stepData, currentIndex) {
+  const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
         return false;
       }
     }
     return true;
-  }
+  };
 
-  const [modalOpen, setModalOpen] = useState(null);
-  const [selectedGuarantor, setSelectedGuarantor] = useState("");
-
-  const handleChange = async (e, index) => {
+  const handleChange = async (e, index, dataIndex = null) => {
     const { name, value, checked, type, files } = e.target;
     const newData = { ...open.data };
-    const inputs = [...newData.inputs];
+    const inputs =
+      dataIndex !== null
+        ? [...newData.guarantorSteps[dataIndex].inputs]
+        : [...newData.inputs];
 
     if (type === "checkbox") {
       inputs[index].value = checked;
-      if (checked) {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = !checked;
     } else if (type === "text") {
       inputs[index].value = value;
-      if (value !== "") {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = value === "";
     } else if (type === "file") {
       if (files.length > 0) {
         try {
@@ -483,71 +528,19 @@ function ViewFile() {
           inputs[index].is_required = false;
         } catch (error) {
           console.error("Failed to upload file:", error);
-          inputs[index].is_required = true;
         }
       } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
+        inputs[index].is_required = true;
       }
     }
 
-    setOpen({ is: open.is, data: { ...newData, inputs }, index: open.index });
-  };
-
-  const handleModalChange = async (e, dataIndex, inputIndex) => {
-    const { name, type, value, checked, files } = e.target;
-
-    if (type === "file" && files.length > 0) {
-      try {
-        const uploadedFilePath = await uploadImageToCDN(files[0]);
-        setModalOpen((prevState) => {
-          if (!prevState || !prevState.data) {
-            console.error("Modal state is not properly initialized.");
-            return prevState;
-          }
-
-          const updatedData = [...prevState.data];
-          const updatedInputs = [...updatedData[dataIndex].data.inputs];
-          updatedInputs[inputIndex].value = uploadedFilePath;
-          updatedInputs[inputIndex].is_required = false; // Assuming file upload makes the field not required
-
-          return {
-            ...prevState,
-            data: updatedData,
-          };
-        });
-      } catch (error) {
-        console.error("Failed to upload file:", error);
-      }
-      return;
+    if (dataIndex !== null) {
+      newData.guarantorSteps[dataIndex].inputs = inputs;
+    } else {
+      newData.inputs = inputs;
     }
 
-    setModalOpen((prevState) => {
-      if (!prevState || !prevState.data) {
-        console.error("Modal state is not properly initialized.");
-        return prevState;
-      }
-
-      const updatedData = [...prevState.data];
-      const updatedInputs = [...updatedData[dataIndex].data.inputs];
-
-      if (type === "checkbox") {
-        updatedInputs[inputIndex].value = checked;
-        updatedInputs[inputIndex].is_required = !checked;
-      } else if (type === "text") {
-        updatedInputs[inputIndex].value = value;
-        updatedInputs[inputIndex].is_required = value === "";
-      } else {
-        updatedInputs[inputIndex].value = value;
-      }
-
-      updatedData[dataIndex].data.inputs = updatedInputs;
-
-      return {
-        ...prevState,
-        data: updatedData,
-      };
-    });
+    setOpen({ ...open, data: newData });
   };
 
   const handleClick = (newData) => {
@@ -595,10 +588,20 @@ function ViewFile() {
       }
 
       const updatedData = [...prevState.data];
+      const selectedId = selectedGuarantorID[selectedGuarantorID.length - 1]; // Assuming you're selecting only one guarantor at a time
+      const selectedGuarantor = guarantors.find(
+        (g) => g.guarantor_id === selectedId
+      );
+
+      if (!selectedGuarantor) {
+        return prevState; // Return previous state if selected guarantor not found
+      }
+
       updatedData[updatedData.length - 1] = {
         ...updatedData[updatedData.length - 1],
         is: true,
-        username: selectedGuarantor,
+        username: selectedGuarantor.username, // Store the username
+        guarantorId: selectedGuarantor.guarantor_id, // Store the guarantor ID
       };
 
       return {
@@ -608,6 +611,63 @@ function ViewFile() {
     });
   };
 
+  const [modalOpen, setModalOpen] = useState(null);
+
+  const handleModalChange = async (e, dataIndex, inputIndex) => {
+    const { type, value, checked, files } = e.target;
+
+    if (type === "file" && files.length > 0) {
+      try {
+        const uploadedFilePath = await uploadImageToCDN(files[0]);
+        setModalOpen((prevState) => {
+          if (!prevState || !prevState.data) {
+            console.error("Modal state is not properly initialized.");
+            return prevState;
+          }
+
+          const updatedData = [...prevState.data];
+          const updatedInputs = [...updatedData[dataIndex].data.inputs];
+          updatedInputs[inputIndex].value = uploadedFilePath;
+          updatedInputs[inputIndex].is_required = false;
+
+          return {
+            ...prevState,
+            data: updatedData,
+          };
+        });
+      } catch (error) {
+        console.error("Failed to upload file:", error);
+      }
+      return;
+    }
+
+    setModalOpen((prevState) => {
+      if (!prevState || !prevState.data) {
+        console.error("Modal state is not properly initialized.");
+        return prevState;
+      }
+
+      const updatedData = [...prevState.data];
+      const updatedInputs = [...updatedData[dataIndex].data.inputs];
+
+      if (type === "checkbox") {
+        updatedInputs[inputIndex].value = checked;
+        updatedInputs[inputIndex].is_required = !checked;
+      } else if (type === "text") {
+        updatedInputs[inputIndex].value = value;
+        updatedInputs[inputIndex].is_required = value === "";
+      } else {
+        updatedInputs[inputIndex].value = value;
+      }
+
+      updatedData[dataIndex].data.inputs = updatedInputs;
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
+    });
+  };
   const submitStep = async () => {
     try {
       await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
@@ -636,17 +696,74 @@ function ViewFile() {
 
   const submitGuarantorStep = async () => {
     try {
-      const response = await AxiosInstance.post(
-        `/guarantor-step/guarantor-step/${id}`,
-        open.data
-      );
+      // Submitting regular steps
+      if (open.data && open.data.guarantorSteps) {
+        for (const guarantor of open.data.guarantorSteps) {
+          const response = await AxiosInstance.post(
+            `/guarantor-step/guarantor-step/${id}`,
+            guarantor
+          );
+          console.log(response, "response");
+        }
+      }
 
-      console.log(response, "response");
+      // Submitting modal steps
+      if (modalOpen && modalOpen.data) {
+        for (const [index, item] of modalOpen.data.entries()) {
+          try {
+            const final = {
+              ...item.data,
+              guarantor_id: item.guarantorId, // Use the specific guarantor ID from each item
+            };
+            await AxiosInstance.post(
+              `/guarantor-step/guarantor-step/${id}`,
+              final
+            );
+            console.log(`Step ${index} submitted successfully`);
+          } catch (error) {
+            console.error(`Error submitting step ${index}: `, error.message);
+          }
+        }
+      }
+
+      console.log("All steps submitted successfully");
       fetchData();
       fetchStepsData();
-      setOpen({ is: false, data: {}, index: "" });
+      setModalOpen({ data: [] });
     } catch (error) {
       console.error("Error: ", error.message);
+    }
+  };
+  const removeGuarantorStep = async (dataIndex, stepType = "open") => {
+    if (stepType === "open") {
+      const guarantorStep = open.data.guarantorSteps[dataIndex];
+      try {
+        await AxiosInstance.delete(
+          `/guarantor-step/guarantor-step/${guarantorStep.loan_step_id}/${guarantorStep.guarantor_id}`
+        );
+      } catch (error) {
+        console.error("Failed to delete guarantor step:", error.message);
+      }
+      setOpen((prevState) => {
+        const updatedGuarantorSteps = prevState.data.guarantorSteps.filter(
+          (_, i) => i !== dataIndex
+        );
+        return {
+          ...prevState,
+          data: {
+            ...prevState.data,
+            guarantorSteps: updatedGuarantorSteps,
+          },
+        };
+      });
+    } else if (stepType === "modalOpen") {
+      setModalOpen((prevState) => {
+        const updatedData = prevState.data.filter((_, i) => i !== dataIndex);
+        return {
+          ...prevState,
+          data: updatedData,
+        };
+      });
     }
   };
 
@@ -738,12 +855,17 @@ function ViewFile() {
     }
   };
   const isGuarantorAlreadyAdded = (guarantorId) => {
-    return (
+    const alreadyAddedInGuarantorSteps =
       open.data.guarantorSteps &&
       open.data.guarantorSteps.some(
         (guarantorStep) => guarantorStep.guarantor_id === guarantorId
-      )
+      );
+
+    const alreadyAddedInModal = modalOpen?.data?.some(
+      (item) => item.guarantorId === guarantorId
     );
+
+    return alreadyAddedInGuarantorSteps || alreadyAddedInModal;
   };
 
   return (
@@ -782,8 +904,7 @@ function ViewFile() {
                   <Button
                     colorScheme="blue"
                     style={{ backgroundColor: "#b19552" }}
-                    onClick={onOpen}
-                    className="buttonss"
+                    onClick={handleAddGuarantor}
                   >
                     Add Guarantor
                   </Button>
@@ -957,6 +1078,7 @@ function ViewFile() {
                                   <th>Unit Address</th>
                                   <th>Occupation</th>
                                   <th>Reference</th>
+                                  <th>Action</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -970,6 +1092,29 @@ function ViewFile() {
                                     <td>{guarantor.unit_address}</td>
                                     <td>{guarantor.occupation}</td>
                                     <td>{guarantor.reference}</td>
+                                    <td>
+                                      <Button
+                                        onClick={() =>
+                                          handleEditGuarantor(guarantor)
+                                        }
+                                        colorScheme="yellow"
+                                        size="sm"
+                                        mr="2"
+                                      >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                      </Button>
+                                      <Button
+                                        onClick={() =>
+                                          openDeleteModal(
+                                            guarantor.guarantor_id
+                                          )
+                                        }
+                                        colorScheme="red"
+                                        size="sm"
+                                      >
+                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                      </Button>
+                                    </td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -1009,7 +1154,7 @@ function ViewFile() {
                               }}
                             >
                               {stepData &&
-                                stepData?.map((item, index) => (
+                                stepData.map((item, index) => (
                                   <li
                                     key={index}
                                     id={`step${index + 1}`}
@@ -1039,14 +1184,15 @@ function ViewFile() {
                                             is: false,
                                             data: {},
                                             index: "",
+                                            guarantors: [],
                                           });
                                         } else {
                                           setOpen({
                                             is: true,
                                             data: item,
                                             index,
+                                            guarantors: [],
                                           });
-                                          setModalOpen();
                                         }
                                       }
                                     }}
@@ -1077,7 +1223,6 @@ function ViewFile() {
                                           <Input
                                             name="step"
                                             required={input.is_required}
-                                            // disabled={open.data.status === "complete"}
                                             value={input.value}
                                             placeholder={`Enter ${input.value}`}
                                             onChange={(e) =>
@@ -1090,7 +1235,6 @@ function ViewFile() {
                                           <input
                                             type="checkbox"
                                             checked={input.value}
-                                            // disabled={open.data.status === "complete"}
                                             required={input.is_required}
                                             onChange={(e) =>
                                               handleChange(e, index)
@@ -1148,7 +1292,6 @@ function ViewFile() {
                                   >
                                     Submit
                                   </Button>
-
                                   <Button
                                     colorScheme="blue"
                                     className="buttonss mt-3"
@@ -1162,151 +1305,175 @@ function ViewFile() {
                                   </Button>
                                 </Form>
                               )}
-                            {open.is &&
-                              open.data.guarantorSteps &&
-                              open.data.guarantorSteps.map(
-                                (guarantor, dataIndex) => (
-                                  <Form
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      submitGuarantorStep();
-                                    }}
-                                    style={{ marginTop: "20px" }}
-                                    key={dataIndex}
-                                  >
-                                    {/* Ensure to access the guarantor's name correctly */}
-                                    <p>{guarantor.guarantor_id} Cibil Score</p>
-                                    {console.log(guarantor, "guarantor")}
-                                    {guarantor.inputs?.map(
-                                      (input, inputIndex) => (
-                                        <FormControl
-                                          key={`${dataIndex}-${inputIndex}`}
-                                          id="step"
-                                          className="d-flex justify-content-between align-items-center mt-4"
-                                        >
-                                          {input.type === "input" ? (
-                                            <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                name="step"
-                                                value={input.value}
-                                                placeholder={`Enter ${input.label}`}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex,
-                                                    "guarantorSteps"
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          ) : input.type === "checkbox" ? (
-                                            <div>
-                                              <input
-                                                type="checkbox"
-                                                checked={input.value}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex,
-                                                    "guarantorSteps"
-                                                  )
-                                                }
-                                              />{" "}
-                                              {input.label}
-                                            </div>
-                                          ) : (
-                                            input.type === "file" && (
+                              {open.is &&
+                                open.data.guarantorSteps &&
+                                open.data.guarantorSteps.map(
+                                  (guarantor, dataIndex) => (
+                                    <Form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitGuarantorStep();
+                                      }}
+                                      style={{ marginTop: "20px" }}
+                                      key={dataIndex}
+                                    >
+                                      <p>
+                                        {guarantor.username} {guarantor.loan_step}
+                                      </p>
+                                      <AiOutlineClose
+                                        onClick={() =>
+                                          removeGuarantorStep(dataIndex, "open")
+                                        }
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "red",
+                                          marginLeft: "10px",
+                                        }}
+                                      />
+                                      {console.log(guarantor, "guarantor")}
+                                      {guarantor.inputs?.map(
+                                        (input, inputIndex) => (
+                                          <FormControl
+                                            key={`${dataIndex}-${inputIndex}`}
+                                            id="step"
+                                            className="d-flex justify-content-between align-items-center mt-4"
+                                          >
+                                            {input.type === "input" ? (
                                               <div>
                                                 <label>{input.label}</label>
                                                 <Input
-                                                  type="file"
+                                                  name="step"
+                                                  value={input.value}
+                                                  placeholder={`Enter ${input.label}`}
                                                   onChange={(e) =>
-                                                    handleModalChange(
+                                                    handleChange(
                                                       e,
-                                                      dataIndex,
                                                       inputIndex,
-                                                      "guarantorSteps"
+                                                      dataIndex
                                                     )
                                                   }
                                                 />
                                               </div>
-                                            )
-                                          )}
-                                        </FormControl>
-                                      )
-                                    )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
-                                  </Form>
-                                )
-                              )}
-                            {modalOpen &&
-                              modalOpen.data?.map((item, dataIndex) =>
-                                item.is &&
-                                item.data.loan_step_id !== "1715348523661" ? (
-                                  <Form
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      submitGuarantorStep();
-                                    }}
-                                    style={{ marginTop: "20px" }}
-                                    key={dataIndex}
-                                  >
-                                    <p>{item.username} Cibil Score</p>
-                                    {item.data.inputs?.map(
-                                      (input, inputIndex) => (
-                                        <FormControl
-                                          key={`${dataIndex}-${inputIndex}`}
-                                          id="step"
-                                          className="d-flex justify-content-between align-items-center mt-4"
+                                            ) : input.type === "checkbox" ? (
+                                              <div>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={input.value}
+                                                  required={input.is_required}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      e,
+                                                      inputIndex,
+                                                      dataIndex
+                                                    )
+                                                  }
+                                                />{" "}
+                                                {input.label}
+                                              </div>
+                                            ) : (
+                                              input.type === "file" && (
+                                                <div>
+                                                  <label>{input.label}</label>
+                                                  <Input
+                                                    type="file"
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
+                                                  />
+                                                  {input.value && (
+                                                    <div
+                                                      style={{
+                                                        marginTop: "10px",
+                                                      }}
+                                                    >
+                                                      {input.value
+                                                        .toLowerCase()
+                                                        .endsWith(".pdf") ? (
+                                                        <embed
+                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                          type="application/pdf"
+                                                          width="100%"
+                                                          height="200px"
+                                                        />
+                                                      ) : (
+                                                        <img
+                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                          alt="Uploaded"
+                                                          style={{
+                                                            width: "100%",
+                                                            height: "200px",
+                                                          }}
+                                                        />
+                                                      )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )
+                                            )}
+                                          </FormControl>
+                                        )
+                                      )}
+                                      {dataIndex ===
+                                        open.data.guarantorSteps.length - 1 && (
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          style={{ backgroundColor: "#b19552" }}
                                         >
-                                          {input.type === "input" ? (
-                                            <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                name="step"
-                                                value={input.value}
-                                                placeholder={`Enter ${input.label}`}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          ) : input.type === "checkbox" ? (
-                                            <div>
-                                              <input
-                                                type="checkbox"
-                                                checked={input.value}
-                                                onChange={(e) =>
-                                                  handleModalChange(
-                                                    e,
-                                                    dataIndex,
-                                                    inputIndex
-                                                  )
-                                                }
-                                              />{" "}
-                                              {input.label}
-                                            </div>
-                                          ) : (
-                                            input.type === "file" && (
+                                          Submit
+                                        </Button>
+                                      )}
+                                    </Form>
+                                  )
+                                )}
+                              {modalOpen &&
+                                modalOpen.data?.map((item, dataIndex) =>
+                                  item.is &&
+                                  item.data.loan_step_id !== "1715348523661" ? (
+                                    <Form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitGuarantorStep();
+                                      }}
+                                      style={{ marginTop: "20px" }}
+                                      key={dataIndex}
+                                    >
+                                      <p>
+                                        {item.username} {item.data.loan_step}
+                                      </p>
+                                      <AiOutlineClose
+                                        onClick={() =>
+                                          removeGuarantorStep(
+                                            dataIndex,
+                                            "modalOpen"
+                                          )
+                                        }
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "red",
+                                          marginLeft: "10px",
+                                        }}
+                                      />
+                                      {item.data.inputs?.map(
+                                        (input, inputIndex) => (
+                                          <FormControl
+                                            key={`${dataIndex}-${inputIndex}`}
+                                            id="step"
+                                            className="d-flex justify-content-between align-items-center mt-4"
+                                          >
+                                            {input.type === "input" ? (
                                               <div>
                                                 <label>{input.label}</label>
                                                 <Input
-                                                  type="file"
+                                                  name="step"
+                                                  value={input.value}
+                                                  placeholder={`Enter ${input.label}`}
                                                   onChange={(e) =>
                                                     handleModalChange(
                                                       e,
@@ -1316,23 +1483,56 @@ function ViewFile() {
                                                   }
                                                 />
                                               </div>
-                                            )
-                                          )}
-                                        </FormControl>
-                                      )
-                                    )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
-                                  </Form>
-                                ) : null
-                              )}
+                                            ) : input.type === "checkbox" ? (
+                                              <div>
+                                                <input
+                                                  type="checkbox"
+                                                  checked={input.value}
+                                                  onChange={(e) =>
+                                                    handleModalChange(
+                                                      e,
+                                                      dataIndex,
+                                                      inputIndex
+                                                    )
+                                                  }
+                                                />{" "}
+                                                {input.label}
+                                              </div>
+                                            ) : (
+                                              input.type === "file" && (
+                                                <div>
+                                                  <label>{input.label}</label>
+                                                  <Input
+                                                    type="file"
+                                                    onChange={(e) =>
+                                                      handleModalChange(
+                                                        e,
+                                                        dataIndex,
+                                                        inputIndex
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              )
+                                            )}
+                                          </FormControl>
+                                        )
+                                      )}
+                                      {dataIndex ===
+                                        modalOpen.data.length - 1 && (
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          mr={3}
+                                          style={{ backgroundColor: "#b19552" }}
+                                        >
+                                          Submit
+                                        </Button>
+                                      )}
+                                    </Form>
+                                  ) : null
+                                )}
                           </div>
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
@@ -1425,7 +1625,9 @@ function ViewFile() {
               scrollbarWidth: "thin",
             }}
           >
-            <ModalHeader>Add New Guarantor</ModalHeader>
+            <ModalHeader>
+              {isEditMode ? "Edit Guarantor" : "Add New Guarantor"}
+            </ModalHeader>
             <ModalCloseButton />
             <form onSubmit={handleSubmit(onSubmit)}>
               <ModalBody pb={6}>
@@ -1435,8 +1637,11 @@ function ViewFile() {
                     name="username"
                     type="string"
                     onChange={handleChangeGuarantor}
-                    value={formData.username}
+                    defaultValue={formData.username}
                     placeholder="Enter username"
+                    {...register("username", {
+                      required: "Username is required",
+                    })}
                   />
                   {errors.username && <p>{errors.username.message}</p>}
                 </FormControl>
@@ -1446,8 +1651,11 @@ function ViewFile() {
                     name="number"
                     type="number"
                     onChange={handleChangeGuarantor}
-                    value={formData.number}
+                    defaultValue={formData.number}
                     placeholder="Enter number"
+                    {...register("number", {
+                      required: "Mobile number is required",
+                    })}
                   />
                   {errors.number && <p>{errors.number.message}</p>}
                 </FormControl>
@@ -1457,8 +1665,9 @@ function ViewFile() {
                     name="email"
                     type="string"
                     onChange={handleChangeGuarantor}
-                    value={formData.email}
+                    defaultValue={formData.email}
                     placeholder="Enter email"
+                    {...register("email", { required: "Email is required" })}
                   />
                   {errors.email && <p>{errors.email.message}</p>}
                 </FormControl>
@@ -1468,8 +1677,11 @@ function ViewFile() {
                     name="aadhar_card"
                     type="number"
                     onChange={handleadharChange}
-                    value={formData.aadhar_card}
+                    defaultValue={formData.aadhar_card}
                     placeholder="XXXX - XXXX - XXXX"
+                    {...register("aadhar_card", {
+                      required: "Aadhar card is required",
+                    })}
                   />
                 </FormControl>
                 <FormControl id="pancard" mt={4} isRequired>
@@ -1478,8 +1690,11 @@ function ViewFile() {
                     name="pan_card"
                     type="text"
                     onChange={handlePanChange}
-                    value={formData.pan_card}
-                    placeholder="Enyrt your PAN"
+                    defaultValue={formData.pan_card}
+                    placeholder="Enter your PAN"
+                    {...register("pan_card", {
+                      required: "PAN card is required",
+                    })}
                   />
                 </FormControl>
                 <FormControl id="unit_address" mt={4} isRequired>
@@ -1488,8 +1703,11 @@ function ViewFile() {
                     name="unit_address"
                     type="string"
                     onChange={handleChangeGuarantor}
-                    value={formData.unit_address}
+                    defaultValue={formData.unit_address}
                     placeholder="Enter unit address"
+                    {...register("unit_address", {
+                      required: "Unit address is required",
+                    })}
                   />
                 </FormControl>
                 <FormControl id="reference" mt={4} isRequired>
@@ -1498,8 +1716,11 @@ function ViewFile() {
                     name="reference"
                     type="string"
                     onChange={handleChangeGuarantor}
-                    value={formData.reference}
+                    defaultValue={formData.reference}
                     placeholder="Enter reference"
+                    {...register("reference", {
+                      required: "Reference is required",
+                    })}
                   />
                 </FormControl>
                 <FormControl mt={4}>
@@ -1508,8 +1729,9 @@ function ViewFile() {
                     name="occupation"
                     type="string"
                     onChange={handleChangeGuarantor}
-                    value={formData.occupation}
+                    defaultValue={formData.occupation}
                     placeholder="Enter occupation"
+                    {...register("occupation")}
                   />
                   {errors.occupation && <p>{errors.occupation.message}</p>}
                 </FormControl>
@@ -1533,13 +1755,7 @@ function ViewFile() {
       <>
         <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
           <ModalOverlay />
-          <ModalContent
-          // style={{
-          //   height: "40%",
-          //   overflow: "scroll",
-          //   scrollbarWidth: "thin",
-          // }}
-          >
+          <ModalContent>
             <ModalHeader>Add Guarantor</ModalHeader>
             <ModalCloseButton />
             <form>
@@ -1548,7 +1764,17 @@ function ViewFile() {
                   <FormLabel>Guarantor</FormLabel>
                   <Select
                     placeholder="Select Guarantor"
-                    onChange={(e) => setSelectedGuarantor(e.target.value)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setSelectedGuarantorID((prevSelected) => {
+                        if (prevSelected.includes(selectedId)) {
+                          return prevSelected.filter((id) => id !== selectedId);
+                        } else {
+                          return [...prevSelected, selectedId];
+                        }
+                      });
+                      setSelectedGuarantor(e.target.value);
+                    }}
                   >
                     {guarantors
                       .filter(
@@ -1581,6 +1807,22 @@ function ViewFile() {
           </ModalContent>
         </Modal>
       </>
+      <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Guarantor</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to delete this guarantor?</ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={handleDeleteGuarantor}>
+              Delete
+            </Button>
+            <Button variant="ghost" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <Toaster />
     </div>
   );
