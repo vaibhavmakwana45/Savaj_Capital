@@ -38,12 +38,6 @@ import {
   faEdit,
   faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  faChevronDown,
-  faChevronUp,
-  faEdit,
-  faTrashAlt,
-} from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { Typography } from "@mui/material";
 
