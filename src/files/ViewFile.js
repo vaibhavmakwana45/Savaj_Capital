@@ -38,6 +38,12 @@ import {
   faEdit,
   faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faChevronUp,
+  faEdit,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { Typography } from "@mui/material";
 
@@ -116,9 +122,8 @@ const FileDisplay = ({ groupedFiles }) => {
             key={index}
           >
             <div
-              className={`accordion-item ${
-                index === openPanelIndex ? "show" : ""
-              }`}
+              className={`accordion-item ${index === openPanelIndex ? "show" : ""
+                }`}
               key={index}
             >
               <h2
@@ -197,9 +202,8 @@ const FileDisplay = ({ groupedFiles }) => {
               </div> */}
               <div
                 id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
+                className={`accordion-collapse collapse ${index === openPanelIndex ? "show" : ""
+                  }`}
                 aria-labelledby={`panelsStayOpen-heading-${index}`}
               >
                 <div
@@ -558,26 +562,26 @@ function ViewFile() {
       ...prevState,
       data: prevState?.data
         ? [
-            ...prevState.data,
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
+          ...prevState.data,
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
             },
-          ]
+          },
+        ]
         : [
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
             },
-          ],
+          },
+        ],
     }));
   };
 
@@ -694,6 +698,21 @@ function ViewFile() {
     }
   };
 
+  // const submitGuarantorStep = async () => {
+  //   try {
+  //     const response = await AxiosInstance.post(
+  //       `/guarantor-step/guarantor-step/${id}`,
+  //       open.data
+  //     );
+
+  //     console.log(response, "response");
+  //     fetchData();
+  //     fetchStepsData();
+  //     setOpen({ is: false, data: {}, index: "" });
+  //   } catch (error) {
+  //     console.error("Error: ", error.message);
+  //   }
+  // };
   const submitGuarantorStep = async () => {
     try {
       // Submitting regular steps
@@ -729,6 +748,7 @@ function ViewFile() {
       console.log("All steps submitted successfully");
       fetchData();
       fetchStepsData();
+      setModalOpen({ data: [] });
       setModalOpen({ data: [] });
     } catch (error) {
       console.error("Error: ", error.message);
@@ -1026,9 +1046,8 @@ function ViewFile() {
                     </FormLabel>
                     <div className="accordion my-3 mx-3">
                       <div
-                        className={`accordion-item ${
-                          isOpenGuarantor ? "show" : ""
-                        }`}
+                        className={`accordion-item ${isOpenGuarantor ? "show" : ""
+                          }`}
                       >
                         <h2
                           className="accordion-header"
@@ -1058,9 +1077,8 @@ function ViewFile() {
                         </h2>
                         <div
                           id="panelsStayOpen-collapse-0"
-                          className={`accordion-collapse collapse ${
-                            isOpenGuarantor ? "show" : ""
-                          }`}
+                          className={`accordion-collapse collapse ${isOpenGuarantor ? "show" : ""
+                            }`}
                           aria-labelledby="panelsStayOpen-heading-0"
                         >
                           <div
