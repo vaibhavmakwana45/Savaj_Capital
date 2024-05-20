@@ -189,73 +189,73 @@ router.delete("/:loan_step_id", async (req, res) => {
 //   }
 // });
 
-router.get("/get_steps/:file_id", async (req, res) => {
-  try {
-    const { file_id } = req.params;
-    const file = await File_Uplode.findOne({ file_id });
-    const loan = await Loan.findOne({ loan_id: file.loan_id });
-    const steps = [];
+// router.get("/get_steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const file = await File_Uplode.findOne({ file_id });
+//     const loan = await Loan.findOne({ loan_id: file.loan_id });
+//     const steps = [];
 
-    for (const loan_step_id of loan.loan_step_id) {
-      const stepData = await Loan_Step.findOne({ loan_step_id });
+//     for (const loan_step_id of loan.loan_step_id) {
+//       const stepData = await Loan_Step.findOne({ loan_step_id });
 
-      if (!stepData) {
-        continue;
-      }
+//       if (!stepData) {
+//         continue;
+//       }
 
-      if (loan_step_id === "1715348523661") {
-        try {
-          const res = await axios.get(
-            `https://localhost:5882/api/file_upload/get_documents/${file_id}`
-          );
-          steps.push({ ...res.data.data, user_id: file.user_id });
-        } catch (error) {
-          console.error("Error: ", error.message);
-        }
-      } else {
-        const compeleteStep = await Compelete_Step.findOne({
-          loan_step_id,
-          file_id,
-          user_id: file.user_id,
-        });
+//       if (loan_step_id === "1715348523661") {
+//         try {
+//           const res = await axios.get(
+//             `https://localhost:5882/api/file_upload/get_documents/${file_id}`
+//           );
+//           steps.push({ ...res.data.data, user_id: file.user_id });
+//         } catch (error) {
+//           console.error("Error: ", error.message);
+//         }
+//       } else {
+//         const compeleteStep = await Compelete_Step.findOne({
+//           loan_step_id,
+//           file_id,
+//           user_id: file.user_id,
+//         });
 
-        if (compeleteStep) {
-          const updatedInputs = stepData.inputs.map((input) => {
-            const existingInput = compeleteStep.inputs.find(
-              (ci) => ci.label === input.label
-            );
-            return existingInput || input;
-          });
+//         if (compeleteStep) {
+//           const updatedInputs = stepData.inputs.map((input) => {
+//             const existingInput = compeleteStep.inputs.find(
+//               (ci) => ci.label === input.label
+//             );
+//             return existingInput || input;
+//           });
 
-          steps.push({
-            ...compeleteStep.toObject(),
-            inputs: updatedInputs,
-            user_id: file.user_id,
-          });
-        } else {
-          const isActive = stepData.inputs.some((input) => input.is_required);
-          const status = isActive ? "active" : "complete";
-          steps.push({
-            ...stepData.toObject(),
-            status,
-            user_id: file.user_id,
-          });
-        }
-      }
-    }
+//           steps.push({
+//             ...compeleteStep.toObject(),
+//             inputs: updatedInputs,
+//             user_id: file.user_id,
+//           });
+//         } else {
+//           const isActive = stepData.inputs.some((input) => input.is_required);
+//           const status = isActive ? "active" : "complete";
+//           steps.push({
+//             ...stepData.toObject(),
+//             status,
+//             user_id: file.user_id,
+//           });
+//         }
+//       }
+//     }
 
-    res.json({
-      statusCode: 200,
-      data: steps,
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
+//     res.json({
+//       statusCode: 200,
+//       data: steps,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 
 // router.get("/get_steps/:file_id", async (req, res) => {
 //   try {
@@ -348,6 +348,86 @@ router.get("/get_steps/:file_id", async (req, res) => {
 //     });
 //   }
 // });
+
+router.get("/get_steps/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const file = await File_Uplode.findOne({ file_id });
+    const loan = await Loan.findOne({ loan_id: file.loan_id });
+    const steps = [];
+
+    for (const loan_step_id of loan.loan_step_id) {
+      const stepData = await Loan_Step.findOne({ loan_step_id });
+
+      if (!stepData) {
+        continue;
+      }
+
+      if (loan_step_id === "1715348523661") {
+        try {
+          const res = await axios.get(
+            `https://localhost:5882/api/file_upload/get_documents/${file_id}`
+          );
+          steps.push({ ...res.data.data, user_id: file.user_id });
+        } catch (error) {
+          console.error("Error: ", error.message);
+        }
+      } else {
+        const compeleteStep = await Compelete_Step.findOne({
+          loan_step_id,
+          file_id,
+          user_id: file.user_id,
+        });
+
+        if (compeleteStep) {
+          const updatedInputs = stepData.inputs.map((input) => {
+            const existingInput = compeleteStep.inputs.find(
+              (ci) => ci.label === input.label
+            );
+            return existingInput || input;
+          });
+
+          const mergedStep = {
+            ...compeleteStep.toObject(),
+            inputs: updatedInputs,
+            user_id: file.user_id,
+          };
+
+          // Fetch guarantor steps and merge
+          const guarantorSteps = await Guarantor_Step.find({
+            file_id,
+            loan_step_id: compeleteStep.loan_step_id,
+          });
+
+          if (guarantorSteps.length > 0) {
+            mergedStep.guarantorSteps = guarantorSteps;
+          }
+
+          steps.push(mergedStep);
+        } else {
+          const isActive = stepData.inputs.some((input) => input.is_required);
+          const status = isActive ? "active" : "complete";
+          steps.push({
+            ...stepData.toObject(),
+            status,
+            user_id: file.user_id,
+          });
+        }
+      }
+    }
+
+    res.json({
+      statusCode: 200,
+      data: steps,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
 
 router.post("/steps/:file_id", async (req, res) => {
   console.log(req.body);

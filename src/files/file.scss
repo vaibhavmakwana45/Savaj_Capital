@@ -301,7 +301,6 @@
   color: var(--clr-light-gray);
 }
 
-
 .TableCell {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   font-weight: 400;
@@ -603,7 +602,7 @@ button.btn.btn-secondary:focus {
 .css-5xmg3k {
   width: 94% !important;
 }
-.col-md-6{
+.col-md-6 {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -615,6 +614,42 @@ button.btn.btn-secondary:focus {
   display: flex;
 }
 
+.loan-type-dropdown {
+  width: 60%;
+  // justify-content: end;
+  // display: flex;
+}
+.loan-type-dropdown-main {
+  display: flex;
+  justify-content: end;
+  margin-right: 10px;
+  height: 40px;
+}
+/* Add this CSS to your stylesheet */
+.custom-select {
+  position: relative;
+}
+
+.custom-select select {
+  padding-right: 30px; /* Adjust padding to make room for the icon */
+}
+
+.custom-select::after {
+  content: "\25BC"; /* This is the default dropdown arrow */
+  position: absolute;
+  right: 10px; /* Adjust this value as needed */
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.dynamicImportantStyle {
+  color: white !important;
+  background-color: #b19552 !important;
+}
+
+.form-select {
+  height: 41px !important;
+}
 
 // ========================================================== Responsive Code ============================================================
 
@@ -652,6 +687,18 @@ button.btn.btn-secondary:focus {
   .bradcrub-navbar {
     margin-left: 1px !important;
   }
+  .css-k008qs {
+    display: flex;
+    flex-direction: column;
+  }
+  .second-drop-section {
+    justify-content: end;
+    // margin-right: 30px;
+    margin-top: 6px;
+  }
+  .css-k008qs {
+    gap: 6px !important;
+}
 }
 
 /* 1280 */
@@ -698,16 +745,20 @@ button.btn.btn-secondary:focus {
   .pagination-main {
     flex-direction: column !important;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .add-main{
+  .add-main {
     flex-direction: column;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
+  // .second-drop-section{
+  //   justify-content: end;
+  //   margin-right: 15px;
+  // }
 }
 
 /* 576 */
@@ -721,11 +772,11 @@ button.btn.btn-secondary:focus {
   .image-responsive {
     width: 100% !important;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
 
@@ -755,6 +806,9 @@ button.btn.btn-secondary:focus {
   .drop-arrow {
     flex-direction: column;
   }
+  .loan-type-dropdown {
+    width: 100%;
+  }
 }
 
 /* 525 */
@@ -766,12 +820,12 @@ button.btn.btn-secondary:focus {
     display: flex !important;
     margin-bottom: 1px;
   }
-  
-  .add-sec{
+
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .pagination-main {
@@ -821,11 +875,11 @@ button.btn.btn-secondary:focus {
     margin-left: 1px !important;
     margin-top: 15px !important;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .bradcrub-navbar {
@@ -856,6 +910,23 @@ button.btn.btn-secondary:focus {
   .pagination-main {
     display: flex !important;
   }
+  .first-drop-section {
+    flex-direction: column;
+  }
+  .second-drop-section {
+    flex-direction: column;
+    margin-left: 0 !important;
+  }
+  .loan-type-dropdown {
+    // width: 55%;
+    margin-bottom: 10px;
+  }
+  .css-s0weq {
+    width: 200px !important;
+  }
+  .css-s0weq {
+    width: 100% !important;
+  }
 }
 
 /* 425 */
@@ -871,11 +942,11 @@ button.btn.btn-secondary:focus {
   .css-1ece9uh {
     margin-top: -9px;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .theadd {
@@ -904,11 +975,11 @@ button.btn.btn-secondary:focus {
     // margin-left: 30px !important;
     margin-top: 7px !important;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .css-1ece9uh {
@@ -943,11 +1014,11 @@ button.btn.btn-secondary:focus {
   .css-1ece9uh {
     margin-top: -9px;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .buttonss {
@@ -984,11 +1055,11 @@ button.btn.btn-secondary:focus {
     display: flex !important;
     margin-bottom: 1px;
   }
-  .add-sec{
+  .add-sec {
     flex-direction: column;
     // width: 100% !important;
   }
-  .inutss{
+  .inutss {
     width: 100% !important;
   }
   .bradcrub-navbar {
@@ -1021,6 +1092,10 @@ button.btn.btn-secondary:focus {
     flex-direction: column !important;
   }
   .thead {
+    flex-direction: column;
+    text-align: left;
+  }
+  .theaddd {
     flex-direction: column;
     text-align: left;
   }
