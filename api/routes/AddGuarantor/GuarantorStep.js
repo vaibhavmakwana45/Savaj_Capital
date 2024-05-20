@@ -7,19 +7,89 @@ const Loan = require("../../models/Loan/Loan");
 const File_Uplode = require("../../models/File/File_Uplode");
 const { default: axios } = require("axios");
 
+// router.post("/guarantor-step/:file_id", async (req, res) => {
+//   console.log(req.body);
+//   try {
+//     const { file_id } = req.params;
+//     const { loan_step_id, inputs, user_id, loan_step } = req.body;
+
+//     const existingStep = await Guarantor_Step.findOne({
+//       loan_step_id,
+//       file_id,
+//       user_id,
+//     });
+
+//     if (existingStep) {
+//       const newInputMap = new Map(inputs.map((input) => [input.label, input]));
+
+//       existingStep.inputs = existingStep.inputs.map((input) => {
+//         if (newInputMap.has(input.label)) {
+//           return {
+//             ...input,
+//             ...newInputMap.get(input.label),
+//           };
+//         }
+//         return input;
+//       });
+
+//       newInputMap.forEach((value, key) => {
+//         if (!existingStep.inputs.some((input) => input.label === key)) {
+//           existingStep.inputs.push(value);
+//         }
+//       });
+
+//       existingStep.updatedAt = moment()
+//         .utcOffset(330)
+//         .format("YYYY-MM-DD HH:mm:ss");
+//       await existingStep.save();
+
+//       res.status(200).json({
+//         statusCode: 200,
+//         message: "Step Updated Successfully.",
+//       });
+//     } else {
+//       const timestamp = Date.now();
+//       const uniqueId = `${timestamp}`;
+//       const newStep = {
+//         compelete_step_id: uniqueId,
+//         loan_step_id,
+//         inputs,
+//         loan_step,
+//         status: "complete",
+//         file_id,
+//         user_id,
+//         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//         updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//       };
+
+//       await Guarantor_Step.create(newStep);
+
+//       res.status(200).json({
+//         statusCode: 200,
+//         message: "Step Created Successfully.",
+//       });
+//     }
+//   } catch (error) {
+//     res.status(500).json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.post("/guarantor-step/:file_id", async (req, res) => {
   console.log(req.body);
   try {
     const { file_id } = req.params;
-    const { loan_step_id, inputs, user_id, loan_step } = req.body;
+    const { loan_step_id, inputs, user_id, loan_step, guarantor_id } = req.body;
 
     const existingStep = await Guarantor_Step.findOne({
+      guarantor_id,
       loan_step_id,
-      file_id,
-      user_id,
     });
 
     if (existingStep) {
+      // Update existing step
       const newInputMap = new Map(inputs.map((input) => [input.label, input]));
 
       existingStep.inputs = existingStep.inputs.map((input) => {
@@ -38,9 +108,7 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
         }
       });
 
-      existingStep.updatedAt = moment()
-        .utcOffset(330)
-        .format("YYYY-MM-DD HH:mm:ss");
+      existingStep.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
       await existingStep.save();
 
       res.status(200).json({
@@ -48,11 +116,13 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
         message: "Step Updated Successfully.",
       });
     } else {
+      // Create new step
       const timestamp = Date.now();
       const uniqueId = `${timestamp}`;
       const newStep = {
         compelete_step_id: uniqueId,
         loan_step_id,
+        guarantor_id,
         inputs,
         loan_step,
         status: "complete",
@@ -70,12 +140,13 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
+    res.status(5000).json({ // Changed status code to 5000
+      statusCode: 5000, // Changed status code to 5000
       message: error.message,
     });
   }
 });
+
 
 router.get("/get_guarantor_steps/:file_id", async (req, res) => {
   try {

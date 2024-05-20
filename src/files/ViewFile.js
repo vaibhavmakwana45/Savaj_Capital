@@ -115,9 +115,8 @@ const FileDisplay = ({ groupedFiles }) => {
             key={index}
           >
             <div
-              className={`accordion-item ${
-                index === openPanelIndex ? "show" : ""
-              }`}
+              className={`accordion-item ${index === openPanelIndex ? "show" : ""
+                }`}
               key={index}
             >
               <h2
@@ -196,9 +195,8 @@ const FileDisplay = ({ groupedFiles }) => {
               </div> */}
               <div
                 id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
+                className={`accordion-collapse collapse ${index === openPanelIndex ? "show" : ""
+                  }`}
                 aria-labelledby={`panelsStayOpen-heading-${index}`}
               >
                 <div
@@ -470,34 +468,25 @@ function ViewFile() {
 
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
+  const [open, setOpen] = useState({
+    is: false,
+    data: {},
+    index: "",
+    guarantors: [],
+  });
+  const [selectedGuarantor, setSelectedGuarantor] = useState();
+  const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
+
+  useEffect(() => {
+    fetchStepsData();
+  }, []);
 
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      const steps = response.data.data;
-
-      // Assuming the main step is the first one in the stepData array
-      const mainStepInputs = steps[0]?.inputs || [];
-
-      // Iterate through each step and update guarantor steps if necessary
-      const updatedSteps = steps.map((step) => {
-        if (step.guarantorSteps) {
-          step.guarantorSteps = step.guarantorSteps.map((guarantorStep) => {
-            const existingInputs = guarantorStep.inputs || [];
-            const updatedInputs = mainStepInputs.map((mainInput) => {
-              const existingInput = existingInputs.find(
-                (input) => input.label === mainInput.label
-              );
-              return existingInput || { ...mainInput, value: "" };
-            });
-            return { ...guarantorStep, inputs: updatedInputs };
-          });
-        }
-        return step;
-      });
-
-      setStepData(updatedSteps);
+      console.log(response, "responseeeee");
+      setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
       console.error("Error: ", error.message);
@@ -505,41 +494,29 @@ function ViewFile() {
     }
   };
 
-  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-
-  function allPreviousComplete(stepData, currentIndex) {
+  const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
         return false;
       }
     }
     return true;
-  }
+  };
 
-  const [modalOpen, setModalOpen] = useState(null);
-  const [selectedGuarantor, setSelectedGuarantor] = useState("");
-
-  const handleChange = async (e, index) => {
+  const handleChange = async (e, index, dataIndex = null) => {
     const { name, value, checked, type, files } = e.target;
     const newData = { ...open.data };
-    const inputs = [...newData.inputs];
+    const inputs =
+      dataIndex !== null
+        ? [...newData.guarantorSteps[dataIndex].inputs]
+        : [...newData.inputs];
 
     if (type === "checkbox") {
       inputs[index].value = checked;
-      if (checked) {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = !checked;
     } else if (type === "text") {
       inputs[index].value = value;
-      if (value !== "") {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = value === "";
     } else if (type === "file") {
       if (files.length > 0) {
         try {
@@ -548,19 +525,93 @@ function ViewFile() {
           inputs[index].is_required = false;
         } catch (error) {
           console.error("Failed to upload file:", error);
-          inputs[index].is_required = true;
         }
       } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
+        inputs[index].is_required = true;
       }
     }
 
-    setOpen({ is: open.is, data: { ...newData, inputs }, index: open.index });
+    if (dataIndex !== null) {
+      newData.guarantorSteps[dataIndex].inputs = inputs;
+    } else {
+      newData.inputs = inputs;
+    }
+
+    setOpen({ ...open, data: newData });
   };
 
+  const handleClick = (newData) => {
+    const updatedInputs = newData.data.inputs.map((item) => {
+      if (item.type === "input" || item.type === "file") {
+        return { ...item, value: "" };
+      }
+      if (item.type === "checkbox") {
+        return { ...item, value: false };
+      }
+      return item;
+    });
+
+    setModalOpen((prevState) => ({
+      ...prevState,
+      data: prevState?.data
+        ? [
+          ...prevState.data,
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
+            },
+          },
+        ]
+        : [
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
+            },
+          },
+        ],
+    }));
+  };
+
+  const addUserToModel = () => {
+    setModalOpen((prevState) => {
+      if (!prevState?.data || prevState.data.length === 0) {
+        return prevState;
+      }
+
+      const updatedData = [...prevState.data];
+      const selectedId = selectedGuarantorID[selectedGuarantorID.length - 1]; // Assuming you're selecting only one guarantor at a time
+      const selectedGuarantor = guarantors.find(
+        (g) => g.guarantor_id === selectedId
+      );
+
+      if (!selectedGuarantor) {
+        return prevState; // Return previous state if selected guarantor not found
+      }
+
+      updatedData[updatedData.length - 1] = {
+        ...updatedData[updatedData.length - 1],
+        is: true,
+        username: selectedGuarantor.username, // Store the username
+        guarantorId: selectedGuarantor.guarantor_id, // Store the guarantor ID
+      };
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
+    });
+  };
+
+  const [modalOpen, setModalOpen] = useState(null);
+
   const handleModalChange = async (e, dataIndex, inputIndex) => {
-    const { name, type, value, checked, files } = e.target;
+    const { type, value, checked, files } = e.target;
 
     if (type === "file" && files.length > 0) {
       try {
@@ -574,7 +625,7 @@ function ViewFile() {
           const updatedData = [...prevState.data];
           const updatedInputs = [...updatedData[dataIndex].data.inputs];
           updatedInputs[inputIndex].value = uploadedFilePath;
-          updatedInputs[inputIndex].is_required = false; // Assuming file upload makes the field not required
+          updatedInputs[inputIndex].is_required = false;
 
           return {
             ...prevState,
@@ -614,65 +665,6 @@ function ViewFile() {
       };
     });
   };
-
-  const handleClick = (newData) => {
-    const updatedInputs = newData.data.inputs.map((item) => {
-      if (item.type === "input" || item.type === "file") {
-        return { ...item, value: "" };
-      }
-      if (item.type === "checkbox") {
-        return { ...item, value: false };
-      }
-      return item;
-    });
-
-    setModalOpen((prevState) => ({
-      ...prevState,
-      data: prevState?.data
-        ? [
-            ...prevState.data,
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
-            },
-          ]
-        : [
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
-            },
-          ],
-    }));
-  };
-
-  const addUserToModel = () => {
-    setModalOpen((prevState) => {
-      if (!prevState?.data || prevState.data.length === 0) {
-        return prevState;
-      }
-
-      const updatedData = [...prevState.data];
-      updatedData[updatedData.length - 1] = {
-        ...updatedData[updatedData.length - 1],
-        is: true,
-        username: selectedGuarantor,
-      };
-
-      return {
-        ...prevState,
-        data: updatedData,
-      };
-    });
-  };
-
   const submitStep = async () => {
     try {
       await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
@@ -699,21 +691,61 @@ function ViewFile() {
     }
   };
 
+  // const submitGuarantorStep = async () => {
+  //   try {
+  //     const response = await AxiosInstance.post(
+  //       `/guarantor-step/guarantor-step/${id}`,
+  //       open.data
+  //     );
+
+  //     console.log(response, "response");
+  //     fetchData();
+  //     fetchStepsData();
+  //     setOpen({ is: false, data: {}, index: "" });
+  //   } catch (error) {
+  //     console.error("Error: ", error.message);
+  //   }
+  // };
   const submitGuarantorStep = async () => {
     try {
-      const response = await AxiosInstance.post(
-        `/guarantor-step/guarantor-step/${id}`,
-        open.data
-      );
+      if (open.data && open.data.guarantorSteps) {
+        // Submitting regular steps
+        for (const guarantor of open.data.guarantorSteps) {
+          const response = await AxiosInstance.post(
+            `/guarantor-step/guarantor-step/${id}`,
+            guarantor
+          );
+          console.log(response, "response");
+        }
+      }
 
-      console.log(response, "response");
+      if (modalOpen && modalOpen.data) {
+        modalOpen.data.forEach(async (item, index) => {
+          try {
+            const final = {
+              ...item.data,
+              guarantor_id: selectedGuarantor,
+            };
+            await AxiosInstance.post(
+              `/guarantor-step/guarantor-step/${id}`,
+              final
+            );
+          } catch (error) {
+            console.error(`Error submitting step ${index}: `, error.message);
+           
+          }
+        });
+      }
+
+      console.log("All steps submitted successfully");
       fetchData();
       fetchStepsData();
-      setOpen({ is: false, data: {}, index: "" });
+      setModalOpen({ data: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
   };
+
 
   if (loading) {
     return (
@@ -847,8 +879,7 @@ function ViewFile() {
                   <Button
                     colorScheme="blue"
                     style={{ backgroundColor: "#b19552" }}
-                    onClick={onOpen}
-                    className="buttonss"
+                    onClick={handleAddGuarantor}
                   >
                     Add Guarantor
                   </Button>
@@ -970,9 +1001,8 @@ function ViewFile() {
                     </FormLabel>
                     <div className="accordion my-3 mx-3">
                       <div
-                        className={`accordion-item ${
-                          isOpenGuarantor ? "show" : ""
-                        }`}
+                        className={`accordion-item ${isOpenGuarantor ? "show" : ""
+                          }`}
                       >
                         <h2
                           className="accordion-header"
@@ -1002,9 +1032,8 @@ function ViewFile() {
                         </h2>
                         <div
                           id="panelsStayOpen-collapse-0"
-                          className={`accordion-collapse collapse ${
-                            isOpenGuarantor ? "show" : ""
-                          }`}
+                          className={`accordion-collapse collapse ${isOpenGuarantor ? "show" : ""
+                            }`}
                           aria-labelledby="panelsStayOpen-heading-0"
                         >
                           <div
@@ -1098,7 +1127,7 @@ function ViewFile() {
                               }}
                             >
                               {stepData &&
-                                stepData?.map((item, index) => (
+                                stepData.map((item, index) => (
                                   <li
                                     key={index}
                                     id={`step${index + 1}`}
@@ -1128,14 +1157,15 @@ function ViewFile() {
                                             is: false,
                                             data: {},
                                             index: "",
+                                            guarantors: [],
                                           });
                                         } else {
                                           setOpen({
                                             is: true,
                                             data: item,
                                             index,
+                                            guarantors: [],
                                           });
-                                          setModalOpen();
                                         }
                                       }
                                     }}
@@ -1166,7 +1196,6 @@ function ViewFile() {
                                           <Input
                                             name="step"
                                             required={input.is_required}
-                                            // disabled={open.data.status === "complete"}
                                             value={input.value}
                                             placeholder={`Enter ${input.value}`}
                                             onChange={(e) =>
@@ -1179,7 +1208,6 @@ function ViewFile() {
                                           <input
                                             type="checkbox"
                                             checked={input.value}
-                                            // disabled={open.data.status === "complete"}
                                             required={input.is_required}
                                             onChange={(e) =>
                                               handleChange(e, index)
@@ -1237,7 +1265,6 @@ function ViewFile() {
                                   >
                                     Submit
                                   </Button>
-
                                   <Button
                                     colorScheme="blue"
                                     className="buttonss mt-3"
@@ -1263,8 +1290,9 @@ function ViewFile() {
                                     style={{ marginTop: "20px" }}
                                     key={dataIndex}
                                   >
-                                    {/* Ensure to access the guarantor's name correctly */}
-                                    <p>{guarantor.guarantor_id} Cibil Score</p>
+                                    <p>
+                                      {guarantor.username} {guarantor.loan_step}
+                                    </p>
                                     {console.log(guarantor, "guarantor")}
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
@@ -1281,11 +1309,10 @@ function ViewFile() {
                                                 value={input.value}
                                                 placeholder={`Enter ${input.label}`}
                                                 onChange={(e) =>
-                                                  handleModalChange(
+                                                  handleChange(
                                                     e,
-                                                    dataIndex,
                                                     inputIndex,
-                                                    "guarantorSteps"
+                                                    dataIndex
                                                   )
                                                 }
                                               />
@@ -1295,12 +1322,12 @@ function ViewFile() {
                                               <input
                                                 type="checkbox"
                                                 checked={input.value}
+                                                required={input.is_required}
                                                 onChange={(e) =>
-                                                  handleModalChange(
+                                                  handleChange(
                                                     e,
-                                                    dataIndex,
                                                     inputIndex,
-                                                    "guarantorSteps"
+                                                    dataIndex
                                                   )
                                                 }
                                               />{" "}
@@ -1312,37 +1339,66 @@ function ViewFile() {
                                                 <label>{input.label}</label>
                                                 <Input
                                                   type="file"
+                                                  required={input.is_required}
                                                   onChange={(e) =>
-                                                    handleModalChange(
+                                                    handleChange(
                                                       e,
-                                                      dataIndex,
                                                       inputIndex,
-                                                      "guarantorSteps"
+                                                      dataIndex
                                                     )
                                                   }
                                                 />
+                                                {input.value && (
+                                                  <div
+                                                    style={{
+                                                      marginTop: "10px",
+                                                    }}
+                                                  >
+                                                    {input.value
+                                                      .toLowerCase()
+                                                      .endsWith(".pdf") ? (
+                                                      <embed
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                        type="application/pdf"
+                                                        width="100%"
+                                                        height="200px"
+                                                      />
+                                                    ) : (
+                                                      <img
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                        alt="Uploaded"
+                                                        style={{
+                                                          width: "100%",
+                                                          height: "200px",
+                                                        }}
+                                                      />
+                                                    )}
+                                                  </div>
+                                                )}
                                               </div>
                                             )
                                           )}
                                         </FormControl>
                                       )
                                     )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
+                                    {dataIndex ===
+                                      open.data.guarantorSteps.length - 1 && (
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          style={{ backgroundColor: "#b19552" }}
+                                        >
+                                          Submit
+                                        </Button>
+                                      )}
                                   </Form>
                                 )
                               )}
                             {modalOpen &&
                               modalOpen.data?.map((item, dataIndex) =>
                                 item.is &&
-                                item.data.loan_step_id !== "1715348523661" ? (
+                                  item.data.loan_step_id !== "1715348523661" ? (
                                   <Form
                                     onSubmit={(e) => {
                                       e.preventDefault();
@@ -1351,7 +1407,9 @@ function ViewFile() {
                                     style={{ marginTop: "20px" }}
                                     key={dataIndex}
                                   >
-                                    <p>{item.username} Cibil Score</p>
+                                    <p>
+                                      {item.username} {item.data.loan_step}
+                                    </p>
                                     {item.data.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl
@@ -1410,15 +1468,18 @@ function ViewFile() {
                                         </FormControl>
                                       )
                                     )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
+                                    {dataIndex ===
+                                      modalOpen.data.length - 1 && (
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          mr={3}
+                                          style={{ backgroundColor: "#b19552" }}
+                                        >
+                                          Submit
+                                        </Button>
+                                      )}
                                   </Form>
                                 ) : null
                               )}
@@ -1659,7 +1720,17 @@ function ViewFile() {
                   <FormLabel>Guarantor</FormLabel>
                   <Select
                     placeholder="Select Guarantor"
-                    onChange={(e) => setSelectedGuarantor(e.target.value)}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setSelectedGuarantorID((prevSelected) => {
+                        if (prevSelected.includes(selectedId)) {
+                          return prevSelected.filter((id) => id !== selectedId);
+                        } else {
+                          return [...prevSelected, selectedId];
+                        }
+                      });
+                      setSelectedGuarantor(e.target.value);
+                    }}
                   >
                     {guarantors
                       .filter(

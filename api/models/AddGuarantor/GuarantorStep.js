@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const GuarantorStepSchema = new mongoose.Schema({
+  guarantor_id: { type: String },
   compelete_step_id: { type: String },
   loan_step_id: { type: String },
   file_id: { type: String },

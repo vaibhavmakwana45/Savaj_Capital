@@ -7,6 +7,7 @@ const Loan = require("../../models/Loan/Loan");
 const File_Uplode = require("../../models/File/File_Uplode");
 const { default: axios } = require("axios");
 const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
+const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 
 // Post Loan-Step
 router.post("/", async (req, res) => {
@@ -400,7 +401,14 @@ router.get("/get_steps/:file_id", async (req, res) => {
           });
 
           if (guarantorSteps.length > 0) {
-            mergedStep.guarantorSteps = guarantorSteps;
+            // Iterate over guarantorSteps to include guarantor username
+            const stepsWithGuarantor = await Promise.all(guarantorSteps.map(async (guarantorStep) => {
+              const guarantor = await Guarantor.findOne({ guarantor_id: guarantorStep.guarantor_id });
+              const username = guarantor ? guarantor.username : null;
+              return { ...guarantorStep.toObject(), username };
+            }));
+
+            mergedStep.guarantorSteps = stepsWithGuarantor;
           }
 
           steps.push(mergedStep);
