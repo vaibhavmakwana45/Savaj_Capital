@@ -329,6 +329,7 @@ function ViewFile() {
   const [formData, setFormData] = useState({
     user_id: "",
     file_id: "",
+    guarantor_id: "",
     username: "",
     number: "",
     email: "",
@@ -471,6 +472,7 @@ function ViewFile() {
   };
 
   const [modalOpen, setModalOpen] = useState(null);
+  console.log(modalOpen, "modalOpen");
   const [selectedGuarantor, setSelectedGuarantor] = useState("");
 
   const handleClick = (newData) => {
@@ -510,6 +512,8 @@ function ViewFile() {
           ],
     }));
   };
+
+  const [cibilInputs, setCibilInputs] = useState([]);
 
   const addUserToModel = () => {
     setModalOpen((prevState) => {
@@ -609,21 +613,50 @@ function ViewFile() {
     }
   };
 
+  // const submitGuarantorStep = async (index) => {
+  //   try {
+  //     const final = {
+  //       ...modalOpen.data[index].data,
+  //       guarantor_id: selectedGuarantor,
+  //     };
+  //     const response = await AxiosInstance.post(
+  //       `/guarantor-step/guarantor-step/${id}`,
+  //       final
+  //     );
+
+  //     console.log(response, "response");
+  //     fetchData();
+  //     fetchStepsData();
+  //     setModalOpen({ data: [] });
+  //   } catch (error) {
+  //     console.error("Error: ", error.message);
+  //   }
+  // };
+
   const submitGuarantorStep = async () => {
     try {
-      const response = await AxiosInstance.post(
-        `/guarantor-step/guarantor-step/${id}`,
-        open.data
-      );
-
-      console.log(response, "response");
+      for (let index = 0; index < modalOpen.data.length; index++) {
+        const final = {
+          ...modalOpen.data[index].data,
+          guarantor_id: selectedGuarantor,
+        };
+        await AxiosInstance.post(
+          `/guarantor-step/guarantor-step/${id}`,
+          final
+        );
+      }
+  
+      console.log("All steps submitted successfully");
       fetchData();
       fetchStepsData();
-      setOpen({ is: false, data: {}, index: "" });
+      setModalOpen({ data: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
   };
+
+  
+
   if (loading) {
     return (
       <Flex justify="center" align="center" height="100vh">
@@ -1136,6 +1169,7 @@ function ViewFile() {
                                   <Form
                                     onSubmit={(e) => {
                                       e.preventDefault();
+                                      // submitGuarantorStep(dataIndex);
                                       submitGuarantorStep();
                                     }}
                                     style={{ marginTop: "20px" }}
@@ -1200,15 +1234,18 @@ function ViewFile() {
                                         </FormControl>
                                       )
                                     )}
-                                    <Button
-                                      colorScheme="blue"
-                                      className="mt-3"
-                                      type="submit"
-                                      mr={3}
-                                      style={{ backgroundColor: "#b19552" }}
-                                    >
-                                      Submit
-                                    </Button>
+                                    {dataIndex ===
+                                      modalOpen.data.length - 1 && (
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
                                   </Form>
                                 ) : null
                               )}
@@ -1430,7 +1467,7 @@ function ViewFile() {
                     onChange={(e) => setSelectedGuarantor(e.target.value)}
                   >
                     {guarantors.map((guarantor, index) => (
-                      <option key={index} value={guarantor.username}>
+                      <option key={index} value={guarantor.guarantor_id}>
                         {guarantor.username}
                       </option>
                     ))}
