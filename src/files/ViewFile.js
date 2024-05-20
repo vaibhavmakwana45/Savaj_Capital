@@ -689,7 +689,6 @@ function ViewFile() {
         "/addusers/edituser/" + userId,
         formData
       );
-      console.log(response, "response");
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -965,22 +964,18 @@ function ViewFile() {
                             <strong>Loan User :</strong>{" "}
                             <span> {fileData?.user?.username || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Email :</strong>{" "}
                             <span> {fileData?.user?.email || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Phone Number :</strong>{" "}
                             <span> {fileData?.user?.number || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Cibil Score :</strong>{" "}
                             <span> {fileData?.user?.cibil_score || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="gstNumber">Gst Number :</strong>{" "}
                             <span
@@ -1011,7 +1006,6 @@ function ViewFile() {
                               ></i>
                             </span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="aadharCard">Aadhar Card :</strong>{" "}
                             <span
@@ -1031,15 +1025,12 @@ function ViewFile() {
                             {fileData?.user?.city || "N/A"}
                           </div>
                           <div>
-                            {/* <br /> */}
                             <strong>State :</strong>{" "}
                             {fileData?.user?.state || "N/A"}
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Country :</strong>{" "}
                             {fileData?.user?.country || "N/A"}
-                            {/* <br /> */}
                           </div>
                         </div>
                       </div>
@@ -1236,7 +1227,7 @@ function ViewFile() {
                                       className="d-flex justify-content-between align-items-center mt-4"
                                     >
                                       {input.type === "input" ? (
-                                        <div>
+                                        <div className="  col-8">
                                           <label>{input.label}</label>
                                           <Input
                                             name="step"
@@ -1249,7 +1240,7 @@ function ViewFile() {
                                           />
                                         </div>
                                       ) : input.type === "checkbox" ? (
-                                        <div>
+                                        <div className="col-4 ">
                                           <input
                                             type="checkbox"
                                             checked={input.value}
@@ -1556,10 +1547,7 @@ function ViewFile() {
                             open.data.loan_step_id === "1715348523661" &&
                             open.data.pendingData.length !== 0 && (
                               <div className="row">
-                                <div
-                                  className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                                >
+                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
                                   <Table
                                     size="sm"
                                     aria-label="documents"
