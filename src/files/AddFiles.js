@@ -513,7 +513,7 @@ function AddFiles() {
                 </Select>
               </FormControl>
             )}
-            <div>
+            {/* <div>
               {Object.entries(groupedLoanDocuments).map(
                 ([title_id, documentGroups]) => (
                   <div key={title_id} className="my-3">
@@ -660,7 +660,7 @@ function AddFiles() {
                   </div>
                 )
               )}
-            </div>
+            </div> */}
 
             {/* <FormControl id="stemp_paper_print" mt={4}>
               <Checkbox

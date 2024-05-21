@@ -14,6 +14,8 @@ const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 const BankApproval = require("../../models/Bank/BankApproval");
 const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
 const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
+const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
+const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 
 router.post("/", async (req, res) => {
   try {
@@ -670,7 +672,15 @@ router.delete("/:fileId", async (req, res) => {
     const deletedFile = await File_Uplode.findOneAndDelete({
       file_id: fileId,
     });
-    const deletedSteps = await Compelete_Step.deleteMany({ file_id: fileId });
+    await Compelete_Step.deleteMany({
+      file_id: fileId,
+    });
+    await Guarantor_Step.deleteMany({
+      file_id: fileId,
+    });
+    await Guarantor.deleteMany({
+      file_id: fileId,
+    });
 
     if (!deletedFile) {
       return res.status(404).json({

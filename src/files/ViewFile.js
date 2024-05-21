@@ -31,7 +31,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
 import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
-import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -330,6 +329,7 @@ function ViewFile() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -390,17 +390,26 @@ function ViewFile() {
   const handleDeleteGuarantor = async () => {
     if (selectedGuarantorId) {
       try {
-        await AxiosInstance.delete(
+        const response = await AxiosInstance.delete(
           `/add-guarantor/delete-guarantor/${selectedGuarantorId}`
         );
-        toast.success("Guarantor Deleted Successfully!");
-        setGuarantors((prevGuarantors) =>
-          prevGuarantors.filter((g) => g.guarantor_id !== selectedGuarantorId)
-        );
+        const { success, message } = response.data;
+        if (success) {
+          toast.success(message);
+          setGuarantors((prevGuarantors) =>
+            prevGuarantors.filter((g) => g.guarantor_id !== selectedGuarantorId)
+          );
+        } else {
+          toast.error(message);
+        }
         closeDeleteModal();
       } catch (error) {
         console.error("Error deleting guarantor:", error);
-        toast.error("Please try again later!");
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Please try again later!");
+        }
         closeDeleteModal();
       }
     }
@@ -481,10 +490,6 @@ function ViewFile() {
   const [selectedGuarantor, setSelectedGuarantor] = useState();
   const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
 
-  useEffect(() => {
-    fetchStepsData();
-  }, []);
-
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
@@ -498,6 +503,9 @@ function ViewFile() {
     }
   };
 
+  useEffect(() => {
+    fetchStepsData();
+  }, []);
   const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -696,45 +704,39 @@ function ViewFile() {
 
   const submitGuarantorStep = async () => {
     try {
-      // Submitting regular steps
       if (open.data && open.data.guarantorSteps) {
         for (const guarantor of open.data.guarantorSteps) {
-          const response = await AxiosInstance.post(
+          await AxiosInstance.post(
             `/guarantor-step/guarantor-step/${id}`,
             guarantor
           );
-          console.log(response, "response");
+          console.log("Guarantor step submitted successfully");
         }
       }
 
-      // Submitting modal steps
       if (modalOpen && modalOpen.data) {
-        for (const [index, item] of modalOpen.data.entries()) {
-          try {
-            const final = {
-              ...item.data,
-              guarantor_id: item.guarantorId, // Use the specific guarantor ID from each item
-            };
-            await AxiosInstance.post(
-              `/guarantor-step/guarantor-step/${id}`,
-              final
-            );
-            console.log(`Step ${index} submitted successfully`);
-          } catch (error) {
-            console.error(`Error submitting step ${index}: `, error.message);
-          }
+        for (const item of modalOpen.data) {
+          const final = {
+            ...item.data,
+            guarantor_id: item.guarantorId,
+          };
+          await AxiosInstance.post(
+            `/guarantor-step/guarantor-step/${id}`,
+            final
+          );
+          console.log("Guarantor step submitted successfully");
         }
       }
 
-      console.log("All steps submitted successfully");
-      fetchData();
-      fetchStepsData();
+      await fetchData();
+      await fetchStepsData();
       setModalOpen({ data: [] });
-      setModalOpen({ data: [] });
+      setOpen({ is: false, data: {}, index: "", guarantors: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
   };
+
   const removeGuarantorStep = async (dataIndex, stepType = "open") => {
     if (stepType === "open") {
       const guarantorStep = open.data.guarantorSteps[dataIndex];
@@ -802,31 +804,45 @@ function ViewFile() {
     }, 2000);
   }
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
     const payload = {
-      username: formData.username,
-      number: formData.number,
-      email: formData.email,
-      pan_card: formData.pan_card,
-      aadhar_card: formData.aadhar_card,
-      unit_address: formData.unit_address,
-      occupation: formData.occupation,
-      reference: formData.reference,
+      ...data,
       user_id: fileData.user_id,
       file_id: fileData.file_id,
     };
+
     try {
-      await AxiosInstance.post("/add-guarantor/add-guarantor", payload);
-      toast.success("Guarantor Added Successfully!");
+      if (isEditMode) {
+        await AxiosInstance.put(
+          `/add-guarantor/update-guarantor/${currentGuarantorId}`,
+          payload
+        );
+        toast.success("Guarantor Updated Successfully!");
+        setGuarantors((prev) =>
+          prev.map((g) =>
+            g.guarantor_id === currentGuarantorId ? { ...g, ...payload } : g
+          )
+        );
+      } else {
+        const { data } = await AxiosInstance.post(
+          "/add-guarantor/add-guarantor",
+          payload
+        );
+        toast.success("Guarantor Added Successfully!");
+        setGuarantors((prev) => [
+          ...prev,
+          { ...payload, guarantor_id: data.guarantor_id },
+        ]);
+      }
+
       onClose();
       fetchData();
       reset();
     } catch (error) {
-      console.error("Error adding guarantor:", error);
+      console.error("Error adding/updating guarantor:", error);
       toast.error("Please try again later!");
     }
   };
-
   const handleChangeGuarantor = (e) => {
     const { name, value } = e.target;
     setFormData({
