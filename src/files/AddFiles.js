@@ -46,18 +46,6 @@ function AddFiles() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
-  // const [formData, setFormData] = useState({
-  //   user_id: "",
-  //   username: "",
-  //   number: "",
-  //   email: "",
-  //   pan_card: "",
-  //   aadhar_card: "",
-  //   dob: "",
-  //   country: "India",
-  //   state: "",
-  //   city: "",
-  // });
 
   const [formData, setFormData] = useState({
     user_id: "",
@@ -74,8 +62,6 @@ function AddFiles() {
     unit_address: "",
     gst_number: "",
     reference: "",
-    // stemp_paper_print: false, // Initialize as false
-    // loan_dispatch: false, // Initialize as false
   });
 
   const {
@@ -410,7 +396,7 @@ function AddFiles() {
         }));
       });
 
-      const uploadedFiles = (await Promise.all(uploadPromises)).flat(); // Flatten in case of multiple file responses per item
+      const uploadedFiles = (await Promise.all(uploadPromises)).flat(); 
 
       const payload = {
         user_id: selectedUser,
@@ -422,8 +408,6 @@ function AddFiles() {
           title_id: file.title_id,
           key: file.key,
         })),
-        // stemp_paper_print: formData.stemp_paper_print,
-        // loan_dispatch: formData.loan_dispatch,
       };
       await AxiosInstance.post("/file_upload", payload);
       history.push("/superadmin/filetable");
@@ -435,7 +419,6 @@ function AddFiles() {
         error.response.data &&
         error.response.status === 400
       ) {
-        // Display custom error message from server
         toast.error(error.response.data.message);
       } else {
         toast.error(error.message || "Submission failed! Please try again.");

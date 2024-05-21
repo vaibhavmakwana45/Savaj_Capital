@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Stack,
 } from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
@@ -178,7 +179,6 @@ function Row(props) {
           </span>
         </TableCell>
         <TableCell align="">{file?.city}</TableCell>
-        {/* <TableCell align="">{file?.pan_card}</TableCell> */}
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">
           <span
@@ -409,10 +409,7 @@ export default function CollapsibleTable() {
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const states = State.getStatesOfCountry("IN"); // Assuming 'IN' is the country code for India
-
-  // Retrieve cities whenever the selectedState changes
-  // Here we find the state object first to get the correct ISO code for fetching cities
+  const states = State.getStatesOfCountry("IN");
   const cities = selectedState
     ? City.getCitiesOfState(
         "IN",
@@ -422,7 +419,8 @@ export default function CollapsibleTable() {
 
   const handleStateChange = (event) => {
     setSelectedState(event.target.value);
-    setSelectedCity(""); // Reset city selection when state changes
+    setSelectedCity(""); 
+    
   };
 
   const handleCityChange = (event) => {
@@ -706,91 +704,82 @@ export default function CollapsibleTable() {
             </Text>
           </Flex>
           <Flex justifyContent="end" py="1" className="mainnnn">
-            <Flex className="thead p-2 ">
-              {!loan && (
-                <Flex className="thead ">
-                  <Select
-                    placeholder="Select a loan type"
-                    value={selectedLoan}
-                    onChange={(e) => setSelectedLoan(e.target.value)}
-                    mr="10px"
-                    width="200px"
-                    className="mb-2"
+            <Flex className="theaddd p-2 ">
+              <div className="d-flex first-drop-section gap-2">
+                {!loan && (
+                  <select
+                    class="form-select loan-type-dropdown"
+                    aria-label="Default select example"
                   >
-                    <option value="All Loan Types">All Loan Types</option>
+                    <option selected>Select loan type</option>
                     {loans.map((loan) => (
                       <option key={loan.loan_id} value={loan.loan}>
                         {loan.loan}
                       </option>
                     ))}
-                  </Select>
-                </Flex>
-              )}
-              <Select
-                value={selectedState}
-                onChange={handleStateChange}
-                placeholder="Select State"
-                width="200px"
-                marginRight="10px"
-                className="mb-2 drop"
-              >
-                {states.map((state) => (
-                  <option key={state.isoCode} value={state.name}>
-                    {state.name}
-                  </option>
-                ))}
-              </Select>
-              <Select
-                value={selectedCity}
-                onChange={handleCityChange}
-                placeholder="Select City"
-                disabled={!selectedState}
-                width="200px"
-                marginRight="10px"
-                className="mb-2 drop"
-              >
-                {cities.map((city) => (
-                  <option key={city.name} value={city.name}>
-                    {city.name}
-                  </option>
-                ))}
-              </Select>
-              <Select
-                value={selectedStatusSearch}
-                onChange={(e) => setSelectedStatusSearch(e.target.value)}
-                mr="10px"
-                width="200px"
-                className="mb-2"
-              >
-                <option value="">Select a Status</option>
-                <option value="running">Running</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </Select>
-
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name"
-                width="250px"
-                mr="10px"
-              />
-              <div>
-                <style>
-                  {`
-                    .dynamicImportantStyle {
-                      background-color: #b19552 !important;
-                      color: #fff !important;
-                    }
-                  `}
-                </style>
+                  </select>
+                )}
+                <select
+                  class="form-select loan-type-dropdown"
+                  aria-label="Default select example"
+                  value={selectedState}
+                  onChange={handleStateChange}
+                >
+                  <option selected>Select State</option>
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  class="form-select loan-type-dropdown"
+                  aria-label="Default select example"
+                  disabled={!selectedState}
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                >
+                  <option selected>Select City</option>
+                  {cities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <Button
-                onClick={() => history.push("/superadmin/addfile")}
-                className="dynamicImportantStyle"
+
+              <div
+                className="d-flex second-drop-section gap-2 "
+                style={{ marginLeft: "10px" }}
               >
-                Add File
-              </Button>
+                <select
+                  class="form-select loan-type-dropdown "
+                  aria-label="Default select example"
+                  value={selectedStatusSearch}
+                  onChange={(e) => setSelectedStatusSearch(e.target.value)}
+                  width="200px"
+                >
+                  <option selected>Select State</option>
+                  <option value="running">Running</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  mr="10px"
+                />
+                <Button
+                  onClick={() => history.push("/superadmin/addfile")}
+                  className="dynamicImportantStyle"
+                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552", color: "white" }}
+                >
+                  Add File
+                </Button>
+              </div>
             </Flex>
           </Flex>
         </CardHeader>
@@ -814,7 +803,6 @@ export default function CollapsibleTable() {
                     <TableCell align="">File Id</TableCell>
                     <TableCell align="">Customer (Business)</TableCell>
                     <TableCell align="">City</TableCell>
-                    {/* <TableCell align="">Pan Card</TableCell> */}
                     <TableCell align="">Loan</TableCell>
                     <TableCell align="">File Status</TableCell>
                     <TableCell align="">Document Status</TableCell>
@@ -882,7 +870,7 @@ export default function CollapsibleTable() {
           leastDestructiveRef={cancelRef1}
           onClose={() => {
             setIsUpdateDialogOpen(false);
-            setSelectedStatus(""); // Reset the selected status when closing the dialog
+            setSelectedStatus("");
           }}
         >
           <AlertDialogOverlay>
@@ -920,11 +908,11 @@ export default function CollapsibleTable() {
                 <Button
                   colorScheme="red"
                   onClick={() => {
-                    updateFile(selecteUpdateFileId, selectedStatus); // Pass selectedStatus to update function
+                    updateFile(selecteUpdateFileId, selectedStatus);
                     setIsUpdateDialogOpen(false);
                   }}
                   ml={3}
-                  isDisabled={!selectedStatus} // Disable the button if no status is selected
+                  isDisabled={!selectedStatus}
                 >
                   Update
                 </Button>
