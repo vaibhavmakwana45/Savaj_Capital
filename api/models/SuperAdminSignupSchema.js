@@ -1,32 +1,32 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const SuperAdminSignupSchema = new mongoose.Schema({
   superadmin_id: {
     type: String,
-    unique: true
+    unique: true,
   },
   firstname: {
-    type: String
+    type: String,
   },
   lastname: {
-    type: String
+    type: String,
   },
   email: {
     type: String,
-    lowercase: true
+    lowercase: true,
   },
   phonenumber: {
-    type: Number
+    type: Number,
   },
   password: {
-    type: String
+    type: String,
   },
   createAt: {
-    type: String
+    type: String,
   },
   updateAt: {
-    type: String
-  }
+    type: String,
+  },
 });
 
-module.exports = mongoose.model('SuperAdminSignup', SuperAdminSignupSchema);
+module.exports = mongoose.model("SuperAdminSignup", SuperAdminSignupSchema);

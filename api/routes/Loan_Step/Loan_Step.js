@@ -6,6 +6,8 @@ const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
 const Loan = require("../../models/Loan/Loan");
 const File_Uplode = require("../../models/File/File_Uplode");
 const { default: axios } = require("axios");
+const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
+const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 
 // Post Loan-Step
 router.post("/", async (req, res) => {
@@ -188,6 +190,166 @@ router.delete("/:loan_step_id", async (req, res) => {
 //   }
 // });
 
+// router.get("/get_steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const file = await File_Uplode.findOne({ file_id });
+//     const loan = await Loan.findOne({ loan_id: file.loan_id });
+//     const steps = [];
+
+//     for (const loan_step_id of loan.loan_step_id) {
+//       const stepData = await Loan_Step.findOne({ loan_step_id });
+
+//       if (!stepData) {
+//         continue;
+//       }
+
+//       if (loan_step_id === "1715348523661") {
+//         try {
+//           const res = await axios.get(
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//           );
+//           steps.push({ ...res.data.data, user_id: file.user_id });
+//         } catch (error) {
+//           console.error("Error: ", error.message);
+//         }
+//       } else {
+//         const compeleteStep = await Compelete_Step.findOne({
+//           loan_step_id,
+//           file_id,
+//           user_id: file.user_id,
+//         });
+
+//         if (compeleteStep) {
+//           const updatedInputs = stepData.inputs.map((input) => {
+//             const existingInput = compeleteStep.inputs.find(
+//               (ci) => ci.label === input.label
+//             );
+//             return existingInput || input;
+//           });
+
+//           steps.push({
+//             ...compeleteStep.toObject(),
+//             inputs: updatedInputs,
+//             user_id: file.user_id,
+//           });
+//         } else {
+//           const isActive = stepData.inputs.some((input) => input.is_required);
+//           const status = isActive ? "active" : "complete";
+//           steps.push({
+//             ...stepData.toObject(),
+//             status,
+//             user_id: file.user_id,
+//           });
+//         }
+//       }
+//     }
+
+//     res.json({
+//       statusCode: 200,
+//       data: steps,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
+// router.get("/get_steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const file = await File_Uplode.findOne({ file_id });
+//     if (!file) {
+//       return res.status(404).json({ message: "File not found" });
+//     }
+
+//     const loan = await Loan.findOne({ loan_id: file.loan_id });
+//     if (!loan) {
+//       return res.status(404).json({ message: "Loan not found" });
+//     }
+
+//     const steps = [];
+//     for (const loan_step_id of loan.loan_step_id) {
+//       const stepData = await Loan_Step.findOne({ loan_step_id });
+//       console.log(`Step Data for ${loan_step_id}:`, stepData);
+
+//       if (!stepData) continue;
+
+//       const completeStep = await Compelete_Step.findOne({
+//         loan_step_id,
+//         file_id,
+//         user_id: file.user_id,
+//       });
+//       console.log(`Complete Step Data for ${loan_step_id}:`, completeStep);
+
+//       const guarantorStep = await Guarantor_Step.findOne({
+//         loan_step_id,
+//         file_id,
+//         user_id: file.user_id,
+//       });
+//       console.log(`Guarantor Step Data for ${loan_step_id}:`, guarantorStep);
+
+//       let stepEntry = { ...stepData.toObject(), user_id: file.user_id };
+
+//       if (completeStep) {
+//         stepEntry = { ...stepEntry, completeStep: completeStep.toObject() };
+//       }
+//       if (guarantorStep) {
+//         stepEntry = { ...stepEntry, guarantorStep: guarantorStep.toObject() };
+//       }
+
+//       steps.push(stepEntry);
+//     }
+
+//     console.log("Final steps data:", steps);
+//     res.json({
+//       statusCode: 200,
+//       data: steps,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     console.error("Error in get_steps:", error);
+//     res.status(500).json({
+//       message: error.message,
+//     });
+//   }
+// });
+
+// router.post("/steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const timestamp = Date.now();
+//     const uniqueId = `${timestamp}`;
+
+//     const object = {
+//       compelete_step_id: uniqueId,
+//       loan_step_id: req.body.loan_step_id,
+//       inputs: req.body.inputs,
+//       loan_step: req.body.loan_step,
+//       status: "complete",
+//       file_id: file_id,
+//       user_id: req.body.user_id,
+//       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//     };
+
+//     var data = await Compelete_Step.create(object);
+//     res.status(200).json({
+//       statusCode: 200,
+//       data: data,
+//       message: "Step Completed Successfully.",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.get("/get_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -226,11 +388,44 @@ router.get("/get_steps/:file_id", async (req, res) => {
             return existingInput || input;
           });
 
-          steps.push({
+          const mergedStep = {
             ...compeleteStep.toObject(),
             inputs: updatedInputs,
             user_id: file.user_id,
+          };
+
+          // Fetch guarantor steps and merge
+          const guarantorSteps = await Guarantor_Step.find({
+            file_id,
+            loan_step_id: compeleteStep.loan_step_id,
           });
+
+          if (guarantorSteps.length > 0) {
+            // Iterate over guarantorSteps to include guarantor username
+            const stepsWithGuarantor = await Promise.all(
+              guarantorSteps.map(async (guarantorStep) => {
+                const guarantor = await Guarantor.findOne({
+                  guarantor_id: guarantorStep.guarantor_id,
+                });
+                const username = guarantor ? guarantor.username : null;
+                const mergedGuarantorInputs = stepData.inputs.map((input) => {
+                  const existingInput = guarantorStep.inputs.find(
+                    (ci) => ci.label === input.label
+                  );
+                  return existingInput || input;
+                });
+                return {
+                  ...guarantorStep.toObject(),
+                  inputs: mergedGuarantorInputs,
+                  username,
+                };
+              })
+            );
+
+            mergedStep.guarantorSteps = stepsWithGuarantor;
+          }
+
+          steps.push(mergedStep);
         } else {
           const isActive = stepData.inputs.some((input) => input.is_required);
           const status = isActive ? "active" : "complete";
@@ -256,39 +451,8 @@ router.get("/get_steps/:file_id", async (req, res) => {
   }
 });
 
-// router.post("/steps/:file_id", async (req, res) => {
-//   try {
-//     const { file_id } = req.params;
-//     const timestamp = Date.now();
-//     const uniqueId = `${timestamp}`;
-
-//     const object = {
-//       compelete_step_id: uniqueId,
-//       loan_step_id: req.body.loan_step_id,
-//       inputs: req.body.inputs,
-//       loan_step: req.body.loan_step,
-//       status: "complete",
-//       file_id: file_id,
-//       user_id: req.body.user_id,
-//       createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
-//       updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
-//     };
-
-//     var data = await Compelete_Step.create(object);
-//     res.status(200).json({
-//       statusCode: 200,
-//       data: data,
-//       message: "Step Completed Successfully.",
-//     });
-//   } catch (error) {
-//     res.json({
-//       statusCode: 500,
-//       message: error.message,
-//     });
-//   }
-// });
-
 router.post("/steps/:file_id", async (req, res) => {
+  console.log(req.body);
   try {
     const { file_id } = req.params;
     const { loan_step_id, inputs, user_id, loan_step } = req.body;

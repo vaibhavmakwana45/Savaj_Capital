@@ -17,6 +17,7 @@ import {
   ModalBody,
   ModalCloseButton,
   Checkbox,
+  Select,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import Card from "components/Card/Card.js";
@@ -26,10 +27,19 @@ import { useLocation } from "react-router-dom";
 import { ArrowBackIcon, CloseIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
+import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faChevronUp,
+  faEdit,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { useForm } from "react-hook-form";
+import { Typography } from "@mui/material";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
@@ -197,7 +207,11 @@ const FileDisplay = ({ groupedFiles }) => {
                   style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
                 >
                   {files.map((file, idx) => (
-                    <div key={idx} style={{ width: "45%" }}>
+                    <div
+                      key={idx}
+                      className="image-responsive"
+                      style={{ width: "45%" }}
+                    >
                       <p className="mb-3">{file.document_name}</p>
                       {file.file_path.endsWith(".pdf") ? (
                         <iframe
@@ -304,6 +318,141 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpensGuarantor,
+    onOpen: onOpensGuarantor,
+    onClose: onClosesGuarantor,
+  } = useDisclosure();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
+
+  const [formData, setFormData] = useState({
+    user_id: "",
+    file_id: "",
+    username: "",
+    number: "",
+    email: "",
+    pan_card: "",
+    aadhar_card: "",
+    unit_address: "",
+    occupation: "",
+    reference: "",
+  });
+
+  const handleAddGuarantor = () => {
+    setIsEditMode(false);
+    setFormData({
+      user_id: "",
+      file_id: "",
+      username: "",
+      number: "",
+      email: "",
+      pan_card: "",
+      aadhar_card: "",
+      unit_address: "",
+      occupation: "",
+      reference: "",
+    });
+    onOpen();
+  };
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentGuarantorId, setCurrentGuarantorId] = useState(null);
+  const handleEditGuarantor = (guarantor) => {
+    setIsEditMode(true);
+    setCurrentGuarantorId(guarantor.guarantor_id);
+    setFormData(guarantor);
+
+    for (const key in guarantor) {
+      setValue(key, guarantor[key]);
+    }
+
+    onOpen();
+  };
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedGuarantorId, setSelectedGuarantorId] = useState(null);
+
+  const openDeleteModal = (id) => {
+    setSelectedGuarantorId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+  const handleDeleteGuarantor = async () => {
+    if (selectedGuarantorId) {
+      try {
+        const response = await AxiosInstance.delete(
+          `/add-guarantor/delete-guarantor/${selectedGuarantorId}`
+        );
+        const { success, message } = response.data;
+        if (success) {
+          toast.success(message);
+          setGuarantors((prevGuarantors) =>
+            prevGuarantors.filter((g) => g.guarantor_id !== selectedGuarantorId)
+          );
+        } else {
+          toast.error(message);
+        }
+        closeDeleteModal();
+      } catch (error) {
+        console.error("Error deleting guarantor:", error);
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Please try again later!");
+        }
+        closeDeleteModal();
+      }
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await AxiosInstance.get(
+        "/file_upload/file_upload/" + id
+      );
+      setFileData(response.data.data.file);
+    } catch (error) {
+      console.error("Error fetching file data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    fetchStepsData();
+  }, [id]);
+  const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
+
+  const handleAccordionClick = () => {
+    setIsOpenGuarantor(!isOpenGuarantor);
+  };
+  const [guarantors, setGuarantors] = useState([]);
+
+  useEffect(() => {
+    const fetchGuarantors = async () => {
+      try {
+        const response = await AxiosInstance.get(
+          `/add-guarantor/guarantors/${id}`
+        );
+        setGuarantors(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch guarantors", error);
+      }
+    };
+
+    fetchGuarantors();
+  }, []);
 
   const uploadImageToCDN = async (file) => {
     const formData = new FormData();
@@ -330,31 +479,22 @@ function ViewFile() {
     }
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await AxiosInstance.get(
-        "/file_upload/file_upload/" + id
-      );
-      setFileData(response.data.data.file);
-    } catch (error) {
-      console.error("Error fetching file data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    fetchStepsData();
-  }, [id]);
-
   const [stepData, setStepData] = useState([]);
   const [stepLoader, setStepLoader] = useState(false);
+  const [open, setOpen] = useState({
+    is: false,
+    data: {},
+    index: "",
+    guarantors: [],
+  });
+  const [selectedGuarantor, setSelectedGuarantor] = useState();
+  const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
+
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "response");
+      console.log(response, "responseeeee");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -363,38 +503,32 @@ function ViewFile() {
     }
   };
 
-  const [open, setOpen] = useState({ is: false, data: {}, index: "" });
-  console.log(open, "open");
-  function allPreviousComplete(stepData, currentIndex) {
+  useEffect(() => {
+    fetchStepsData();
+  }, []);
+  const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
         return false;
       }
     }
     return true;
-  }
+  };
 
-  const handleChange = async (e, index) => {
+  const handleChange = async (e, index, dataIndex = null) => {
     const { name, value, checked, type, files } = e.target;
     const newData = { ...open.data };
-    const inputs = [...newData.inputs];
+    const inputs =
+      dataIndex !== null
+        ? [...newData.guarantorSteps[dataIndex].inputs]
+        : [...newData.inputs];
 
     if (type === "checkbox") {
       inputs[index].value = checked;
-      if (checked) {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = !checked;
     } else if (type === "text") {
       inputs[index].value = value;
-      if (value !== "") {
-        inputs[index].is_required = false;
-      } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
-      }
+      inputs[index].is_required = value === "";
     } else if (type === "file") {
       if (files.length > 0) {
         try {
@@ -403,17 +537,146 @@ function ViewFile() {
           inputs[index].is_required = false;
         } catch (error) {
           console.error("Failed to upload file:", error);
-          inputs[index].is_required = true;
         }
       } else {
-        inputs[index].is_required =
-          stepData[open?.index]?.inputs[index]?.is_required;
+        inputs[index].is_required = true;
       }
     }
 
-    setOpen({ is: open.is, data: { ...newData, inputs }, index: open.index });
+    if (dataIndex !== null) {
+      newData.guarantorSteps[dataIndex].inputs = inputs;
+    } else {
+      newData.inputs = inputs;
+    }
+
+    setOpen({ ...open, data: newData });
   };
 
+  const handleClick = (newData) => {
+    const updatedInputs = newData.data.inputs.map((item) => {
+      if (item.type === "input" || item.type === "file") {
+        return { ...item, value: "" };
+      }
+      if (item.type === "checkbox") {
+        return { ...item, value: false };
+      }
+      return item;
+    });
+
+    setModalOpen((prevState) => ({
+      ...prevState,
+      data: prevState?.data
+        ? [
+            ...prevState.data,
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
+            },
+          ]
+        : [
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
+            },
+          ],
+    }));
+  };
+
+  const addUserToModel = () => {
+    setModalOpen((prevState) => {
+      if (!prevState?.data || prevState.data.length === 0) {
+        return prevState;
+      }
+
+      const updatedData = [...prevState.data];
+      const selectedId = selectedGuarantorID[selectedGuarantorID.length - 1];
+      const selectedGuarantor = guarantors.find(
+        (g) => g.guarantor_id === selectedId
+      );
+
+      if (!selectedGuarantor) {
+        return prevState;
+      }
+
+      updatedData[updatedData.length - 1] = {
+        ...updatedData[updatedData.length - 1],
+        is: true,
+        username: selectedGuarantor.username,
+        guarantorId: selectedGuarantor.guarantor_id,
+      };
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
+    });
+  };
+
+  const [modalOpen, setModalOpen] = useState(null);
+
+  const handleModalChange = async (e, dataIndex, inputIndex) => {
+    const { type, value, checked, files } = e.target;
+
+    if (type === "file" && files.length > 0) {
+      try {
+        const uploadedFilePath = await uploadImageToCDN(files[0]);
+        setModalOpen((prevState) => {
+          if (!prevState || !prevState.data) {
+            console.error("Modal state is not properly initialized.");
+            return prevState;
+          }
+
+          const updatedData = [...prevState.data];
+          const updatedInputs = [...updatedData[dataIndex].data.inputs];
+          updatedInputs[inputIndex].value = uploadedFilePath;
+          updatedInputs[inputIndex].is_required = false;
+
+          return {
+            ...prevState,
+            data: updatedData,
+          };
+        });
+      } catch (error) {
+        console.error("Failed to upload file:", error);
+      }
+      return;
+    }
+
+    setModalOpen((prevState) => {
+      if (!prevState || !prevState.data) {
+        console.error("Modal state is not properly initialized.");
+        return prevState;
+      }
+
+      const updatedData = [...prevState.data];
+      const updatedInputs = [...updatedData[dataIndex].data.inputs];
+
+      if (type === "checkbox") {
+        updatedInputs[inputIndex].value = checked;
+        updatedInputs[inputIndex].is_required = !checked;
+      } else if (type === "text") {
+        updatedInputs[inputIndex].value = value;
+        updatedInputs[inputIndex].is_required = value === "";
+      } else {
+        updatedInputs[inputIndex].value = value;
+      }
+
+      updatedData[dataIndex].data.inputs = updatedInputs;
+
+      return {
+        ...prevState,
+        data: updatedData,
+      };
+    });
+  };
   const submitStep = async () => {
     try {
       await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
@@ -427,13 +690,83 @@ function ViewFile() {
         cibil_score: cibilScore,
       };
 
-      await AxiosInstance.put("/addusers/edituser/" + userId, formData);
-
+      const response = await AxiosInstance.put(
+        "/addusers/edituser/" + userId,
+        formData
+      );
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
     } catch (error) {
       console.error("Error: ", error.message);
+    }
+  };
+
+  const submitGuarantorStep = async () => {
+    try {
+      if (open.data && open.data.guarantorSteps) {
+        for (const guarantor of open.data.guarantorSteps) {
+          await AxiosInstance.post(
+            `/guarantor-step/guarantor-step/${id}`,
+            guarantor
+          );
+          console.log("Guarantor step submitted successfully");
+        }
+      }
+
+      if (modalOpen && modalOpen.data) {
+        for (const item of modalOpen.data) {
+          const final = {
+            ...item.data,
+            guarantor_id: item.guarantorId,
+          };
+          await AxiosInstance.post(
+            `/guarantor-step/guarantor-step/${id}`,
+            final
+          );
+          console.log("Guarantor step submitted successfully");
+        }
+      }
+
+      await fetchData();
+      await fetchStepsData();
+      setModalOpen({ data: [] });
+      setOpen({ is: false, data: {}, index: "", guarantors: [] });
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  const removeGuarantorStep = async (dataIndex, stepType = "open") => {
+    if (stepType === "open") {
+      const guarantorStep = open.data.guarantorSteps[dataIndex];
+      try {
+        await AxiosInstance.delete(
+          `/guarantor-step/guarantor-step/${guarantorStep.loan_step_id}/${guarantorStep.guarantor_id}`
+        );
+      } catch (error) {
+        console.error("Failed to delete guarantor step:", error.message);
+      }
+      setOpen((prevState) => {
+        const updatedGuarantorSteps = prevState.data.guarantorSteps.filter(
+          (_, i) => i !== dataIndex
+        );
+        return {
+          ...prevState,
+          data: {
+            ...prevState.data,
+            guarantorSteps: updatedGuarantorSteps,
+          },
+        };
+      });
+    } else if (stepType === "modalOpen") {
+      setModalOpen((prevState) => {
+        const updatedData = prevState.data.filter((_, i) => i !== dataIndex);
+        return {
+          ...prevState,
+          data: updatedData,
+        };
+      });
     }
   };
 
@@ -449,6 +782,7 @@ function ViewFile() {
       </Flex>
     );
   }
+
   function copyText(elementId) {
     var textToCopy = document.getElementById(elementId).innerText;
     var tempInput = document.createElement("input");
@@ -469,6 +803,87 @@ function ViewFile() {
       messageElement.parentNode.removeChild(messageElement);
     }, 2000);
   }
+
+  const onSubmit = async (data) => {
+    const payload = {
+      ...data,
+      user_id: fileData.user_id,
+      file_id: fileData.file_id,
+    };
+
+    try {
+      if (isEditMode) {
+        await AxiosInstance.put(
+          `/add-guarantor/update-guarantor/${currentGuarantorId}`,
+          payload
+        );
+        toast.success("Guarantor Updated Successfully!");
+        setGuarantors((prev) =>
+          prev.map((g) =>
+            g.guarantor_id === currentGuarantorId ? { ...g, ...payload } : g
+          )
+        );
+      } else {
+        const { data } = await AxiosInstance.post(
+          "/add-guarantor/add-guarantor",
+          payload
+        );
+        toast.success("Guarantor Added Successfully!");
+        setGuarantors((prev) => [
+          ...prev,
+          { ...payload, guarantor_id: data.guarantor_id },
+        ]);
+      }
+
+      onClose();
+      fetchData();
+      reset();
+    } catch (error) {
+      console.error("Error adding/updating guarantor:", error);
+      toast.error("Please try again later!");
+    }
+  };
+  const handleChangeGuarantor = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handlePanChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const isGuarantorAlreadyAdded = (guarantorId) => {
+    const alreadyAddedInGuarantorSteps =
+      open.data.guarantorSteps &&
+      open.data.guarantorSteps.some(
+        (guarantorStep) => guarantorStep.guarantor_id === guarantorId
+      );
+
+    const alreadyAddedInModal = modalOpen?.data?.some(
+      (item) => item.guarantorId === guarantorId
+    );
+
+    return alreadyAddedInGuarantorSteps || alreadyAddedInModal;
+  };
 
   return (
     <div>
@@ -503,6 +918,13 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
+                  <Button
+                    colorScheme="blue"
+                    style={{ backgroundColor: "#b19552" }}
+                    onClick={handleAddGuarantor}
+                  >
+                    Add Guarantor
+                  </Button>
                 </Flex>
               </FormLabel>
 
@@ -536,54 +958,180 @@ function ViewFile() {
                     >
                       <div className="row">
                         <div className="col-md-6">
-                          <strong>Loan User:</strong>{" "}
-                          {fileData?.user?.username || "N/A"}
-                          <br />
-                          <strong>Email:</strong>{" "}
-                          {fileData?.user?.email || "N/A"}
-                          <br />
-                          <strong>Phone Number:</strong>{" "}
-                          {fileData?.user?.number || "N/A"}
-                          <br />
-                          <strong>Cibil Score:</strong>{" "}
-                          {fileData?.user?.cibil_score || "N/A"}
-                          <br />
-                          <strong id="gstNumber">Gst Number:</strong>{" "}
-                          <span
-                            id="gstNumberText"
-                            onClick={() => copyText("gstNumberText")}
-                          >
-                            {fileData?.user?.gst_number || "N/A"}
-                          </span>
+                          <div>
+                            <strong>Loan User :</strong>{" "}
+                            <span> {fileData?.user?.username || "N/A"}</span>
+                          </div>
+                          <div>
+                            <strong>Email :</strong>{" "}
+                            <span> {fileData?.user?.email || "N/A"}</span>
+                          </div>
+                          <div>
+                            <strong>Phone Number :</strong>{" "}
+                            <span> {fileData?.user?.number || "N/A"}</span>
+                          </div>
+                          <div>
+                            <strong>Cibil Score :</strong>{" "}
+                            <span> {fileData?.user?.cibil_score || "N/A"}</span>
+                          </div>
+                          <div>
+                            <strong id="gstNumber">Gst Number :</strong>{" "}
+                            <span
+                              id="gstNumberText"
+                              onClick={() => copyText("gstNumberText")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {fileData?.user?.gst_number || "N/A"}{" "}
+                              <i
+                                class="fa-solid fa-copy"
+                                style={{ color: "#B19552", marginLeft: "5px" }}
+                              ></i>
+                            </span>
+                          </div>
                         </div>
                         <div className="col-md-6">
-                          <strong id="panCard">PAN Card:</strong>{" "}
-                          <span
-                            id="panCardText"
-                            onClick={() => copyText("panCardText")}
-                          >
-                            {fileData?.user?.pan_card || "N/A"}
-                          </span>
-                          <br />
-                          <strong id="aadharCard">Aadhar Card:</strong>{" "}
-                          <span
-                            id="aadharCardText"
-                            onClick={() => copyText("aadharCardText")}
-                          >
-                            {fileData?.user?.aadhar_card || "N/A"}
-                          </span>
-                          <br />
-                          <strong>City:</strong> {fileData?.user?.city || "N/A"}
-                          <br />
-                          <strong>State:</strong>{" "}
-                          {fileData?.user?.state || "N/A"}
-                          <br />
-                          <strong>Country:</strong>{" "}
-                          {fileData?.user?.country || "N/A"}
-                          <br />
+                          <div>
+                            <strong id="panCard">PAN Card :</strong>{" "}
+                            <span
+                              id="panCardText"
+                              onClick={() => copyText("panCardText")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {fileData?.user?.pan_card || "N/A"}{" "}
+                              <i
+                                class="fa-solid fa-copy"
+                                style={{ color: "#B19552", marginLeft: "10px" }}
+                              ></i>
+                            </span>
+                          </div>
+                          <div>
+                            <strong id="aadharCard">Aadhar Card :</strong>{" "}
+                            <span
+                              id="aadharCardText"
+                              onClick={() => copyText("aadharCardText")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {fileData?.user?.aadhar_card || "N/A"}{" "}
+                              <i
+                                class="fa-solid fa-copy"
+                                style={{ color: "#B19552", marginLeft: "10px" }}
+                              ></i>
+                            </span>
+                          </div>
+                          <div>
+                            <strong>City :</strong>{" "}
+                            {fileData?.user?.city || "N/A"}
+                          </div>
+                          <div>
+                            <strong>State :</strong>{" "}
+                            {fileData?.user?.state || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Country :</strong>{" "}
+                            {fileData?.user?.country || "N/A"}
+                          </div>
                         </div>
                       </div>
                     </FormLabel>
+                    <div className="accordion my-3 mx-3">
+                      <div
+                        className={`accordion-item ${
+                          isOpenGuarantor ? "show" : ""
+                        }`}
+                      >
+                        <h2
+                          className="accordion-header"
+                          id="panelsStayOpen-heading-0"
+                        >
+                          <button
+                            className="accordion-button"
+                            type="button"
+                            onClick={handleAccordionClick}
+                            aria-expanded={isOpenGuarantor ? "true" : "false"}
+                            style={{
+                              color: "white",
+                              fontWeight: 700,
+                              fontSize: "14px",
+                              backgroundColor: "#414650",
+                              justifyContent: "space-between",
+                            }}
+                            id="staticTitle"
+                          >
+                            All Guarantors
+                            <FontAwesomeIcon
+                              icon={
+                                isOpenGuarantor ? faChevronUp : faChevronDown
+                              }
+                            />
+                          </button>
+                        </h2>
+                        <div
+                          id="panelsStayOpen-collapse-0"
+                          className={`accordion-collapse collapse ${
+                            isOpenGuarantor ? "show" : ""
+                          }`}
+                          aria-labelledby="panelsStayOpen-heading-0"
+                        >
+                          <div
+                            className="accordion-body"
+                            style={{ padding: "1rem" }}
+                          >
+                            <table className="table">
+                              <thead>
+                                <tr>
+                                  <th>Username</th>
+                                  <th>Contact Number</th>
+                                  <th>Email</th>
+                                  <th>PAN Card</th>
+                                  <th>Aadhar Card</th>
+                                  <th>Unit Address</th>
+                                  <th>Occupation</th>
+                                  <th>Reference</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {guarantors.map((guarantor, index) => (
+                                  <tr key={index}>
+                                    <td>{guarantor.username}</td>
+                                    <td>{guarantor.number}</td>
+                                    <td>{guarantor.email}</td>
+                                    <td>{guarantor.pan_card}</td>
+                                    <td>{guarantor.aadhar_card}</td>
+                                    <td>{guarantor.unit_address}</td>
+                                    <td>{guarantor.occupation}</td>
+                                    <td>{guarantor.reference}</td>
+                                    <td>
+                                      <Button
+                                        onClick={() =>
+                                          handleEditGuarantor(guarantor)
+                                        }
+                                        colorScheme="yellow"
+                                        size="sm"
+                                        mr="2"
+                                      >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                      </Button>
+                                      <Button
+                                        onClick={() =>
+                                          openDeleteModal(
+                                            guarantor.guarantor_id
+                                          )
+                                        }
+                                        colorScheme="red"
+                                        size="sm"
+                                      >
+                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     {stepLoader ? (
                       <div
@@ -615,7 +1163,7 @@ function ViewFile() {
                               }}
                             >
                               {stepData &&
-                                stepData?.map((item, index) => (
+                                stepData.map((item, index) => (
                                   <li
                                     key={index}
                                     id={`step${index + 1}`}
@@ -645,133 +1193,361 @@ function ViewFile() {
                                             is: false,
                                             data: {},
                                             index: "",
+                                            guarantors: [],
                                           });
                                         } else {
                                           setOpen({
                                             is: true,
                                             data: item,
                                             index,
+                                            guarantors: [],
                                           });
                                         }
                                       }
                                     }}
                                   >
-                                    {/* <div className="circle-container">
-                                    <a href="#">
-                                      <div className="circle-button"></div>
-                                    </a>
-                                  </div> */}
                                     {item?.loan_step}
                                   </li>
                                 ))}
                             </ul>
                           </div>
-                          {open.is &&
-                            open.data.loan_step_id !== "1715348523661" && (
-                              <Form
-                                onSubmit={(e) => {
-                                  e.preventDefault();
-                                  submitStep();
-                                }}
-                              >
-                                {open?.data?.inputs?.map((input, index) => (
-                                  <FormControl
-                                    key={index}
-                                    id="step"
-                                    className="d-flex justify-content-between align-items-center mt-4"
-                                  >
-                                    {input.type === "input" ? (
-                                      <div>
-                                        <label>{input.label}</label>
-                                        <Input
-                                          name="step"
-                                          required={input.is_required}
-                                          // disabled={open.data.status === "complete"}
-                                          value={input.value}
-                                          placeholder={`Enter ${input.value}`}
-                                          onChange={(e) =>
-                                            handleChange(e, index)
-                                          }
-                                        />
-                                      </div>
-                                    ) : input.type === "checkbox" ? (
-                                      <div>
-                                        <input
-                                          type="checkbox"
-                                          checked={input.value}
-                                          // disabled={open.data.status === "complete"}
-                                          required={input.is_required}
-                                          onChange={(e) =>
-                                            handleChange(e, index)
-                                          }
-                                        />{" "}
-                                        {input.label}
-                                      </div>
-                                    ) : (
-                                      input.type === "file" && (
-                                        <div>
+                          <div className="d-flex gap-3">
+                            {open.is &&
+                              open.data.loan_step_id !== "1715348523661" && (
+                                <Form
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    submitStep();
+                                  }}
+                                >
+                                  {open?.data?.inputs?.map((input, index) => (
+                                    <FormControl
+                                      key={index}
+                                      id="step"
+                                      className="d-flex justify-content-between align-items-center mt-4"
+                                    >
+                                      {input.type === "input" ? (
+                                        <div className="  col-8">
                                           <label>{input.label}</label>
                                           <Input
-                                            type="file"
+                                            name="step"
                                             required={input.is_required}
-                                            // disabled={
-                                            //   open.data.status === "complete"
-                                            // }
+                                            value={input.value}
+                                            placeholder={`Enter ${input.value}`}
                                             onChange={(e) =>
                                               handleChange(e, index)
                                             }
                                           />
-                                          {console.log(input, "input.value")}
-                                          {input.value && (
-                                            <div style={{ marginTop: "10px" }}>
-                                              {input.value
-                                                .toLowerCase()
-                                                .endsWith(".pdf") ? (
-                                                <embed
-                                                  src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                  type="application/pdf"
-                                                  width="100%"
-                                                  height="200px"
-                                                />
-                                              ) : (
-                                                <img
-                                                  src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                  alt="Uploaded"
-                                                  style={{
-                                                    width: "100%",
-                                                    height: "200px",
-                                                  }}
-                                                />
-                                              )}
-                                            </div>
-                                          )}
                                         </div>
+                                      ) : input.type === "checkbox" ? (
+                                        <div className="col-4 ">
+                                          <input
+                                            type="checkbox"
+                                            checked={input.value}
+                                            required={input.is_required}
+                                            onChange={(e) =>
+                                              handleChange(e, index)
+                                            }
+                                          />{" "}
+                                          {input.label}
+                                        </div>
+                                      ) : (
+                                        input.type === "file" && (
+                                          <div>
+                                            <label>{input.label}</label>
+                                            <Input
+                                              type="file"
+                                              required={input.is_required}
+                                              onChange={(e) =>
+                                                handleChange(e, index)
+                                              }
+                                            />
+                                            {input.value && (
+                                              <div
+                                                style={{ marginTop: "10px" }}
+                                              >
+                                                {input.value
+                                                  .toLowerCase()
+                                                  .endsWith(".pdf") ? (
+                                                  <embed
+                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                    type="application/pdf"
+                                                    width="100%"
+                                                    height="200px"
+                                                  />
+                                                ) : (
+                                                  <img
+                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                    alt="Uploaded"
+                                                    style={{
+                                                      width: "100%",
+                                                      height: "200px",
+                                                    }}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )
+                                      )}
+                                    </FormControl>
+                                  ))}
+                                  <Button
+                                    colorScheme="blue"
+                                    className="mt-3"
+                                    type="submit"
+                                    mr={3}
+                                    style={{ backgroundColor: "#b19552" }}
+                                  >
+                                    Submit
+                                  </Button>
+                                  <Button
+                                    colorScheme="blue"
+                                    className="buttonss mt-3"
+                                    style={{ backgroundColor: "#b19552" }}
+                                    onClick={() => {
+                                      onOpensGuarantor();
+                                      handleClick(open);
+                                    }}
+                                  >
+                                    Add
+                                  </Button>
+                                </Form>
+                              )}
+                            {open.is &&
+                              open.data.guarantorSteps &&
+                              open.data.guarantorSteps.map(
+                                (guarantor, dataIndex) => (
+                                  <Form
+                                    onSubmit={(e) => {
+                                      e.preventDefault();
+                                      submitGuarantorStep();
+                                    }}
+                                    style={{ marginTop: "20px" }}
+                                    key={dataIndex}
+                                  >
+                                    <p>
+                                      {guarantor.username} {guarantor.loan_step}
+                                    </p>
+                                    <AiOutlineClose
+                                      onClick={() =>
+                                        removeGuarantorStep(dataIndex, "open")
+                                      }
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "red",
+                                        marginLeft: "10px",
+                                      }}
+                                    />
+                                    {console.log(guarantor, "guarantor")}
+                                    {guarantor.inputs?.map(
+                                      (input, inputIndex) => (
+                                        <FormControl
+                                          key={`${dataIndex}-${inputIndex}`}
+                                          id="step"
+                                          className="d-flex justify-content-between align-items-center mt-4"
+                                        >
+                                          {input.type === "input" ? (
+                                            <div>
+                                              <label>{input.label}</label>
+                                              <Input
+                                                name="step"
+                                                value={input.value}
+                                                placeholder={`Enter ${input.label}`}
+                                                onChange={(e) =>
+                                                  handleChange(
+                                                    e,
+                                                    inputIndex,
+                                                    dataIndex
+                                                  )
+                                                }
+                                              />
+                                            </div>
+                                          ) : input.type === "checkbox" ? (
+                                            <div>
+                                              <input
+                                                type="checkbox"
+                                                checked={input.value}
+                                                required={input.is_required}
+                                                onChange={(e) =>
+                                                  handleChange(
+                                                    e,
+                                                    inputIndex,
+                                                    dataIndex
+                                                  )
+                                                }
+                                              />{" "}
+                                              {input.label}
+                                            </div>
+                                          ) : (
+                                            input.type === "file" && (
+                                              <div>
+                                                <label>{input.label}</label>
+                                                <Input
+                                                  type="file"
+                                                  required={input.is_required}
+                                                  onChange={(e) =>
+                                                    handleChange(
+                                                      e,
+                                                      inputIndex,
+                                                      dataIndex
+                                                    )
+                                                  }
+                                                />
+                                                {input.value && (
+                                                  <div
+                                                    style={{
+                                                      marginTop: "10px",
+                                                    }}
+                                                  >
+                                                    {input.value
+                                                      .toLowerCase()
+                                                      .endsWith(".pdf") ? (
+                                                      <embed
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                        type="application/pdf"
+                                                        width="100%"
+                                                        height="200px"
+                                                      />
+                                                    ) : (
+                                                      <img
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                        alt="Uploaded"
+                                                        style={{
+                                                          width: "100%",
+                                                          height: "200px",
+                                                        }}
+                                                      />
+                                                    )}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )
+                                          )}
+                                        </FormControl>
                                       )
                                     )}
-                                  </FormControl>
-                                ))}
-                                {/* {open.data.status !== "complete" && ( */}
-                                <Button
-                                  colorScheme="blue"
-                                  className="mt-3"
-                                  type="submit"
-                                  mr={3}
-                                  style={{ backgroundColor: "#b19552" }}
-                                >
-                                  Submit
-                                </Button>
-                                {/* )} */}
-                              </Form>
-                            )}
-
+                                    {dataIndex ===
+                                      open.data.guarantorSteps.length - 1 && (
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
+                                  </Form>
+                                )
+                              )}
+                            {modalOpen &&
+                              modalOpen.data?.map((item, dataIndex) =>
+                                item.is &&
+                                item.data.loan_step_id !== "1715348523661" ? (
+                                  <Form
+                                    onSubmit={(e) => {
+                                      e.preventDefault();
+                                      submitGuarantorStep();
+                                    }}
+                                    style={{ marginTop: "20px" }}
+                                    key={dataIndex}
+                                  >
+                                    <p>
+                                      {item.username} {item.data.loan_step}
+                                    </p>
+                                    <AiOutlineClose
+                                      onClick={() =>
+                                        removeGuarantorStep(
+                                          dataIndex,
+                                          "modalOpen"
+                                        )
+                                      }
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "red",
+                                        marginLeft: "10px",
+                                      }}
+                                    />
+                                    {item.data.inputs?.map(
+                                      (input, inputIndex) => (
+                                        <FormControl
+                                          key={`${dataIndex}-${inputIndex}`}
+                                          id="step"
+                                          className="d-flex justify-content-between align-items-center mt-4"
+                                        >
+                                          {input.type === "input" ? (
+                                            <div>
+                                              <label>{input.label}</label>
+                                              <Input
+                                                name="step"
+                                                value={input.value}
+                                                placeholder={`Enter ${input.label}`}
+                                                onChange={(e) =>
+                                                  handleModalChange(
+                                                    e,
+                                                    dataIndex,
+                                                    inputIndex
+                                                  )
+                                                }
+                                              />
+                                            </div>
+                                          ) : input.type === "checkbox" ? (
+                                            <div>
+                                              <input
+                                                type="checkbox"
+                                                checked={input.value}
+                                                onChange={(e) =>
+                                                  handleModalChange(
+                                                    e,
+                                                    dataIndex,
+                                                    inputIndex
+                                                  )
+                                                }
+                                              />{" "}
+                                              {input.label}
+                                            </div>
+                                          ) : (
+                                            input.type === "file" && (
+                                              <div>
+                                                <label>{input.label}</label>
+                                                <Input
+                                                  type="file"
+                                                  onChange={(e) =>
+                                                    handleModalChange(
+                                                      e,
+                                                      dataIndex,
+                                                      inputIndex
+                                                    )
+                                                  }
+                                                />
+                                              </div>
+                                            )
+                                          )}
+                                        </FormControl>
+                                      )
+                                    )}
+                                    {dataIndex ===
+                                      modalOpen.data.length - 1 && (
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
+                                  </Form>
+                                ) : null
+                              )}
+                          </div>
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" &&
                             open.data.pendingData.length !== 0 && (
                               <div className="row">
-                                <div
-                                  className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                                >
+                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
                                   <Table
                                     size="sm"
                                     aria-label="documents"
@@ -845,6 +1621,215 @@ function ViewFile() {
           </Card>
         </Flex>
       )}
+      <>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              height: "80%",
+              overflow: "scroll",
+              scrollbarWidth: "thin",
+            }}
+          >
+            <ModalHeader>
+              {isEditMode ? "Edit Guarantor" : "Add New Guarantor"}
+            </ModalHeader>
+            <ModalCloseButton />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>Guarantor Name</FormLabel>
+                  <Input
+                    name="username"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.username}
+                    placeholder="Enter username"
+                    {...register("username", {
+                      required: "Username is required",
+                    })}
+                  />
+                  {errors.username && <p>{errors.username.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Mobile Number</FormLabel>
+                  <Input
+                    name="number"
+                    type="number"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.number}
+                    placeholder="Enter number"
+                    {...register("number", {
+                      required: "Mobile number is required",
+                    })}
+                  />
+                  {errors.number && <p>{errors.number.message}</p>}
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Email</FormLabel>
+                  <Input
+                    name="email"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.email}
+                    placeholder="Enter email"
+                    {...register("email", { required: "Email is required" })}
+                  />
+                  {errors.email && <p>{errors.email.message}</p>}
+                </FormControl>
+                <FormControl id="aadharcard" mt={4} isRequired>
+                  <FormLabel>Aadhar Card</FormLabel>
+                  <Input
+                    name="aadhar_card"
+                    type="number"
+                    onChange={handleadharChange}
+                    defaultValue={formData.aadhar_card}
+                    placeholder="XXXX - XXXX - XXXX"
+                    {...register("aadhar_card", {
+                      required: "Aadhar card is required",
+                    })}
+                  />
+                </FormControl>
+                <FormControl id="pancard" mt={4} isRequired>
+                  <FormLabel>Pan Card</FormLabel>
+                  <Input
+                    name="pan_card"
+                    type="text"
+                    onChange={handlePanChange}
+                    defaultValue={formData.pan_card}
+                    placeholder="Enter your PAN"
+                    {...register("pan_card", {
+                      required: "PAN card is required",
+                    })}
+                  />
+                </FormControl>
+                <FormControl id="unit_address" mt={4} isRequired>
+                  <FormLabel>Unit Address</FormLabel>
+                  <Input
+                    name="unit_address"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.unit_address}
+                    placeholder="Enter unit address"
+                    {...register("unit_address", {
+                      required: "Unit address is required",
+                    })}
+                  />
+                </FormControl>
+                <FormControl id="reference" mt={4} isRequired>
+                  <FormLabel>Reference</FormLabel>
+                  <Input
+                    name="reference"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.reference}
+                    placeholder="Enter reference"
+                    {...register("reference", {
+                      required: "Reference is required",
+                    })}
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  <FormLabel>Occupation</FormLabel>
+                  <Input
+                    name="occupation"
+                    type="string"
+                    onChange={handleChangeGuarantor}
+                    defaultValue={formData.occupation}
+                    placeholder="Enter occupation"
+                    {...register("occupation")}
+                  />
+                  {errors.occupation && <p>{errors.occupation.message}</p>}
+                </FormControl>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="submit"
+                  style={{ backgroundColor: "#b19552" }}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClose}>Cancel</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
+      <>
+        <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Add Guarantor</ModalHeader>
+            <ModalCloseButton />
+            <form>
+              <ModalBody pb={6}>
+                <FormControl id="role" mt={4}>
+                  <FormLabel>Guarantor</FormLabel>
+                  <Select
+                    placeholder="Select Guarantor"
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setSelectedGuarantorID((prevSelected) => {
+                        if (prevSelected.includes(selectedId)) {
+                          return prevSelected.filter((id) => id !== selectedId);
+                        } else {
+                          return [...prevSelected, selectedId];
+                        }
+                      });
+                      setSelectedGuarantor(e.target.value);
+                    }}
+                  >
+                    {guarantors
+                      .filter(
+                        (guarantor) =>
+                          !isGuarantorAlreadyAdded(guarantor.guarantor_id)
+                      )
+                      .map((guarantor, index) => (
+                        <option key={index} value={guarantor.guarantor_id}>
+                          {guarantor.username}
+                        </option>
+                      ))}
+                  </Select>
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  type="button"
+                  onClick={() => {
+                    onClosesGuarantor();
+                    addUserToModel();
+                  }}
+                >
+                  Save
+                </Button>
+                <Button onClick={onClosesGuarantor}>Cancel</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </>
+      <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Guarantor</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to delete this guarantor?</ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={handleDeleteGuarantor}>
+              Delete
+            </Button>
+            <Button variant="ghost" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Toaster />
     </div>
   );
 }
