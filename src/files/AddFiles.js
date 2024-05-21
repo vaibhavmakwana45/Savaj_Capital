@@ -46,7 +46,6 @@ function AddFiles() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
-
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
@@ -357,6 +356,7 @@ function AddFiles() {
       });
     }
   };
+  
   const handleSubmitData = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -396,7 +396,7 @@ function AddFiles() {
         }));
       });
 
-      const uploadedFiles = (await Promise.all(uploadPromises)).flat(); 
+      const uploadedFiles = (await Promise.all(uploadPromises)).flat();
 
       const payload = {
         user_id: selectedUser,

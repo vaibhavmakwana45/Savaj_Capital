@@ -201,6 +201,7 @@ router.get("/", async (req, res) => {
     const userIds = data.map((item) => item.user_id);
     const loanIds = data.map((item) => item.loan_id);
     const loanTypeIds = data.map((item) => item.loantype_id);
+    const fileIds = data.map((item) => item.file_id); // Add file IDs for fetching status messages and loan step details
 
     // Execute parallel queries
     const [
@@ -208,11 +209,13 @@ router.get("/", async (req, res) => {
       userData,
       loanData,
       loanTypeData,
+      statusMessages, // Fetch status messages from Compelete_Step
     ] = await Promise.all([
       SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
       AddUser.find({ user_id: { $in: userIds } }),
       Loan.find({ loan_id: { $in: loanIds } }),
       Loan_Type.find({ loantype_id: { $in: loanTypeIds } }),
+      Compelete_Step.find({ file_id: { $in: fileIds } }), // Fetch status messages and loan step details
     ]);
 
     // Create maps for faster lookup
@@ -223,6 +226,18 @@ router.get("/", async (req, res) => {
     const loanMap = new Map(loanData.map((loan) => [loan.loan_id, loan]));
     const loanTypeMap = new Map(
       loanTypeData.map((loanType) => [loanType.loantype_id, loanType])
+    );
+    const statusMessageMap = new Map(
+      statusMessages.map((status) => [status.file_id, status.statusMessage])
+    );
+    const loanStepMap = new Map(
+      statusMessages.map((status) => [
+        status.file_id,
+        {
+          loan_step: status.loan_step,
+          inputs: status.inputs,
+        },
+      ])
     );
 
     // Fetch documents count for each loan/loantype
@@ -271,15 +286,15 @@ router.get("/", async (req, res) => {
         const loanTypeData = loanTypeMap.get(item.loantype_id);
         item.loan_type = loanTypeData.loan_type;
       }
-
-      // const documentCount = documentCounts.find(dc => dc.itemId === item._id)?.count || 0;
-      // item.document_count = documentCount;
-
-      // const uploadedDocumentsCount = documentData.find(dd => dd.itemId === item._id)?.docs.length || 0;
-      // item.uploaded_documents_count = uploadedDocumentsCount;
-
-      // const percentage = ((uploadedDocumentsCount / documentCount) * 100).toFixed(2);
-      // item.document_percentage = parseFloat(percentage);
+      if (statusMessageMap.has(item.file_id)) {
+        const statusMessage = statusMessageMap.get(item.file_id);
+        item.status_message = statusMessage;
+      }
+      if (loanStepMap.has(item.file_id)) {
+        const loanStepData = loanStepMap.get(item.file_id);
+        item.loan_step = loanStepData.loan_step;
+        item.inputs = loanStepData.inputs;
+      }
 
       const loanDocs =
         documentData.find((dd) => dd.itemId === item._id)?.docs || [];
@@ -313,6 +328,8 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+
 
 // Without Pagination
 // router.get("/", async (req, res) => {

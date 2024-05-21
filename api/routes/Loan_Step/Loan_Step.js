@@ -152,7 +152,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 
 //           steps.push({ ...res.data.data, user_id: file.user_id });
@@ -207,7 +207,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -367,7 +367,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
@@ -455,7 +455,14 @@ router.post("/steps/:file_id", async (req, res) => {
   console.log(req.body);
   try {
     const { file_id } = req.params;
-    const { loan_step_id, inputs, user_id, loan_step } = req.body;
+    const {
+      loan_step_id,
+      inputs,
+      user_id,
+      loan_step,
+      status,
+      statusMessage,
+    } = req.body;
 
     const existingStep = await Compelete_Step.findOne({
       loan_step_id,
@@ -482,6 +489,8 @@ router.post("/steps/:file_id", async (req, res) => {
         }
       });
 
+      existingStep.status = status; // Ensure status is updated
+      existingStep.statusMessage = statusMessage; // Update statusMessage
       existingStep.updatedAt = moment()
         .utcOffset(330)
         .format("YYYY-MM-DD HH:mm:ss");
@@ -499,7 +508,8 @@ router.post("/steps/:file_id", async (req, res) => {
         loan_step_id,
         inputs,
         loan_step,
-        status: "complete",
+        status: status || "complete", // Default to "complete" if status is not provided
+        statusMessage, 
         file_id,
         user_id,
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),

@@ -181,7 +181,7 @@ function Row(props) {
         <TableCell align="">{file?.city}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
         <TableCell align="">
-          <span
+          <div
             style={{
               color: "white",
               backgroundColor:
@@ -189,17 +189,49 @@ function Row(props) {
                   ? "#4CAF50"
                   : file?.status === "rejected"
                   ? "#F44336"
-                  : " #FF9C00",
+                  : "#FF9C00",
               padding: "4px 8px",
               borderRadius: "10px",
+              display: "inline-block",
             }}
           >
-            {file?.status === "approved"
-              ? "Approved"
-              : file?.status === "rejected"
-              ? "Rejected"
-              : "Running"}
-          </span>
+            <span>
+              {file?.status === "approved"
+                ? `Approved`
+                : file?.status === "rejected"
+                ? `Rejected`
+                : `Running`}
+            </span>
+            {file?.status_message && (
+              <>
+                <br />
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: "4px",
+                    fontSize: "0.9em",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {file.status_message}
+                </span>
+              </>
+            )}
+            {file?.status !== "rejected" && file?.inputs && (
+              <>
+                <br />
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "0.9em",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Amount: {file.inputs[0].value}
+                </span>
+              </>
+            )}
+          </div>
         </TableCell>
 
         <TableCell align="center">
@@ -419,8 +451,7 @@ export default function CollapsibleTable() {
 
   const handleStateChange = (event) => {
     setSelectedState(event.target.value);
-    setSelectedCity(""); 
-    
+    setSelectedCity("");
   };
 
   const handleCityChange = (event) => {
@@ -525,6 +556,7 @@ export default function CollapsibleTable() {
           limit: itemsPerPage,
         },
       });
+      console.log(response, "response");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setCurrentPage(response.data.currentPage);

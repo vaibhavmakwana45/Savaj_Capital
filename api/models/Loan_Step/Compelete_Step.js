@@ -8,6 +8,7 @@ const compeleteStepSchema = new mongoose.Schema({
   loan_step: { type: String },
   inputs: { type: Array },
   status: { type: String },
+  statusMessage: { type: String },
   createdAt: { type: String },
   updatedAt: { type: String },
 });
