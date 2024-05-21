@@ -30,6 +30,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
+import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -115,8 +116,9 @@ const FileDisplay = ({ groupedFiles }) => {
             key={index}
           >
             <div
-              className={`accordion-item ${index === openPanelIndex ? "show" : ""
-                }`}
+              className={`accordion-item ${
+                index === openPanelIndex ? "show" : ""
+              }`}
               key={index}
             >
               <h2
@@ -195,8 +197,9 @@ const FileDisplay = ({ groupedFiles }) => {
               </div> */}
               <div
                 id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${index === openPanelIndex ? "show" : ""
-                  }`}
+                className={`accordion-collapse collapse ${
+                  index === openPanelIndex ? "show" : ""
+                }`}
                 aria-labelledby={`panelsStayOpen-heading-${index}`}
               >
                 <div
@@ -555,26 +558,26 @@ function ViewFile() {
       ...prevState,
       data: prevState?.data
         ? [
-          ...prevState.data,
-          {
-            ...newData,
-            is: false,
-            data: {
-              ...newData.data,
-              inputs: updatedInputs,
+            ...prevState.data,
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
             },
-          },
-        ]
+          ]
         : [
-          {
-            ...newData,
-            is: false,
-            data: {
-              ...newData.data,
-              inputs: updatedInputs,
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
             },
-          },
-        ],
+          ],
     }));
   };
 
@@ -585,20 +588,20 @@ function ViewFile() {
       }
 
       const updatedData = [...prevState.data];
-      const selectedId = selectedGuarantorID[selectedGuarantorID.length - 1]; // Assuming you're selecting only one guarantor at a time
+      const selectedId = selectedGuarantorID[selectedGuarantorID.length - 1];
       const selectedGuarantor = guarantors.find(
         (g) => g.guarantor_id === selectedId
       );
 
       if (!selectedGuarantor) {
-        return prevState; // Return previous state if selected guarantor not found
+        return prevState;
       }
 
       updatedData[updatedData.length - 1] = {
         ...updatedData[updatedData.length - 1],
         is: true,
-        username: selectedGuarantor.username, // Store the username
-        guarantorId: selectedGuarantor.guarantor_id, // Store the guarantor ID
+        username: selectedGuarantor.username,
+        guarantorId: selectedGuarantor.guarantor_id,
       };
 
       return {
@@ -682,7 +685,6 @@ function ViewFile() {
         "/addusers/edituser/" + userId,
         formData
       );
-      console.log(response, "response");
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -691,25 +693,10 @@ function ViewFile() {
     }
   };
 
-  // const submitGuarantorStep = async () => {
-  //   try {
-  //     const response = await AxiosInstance.post(
-  //       `/guarantor-step/guarantor-step/${id}`,
-  //       open.data
-  //     );
-
-  //     console.log(response, "response");
-  //     fetchData();
-  //     fetchStepsData();
-  //     setOpen({ is: false, data: {}, index: "" });
-  //   } catch (error) {
-  //     console.error("Error: ", error.message);
-  //   }
-  // };
   const submitGuarantorStep = async () => {
     try {
+      // Submitting regular steps
       if (open.data && open.data.guarantorSteps) {
-        // Submitting regular steps
         for (const guarantor of open.data.guarantorSteps) {
           const response = await AxiosInstance.post(
             `/guarantor-step/guarantor-step/${id}`,
@@ -719,33 +706,66 @@ function ViewFile() {
         }
       }
 
+      // Submitting modal steps
       if (modalOpen && modalOpen.data) {
-        modalOpen.data.forEach(async (item, index) => {
+        for (const [index, item] of modalOpen.data.entries()) {
           try {
             const final = {
               ...item.data,
-              guarantor_id: selectedGuarantor,
+              guarantor_id: item.guarantorId, // Use the specific guarantor ID from each item
             };
             await AxiosInstance.post(
               `/guarantor-step/guarantor-step/${id}`,
               final
             );
+            console.log(`Step ${index} submitted successfully`);
           } catch (error) {
             console.error(`Error submitting step ${index}: `, error.message);
-           
           }
-        });
+        }
       }
 
       console.log("All steps submitted successfully");
       fetchData();
       fetchStepsData();
       setModalOpen({ data: [] });
+      setModalOpen({ data: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
   };
-
+  const removeGuarantorStep = async (dataIndex, stepType = "open") => {
+    if (stepType === "open") {
+      const guarantorStep = open.data.guarantorSteps[dataIndex];
+      try {
+        await AxiosInstance.delete(
+          `/guarantor-step/guarantor-step/${guarantorStep.loan_step_id}/${guarantorStep.guarantor_id}`
+        );
+      } catch (error) {
+        console.error("Failed to delete guarantor step:", error.message);
+      }
+      setOpen((prevState) => {
+        const updatedGuarantorSteps = prevState.data.guarantorSteps.filter(
+          (_, i) => i !== dataIndex
+        );
+        return {
+          ...prevState,
+          data: {
+            ...prevState.data,
+            guarantorSteps: updatedGuarantorSteps,
+          },
+        };
+      });
+    } else if (stepType === "modalOpen") {
+      setModalOpen((prevState) => {
+        const updatedData = prevState.data.filter((_, i) => i !== dataIndex);
+        return {
+          ...prevState,
+          data: updatedData,
+        };
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -835,12 +855,17 @@ function ViewFile() {
     }
   };
   const isGuarantorAlreadyAdded = (guarantorId) => {
-    return (
+    const alreadyAddedInGuarantorSteps =
       open.data.guarantorSteps &&
       open.data.guarantorSteps.some(
         (guarantorStep) => guarantorStep.guarantor_id === guarantorId
-      )
+      );
+
+    const alreadyAddedInModal = modalOpen?.data?.some(
+      (item) => item.guarantorId === guarantorId
     );
+
+    return alreadyAddedInGuarantorSteps || alreadyAddedInModal;
   };
 
   return (
@@ -920,22 +945,18 @@ function ViewFile() {
                             <strong>Loan User :</strong>{" "}
                             <span> {fileData?.user?.username || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Email :</strong>{" "}
                             <span> {fileData?.user?.email || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Phone Number :</strong>{" "}
                             <span> {fileData?.user?.number || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Cibil Score :</strong>{" "}
                             <span> {fileData?.user?.cibil_score || "N/A"}</span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="gstNumber">Gst Number :</strong>{" "}
                             <span
@@ -966,7 +987,6 @@ function ViewFile() {
                               ></i>
                             </span>
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong id="aadharCard">Aadhar Card :</strong>{" "}
                             <span
@@ -986,23 +1006,21 @@ function ViewFile() {
                             {fileData?.user?.city || "N/A"}
                           </div>
                           <div>
-                            {/* <br /> */}
                             <strong>State :</strong>{" "}
                             {fileData?.user?.state || "N/A"}
                           </div>
-                          {/* <br /> */}
                           <div>
                             <strong>Country :</strong>{" "}
                             {fileData?.user?.country || "N/A"}
-                            {/* <br /> */}
                           </div>
                         </div>
                       </div>
                     </FormLabel>
                     <div className="accordion my-3 mx-3">
                       <div
-                        className={`accordion-item ${isOpenGuarantor ? "show" : ""
-                          }`}
+                        className={`accordion-item ${
+                          isOpenGuarantor ? "show" : ""
+                        }`}
                       >
                         <h2
                           className="accordion-header"
@@ -1032,8 +1050,9 @@ function ViewFile() {
                         </h2>
                         <div
                           id="panelsStayOpen-collapse-0"
-                          className={`accordion-collapse collapse ${isOpenGuarantor ? "show" : ""
-                            }`}
+                          className={`accordion-collapse collapse ${
+                            isOpenGuarantor ? "show" : ""
+                          }`}
                           aria-labelledby="panelsStayOpen-heading-0"
                         >
                           <div
@@ -1191,7 +1210,7 @@ function ViewFile() {
                                       className="d-flex justify-content-between align-items-center mt-4"
                                     >
                                       {input.type === "input" ? (
-                                        <div>
+                                        <div className="  col-8">
                                           <label>{input.label}</label>
                                           <Input
                                             name="step"
@@ -1204,7 +1223,7 @@ function ViewFile() {
                                           />
                                         </div>
                                       ) : input.type === "checkbox" ? (
-                                        <div>
+                                        <div className="col-4 ">
                                           <input
                                             type="checkbox"
                                             checked={input.value}
@@ -1293,6 +1312,16 @@ function ViewFile() {
                                     <p>
                                       {guarantor.username} {guarantor.loan_step}
                                     </p>
+                                    <AiOutlineClose
+                                      onClick={() =>
+                                        removeGuarantorStep(dataIndex, "open")
+                                      }
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "red",
+                                        marginLeft: "10px",
+                                      }}
+                                    />
                                     {console.log(guarantor, "guarantor")}
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
@@ -1383,22 +1412,22 @@ function ViewFile() {
                                     )}
                                     {dataIndex ===
                                       open.data.guarantorSteps.length - 1 && (
-                                        <Button
-                                          colorScheme="blue"
-                                          className="mt-3"
-                                          type="submit"
-                                          style={{ backgroundColor: "#b19552" }}
-                                        >
-                                          Submit
-                                        </Button>
-                                      )}
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
                                   </Form>
                                 )
                               )}
                             {modalOpen &&
                               modalOpen.data?.map((item, dataIndex) =>
                                 item.is &&
-                                  item.data.loan_step_id !== "1715348523661" ? (
+                                item.data.loan_step_id !== "1715348523661" ? (
                                   <Form
                                     onSubmit={(e) => {
                                       e.preventDefault();
@@ -1410,6 +1439,19 @@ function ViewFile() {
                                     <p>
                                       {item.username} {item.data.loan_step}
                                     </p>
+                                    <AiOutlineClose
+                                      onClick={() =>
+                                        removeGuarantorStep(
+                                          dataIndex,
+                                          "modalOpen"
+                                        )
+                                      }
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "red",
+                                        marginLeft: "10px",
+                                      }}
+                                    />
                                     {item.data.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl
@@ -1470,16 +1512,16 @@ function ViewFile() {
                                     )}
                                     {dataIndex ===
                                       modalOpen.data.length - 1 && (
-                                        <Button
-                                          colorScheme="blue"
-                                          className="mt-3"
-                                          type="submit"
-                                          mr={3}
-                                          style={{ backgroundColor: "#b19552" }}
-                                        >
-                                          Submit
-                                        </Button>
-                                      )}
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
                                   </Form>
                                 ) : null
                               )}
@@ -1488,10 +1530,7 @@ function ViewFile() {
                             open.data.loan_step_id === "1715348523661" &&
                             open.data.pendingData.length !== 0 && (
                               <div className="row">
-                                <div
-                                  className="col px-5 pt-3
-                            d-flex justify-content-start align-items-top"
-                                >
+                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
                                   <Table
                                     size="sm"
                                     aria-label="documents"
@@ -1705,13 +1744,7 @@ function ViewFile() {
       <>
         <Modal isOpen={isOpensGuarantor} onClose={onClosesGuarantor}>
           <ModalOverlay />
-          <ModalContent
-          // style={{
-          //   height: "40%",
-          //   overflow: "scroll",
-          //   scrollbarWidth: "thin",
-          // }}
-          >
+          <ModalContent>
             <ModalHeader>Add Guarantor</ModalHeader>
             <ModalCloseButton />
             <form>

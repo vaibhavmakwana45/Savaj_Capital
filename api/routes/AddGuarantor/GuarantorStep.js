@@ -108,7 +108,9 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
         }
       });
 
-      existingStep.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+      existingStep.updatedAt = moment()
+        .utcOffset(330)
+        .format("YYYY-MM-DD HH:mm:ss");
       await existingStep.save();
 
       res.status(200).json({
@@ -140,13 +142,13 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(5000).json({ // Changed status code to 5000
+    res.status(5000).json({
+      // Changed status code to 5000
       statusCode: 5000, // Changed status code to 5000
       message: error.message,
     });
   }
 });
-
 
 router.get("/get_guarantor_steps/:file_id", async (req, res) => {
   try {
@@ -215,4 +217,37 @@ router.get("/get_guarantor_steps/:file_id", async (req, res) => {
     });
   }
 });
+
+router.delete(
+  "/guarantor-step/:loan_step_id/:guarantor_id",
+  async (req, res) => {
+    const { loan_step_id, guarantor_id } = req.params;
+
+    try {
+      // Find and delete the guarantor step
+      const result = await Guarantor_Step.findOneAndDelete({
+        loan_step_id,
+        guarantor_id,
+      });
+
+      if (result) {
+        res.status(200).json({
+          statusCode: 200,
+          message: "Guarantor step deleted successfully.",
+        });
+      } else {
+        res.status(404).json({
+          statusCode: 404,
+          message: "Guarantor step not found.",
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        statusCode: 500,
+        message: error.message,
+      });
+    }
+  }
+);
+
 module.exports = router;

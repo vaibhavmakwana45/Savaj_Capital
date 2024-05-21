@@ -402,11 +402,15 @@ router.get("/get_steps/:file_id", async (req, res) => {
 
           if (guarantorSteps.length > 0) {
             // Iterate over guarantorSteps to include guarantor username
-            const stepsWithGuarantor = await Promise.all(guarantorSteps.map(async (guarantorStep) => {
-              const guarantor = await Guarantor.findOne({ guarantor_id: guarantorStep.guarantor_id });
-              const username = guarantor ? guarantor.username : null;
-              return { ...guarantorStep.toObject(), username };
-            }));
+            const stepsWithGuarantor = await Promise.all(
+              guarantorSteps.map(async (guarantorStep) => {
+                const guarantor = await Guarantor.findOne({
+                  guarantor_id: guarantorStep.guarantor_id,
+                });
+                const username = guarantor ? guarantor.username : null;
+                return { ...guarantorStep.toObject(), username };
+              })
+            );
 
             mergedStep.guarantorSteps = stepsWithGuarantor;
           }
