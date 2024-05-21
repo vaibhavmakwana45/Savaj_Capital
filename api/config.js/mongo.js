@@ -7,10 +7,6 @@ module.exports = () => {
 
     try {
       await mongoose.connect(DB_URL, {
-        // useNewUrlParser: true,
-        // useUnifiedTopology: true,
-        // useCreateIndex: true,
-        // useFindAndModify: false,
       });
 
       let dbStatus = `*    DB Connection: OK\n****************************\n`;

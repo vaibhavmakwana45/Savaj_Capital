@@ -106,12 +106,23 @@ export default function AdminNavbar(props) {
   const generateBreadcrumbItems = (currentRoute, items = []) => {
     if (!currentRoute) return items;
 
-    const parentRoute = currentRoute.parent
-      ? findRouteByKey(currentRoute.parent)
-      : null;
+    const isLast =
+      currentRoute.path ===
+      window.location.pathname.replace(currentRoute.layout, "");
 
+    const currentItem = (
+      <BreadcrumbItem key={currentRoute.key} isCurrentPage={isLast}>
+        <BreadcrumbLink
+          href={currentRoute.layout + currentRoute.path}
+          color={isLast ? "white" : "white"}
+        >
+          {currentRoute.name}
+        </BreadcrumbLink>
+      </BreadcrumbItem>
+    );
+
+    // If it's the first call, determine the dashboard name
     if (items.length === 0) {
-      // Add the dashboard name dynamically based on the current route
       let dashboardName = "";
       switch (currentRoute.layout) {
         case "/superadmin":
@@ -124,8 +135,9 @@ export default function AdminNavbar(props) {
           dashboardName = "SC Branch User";
           break;
         default:
-          dashboardName = "Dashboard"; // Default dashboard name
+          dashboardName = "Dashboard";
       }
+
       items.push(
         <BreadcrumbItem key="dashboard">
           <BreadcrumbLink
@@ -139,21 +151,14 @@ export default function AdminNavbar(props) {
       );
     }
 
-    const routeName = formatPathSegment(currentRoute.name);
-    const isLast =
-      currentRoute.path ===
-      window.location.pathname.replace(currentRoute.layout, "");
+    // Insert the current item after the dashboard name
+    items.splice(1, 0, currentItem);
 
-    items.push(
-      <BreadcrumbItem key={currentRoute.key} isCurrentPage={isLast}>
-        <BreadcrumbLink
-          href={currentRoute.layout + currentRoute.path}
-          color={isLast ? "white" : "white"}
-        >
-          {routeName}
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-    );
+    // Recursively prepend parent breadcrumb item if there's a parent
+    if (currentRoute.parent) {
+      const parentRoute = findRouteByKey(currentRoute.parent);
+      return generateBreadcrumbItems(parentRoute, items);
+    }
 
     return items;
   };
@@ -163,6 +168,7 @@ export default function AdminNavbar(props) {
     const currentRoute = filteredRoutes.find(
       (route) => route.layout + route.path === pathname
     );
+    console.log("Current Route Found:", currentRoute);
     return generateBreadcrumbItems(currentRoute);
   };
 
