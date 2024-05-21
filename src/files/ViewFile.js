@@ -31,6 +31,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
 import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
+import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,

@@ -165,4 +165,87 @@ router.delete("/delete-guarantor/:guarantor_id", async (req, res) => {
   }
 });
 
+router.put("/update-guarantor/:guarantor_id", async (req, res) => {
+  const { guarantor_id } = req.params;
+  const {
+    username,
+    number,
+    email,
+    pan_card,
+    aadhar_card,
+    unit_address,
+    occupation,
+    reference,
+    file_id,
+    user_id,
+  } = req.body;
+
+  try {
+    const updatedGuarantor = await Guarantor.findOneAndUpdate(
+      { guarantor_id: guarantor_id },
+      {
+        username,
+        number,
+        email,
+        pan_card,
+        aadhar_card,
+        unit_address,
+        occupation,
+        reference,
+        file_id,
+        user_id,
+        updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      },
+      { new: true }
+    );
+
+    if (!updatedGuarantor) {
+      return res.status(404).json({
+        success: false,
+        message: "Guarantor not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Guarantor updated successfully",
+      data: updatedGuarantor,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.delete("/delete-guarantor/:guarantor_id", async (req, res) => {
+  const { guarantor_id } = req.params;
+
+  try {
+    const deletedGuarantor = await Guarantor.findOneAndDelete({
+      guarantor_id: guarantor_id,
+    });
+
+    if (!deletedGuarantor) {
+      return res.status(404).json({
+        success: false,
+        message: "Guarantor not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Guarantor deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;
