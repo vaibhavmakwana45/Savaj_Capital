@@ -8,7 +8,7 @@ const File_Uplode = require("../../models/File/File_Uplode");
 const { default: axios } = require("axios");
 
 // router.post("/guarantor-step/:file_id", async (req, res) => {
-//   console.log(req.body);
+
 //   try {
 //     const { file_id } = req.params;
 //     const { loan_step_id, inputs, user_id, loan_step } = req.body;
@@ -78,7 +78,7 @@ const { default: axios } = require("axios");
 // });
 
 router.post("/guarantor-step/:file_id", async (req, res) => {
-  console.log(req.body);
+
   try {
     const { file_id } = req.params;
     const { loan_step_id, inputs, user_id, loan_step, guarantor_id } = req.body;

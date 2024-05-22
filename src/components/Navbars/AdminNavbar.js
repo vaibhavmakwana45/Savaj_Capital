@@ -50,7 +50,7 @@ export default function AdminNavbar(props) {
     onOpen,
     ...rest
   } = props;
-  console.log(props);
+
   let mainText =
     fixed && scrolled
       ? useColorModeValue("gray.700", "gray.200")
@@ -168,7 +168,7 @@ export default function AdminNavbar(props) {
     const currentRoute = filteredRoutes.find(
       (route) => route.layout + route.path === pathname
     );
-    console.log("Current Route Found:", currentRoute);
+   
     return generateBreadcrumbItems(currentRoute);
   };
 

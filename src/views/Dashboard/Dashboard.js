@@ -403,7 +403,7 @@ export default function Dashboard() {
             style={{ cursor: "pointer" }}
             onClick={() =>
               history.push(`/superadmin/filetable`, {
-                state: { loan: loan.loan },
+                state: { loan: loan.loan, loan_id: loan.loan_id },
               })
             }
           >

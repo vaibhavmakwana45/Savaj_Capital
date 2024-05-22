@@ -32,6 +32,8 @@ import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
 import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Icon } from "@chakra-ui/react";
+import { FaUndo } from "react-icons/fa";
 import {
   faChevronDown,
   faChevronUp,
@@ -494,7 +496,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "responseeeee");
+    
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -677,23 +679,42 @@ function ViewFile() {
       };
     });
   };
+
   const submitStep = async () => {
     try {
-      await AxiosInstance.post(`/loan_step/steps/${id}`, open.data);
-      const cibilScore = open.data.inputs.find(
-        (input) => input.label === "Cibil Score"
-      )?.value;
+      const updatedData = {
+        ...open.data,
+        status: "complete",
+      };
+
+      const response = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        updatedData
+      );
+     
 
       const userId = open.data.user_id;
 
-      const formData = {
-        cibil_score: cibilScore,
-      };
+      if (open.data.loan_step_id === "1715348482585") {
+        const cibilScore = open.data.inputs.find(
+          (input) => input.label === "Cibil Score"
+        )?.value;
 
-      const response = await AxiosInstance.put(
-        "/addusers/edituser/" + userId,
-        formData
-      );
+        const formData = {
+          cibil_score: cibilScore,
+        };
+
+        // Update user data
+        await AxiosInstance.put(`/addusers/edituser/${userId}`, formData);
+      }
+
+      // Check if the current step is "Dispatch" to update the file status
+      if (open.data.loan_step_id === "1715348798228") {
+        await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
+          status: "approved",
+        });
+      }
+
       fetchData();
       fetchStepsData();
       setOpen({ is: false, data: {}, index: "" });
@@ -710,7 +731,7 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             guarantor
           );
-          console.log("Guarantor step submitted successfully");
+         
         }
       }
 
@@ -724,14 +745,14 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             final
           );
-          console.log("Guarantor step submitted successfully");
+
         }
       }
 
       await fetchData();
       await fetchStepsData();
       setModalOpen({ data: [] });
-      setOpen({ is: false, data: {}, index: "", guarantors: [] });
+      setOpen({ is: false, data: {}, index: "", guarantors: [] }); // Close the modal and reset state
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -768,6 +789,46 @@ function ViewFile() {
         };
       });
     }
+  };
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectMessage, setRejectMessage] = useState(""); // New state for rejection message
+
+  const handleReject = () => {
+    setRejectModalOpen(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    try {
+      const updatedStepData = {
+        ...open.data,
+        status: "reject",
+        statusMessage: rejectMessage,
+      };
+
+      const response = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        updatedStepData
+      );
+
+      await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
+        status: "rejected",
+      });
+      if (response.status === 200) {
+        fetchStepsData();
+        setRejectModalOpen(false);
+        setOpen({ is: false, data: {}, index: "" });
+        setRejectMessage(""); // Clear the rejection message
+      } else {
+        console.error("Failed to update status.");
+      }
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  const closeRejectModal = () => {
+    setRejectModalOpen(false);
+    setRejectMessage(""); // Clear the rejection message when modal is closed
   };
 
   if (loading) {
@@ -883,6 +944,33 @@ function ViewFile() {
     );
 
     return alreadyAddedInGuarantorSteps || alreadyAddedInModal;
+  };
+
+  const handleReverse = async () => {
+    try {
+      const updatedStepData = {
+        ...open.data,
+        status: "active",
+        statusMessage: "",
+      };
+
+      const response = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        updatedStepData
+      );
+
+      await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
+        status: "running",
+      });
+      if (response.status === 200) {
+        fetchStepsData();
+        setOpen({ is: false, data: {}, index: "" });
+      } else {
+        console.error("Failed to update status.");
+      }
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
   };
 
   return (
@@ -1220,101 +1308,147 @@ function ViewFile() {
                                     submitStep();
                                   }}
                                 >
-                                  {open?.data?.inputs?.map((input, index) => (
-                                    <FormControl
-                                      key={index}
-                                      id="step"
-                                      className="d-flex justify-content-between align-items-center mt-4"
-                                    >
-                                      {input.type === "input" ? (
-                                        <div className="  col-8">
-                                          <label>{input.label}</label>
-                                          <Input
-                                            name="step"
-                                            required={input.is_required}
-                                            value={input.value}
-                                            placeholder={`Enter ${input.value}`}
-                                            onChange={(e) =>
-                                              handleChange(e, index)
-                                            }
-                                          />
-                                        </div>
-                                      ) : input.type === "checkbox" ? (
-                                        <div className="col-4 ">
-                                          <input
-                                            type="checkbox"
-                                            checked={input.value}
-                                            required={input.is_required}
-                                            onChange={(e) =>
-                                              handleChange(e, index)
-                                            }
-                                          />{" "}
-                                          {input.label}
-                                        </div>
-                                      ) : (
-                                        input.type === "file" && (
-                                          <div>
+                                  {open.data.status !== "reject" &&
+                                    open.data.inputs.map((input, index) => (
+                                      <FormControl
+                                        key={index}
+                                        id="step"
+                                        className="d-flex justify-content-between align-items-center mt-4"
+                                      >
+                                        {input.type === "input" ? (
+                                          <div className="col-8">
                                             <label>{input.label}</label>
                                             <Input
-                                              type="file"
+                                              name="step"
                                               required={input.is_required}
+                                              value={input.value}
+                                              placeholder={`Enter ${input.value}`}
                                               onChange={(e) =>
                                                 handleChange(e, index)
                                               }
                                             />
-                                            {input.value && (
-                                              <div
-                                                style={{ marginTop: "10px" }}
-                                              >
-                                                {input.value
-                                                  .toLowerCase()
-                                                  .endsWith(".pdf") ? (
-                                                  <embed
-                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                    type="application/pdf"
-                                                    width="100%"
-                                                    height="200px"
-                                                  />
-                                                ) : (
-                                                  <img
-                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                    alt="Uploaded"
-                                                    style={{
-                                                      width: "100%",
-                                                      height: "200px",
-                                                    }}
-                                                  />
-                                                )}
-                                              </div>
-                                            )}
                                           </div>
-                                        )
-                                      )}
-                                    </FormControl>
-                                  ))}
-                                  <Button
-                                    colorScheme="blue"
-                                    className="mt-3"
-                                    type="submit"
-                                    mr={3}
-                                    style={{ backgroundColor: "#b19552" }}
-                                  >
-                                    Submit
-                                  </Button>
-                                  <Button
-                                    colorScheme="blue"
-                                    className="buttonss mt-3"
-                                    style={{ backgroundColor: "#b19552" }}
-                                    onClick={() => {
-                                      onOpensGuarantor();
-                                      handleClick(open);
-                                    }}
-                                  >
-                                    Add
-                                  </Button>
+                                        ) : input.type === "checkbox" ? (
+                                          <div className="col-4">
+                                            <input
+                                              type="checkbox"
+                                              checked={input.value}
+                                              required={input.is_required}
+                                              onChange={(e) =>
+                                                handleChange(e, index)
+                                              }
+                                            />{" "}
+                                            {input.label}
+                                          </div>
+                                        ) : (
+                                          input.type === "file" && (
+                                            <div>
+                                              <label>{input.label}</label>
+                                              <Input
+                                                type="file"
+                                                required={input.is_required}
+                                                onChange={(e) =>
+                                                  handleChange(e, index)
+                                                }
+                                              />
+                                              {input.value && (
+                                                <div
+                                                  style={{ marginTop: "10px" }}
+                                                >
+                                                  {input.value
+                                                    .toLowerCase()
+                                                    .endsWith(".pdf") ? (
+                                                    <embed
+                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                      type="application/pdf"
+                                                      width="100%"
+                                                      height="200px"
+                                                    />
+                                                  ) : (
+                                                    <img
+                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                      alt="Uploaded"
+                                                      style={{
+                                                        width: "100%",
+                                                        height: "200px",
+                                                      }}
+                                                    />
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )
+                                        )}
+                                      </FormControl>
+                                    ))}
+
+                                  {open.data.status !== "reject" && (
+                                    <>
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                      <Button
+                                        colorScheme="blue"
+                                        className="buttonss mt-3"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                        onClick={() => {
+                                          onOpensGuarantor();
+                                          handleClick(open);
+                                        }}
+                                      >
+                                        Add
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  {open.data.status === "reject" &&
+                                    open.data.statusMessage && (
+                                      <div
+                                        className="status-message mt-3"
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <p style={{ marginRight: "10px" }}>
+                                          Reject Message:{" "}
+                                          <span style={{ color: "red" }}>
+                                            {open.data.statusMessage}
+                                          </span>
+                                        </p>
+                                        <IconButton
+                                          icon={<Icon as={FaUndo} />} // Your desired icon
+                                          onClick={handleReverse} // Function to handle reversing the status
+                                          colorScheme="blue"
+                                          className="buttonss mt-3"
+                                          style={{ backgroundColor: "#007bff" }}
+                                          aria-label="Reverse"
+                                        />
+                                      </div>
+                                    )}
+
+                                  {open.data.status !== "reject" && (
+                                    <Button
+                                      colorScheme="red"
+                                      className="buttonss mt-3"
+                                      style={{ backgroundColor: "#FF0000" }}
+                                      onClick={handleReject}
+                                    >
+                                      Reject
+                                    </Button>
+                                  )}
                                 </Form>
                               )}
+
                             {open.is &&
+                              open.data.status !== "reject" &&
                               open.data.guarantorSteps &&
                               open.data.guarantorSteps.map(
                                 (guarantor, dataIndex) => (
@@ -1339,7 +1473,7 @@ function ViewFile() {
                                         marginLeft: "10px",
                                       }}
                                     />
-                                    {console.log(guarantor, "guarantor")}
+                      
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl
@@ -1441,6 +1575,7 @@ function ViewFile() {
                                   </Form>
                                 )
                               )}
+
                             {modalOpen &&
                               modalOpen.data?.map((item, dataIndex) =>
                                 item.is &&
@@ -1829,6 +1964,30 @@ function ViewFile() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <Modal isOpen={rejectModalOpen} onClose={closeRejectModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Reject Step</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <label>Please provide a reason for rejection:</label>
+              <Input
+                type="text"
+                value={rejectMessage}
+                onChange={(e) => setRejectMessage(e.target.value)} // Update state on change
+              />
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleRejectConfirm}>
+              Confirm
+            </Button>
+            <Button onClick={closeRejectModal}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <Toaster />
     </div>
   );

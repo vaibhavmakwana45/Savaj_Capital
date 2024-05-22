@@ -11,9 +11,7 @@ app.get("/", async (req, res) => {
   res.send("Success!!!!!!");
 });
 
-app.listen(5883, () => {
-  console.log("Server Started");
-});
+app.listen(5883, () => {});
 
 function getCurrentDateAndTime() {
   const currentDate = new Date();

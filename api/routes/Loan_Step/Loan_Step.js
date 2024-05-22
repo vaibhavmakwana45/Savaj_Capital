@@ -274,7 +274,6 @@ router.delete("/:loan_step_id", async (req, res) => {
 //     const steps = [];
 //     for (const loan_step_id of loan.loan_step_id) {
 //       const stepData = await Loan_Step.findOne({ loan_step_id });
-//       console.log(`Step Data for ${loan_step_id}:`, stepData);
 
 //       if (!stepData) continue;
 
@@ -283,14 +282,14 @@ router.delete("/:loan_step_id", async (req, res) => {
 //         file_id,
 //         user_id: file.user_id,
 //       });
-//       console.log(`Complete Step Data for ${loan_step_id}:`, completeStep);
+
 
 //       const guarantorStep = await Guarantor_Step.findOne({
 //         loan_step_id,
 //         file_id,
 //         user_id: file.user_id,
 //       });
-//       console.log(`Guarantor Step Data for ${loan_step_id}:`, guarantorStep);
+//  
 
 //       let stepEntry = { ...stepData.toObject(), user_id: file.user_id };
 
@@ -304,7 +303,6 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       steps.push(stepEntry);
 //     }
 
-//     console.log("Final steps data:", steps);
 //     res.json({
 //       statusCode: 200,
 //       data: steps,
@@ -452,10 +450,17 @@ router.get("/get_steps/:file_id", async (req, res) => {
 });
 
 router.post("/steps/:file_id", async (req, res) => {
-  console.log(req.body);
+
   try {
     const { file_id } = req.params;
-    const { loan_step_id, inputs, user_id, loan_step } = req.body;
+    const {
+      loan_step_id,
+      inputs,
+      user_id,
+      loan_step,
+      status,
+      statusMessage,
+    } = req.body;
 
     const existingStep = await Compelete_Step.findOne({
       loan_step_id,
@@ -482,6 +487,8 @@ router.post("/steps/:file_id", async (req, res) => {
         }
       });
 
+      existingStep.status = status; // Ensure status is updated
+      existingStep.statusMessage = statusMessage; // Update statusMessage
       existingStep.updatedAt = moment()
         .utcOffset(330)
         .format("YYYY-MM-DD HH:mm:ss");
@@ -499,7 +506,8 @@ router.post("/steps/:file_id", async (req, res) => {
         loan_step_id,
         inputs,
         loan_step,
-        status: "complete",
+        status: status || "complete", // Default to "complete" if status is not provided
+        statusMessage, 
         file_id,
         user_id,
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
