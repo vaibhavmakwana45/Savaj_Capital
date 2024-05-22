@@ -185,16 +185,72 @@ router.post("/", async (req, res) => {
 // Fast Responce with pagination
 router.get("/", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const currentPage = parseInt(req.query.page) || 1;
+    const dataPerPage = parseInt(req.query.limit) || 10;
+    const searchTerm = req.query.searchTerm
+      ? req.query.searchTerm.toLowerCase()
+      : "";
+    const selectedLoan = req.query.selectedLoan || "";
+    const selectedStatus = req.query.selectedStatus
+      ? req.query.selectedStatus.toLowerCase()
+      : "";
+    const selectedState = req.query.selectedState || "";
+    const selectedCity = req.query.selectedCity || "";
 
-    // Fetch data with aggregation pipeline
-    const data = await File_Uplode.aggregate([
+    const skip = (currentPage - 1) * dataPerPage;
+    const limit = dataPerPage;
+
+    let matchStage = {};
+
+    if (searchTerm) {
+      matchStage.$or = [
+        { file_id: { $regex: searchTerm, $options: "i" } },
+        { loan_type: { $regex: searchTerm, $options: "i" } },
+        { user_username: { $regex: searchTerm, $options: "i" } },
+        { loan: { $regex: searchTerm, $options: "i" } },
+        { status: { $regex: searchTerm, $options: "i" } },
+      ];
+    }
+
+    if (selectedLoan !== "all loan types" && selectedLoan !== "") {
+      matchStage.loan_id = selectedLoan;
+    }
+
+    if (selectedStatus) {
+      matchStage.status = { $regex: selectedStatus, $options: "i" };
+    }
+
+    // Fetching state and city based on user_id
+    if (selectedState || selectedCity) {
+      const userData = await AddUser.find({ user_id: { $exists: true } });
+      const filteredUserIds = userData
+        .filter((user) => {
+          if (selectedState && selectedCity) {
+            return user.state === selectedState && user.city === selectedCity;
+          } else if (selectedState) {
+            return user.state === selectedState;
+          } else if (selectedCity) {
+            return user.city === selectedCity;
+          }
+        })
+        .map((user) => user.user_id);
+
+      matchStage.user_id = { $in: filteredUserIds };
+    }
+
+    // Aggregation pipeline
+    const pipeline = [
+      { $match: matchStage },
       { $sort: { updatedAt: -1 } },
       { $skip: skip },
       { $limit: limit },
-    ]);
+    ];
+
+    const totalDataCount = await File_Uplode.countDocuments(matchStage);
+
+    const totalPages = Math.ceil(totalDataCount / dataPerPage);
+
+    const data = await File_Uplode.aggregate(pipeline);
 
     // Get IDs for parallel queries
     const branchUserIds = data.map((item) => item.branchuser_id);
@@ -210,14 +266,14 @@ router.get("/", async (req, res) => {
       loanData,
       loanTypeData,
       statusMessages,
-      amountData, // Renamed to plural form for clarity
+      amountData,
     ] = await Promise.all([
       SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
       AddUser.find({ user_id: { $in: userIds } }),
       Loan.find({ loan_id: { $in: loanIds } }),
       Loan_Type.find({ loantype_id: { $in: loanTypeIds } }),
       Compelete_Step.find({ file_id: { $in: fileIds } }),
-      Compelete_Step.find({ loan_step_id: "1715348651727" }), // Fetch all records for the specific loan_step_id
+      Compelete_Step.find({ loan_step_id: "1715348651727" }),
     ]);
 
     // Create maps for faster lookup
@@ -239,18 +295,6 @@ router.get("/", async (req, res) => {
         step.file_id,
         step.inputs.find((input) => input.label === "Amount").value,
       ])
-    );
-
-    // Fetch documents count for each loan/loantype
-    const documentCounts = await Promise.all(
-      data.map(async (item) => {
-        const count = await Loan_Documents.countDocuments(
-          item.loantype_id === ""
-            ? { loan_id: item.loan_id }
-            : { loantype_id: item.loantype_id }
-        );
-        return { itemId: item._id, count };
-      })
     );
 
     // Fetch documents for each loan/loantype
@@ -291,7 +335,7 @@ router.get("/", async (req, res) => {
         const statusMessage = statusMessageMap.get(item.file_id);
         item.status_message = statusMessage;
       }
-      // Set the amount value for the item based on its file_id
+
       if (amountMap.has(item.file_id)) {
         item.amount = amountMap.get(item.file_id);
       }
@@ -307,18 +351,12 @@ router.get("/", async (req, res) => {
       }));
     });
 
-    // Query to fetch total count of documents
-    const totalCount = await File_Uplode.countDocuments();
-
-    // Calculate total page count
-    const totalPages = Math.ceil(totalCount / limit);
-
     res.json({
       statusCode: 200,
       data,
-      count: totalCount,
       totalPages,
-      currentPage: page,
+      currentPage,
+      totalCount: totalDataCount,
       message: "Read All Request",
     });
   } catch (error) {

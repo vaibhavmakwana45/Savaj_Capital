@@ -152,7 +152,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 
 //           steps.push({ ...res.data.data, user_id: file.user_id });
@@ -207,7 +207,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -274,7 +274,6 @@ router.delete("/:loan_step_id", async (req, res) => {
 //     const steps = [];
 //     for (const loan_step_id of loan.loan_step_id) {
 //       const stepData = await Loan_Step.findOne({ loan_step_id });
-//       console.log(`Step Data for ${loan_step_id}:`, stepData);
 
 //       if (!stepData) continue;
 
@@ -283,14 +282,14 @@ router.delete("/:loan_step_id", async (req, res) => {
 //         file_id,
 //         user_id: file.user_id,
 //       });
-//       console.log(`Complete Step Data for ${loan_step_id}:`, completeStep);
+
 
 //       const guarantorStep = await Guarantor_Step.findOne({
 //         loan_step_id,
 //         file_id,
 //         user_id: file.user_id,
 //       });
-//       console.log(`Guarantor Step Data for ${loan_step_id}:`, guarantorStep);
+//  
 
 //       let stepEntry = { ...stepData.toObject(), user_id: file.user_id };
 
@@ -304,7 +303,6 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       steps.push(stepEntry);
 //     }
 
-//     console.log("Final steps data:", steps);
 //     res.json({
 //       statusCode: 200,
 //       data: steps,
@@ -367,7 +365,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
-            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {
@@ -452,7 +450,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
 });
 
 router.post("/steps/:file_id", async (req, res) => {
-  console.log(req.body);
+
   try {
     const { file_id } = req.params;
     const {

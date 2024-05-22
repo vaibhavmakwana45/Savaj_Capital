@@ -496,7 +496,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "responseeeee");
+    
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -691,7 +691,7 @@ function ViewFile() {
         `/loan_step/steps/${id}`,
         updatedData
       );
-      console.log(response, "vaibhav");
+     
 
       const userId = open.data.user_id;
 
@@ -731,7 +731,7 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             guarantor
           );
-          console.log("Guarantor step submitted successfully");
+         
         }
       }
 
@@ -745,7 +745,7 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             final
           );
-          console.log("Guarantor step submitted successfully");
+
         }
       }
 
@@ -1473,7 +1473,7 @@ function ViewFile() {
                                         marginLeft: "10px",
                                       }}
                                     />
-                                    {console.log(open.data, "guarantor")}
+                      
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl
