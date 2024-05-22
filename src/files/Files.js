@@ -58,6 +58,74 @@ function Row(props) {
   const history = useHistory();
   const [open, setOpen] = useState(false);
 
+  const [fileData, setFileData] = useState([]);
+  let [filePercentageData, setFilePercentageData] = useState("");
+  const fetchFileData = async () => {
+    try {
+      const file_id = file.file_id;
+      const response = await AxiosInstance.get(
+        `/file_upload/file-count/${file_id}`
+      );
+      setFileData([
+        ...response.data.data.approvedData,
+        ...response.data.data.pendingData,
+      ]);
+      setFilePercentageData(response.data.data.document_percentage);
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchFileData();
+  }, [file]);
+
+  useEffect(() => {
+    $(".progress").each(function () {
+      var value = parseInt($(this).attr("data-value"));
+      var progressBars = $(this).find(".progress-bar");
+
+      progressBars.removeClass("red yellow purple blue green");
+
+      if (value >= 0 && value < 20) {
+        progressBars.addClass("red");
+      } else if (value >= 20 && value < 40) {
+        progressBars.addClass("#FF9C00");
+      } else if (value >= 40 && value < 60) {
+        progressBars.addClass("purple");
+      } else if (value >= 60 && value < 80) {
+        progressBars.addClass("blue");
+      } else if (value >= 80 && value <= 100) {
+        progressBars.addClass("green");
+      }
+
+      if (value <= 50) {
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      } else {
+        progressBars.eq(1).css("transform", "rotate(180deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
+      }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
+    });
+  }, [filePercentageData]);
+
+  const handleClick = () => {
+    AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
+      .then((response) => {})
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <React.Fragment>
       <TableRow
@@ -168,6 +236,25 @@ function Row(props) {
           </div>
         </TableCell>
 
+        <TableCell align="center">
+          {filePercentageData && (
+            <div class="progress " data-value={Number(filePercentageData)}>
+              <span class="progress-left">
+                <span class="progress-bar"></span>
+              </span>
+              <span class="progress-right">
+                <span class="progress-bar"></span>
+              </span>
+              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                <div class="font-weight-bold">
+                  {Number(filePercentageData)}
+                  <sup class="small">%</sup>
+                </div>
+              </div>
+            </div>
+          )}
+        </TableCell>
+
         <TableCell>
           {file.loan_id === "1715150207654" ? (
             // <Button
@@ -231,6 +318,100 @@ function Row(props) {
           </Flex>
         </TableCell>
       </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse
+            in={open}
+            timeout="auto"
+            unmountOnExit
+            style={{ width: "100%" }}
+          >
+            <Box sx={{ margin: 1 }} className="d-flex gap-4 collapse-table">
+              <Paper
+                className="col-8 col-md-8 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "104px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Document
+                      </TableCell>
+                      <TableCell
+                        className="status"
+                        sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                      >
+                        Status
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {fileData?.map((documentRow, index) => (
+                      <TableRow key={index}>
+                        <TableCell component="th" scope="row">
+                          {documentRow?.name} ({documentRow?.title})
+                        </TableCell>
+                        <TableCell>
+                          {documentRow?.status === "Uploaded" ? (
+                            <span
+                              style={{ color: "green", fontWeight: "bold" }}
+                            >
+                              <i class="fa-regular fa-circle-check"></i>
+                              &nbsp;&nbsp;Uploaded
+                            </span>
+                          ) : (
+                            <span
+                              style={{ color: "#FF9C00 ", fontWeight: "bold" }}
+                            >
+                              <i class="fa-regular fa-clock"></i>
+                              &nbsp;&nbsp;Pending
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Paper>
+              <Paper
+                className="col-4 col-md-4 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "100px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Create
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Update
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>{file?.createdAt}</TableCell>
+                      <TableCell>{file?.updatedAt}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Paper>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
     </React.Fragment>
   );
 }
@@ -279,6 +460,66 @@ export default function CollapsibleTable() {
     setSelectedCity(event.target.value);
   };
 
+  // const filteredUsers = files.filter((file) => {
+  //   const loanSafe =
+  //     file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
+  //   const fileIdSafe =
+  //     file.file_id && typeof file.file_id === "string"
+  //       ? file.file_id.toLowerCase()
+  //       : "";
+  //   const loanTypeSafe =
+  //     file.loan_type && typeof file.loan_type === "string"
+  //       ? file.loan_type.toLowerCase()
+  //       : "";
+  //   const usernameSafe =
+  //     file.user_username && typeof file.user_username === "string"
+  //       ? file.user_username.toLowerCase()
+  //       : "";
+  //   const statusSafe =
+  //     file.status && typeof file.status === "string"
+  //       ? file.status.toLowerCase()
+  //       : "";
+
+  //   return (
+  //     (selectedLoan === "All Loan Types" ||
+  //       loanSafe.includes(selectedLoan.toLowerCase())) &&
+  //     (loanSafe.includes(searchTerm.toLowerCase()) ||
+  //       fileIdSafe.includes(searchTerm.toLowerCase()) ||
+  //       loanTypeSafe.includes(searchTerm.toLowerCase()) ||
+  //       usernameSafe.includes(searchTerm.toLowerCase())) &&
+  //     (selectedStatusSearch === "" ||
+  //       statusSafe === selectedStatusSearch.toLowerCase())
+  //   );
+  // });
+  const filteredUsers = files.filter((file) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const selectedLoanLower = selectedLoan.toLowerCase();
+    const selectedStatusLower = selectedStatusSearch.toLowerCase();
+
+    const matchesSearch =
+      file.file_id?.toLowerCase().includes(searchTermLower) ||
+      file.loan_type?.toLowerCase().includes(searchTermLower) ||
+      file.user_username?.toLowerCase().includes(searchTermLower) ||
+      file.loan?.toLowerCase().includes(searchTermLower) ||
+      file.status?.toLowerCase().includes(searchTermLower);
+
+    const matchesLoan =
+      selectedLoan === "All Loan Types" ||
+      file.loan?.toLowerCase().includes(selectedLoanLower);
+    const matchesStatus =
+      selectedStatusSearch === "" ||
+      file.status?.toLowerCase() === selectedStatusLower;
+    const matchesState = selectedState ? file.state === selectedState : true;
+    const matchesCity = selectedCity ? file.city === selectedCity : true;
+    return (
+      matchesSearch &&
+      matchesLoan &&
+      matchesStatus &&
+      matchesState &&
+      matchesCity
+    );
+  });
+
   const history = useHistory();
 
   const handleRow = (url) => {
@@ -307,7 +548,7 @@ export default function CollapsibleTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalRecords, setTotalRecorrds] = useState(0)
+  const [totalRecords, setTotalRecorrds] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -360,6 +601,26 @@ export default function CollapsibleTable() {
       setCurrentPage(prevPage);
     }
   };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const fileResponse = await AxiosInstance.get("/file_upload");
+  //       const loanResponse = await AxiosInstance.get("/loan");
+
+  //       setFiles(fileResponse.data.data);
+  //       setLoans(loanResponse.data.data);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  // Inside the Row component
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
@@ -619,6 +880,7 @@ export default function CollapsibleTable() {
                     <TableCell align="">City</TableCell>
                     <TableCell align="">Loan</TableCell>
                     <TableCell align="">File Status</TableCell>
+                    <TableCell align="">Document Status</TableCell>
                     <TableCell
                       align=""
                       // }
