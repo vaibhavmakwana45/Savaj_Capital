@@ -679,32 +679,41 @@ function ViewFile() {
       };
     });
   };
+
   const submitStep = async () => {
     try {
-      // Set the status to "complete"
       const updatedData = {
         ...open.data,
         status: "complete",
       };
 
-      // Send the POST request with the updated data
-      await AxiosInstance.post(`/loan_step/steps/${id}`, updatedData);
-
-      const cibilScore = open.data.inputs.find(
-        (input) => input.label === "Cibil Score"
-      )?.value;
+      const response = await AxiosInstance.post(
+        `/loan_step/steps/${id}`,
+        updatedData
+      );
+      console.log(response, "vaibhav");
 
       const userId = open.data.user_id;
 
-      const formData = {
-        cibil_score: cibilScore,
-      };
+      if (open.data.loan_step_id === "1715348482585") {
+        const cibilScore = open.data.inputs.find(
+          (input) => input.label === "Cibil Score"
+        )?.value;
 
-      // Update user data
-      const response = await AxiosInstance.put(
-        "/addusers/edituser/" + userId,
-        formData
-      );
+        const formData = {
+          cibil_score: cibilScore,
+        };
+
+        // Update user data
+        await AxiosInstance.put(`/addusers/edituser/${userId}`, formData);
+      }
+
+      // Check if the current step is "Dispatch" to update the file status
+      if (open.data.loan_step_id === "1715348798228") {
+        await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
+          status: "approved",
+        });
+      }
 
       fetchData();
       fetchStepsData();
@@ -936,6 +945,7 @@ function ViewFile() {
 
     return alreadyAddedInGuarantorSteps || alreadyAddedInModal;
   };
+
   const handleReverse = async () => {
     try {
       const updatedStepData = {

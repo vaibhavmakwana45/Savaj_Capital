@@ -201,7 +201,7 @@ router.get("/", async (req, res) => {
     const userIds = data.map((item) => item.user_id);
     const loanIds = data.map((item) => item.loan_id);
     const loanTypeIds = data.map((item) => item.loantype_id);
-    const fileIds = data.map((item) => item.file_id); // Add file IDs for fetching status messages and loan step details
+    const fileIds = data.map((item) => item.file_id);
 
     // Execute parallel queries
     const [
@@ -209,13 +209,15 @@ router.get("/", async (req, res) => {
       userData,
       loanData,
       loanTypeData,
-      statusMessages, // Fetch status messages from Compelete_Step
+      statusMessages,
+      amountData, // Renamed to plural form for clarity
     ] = await Promise.all([
       SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
       AddUser.find({ user_id: { $in: userIds } }),
       Loan.find({ loan_id: { $in: loanIds } }),
       Loan_Type.find({ loantype_id: { $in: loanTypeIds } }),
-      Compelete_Step.find({ file_id: { $in: fileIds } }), // Fetch status messages and loan step details
+      Compelete_Step.find({ file_id: { $in: fileIds } }),
+      Compelete_Step.find({ loan_step_id: "1715348651727" }), // Fetch all records for the specific loan_step_id
     ]);
 
     // Create maps for faster lookup
@@ -230,13 +232,12 @@ router.get("/", async (req, res) => {
     const statusMessageMap = new Map(
       statusMessages.map((status) => [status.file_id, status.statusMessage])
     );
-    const loanStepMap = new Map(
-      statusMessages.map((status) => [
-        status.file_id,
-        {
-          loan_step: status.loan_step,
-          inputs: status.inputs,
-        },
+
+    // Create a map to store amount values for each file_id
+    const amountMap = new Map(
+      amountData.map((step) => [
+        step.file_id,
+        step.inputs.find((input) => input.label === "Amount").value,
       ])
     );
 
@@ -290,10 +291,9 @@ router.get("/", async (req, res) => {
         const statusMessage = statusMessageMap.get(item.file_id);
         item.status_message = statusMessage;
       }
-      if (loanStepMap.has(item.file_id)) {
-        const loanStepData = loanStepMap.get(item.file_id);
-        item.loan_step = loanStepData.loan_step;
-        item.inputs = loanStepData.inputs;
+      // Set the amount value for the item based on its file_id
+      if (amountMap.has(item.file_id)) {
+        item.amount = amountMap.get(item.file_id);
       }
 
       const loanDocs =
@@ -328,8 +328,6 @@ router.get("/", async (req, res) => {
     });
   }
 });
-
-
 
 // Without Pagination
 // router.get("/", async (req, res) => {
@@ -1227,6 +1225,40 @@ router.put("/updatestatus/:fileId", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+router.get("/amounts/:loan_id", async (req, res) => {
+  try {
+    const loanId = req.params.loan_id;
+
+    const approvedFiles = await File_Uplode.find({
+      loan_id: loanId,
+      status: "approved",
+    });
+
+    const fileIds = approvedFiles.map((file) => file.file_id);
+
+    const completedSteps = await Compelete_Step.find({
+      file_id: { $in: fileIds },
+      loan_step_id: "1715348651727",
+    });
+
+    const amounts = completedSteps.map((step) =>
+      parseFloat(step.inputs.find((input) => input.label === "Amount").value)
+    );
+
+    const totalAmount = amounts.reduce((total, amount) => total + amount, 0);
+
+    res.json({
+      statusCode: 200,
+      totalAmount,
+      message: "Total amount for approved files fetched successfully",
+    });
+  } catch (error) {
+    res.json({
+      statusCode: 500,
       message: error.message,
     });
   }

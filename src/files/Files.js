@@ -217,8 +217,10 @@ function Row(props) {
                 </span>
               </>
             )}
-            {file?.status !== "rejected" && file?.inputs && (
+            {file?.status !== "rejected" && file?.amount && (
               <>
+                {" "}
+                {/* Check if amount exists */}
                 <br />
                 <span
                   style={{
@@ -227,7 +229,7 @@ function Row(props) {
                     color: "#FFFFFF",
                   }}
                 >
-                  Amount: {file.inputs[0].value}
+                  Amount: {file.amount} {/* Display amount */}
                 </span>
               </>
             )}
@@ -436,7 +438,7 @@ export default function CollapsibleTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
   const location = useLocation();
-  const { loan } = location?.state?.state || {};
+  const { loan, loan_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -722,7 +724,25 @@ export default function CollapsibleTable() {
     setSelecteUpdateFileId(id);
     setIsUpdateDialogOpen(true);
   };
+  const [totalAmount, setTotalAmount] = useState(null);
 
+  useEffect(() => {
+    const fetchTotalAmount = async () => {
+      try {
+        if (loan_id) {
+          const response = await AxiosInstance.get(
+            `/file_upload/amounts/${loan_id}`
+          );
+          const { totalAmount } = response.data;
+          setTotalAmount(totalAmount);
+        }
+      } catch (error) {
+        console.error("Error fetching total amount:", error);
+      }
+    };
+
+    fetchTotalAmount();
+  }, [loan_id]);
   return (
     <>
       <div
@@ -732,7 +752,11 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "10px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
             <Text fontSize="xl" fontWeight="bold">
-              {loan ? `${loan}` : "All Files"}
+              <h1>
+                {loan
+                  ? `${loan} - Total Amount: ${totalAmount || "-"}`
+                  : "All Files"}
+              </h1>
             </Text>
           </Flex>
           <Flex justifyContent="end" py="1" className="mainnnn">
