@@ -59,7 +59,7 @@ function Row(props) {
 
   const [fileData, setFileData] = useState([]);
   let [filePercentageData, setFilePercentageData] = useState("");
-  const fetchFileData = async () => {
+  let fetchFileData = async () => {
     try {
       const file_id = file.file_id;
       const response = await AxiosInstance.get(
@@ -406,7 +406,7 @@ export default function CollapsibleTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
   const location = useLocation();
-  const { loan } = location?.state?.state || {};
+  const { loan, loan_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -422,74 +422,34 @@ export default function CollapsibleTable() {
       )
     : [];
 
-  const handleStateChange = (event) => {
-    setSelectedState(event.target.value);
-    setSelectedCity(""); // Reset city selection when state changes
-  };
-
-  const handleCityChange = (event) => {
-    setSelectedCity(event.target.value);
-  };
-
   // const filteredUsers = files.filter((file) => {
-  //   const loanSafe =
-  //     file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
-  //   const fileIdSafe =
-  //     file.file_id && typeof file.file_id === "string"
-  //       ? file.file_id.toLowerCase()
-  //       : "";
-  //   const loanTypeSafe =
-  //     file.loan_type && typeof file.loan_type === "string"
-  //       ? file.loan_type.toLowerCase()
-  //       : "";
-  //   const usernameSafe =
-  //     file.user_username && typeof file.user_username === "string"
-  //       ? file.user_username.toLowerCase()
-  //       : "";
-  //   const statusSafe =
-  //     file.status && typeof file.status === "string"
-  //       ? file.status.toLowerCase()
-  //       : "";
+  //   const searchTermLower = searchTerm.toLowerCase();
+  //   const selectedLoanLower = selectedLoan.toLowerCase();
+  //   const selectedStatusLower = selectedStatusSearch.toLowerCase();
 
+  //   const matchesSearch =
+  //     file.file_id?.toLowerCase().includes(searchTermLower) ||
+  //     file.loan_type?.toLowerCase().includes(searchTermLower) ||
+  //     file.user_username?.toLowerCase().includes(searchTermLower) ||
+  //     file.loan?.toLowerCase().includes(searchTermLower) ||
+  //     file.status?.toLowerCase().includes(searchTermLower);
+
+  //   const matchesLoan =
+  //     selectedLoan === "All Loan Types" ||
+  //     file.loan?.toLowerCase().includes(selectedLoanLower);
+  //   const matchesStatus =
+  //     selectedStatusSearch === "" ||
+  //     file.status?.toLowerCase() === selectedStatusLower;
+  //   const matchesState = selectedState ? file.state === selectedState : true;
+  //   const matchesCity = selectedCity ? file.city === selectedCity : true;
   //   return (
-  //     (selectedLoan === "All Loan Types" ||
-  //       loanSafe.includes(selectedLoan.toLowerCase())) &&
-  //     (loanSafe.includes(searchTerm.toLowerCase()) ||
-  //       fileIdSafe.includes(searchTerm.toLowerCase()) ||
-  //       loanTypeSafe.includes(searchTerm.toLowerCase()) ||
-  //       usernameSafe.includes(searchTerm.toLowerCase())) &&
-  //     (selectedStatusSearch === "" ||
-  //       statusSafe === selectedStatusSearch.toLowerCase())
+  //     matchesSearch &&
+  //     matchesLoan &&
+  //     matchesStatus &&
+  //     matchesState &&
+  //     matchesCity
   //   );
   // });
-  const filteredUsers = files.filter((file) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const selectedLoanLower = selectedLoan.toLowerCase();
-    const selectedStatusLower = selectedStatusSearch.toLowerCase();
-
-    const matchesSearch =
-      file.file_id?.toLowerCase().includes(searchTermLower) ||
-      file.loan_type?.toLowerCase().includes(searchTermLower) ||
-      file.user_username?.toLowerCase().includes(searchTermLower) ||
-      file.loan?.toLowerCase().includes(searchTermLower) ||
-      file.status?.toLowerCase().includes(searchTermLower);
-
-    const matchesLoan =
-      selectedLoan === "All Loan Types" ||
-      file.loan?.toLowerCase().includes(selectedLoanLower);
-    const matchesStatus =
-      selectedStatusSearch === "" ||
-      file.status?.toLowerCase() === selectedStatusLower;
-    const matchesState = selectedState ? file.state === selectedState : true;
-    const matchesCity = selectedCity ? file.city === selectedCity : true;
-    return (
-      matchesSearch &&
-      matchesLoan &&
-      matchesStatus &&
-      matchesState &&
-      matchesCity
-    );
-  });
 
   const history = useHistory();
 
@@ -498,7 +458,7 @@ export default function CollapsibleTable() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDatas = async () => {
       try {
         const loanResponse = await AxiosInstance.get("/loan");
         setLoans(loanResponse.data.data);
@@ -507,20 +467,20 @@ export default function CollapsibleTable() {
       }
     };
 
-    fetchData();
+    fetchDatas();
   }, []);
 
   useEffect(() => {
-    if (loan) {
-      console.log(loan);
-      setSelectedLoan(loan);
+    if (loan_id) {
+      setSelectedLoan(loan_id);
     }
-  }, [loan, loans]);
+  }, [loan_id, loans]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const fetchData = async () => {
     try {
@@ -530,19 +490,30 @@ export default function CollapsibleTable() {
           limit: itemsPerPage,
         },
       });
-      console.log(response, "response");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setCurrentPage(response.data.currentPage);
+      setTotalRecords(response.data.count);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
       setLoading(false);
     }
   };
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, itemsPerPage]);
+
+  // useEffect(() => {
+  //   if (cityFilterData.selectedCity !== "") {
+  //     cityFilter();
+  //   } else if (stateFilterData.selectedState !== "") {
+  //     stateFilter();
+  //   } else if (selectedStatusSearchApi !== "") {
+  //     statusFilter();
+  //   } else if (searchData.loan_id !== "" || loan_id !== "") {
+  //     loanFilter();
+  //   } else {
+  //     fetchData();
+  //   }
+  // }, [currentPage, itemsPerPage]);
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -557,26 +528,6 @@ export default function CollapsibleTable() {
       setCurrentPage(prevPage);
     }
   };
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const fileResponse = await AxiosInstance.get("/file_upload");
-  //       const loanResponse = await AxiosInstance.get("/loan");
-
-  //       setFiles(fileResponse.data.data);
-  //       setLoans(loanResponse.data.data);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-  // Inside the Row component
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
@@ -698,6 +649,196 @@ export default function CollapsibleTable() {
     setIsUpdateDialogOpen(true);
   };
 
+  const [searchValueApi, setSearchValueApi] = useState("");
+  const [searchLoader, setSearchLoader] = useState(false);
+  let handleSearchData = async (values) => {
+    try {
+      setSearchLoader(true);
+      let res = await axios.post(
+        "http://localhost:5882/api/file_upload/search",
+        {
+          search: values,
+        }
+      );
+      if (res.data.statusCode === 200) {
+        setFiles(res.data.data);
+        setTotalRecords(res.data.count);
+        setSearchLoader(false);
+      }
+    } catch (error) {
+      setSearchLoader(false);
+      console.log(error);
+    }
+  };
+
+  const handleReset = () => {
+    setSearchValueApi(""); // Clear the search input value
+    fetchData(); // Fetch all data using the GET API
+  };
+
+  useEffect(() => {
+    if (searchValueApi === "") {
+      handleReset();
+    }
+  }, [searchValueApi]);
+
+  let [searchData, setSearchData] = useState({ loan_id: "" });
+  const updateInputs = (e) => {
+    let name = e.target.name;
+    let value = e.target.value;
+    setSearchData((preVal) => {
+      return {
+        ...preVal,
+        [name]: value,
+      };
+    });
+  };
+
+  // Loan Dropdawn
+  const [loanFilterLoader, setLoanFilterLoader] = useState(false);
+  var loanFilter = async () => {
+    try {
+      setLoanFilterLoader(true);
+      let response = await axios.post(
+        "http://localhost:5882/api/file_upload/filter",
+        {
+          loan_id: searchData.loan_id || loan_id,
+        }
+      );
+      if (response.data.statusCode === 200) {
+        setFiles(response.data.data);
+        setLoanFilterLoader(false);
+        setTotalRecords(response.data.count);
+      }
+    } catch (error) {
+      setLoanFilterLoader(false);
+      console.error("Error fetching filtered data:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (searchData.loan_id !== "" || loan_id !== "") {
+      loanFilter();
+    } else if (searchData.loan_id === "" || loan_id === "") {
+      fetchData();
+    }
+  }, [searchData.loan_id || loan_id]);
+
+  // Status Dropdawn
+  const [selectedStatusSearchApi, setSelectedStatusSearchApi] = useState("");
+  const [statusLoader, setStatusLoader] = useState(false);
+  var statusFilter = async () => {
+    try {
+      setStatusLoader(true);
+      let response = await axios.post(
+        "http://localhost:5882/api/file_upload/status",
+        {
+          status: selectedStatusSearchApi,
+        }
+      );
+      if (response.data.statusCode === 200) {
+        setFiles(response.data.data);
+        setTotalRecords(response.data.count);
+        setStatusLoader(false);
+      }
+    } catch (error) {
+      setStatusLoader(false);
+      console.error("Error fetching filtered data:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (selectedStatusSearchApi !== "") {
+      statusFilter();
+    } else if (selectedStatusSearchApi === "") {
+      fetchData();
+    }
+  }, [selectedStatusSearchApi]);
+
+  // State Filter
+  let [stateFilterData, setStateFilterData] = useState({});
+  const updateStateInputs = (e) => {
+    let name = e.target.name;
+    let value = e.target.value;
+    setStateFilterData((preVal) => {
+      return {
+        ...preVal,
+        [name]: value,
+      };
+    });
+  };
+
+  const [stateLoader, setStateLoader] = useState(false);
+  var stateFilter = async () => {
+    try {
+      setStateLoader(true);
+      let response = await axios.post(
+        "http://localhost:5882/api/file_upload/state_filter",
+        {
+          state: stateFilterData.selectedState,
+        }
+      );
+      if (response.data.statusCode === 200) {
+        setFiles(response.data.data);
+        setTotalRecords(response.data.count);
+        setStateLoader(false);
+      }
+    } catch (error) {
+      setStateLoader(false);
+      console.error("Error fetching filtered data:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (stateFilterData.selectedState !== "") {
+      stateFilter();
+    } else if (stateFilterData.selectedState === "") {
+      fetchData();
+    }
+  }, [stateFilterData.selectedState]);
+
+  // City Filter
+  let [cityFilterData, setCityFilterData] = useState({});
+  const updateCityInputs = (e) => {
+    let name = e.target.name;
+    let value = e.target.value;
+    setCityFilterData((preVal) => {
+      return {
+        ...preVal,
+        [name]: value,
+      };
+    });
+  };
+
+  const [cityLoader, setCityLoader] = useState(false);
+  var cityFilter = async () => {
+    try {
+      setCityLoader(true);
+      let response = await axios.post(
+        "http://localhost:5882/api/file_upload/city_filter",
+        {
+          city: cityFilterData.selectedCity,
+        }
+      );
+      if (response.data.statusCode === 200) {
+        setFiles(response.data.data);
+        setTotalRecords(response.data.count);
+        setCityLoader(false);
+      }
+    } catch (error) {
+      setCityLoader(false);
+      console.error("Error fetching filtered data:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (cityFilterData.selectedCity !== "") {
+      cityFilter();
+    } else if (cityFilterData.selectedCity === "") {
+      fetchData();
+    }
+  }, [cityFilterData.selectedCity]);
+
   return (
     <>
       <div className="card" style={{ marginTop: "80px", borderRadius: "30px" }}>
@@ -715,19 +856,20 @@ export default function CollapsibleTable() {
           </Flex>
           <Flex justifyContent="end" py="1" className="mainnnn">
             <Flex className="thead p-2 ">
-              {!loan && (
+              {!loan_id && (
                 <Flex className="thead ">
                   <Select
                     placeholder="Select a loan type"
-                    value={selectedLoan}
-                    onChange={(e) => setSelectedLoan(e.target.value)}
+                    name="loan_id"
+                    value={searchData?.loan_id}
+                    onChange={updateInputs}
                     mr="10px"
                     width="200px"
                     className="mb-2"
                   >
-                    <option value="All Loan Types">All Loan Types</option>
+                    <option value="">All Loan Types</option>
                     {loans.map((loan) => (
-                      <option key={loan.loan_id} value={loan.loan}>
+                      <option key={loan.loan_id} value={loan.loan_id}>
                         {loan.loan}
                       </option>
                     ))}
@@ -735,8 +877,12 @@ export default function CollapsibleTable() {
                 </Flex>
               )}
               <Select
-                value={selectedState}
-                onChange={handleStateChange}
+                name="selectedState"
+                value={stateFilterData.selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  updateStateInputs(e);
+                }}
                 placeholder="Select State"
                 width="200px"
                 marginRight="10px"
@@ -749,8 +895,12 @@ export default function CollapsibleTable() {
                 ))}
               </Select>
               <Select
-                value={selectedCity}
-                onChange={handleCityChange}
+                name="selectedCity"
+                value={cityFilterData.selectedCity}
+                onChange={(e) => {
+                  setSelectedCity(e.target.value);
+                  updateCityInputs(e);
+                }}
                 placeholder="Select City"
                 disabled={!selectedState}
                 width="200px"
@@ -764,25 +914,35 @@ export default function CollapsibleTable() {
                 ))}
               </Select>
               <Select
-                value={selectedStatusSearch}
-                onChange={(e) => setSelectedStatusSearch(e.target.value)}
+                value={selectedStatusSearchApi}
+                onChange={(e) => setSelectedStatusSearchApi(e.target.value)}
                 mr="10px"
                 width="200px"
                 className="mb-2"
               >
                 <option value="">Select a Status</option>
+                <option value="">All</option>
                 <option value="running">Running</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
               </Select>
-
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name"
-                width="250px"
-                mr="10px"
-              />
+              <form className="form-inline">
+                <input
+                  id="serchbar-size"
+                  className="form-control mr-sm-2"
+                  type="search"
+                  value={searchValueApi}
+                  onChange={(e) => setSearchValueApi(e.target.value)}
+                  placeholder="Search"
+                  aria-label="Search"
+                />
+                {searchValueApi ? (
+                  <Button onClick={() => handleSearchData(searchValueApi)}>
+                    Search
+                  </Button>
+                ) : null}
+                {searchValueApi && <Button onClick={handleReset}>Reset</Button>}
+              </form>
               <div>
                 <style>
                   {`
@@ -797,8 +957,13 @@ export default function CollapsibleTable() {
           </Flex>
         </CardHeader>
         <ThemeProvider theme={theme}>
-          {loading ? (
-            <Flex justify="center" align="center" height="100vh">
+          {loading ||
+          stateLoader ||
+          cityLoader ||
+          statusLoader ||
+          loanFilterLoader ||
+          searchLoader ? (
+            <Flex justify="center" align="center">
               <Loader
                 type="spinner-circle"
                 bgColor={"#b19552"}
@@ -808,41 +973,49 @@ export default function CollapsibleTable() {
             </Flex>
           ) : (
             <TableContainer component={Paper}>
-              <Table aria-label="collapsible table">
-                <TableHead style={{ borderBottom: "1px solid red" }}>
-                  <TableRow>
-                    <TableCell />
-                    <TableCell align="">Index</TableCell>
-                    <TableCell align="">File Id</TableCell>
-                    <TableCell align="">Customer (Business)</TableCell>
-                    <TableCell align="">City</TableCell>
-                    {/* <TableCell align="">Pan Card</TableCell> */}
-                    <TableCell align="">Loan</TableCell>
-                    <TableCell align="">File Status</TableCell>
-                    <TableCell align="">Document Status</TableCell>
-                    <TableCell
-                      align=""
-                      // }
-                    ></TableCell>
-                    <TableCell align="">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredUsers.map((file, index) => (
-                    <Row
-                      key={file._id}
-                      file={file}
-                      id={file.file_id}
-                      pan_card={file.pan_card}
-                      index={index + 1}
-                      handleRow={handleRow}
-                      handleEditClick={handleEditClick}
-                      handleDelete={handleDelete}
-                      handleUpdate={handleUpdate}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+              {files.length > 0 ? (
+                <Table aria-label="collapsible table">
+                  <TableHead style={{ borderBottom: "1px solid red" }}>
+                    <TableRow>
+                      <TableCell />
+                      <TableCell align="">Index</TableCell>
+                      <TableCell align="">File Id</TableCell>
+                      <TableCell align="">Customer (Business)</TableCell>
+                      <TableCell align="">City</TableCell>
+                      {/* <TableCell align="">Pan Card</TableCell> */}
+                      <TableCell align="">Loan</TableCell>
+                      <TableCell align="">File Status</TableCell>
+                      <TableCell align="">Document Status</TableCell>
+                      <TableCell
+                        align=""
+                        // }
+                      ></TableCell>
+                      <TableCell align="">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {files.map((file, index) => (
+                      <Row
+                        key={file._id}
+                        file={file}
+                        id={file.file_id}
+                        pan_card={file.pan_card}
+                        index={index + 1}
+                        handleRow={handleRow}
+                        handleEditClick={handleEditClick}
+                        handleDelete={handleDelete}
+                        handleUpdate={handleUpdate}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Flex justify="center" align="center">
+                  <TableCell variant="h6" color="textSecondary">
+                    No data found.
+                  </TableCell>
+                </Flex>
+              )}
             </TableContainer>
           )}
         </ThemeProvider>
@@ -936,7 +1109,7 @@ export default function CollapsibleTable() {
         </AlertDialog>
       </div>
       <Flex justifyContent="flex-end" alignItems="center" p="4">
-        <Text mr="4">Total Records: {files.length}</Text>
+        <Text mr="4">Total Records: {totalRecords}</Text>
         <Text mr="2">Rows per page:</Text>
         <Select
           value={itemsPerPage}

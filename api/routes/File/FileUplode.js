@@ -1042,131 +1042,205 @@ router.get("/get_documents/:file_id", async (req, res) => {
 });
 
 // router.post("/search", async (req, res) => {
-//   try {
-//     const searchValue = req.body.search;
+//   const { search } = req.body;
 
-//     if (!searchValue) {
-//       return res.status(400).json({ statusCode: 400, message: "Search parameter is required." });
+//   try {
+//     // Create a regex for partial matching
+//     const regex = new RegExp(search, "i"); // 'i' for case-insensitive matching
+
+//     // Find users matching the partially typed username
+//     const users = await AddUser.find({ username: { $regex: regex } });
+
+//     // If no users match the partial username, return empty result
+//     if (users.length === 0) {
+//       return res.json({ statusCode: 200, count: 0, data: [] });
 //     }
 
-//     const regexSearch = new RegExp(searchValue, "i");
+//     // Fetch related data for each user
+//     const results = [];
+//     for (const user of users) {
+//       const fileUploads = await File_Uplode.find({ user_id: user.user_id });
+//       const loans = await Loan.find({ loan_id: { $in: fileUploads.map(file => file.loan_id) } });
+//       const loanTypes = await Loan_Type.find({ loantype_id: { $in: fileUploads.map(file => file.loantype_id) } });
 
-//     const searchCriteria = [
-//       { file_id: regexSearch },
-//       // { email: regexSearch },
-//       // { businessname: regexSearch },
-//       // { number: regexSearch },
-//       // { cibil_score: regexSearch },
-//       // { unit_address: regexSearch },
-//       // { reference: regexSearch },
-//       // { gst_number: regexSearch },
-//       // { state: regexSearch },
-//       // { city: regexSearch },
-//       // { pan_card: regexSearch },
-//     ];
+//       // Combine data
+//       const userResults = fileUploads.map(file => {
+//         const loan = loans.find(loan => loan.loan_id === file.loan_id);
+//         const loanType = loanTypes.find(loanType => loanType.loantype_id === file.loantype_id);
 
-//     // Check if the search value is a valid number
-//     // const searchValueAsNumber = parseInt(searchValue);
-//     // if (!isNaN(searchValueAsNumber)) {
-//     //   // If valid, include aadhar_card field in search criteria
-//     //   searchCriteria.push({ aadhar_card: searchValueAsNumber });
-//     // }
+//         return {
+//           ...file.toObject(),
+//           user_username: user.username,
+//           businessname: user.businessname,
+//           pan_card: user.pan_card,
+//           city: user.city,
+//           loan: loan ? loan.loan : null,
+//           loan_type: loanType ? loanType.loan_type : null,
+//         };
+//       });
 
-//     const data = await File_Uplode.find({ $or: searchCriteria });
-//     const count = await File_Uplode.countDocuments({ $or: searchCriteria });
+//       results.push(...userResults);
+//     }
 
-//     res.json({
-//       statusCode: 200,
-//       data: data,
-//       count: count,
-//       message: "Category Read Successful",
-//     });
+//     const count = results.length;
+
+//     res.json({ statusCode: 200, count, data: results });
 //   } catch (error) {
-//     res.status(500).json({
-//       statusCode: 500,
-//       message: error.message || "An error occurred while searching.",
-//     });
+//     res.status(500).json({ error: error.message });
 //   }
 // });
 
 router.post("/search", async (req, res) => {
+  const { search } = req.body;
+
   try {
-    const searchValue = req.body.search;
+    // Create a regex for partial matching
+    const regex = new RegExp(search, "i"); // 'i' for case-insensitive matching
 
-    if (!searchValue) {
-      return res
-        .status(400)
-        .json({ statusCode: 400, message: "Search parameter is required." });
+    // Find users matching the partially typed username
+    const users = await AddUser.find({ username: { $regex: regex } });
+
+    // If no users match the partial username, return empty result
+    if (users.length === 0) {
+      // Find matching file uploads using regex
+      const fileUploads = await File_Uplode.find({
+        $or: [
+          { file_id: { $regex: regex } },
+          { "documents.doc_id": { $regex: regex } },
+        ],
+      });
+
+      const count = fileUploads.length;
+
+      const fileIdResults = [];
+      for (const file of fileUploads) {
+        const user = await AddUser.findOne({ user_id: file.user_id });
+        const loan = await Loan.findOne({ loan_id: file.loan_id });
+        const loanType = await Loan_Type.findOne({
+          loantype_id: file.loantype_id,
+        });
+
+        if (user) {
+          fileIdResults.push({
+            ...file.toObject(),
+            user_username: user.username,
+            businessname: user.businessname,
+            pan_card: user.pan_card,
+            city: user.city,
+            loan: loan ? loan.loan : null,
+            loan_type: loanType ? loanType.loan_type : null,
+          });
+        }
+      }
+      res.json({ statusCode: 200, count, data: fileIdResults });
+    } else {
+      // Extract user IDs
+      const userIds = users.map((user) => user.user_id);
+
+      // Find file uploads matching the partially typed file_id or documents.doc_id, for the found users
+      const fileUploads = await File_Uplode.find({
+        $or: [
+          { user_id: { $in: userIds } },
+          { file_id: { $regex: regex } },
+          { "documents.doc_id": { $regex: regex } },
+        ],
+      });
+
+      // Fetch related data for each user
+      const results = [];
+      for (const user of users) {
+        const userFileUploads = fileUploads.filter(
+          (file) => file.user_id === user.user_id
+        );
+        const loans = await Loan.find({
+          loan_id: { $in: userFileUploads.map((file) => file.loan_id) },
+        });
+        const loanTypes = await Loan_Type.find({
+          loantype_id: { $in: userFileUploads.map((file) => file.loantype_id) },
+        });
+
+        // Combine data
+        const userResults = userFileUploads.map((file) => {
+          const loan = loans.find((loan) => loan.loan_id === file.loan_id);
+          const loanType = loanTypes.find(
+            (loanType) => loanType.loantype_id === file.loantype_id
+          );
+
+          return {
+            ...file.toObject(),
+            user_username: user.username,
+            businessname: user.businessname,
+            pan_card: user.pan_card,
+            city: user.city,
+            loan: loan ? loan.loan : null,
+            loan_type: loanType ? loanType.loan_type : null,
+          };
+        });
+
+        results.push(...userResults);
+      }
+
+      const count = results.length;
+      res.json({ statusCode: 200, count: count, data: results });
     }
-
-    const regexSearch = new RegExp(searchValue, "i");
-
-    const searchCriteria = [
-      { file_id: regexSearch },
-      // Add more search criteria if needed
-    ];
-
-    const data = await File_Uplode.find({ $or: searchCriteria });
-
-    // Get additional data from related collections
-    const branchUserIds = data.map((item) => item.branchuser_id);
-    const userIds = data.map((item) => item.user_id);
-    console.log(userIds, "userIds");
-    const loanIds = data.map((item) => item.loan_id);
-
-    const [branchUserData, userData, loanData] = await Promise.all([
-      SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }),
-      AddUser.find({ user_id: { $in: userIds } }),
-      Loan.find({ loan_id: { $in: loanIds } }),
-    ]);
-
-    console.log(userIds, "userIds");
-    console.log(userData, "userData");
-
-    const branchUserMap = new Map(
-      branchUserData.map((user) => [user.branchuser_id, user])
-    );
-    const userMap = new Map(userData.map((user) => [user.user_id, user]));
-    const loanMap = new Map(loanData.map((loan) => [loan.loan_id, loan]));
-
-    data.forEach((item) => {
-      const branchUserData = branchUserMap.get(item.branchuser_id);
-      const userDataItem = userData.find(
-        (user) => user.user_id === item.user_id
-      ); // Find the user data for the current item
-      console.log(userDataItem.username, "userDataItem");
-      const loanData = loanMap.get(item.loan_id);
-
-      item.username = userDataItem ? userDataItem.username : ""; // Assign username
-      item.pan_card = userDataItem ? userDataItem.pan_card : ""; // Assign pan_card
-
-      item.loan = loanData ? loanData.loan : "";
-      item.loan_dispatch = item.loan_dispatch || false;
-      item.stemp_paper_print = item.stemp_paper_print || false;
-      item.__v = item.__v || 0;
-
-      const loanDocs = item.documents.map((doc) => ({
-        loan_document_id: doc.loan_document_id,
-        is_uploaded: doc.is_uploaded || false,
-      }));
-      item.loan_document_ids = loanDocs;
-    });
-
-    const count = data.length;
-
-    res.json({
-      statusCode: 200,
-      data: data,
-      count: count,
-      message: "Category Read Successful",
-    });
   } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: error.message || "An error occurred while searching.",
-    });
+    res.status(500).json({ error: error.message });
   }
 });
+
+// router.post("/search", async (req, res) => {
+//   const { search } = req.body;
+
+//   try {
+//     // Create a regex for partial matching
+//     const regex = new RegExp(search, "i"); // 'i' for case-insensitive matching
+
+//     // Find matching file uploads using regex
+//     const fileUploads = await File_Uplode.find({
+//       $or: [
+//         { file_id: { $regex: regex } },
+//         { "documents.doc_id": { $regex: regex } },
+//       ],
+//     });
+
+//     // Extract user IDs, loan IDs, and loan type IDs from file uploads
+//     const userIds = fileUploads.map((file) => file.user_id);
+//     const loanIds = fileUploads.map((loan) => loan.loan_id);
+//     const loanTypeIds = fileUploads.map((loanType) => loanType.loantype_id);
+
+//     // Query users, loans, and loan types based on extracted IDs
+//     const users = await AddUser.find({ user_id: { $in: userIds } });
+//     const loans = await Loan.find({ loan_id: { $in: loanIds } });
+//     const loanTypes = await Loan_Type.find({
+//       loantype_id: { $in: loanTypeIds },
+//     });
+
+//     // Combine file upload data with user, loan, and loan type data
+//     const results = fileUploads.map((file) => {
+//       const user = users.find((user) => user.user_id === file.user_id);
+//       const loan = loans.find((loan) => loan.loan_id === file.loan_id);
+//       const loanType = loanTypes.find(
+//         (loanType) => loanType.loantype_id === file.loantype_id
+//       );
+
+//       return {
+//         ...file.toObject(),
+//         user_username: user ? user.username : null,
+//         businessname: user ? user.businessname : null,
+//         pan_card: user ? user.pan_card : null,
+//         city: user ? user.city : null,
+//         loan: loan ? loan.loan : null,
+//         loan_type: loanType ? loanType.loan_type : null,
+//       };
+//     });
+
+//     const count = results.length;
+
+//     res.json({ statusCode: 200, count: count, data: results });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 router.put("/updatestatus/:fileId", async (req, res) => {
   try {
@@ -1209,6 +1283,258 @@ router.put("/updatestatus/:fileId", async (req, res) => {
     res.status(500).json({
       message: error.message,
     });
+  }
+});
+
+router.post("/filter", async (req, res) => {
+  try {
+    let pipeline = [];
+    if (req.body.loan_id) {
+      pipeline.push({
+        $match: { loan_id: req.body.loan_id },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [{ $match: {} }], // No pagination, returns all documents matching the query
+        totalCount: [{ $count: "count" }],
+      },
+    });
+
+    let result = await File_Uplode.aggregate(pipeline);
+
+    // Extracting the inner "data" array from the result
+    const filteredData = result[0]?.data || [];
+
+    for (let i = 0; i < filteredData.length; i++) {
+      const user_id = filteredData[i].user_id;
+      const loan_id = filteredData[i].loan_id;
+      const loantype_id = filteredData[i].loantype_id;
+
+      const userData = await AddUser.findOne({ user_id: user_id });
+      const loanData = await Loan.findOne({ loan_id: loan_id });
+      const loanTypeData = await Loan_Type.findOne({
+        loantype_id: loantype_id,
+      });
+      if (userData) {
+        filteredData[i].user_username = userData.username;
+        filteredData[i].city = userData.city;
+        filteredData[i].businessname = userData.businessname;
+        filteredData[i].pan_card = userData.pan_card;
+      }
+
+      if (loanData) {
+        filteredData[i].loan = loanData.loan;
+      }
+      if (loanTypeData) {
+        filteredData[i].loan_type = loanTypeData.loan_type;
+      }
+    }
+
+    const count = filteredData.length;
+
+    res.json({
+      statusCode: 200,
+      count: count,
+      data: filteredData, // Sending only the inner "data" array
+      message: "Filtered data retrieved successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.post("/status", async (req, res) => {
+  try {
+    let pipeline = [];
+    if (req.body.status) {
+      pipeline.push({
+        $match: { status: req.body.status },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        data: [{ $match: {} }], // No pagination, returns all documents matching the query
+        // totalCount: [{ $count: "count" }],
+      },
+    });
+
+    let result = await File_Uplode.aggregate(pipeline);
+
+    // Extracting the inner "data" array from the result
+    const filteredData = result[0]?.data || [];
+
+    for (let i = 0; i < filteredData.length; i++) {
+      const user_id = filteredData[i].user_id;
+      const loan_id = filteredData[i].loan_id;
+      const loantype_id = filteredData[i].loantype_id;
+
+      const userData = await AddUser.findOne({ user_id: user_id });
+      const loanData = await Loan.findOne({ loan_id: loan_id });
+      const loanTypeData = await Loan_Type.findOne({
+        loantype_id: loantype_id,
+      });
+      if (userData) {
+        filteredData[i].user_username = userData.username;
+        filteredData[i].city = userData.city;
+        filteredData[i].businessname = userData.businessname;
+        filteredData[i].pan_card = userData.pan_card;
+      }
+
+      if (loanData) {
+        filteredData[i].loan = loanData.loan;
+      }
+      if (loanTypeData) {
+        filteredData[i].loan_type = loanTypeData.loan_type;
+      }
+    }
+
+    const count = filteredData.length;
+
+    res.json({
+      statusCode: 200,
+      count: count,
+      data: filteredData, // Sending only the inner "data" array
+      message: "Filtered data retrieved successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.post("/city_filter", async (req, res) => {
+  const { city } = req.body;
+
+  try {
+    // Create a regex for partial matching
+    const regex = new RegExp(city, "i"); // 'i' for case-insensitive matching
+
+    // Find users matching the partially typed city
+    const users = await AddUser.find({ city: { $regex: regex } });
+    // Extract user IDs
+    const userIds = users.map((user) => user.user_id);
+
+    // Find file uploads matching the partially typed file_id or documents.doc_id, for the found users
+    const fileUploads = await File_Uplode.find({
+      $or: [
+        { user_id: { $in: userIds } },
+        { file_id: { $regex: regex } },
+        { "documents.doc_id": { $regex: regex } },
+      ],
+    });
+
+    // Fetch related data for each user
+    const results = [];
+    for (const user of users) {
+      const userFileUploads = fileUploads.filter(
+        (file) => file.user_id === user.user_id
+      );
+      const loans = await Loan.find({
+        loan_id: { $in: userFileUploads.map((file) => file.loan_id) },
+      });
+      const loanTypes = await Loan_Type.find({
+        loantype_id: { $in: userFileUploads.map((file) => file.loantype_id) },
+      });
+
+      // Combine data
+      const userResults = userFileUploads.map((file) => {
+        const loan = loans.find((loan) => loan.loan_id === file.loan_id);
+        const loanType = loanTypes.find(
+          (loanType) => loanType.loantype_id === file.loantype_id
+        );
+
+        return {
+          ...file.toObject(),
+          user_username: user.username,
+          businessname: user.businessname,
+          pan_card: user.pan_card,
+          state: user.state,
+          city: user.city,
+          loan: loan ? loan.loan : null,
+          loan_type: loanType ? loanType.loan_type : null,
+        };
+      });
+
+      results.push(...userResults);
+    }
+
+    const count = results.length;
+    res.json({ statusCode: 200, count, data: results });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/state_filter", async (req, res) => {
+  const { state } = req.body;
+
+  try {
+    // Create a regex for partial matching
+    const regex = new RegExp(state, "i"); // 'i' for case-insensitive matching
+
+    // Find users matching the partially typed state
+    const users = await AddUser.find({ state: { $regex: regex } });
+    // Extract user IDs
+    const userIds = users.map((user) => user.user_id);
+
+    // Find file uploads matching the partially typed file_id or documents.doc_id, for the found users
+    const fileUploads = await File_Uplode.find({
+      $or: [
+        { user_id: { $in: userIds } },
+        { file_id: { $regex: regex } },
+        { "documents.doc_id": { $regex: regex } },
+      ],
+    });
+
+    // Fetch related data for each user
+    const results = [];
+    for (const user of users) {
+      const userFileUploads = fileUploads.filter(
+        (file) => file.user_id === user.user_id
+      );
+      const loans = await Loan.find({
+        loan_id: { $in: userFileUploads.map((file) => file.loan_id) },
+      });
+      const loanTypes = await Loan_Type.find({
+        loantype_id: { $in: userFileUploads.map((file) => file.loantype_id) },
+      });
+
+      // Combine data
+      const userResults = userFileUploads.map((file) => {
+        const loan = loans.find((loan) => loan.loan_id === file.loan_id);
+        const loanType = loanTypes.find(
+          (loanType) => loanType.loantype_id === file.loantype_id
+        );
+
+        return {
+          ...file.toObject(),
+          user_username: user.username,
+          businessname: user.businessname,
+          pan_card: user.pan_card,
+          state: user.state,
+          city: user.city,
+          loan: loan ? loan.loan : null,
+          loan_type: loanType ? loanType.loan_type : null,
+        };
+      });
+
+      results.push(...userResults);
+    }
+
+    const count = results.length;
+    res.json({ statusCode: 200, count, data: results });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

@@ -401,12 +401,11 @@ export default function Dashboard() {
             key={loan.loan_id}
             minH="125px"
             style={{ cursor: "pointer" }}
-            onClick={() =>
-              {history.push(`/superadmin/filetable`, {
-                state: { loan: loan.loan },
-              })
-                console.log(loan.loan_id,"vaibahv")}
-            }
+            onClick={() => {
+              history.push(`/superadmin/filetable`, {
+                state: { loan: loan.loan, loan_id: loan.loan_id },
+              });
+            }}
           >
             <Flex direction="column">
               <Flex
