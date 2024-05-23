@@ -14,6 +14,7 @@ import {
   Paper,
   Collapse,
   Box,
+  Typography,
 } from "@mui/material";
 import "./file.scss";
 import { useHistory } from "react-router-dom";
@@ -60,6 +61,7 @@ function Row(props) {
 
   const [fileData, setFileData] = useState([]);
   let [filePercentageData, setFilePercentageData] = useState("");
+
   const fetchFileData = async () => {
     try {
       const file_id = file.file_id;
@@ -90,7 +92,7 @@ function Row(props) {
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
       } else if (value >= 20 && value < 40) {
-        progressBars.addClass("#FF9C00");
+        progressBars.addClass("yellow");
       } else if (value >= 40 && value < 60) {
         progressBars.addClass("purple");
       } else if (value >= 60 && value < 80) {
@@ -117,14 +119,6 @@ function Row(props) {
       }
     });
   }, [filePercentageData]);
-
-  const handleClick = () => {
-    AxiosInstance.get(`/idb_check?panCard=${pan_card}`)
-      .then((response) => {})
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
 
   return (
     <React.Fragment>
@@ -543,7 +537,7 @@ export default function CollapsibleTable() {
     if (loan_id) {
       setSelectedLoan(loan_id);
     }
-  }, [loan_id]);
+  }, [loan_id ,loans ,loan]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -759,6 +753,7 @@ export default function CollapsibleTable() {
 
     fetchTotalAmount();
   }, [loan_id]);
+
   return (
     <>
       <div
@@ -868,6 +863,12 @@ export default function CollapsibleTable() {
                 size={50}
               />
             </Flex>
+          ) : files.length === 0 ? (
+            <Flex justify="center" align="center">
+              <Typography variant="h6" color="textSecondary">
+                No data found
+              </Typography>
+            </Flex>
           ) : (
             <TableContainer component={Paper}>
               <Table aria-label="collapsible table">
@@ -881,10 +882,7 @@ export default function CollapsibleTable() {
                     <TableCell align="">Loan</TableCell>
                     <TableCell align="">File Status</TableCell>
                     <TableCell align="">Document Status</TableCell>
-                    <TableCell
-                      align=""
-                      // }
-                    ></TableCell>
+                    <TableCell align=""></TableCell>
                     <TableCell align="">Action</TableCell>
                   </TableRow>
                 </TableHead>
@@ -907,6 +905,7 @@ export default function CollapsibleTable() {
             </TableContainer>
           )}
         </ThemeProvider>
+
         <AlertDialog
           isOpen={isDeleteDialogOpen}
           leastDestructiveRef={cancelRef}
