@@ -496,7 +496,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-    
+
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -687,11 +687,16 @@ function ViewFile() {
         status: "complete",
       };
 
-      const response = await AxiosInstance.post(
-        `/loan_step/steps/${id}`,
-        updatedData
-      );
-     
+      const isNumeric = open.data.inputs
+        .filter((input) => input.label === "Amount")
+        .every((input) => !isNaN(parseFloat(input.value)));
+
+      if (!isNumeric) {
+        toast.error("Amount must be numeric.");
+        return;
+      }
+
+      await AxiosInstance.post(`/loan_step/steps/${id}`, updatedData);
 
       const userId = open.data.user_id;
 
@@ -731,7 +736,6 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             guarantor
           );
-         
         }
       }
 
@@ -745,7 +749,6 @@ function ViewFile() {
             `/guarantor-step/guarantor-step/${id}`,
             final
           );
-
         }
       }
 
@@ -1473,7 +1476,7 @@ function ViewFile() {
                                         marginLeft: "10px",
                                       }}
                                     />
-                      
+
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl
