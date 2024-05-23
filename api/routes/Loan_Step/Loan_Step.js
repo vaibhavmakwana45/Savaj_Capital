@@ -283,13 +283,12 @@ router.delete("/:loan_step_id", async (req, res) => {
 //         user_id: file.user_id,
 //       });
 
-
 //       const guarantorStep = await Guarantor_Step.findOne({
 //         loan_step_id,
 //         file_id,
 //         user_id: file.user_id,
 //       });
-//  
+//
 
 //       let stepEntry = { ...stepData.toObject(), user_id: file.user_id };
 
@@ -450,7 +449,6 @@ router.get("/get_steps/:file_id", async (req, res) => {
 });
 
 router.post("/steps/:file_id", async (req, res) => {
-
   try {
     const { file_id } = req.params;
     const {
@@ -506,8 +504,8 @@ router.post("/steps/:file_id", async (req, res) => {
         loan_step_id,
         inputs,
         loan_step,
-        status: status || "complete", // Default to "complete" if status is not provided
-        statusMessage, 
+        status: status || "complete",
+        statusMessage,
         file_id,
         user_id,
         createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
