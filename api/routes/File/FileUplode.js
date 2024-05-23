@@ -1271,23 +1271,44 @@ router.get("/amounts/:loan_id", async (req, res) => {
   try {
     const loanId = req.params.loan_id;
 
+    // Find approved files with the specified loan ID
     const approvedFiles = await File_Uplode.find({
       loan_id: loanId,
       status: "approved",
     });
 
     const fileIds = approvedFiles.map((file) => file.file_id);
+    const userIds = approvedFiles.map((file) => file.user_id);
+
+    const users = await AddUser.find({ user_id: { $in: userIds } });
+
+    const userStatesCities = users.map(user => ({
+      user_id: user.user_id,
+      state: user.state,
+      city: user.city
+    }));
 
     const completedSteps = await Compelete_Step.find({
       file_id: { $in: fileIds },
       loan_step_id: "1715348651727",
     });
 
-    const amounts = completedSteps.map((step) =>
-      parseFloat(step.inputs.find((input) => input.label === "Amount").value)
-    );
+    const amounts = completedSteps.map((step) => {
+      const user = userStatesCities.find(user => user.user_id === step.user_id);
+      return {
+        amount: parseFloat(step.inputs.find((input) => input.label === "Amount").value),
+        state: user?.state,
+        city: user?.city,
+      };
+    });
 
-    const totalAmount = amounts.reduce((total, amount) => total + amount, 0);
+    const { state, city } = req.query;
+
+    const filteredAmounts = amounts.filter(amount => {
+      return (!state || amount.state === state) && (!city || amount.city === city);
+    });
+
+    const totalAmount = filteredAmounts.reduce((total, item) => total + item.amount, 0);
 
     res.json({
       statusCode: 200,
@@ -1295,11 +1316,13 @@ router.get("/amounts/:loan_id", async (req, res) => {
       message: "Total amount for approved files fetched successfully",
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       statusCode: 500,
       message: error.message,
     });
   }
 });
+
+
 
 module.exports = router;

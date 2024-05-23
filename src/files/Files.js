@@ -537,7 +537,7 @@ export default function CollapsibleTable() {
     if (loan_id) {
       setSelectedLoan(loan_id);
     }
-  }, [loan_id ,loans ,loan]);
+  }, [loan_id, loans, loan]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -735,24 +735,29 @@ export default function CollapsibleTable() {
     setIsUpdateDialogOpen(true);
   };
   const [totalAmount, setTotalAmount] = useState(null);
+  const fetchTotalAmount = async () => {
+    try {
+      if (loan_id) {
+        const response = await AxiosInstance.get(
+          `/file_upload/amounts/${loan_id}`,
+          {
+            params: {
+              state: selectedState,
+              city: selectedCity,
+            },
+          }
+        );
+        const { totalAmount } = response.data;
+        setTotalAmount(totalAmount);
+      }
+    } catch (error) {
+      console.error("Error fetching total amount:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchTotalAmount = async () => {
-      try {
-        if (loan_id) {
-          const response = await AxiosInstance.get(
-            `/file_upload/amounts/${loan_id}`
-          );
-          const { totalAmount } = response.data;
-          setTotalAmount(totalAmount);
-        }
-      } catch (error) {
-        console.error("Error fetching total amount:", error);
-      }
-    };
-
     fetchTotalAmount();
-  }, [loan_id]);
+  }, [loan_id, selectedState, selectedCity]);
 
   return (
     <>
@@ -765,7 +770,9 @@ export default function CollapsibleTable() {
             <Text fontSize="xl" fontWeight="bold">
               <h1>
                 {loan
-                  ? `${loan} - Total Amount: ${totalAmount || "-"}`
+                  ? `${loan} - Total Amount: ${
+                      totalAmount !== null ? totalAmount : "-"
+                    }`
                   : "All Files"}
               </h1>
             </Text>
