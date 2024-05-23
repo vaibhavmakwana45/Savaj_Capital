@@ -802,6 +802,11 @@ function ViewFile() {
 
   const handleRejectConfirm = async () => {
     try {
+      // Check if reject message is empty
+      if (!rejectMessage.trim()) {
+        toast.error("Please provide a reason for rejection.");
+        return;
+      }
       const updatedStepData = {
         ...open.data,
         status: "reject",
@@ -1979,6 +1984,7 @@ function ViewFile() {
                 type="text"
                 value={rejectMessage}
                 onChange={(e) => setRejectMessage(e.target.value)} // Update state on change
+                required // Add the required attribute
               />
             </FormControl>
           </ModalBody>

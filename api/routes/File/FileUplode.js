@@ -1267,6 +1267,7 @@ router.put("/updatestatus/:fileId", async (req, res) => {
     });
   }
 });
+
 router.get("/amounts/:loan_id", async (req, res) => {
   try {
     const loanId = req.params.loan_id;
@@ -1282,10 +1283,10 @@ router.get("/amounts/:loan_id", async (req, res) => {
 
     const users = await AddUser.find({ user_id: { $in: userIds } });
 
-    const userStatesCities = users.map(user => ({
+    const userStatesCities = users.map((user) => ({
       user_id: user.user_id,
       state: user.state,
-      city: user.city
+      city: user.city,
     }));
 
     const completedSteps = await Compelete_Step.find({
@@ -1294,9 +1295,13 @@ router.get("/amounts/:loan_id", async (req, res) => {
     });
 
     const amounts = completedSteps.map((step) => {
-      const user = userStatesCities.find(user => user.user_id === step.user_id);
+      const user = userStatesCities.find(
+        (user) => user.user_id === step.user_id
+      );
       return {
-        amount: parseFloat(step.inputs.find((input) => input.label === "Amount").value),
+        amount: parseFloat(
+          step.inputs.find((input) => input.label === "Amount").value
+        ),
         state: user?.state,
         city: user?.city,
       };
@@ -1304,11 +1309,16 @@ router.get("/amounts/:loan_id", async (req, res) => {
 
     const { state, city } = req.query;
 
-    const filteredAmounts = amounts.filter(amount => {
-      return (!state || amount.state === state) && (!city || amount.city === city);
+    const filteredAmounts = amounts.filter((amount) => {
+      return (
+        (!state || amount.state === state) && (!city || amount.city === city)
+      );
     });
 
-    const totalAmount = filteredAmounts.reduce((total, item) => total + item.amount, 0);
+    const totalAmount = filteredAmounts.reduce(
+      (total, item) => total + item.amount,
+      0
+    );
 
     res.json({
       statusCode: 200,
@@ -1322,7 +1332,5 @@ router.get("/amounts/:loan_id", async (req, res) => {
     });
   }
 });
-
-
 
 module.exports = router;
