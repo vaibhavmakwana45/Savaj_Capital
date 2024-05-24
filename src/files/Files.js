@@ -535,7 +535,10 @@ export default function CollapsibleTable() {
 
   useEffect(() => {
     if (loan_id) {
-      setSelectedLoan(loan_id);
+      const timeout = setTimeout(() => {
+        setSelectedLoan(loan_id);
+      }, 100);
+      return () => clearTimeout(timeout);
     }
   }, [loan_id, loans, loan]);
 
@@ -558,7 +561,7 @@ export default function CollapsibleTable() {
           selectedCity,
         },
       });
-
+      console.log(response, "vaibhav");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setTotalRecorrds(response.data.totalCount);
@@ -767,14 +770,17 @@ export default function CollapsibleTable() {
       >
         <CardHeader style={{ padding: "10px" }} className="card-main ">
           <Flex justifyContent="space-between" p="4" className="mainnnn">
-            <Text fontSize="xl" fontWeight="bold">
-              <h1>
-                {loan
-                  ? `${loan} - Total Amount: ${
-                      totalAmount !== null ? totalAmount : "-"
-                    }`
-                  : "All Files"}
-              </h1>
+            <Text fontSize="xl">
+              {loan ? (
+                <>
+                  {loan}
+                  <Text as="span" color="green.400" fontWeight="bold" pl="1">
+                    - {totalAmount !== null ? totalAmount : "-"}
+                  </Text>
+                </>
+              ) : (
+                "All Files"
+              )}
             </Text>
           </Flex>
           <Flex justifyContent="end" py="1" className="mainnnn">
@@ -836,7 +842,7 @@ export default function CollapsibleTable() {
                   onChange={(e) => setSelectedStatusSearch(e.target.value)}
                   width="200px"
                 >
-                  <option selected>Select State</option>
+                  <option selected>Select Status</option>
                   <option value="running">Running</option>
                   <option value="approved">Approved</option>
                   <option value="rejected">Rejected</option>

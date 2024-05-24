@@ -63,6 +63,7 @@ export default function Dashboard() {
     superadmin: 0,
     loans: [],
   });
+  const [totalAmounts, setTotalAmounts] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +78,40 @@ export default function Dashboard() {
           ...responses[0].data,
           loans: responses[1].data,
         }));
+
+        // Fetch total amounts for each loan and loan type
+        const totalAmountPromises = responses[1].data.map(async (loan) => {
+          const { loan_id, loantype_id } = loan;
+          console.log(loan, "loan");
+          const response = await AxiosInstance.get(
+            `/file_upload/amounts/${loan_id}/${loantype_id || ""}`
+          );
+          console.log(
+            `Total amount for loan_id ${loan_id} and loantype_id ${
+              loantype_id || "none"
+            }:`,
+            response.data.totalAmount
+          ); // Log API response
+          return {
+            loan_id,
+            loantype_id,
+            totalAmount: response.data.totalAmount,
+          };
+        });
+
+        const totalAmountsData = await Promise.all(totalAmountPromises);
+        const totalAmountsMap = totalAmountsData.reduce(
+          (acc, { loan_id, loantype_id, totalAmount }) => {
+            if (!acc[loan_id]) {
+              acc[loan_id] = {};
+            }
+            acc[loan_id][loantype_id || "none"] = totalAmount;
+            return acc;
+          },
+          {}
+        );
+        setTotalAmounts(totalAmountsMap);
+        console.log("Total amounts map:", totalAmountsMap); // Log the total amounts map
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -432,11 +467,16 @@ export default function Dashboard() {
                       fontSize="lg"
                       color={textColor}
                       fontWeight="bold"
-                      style={{ paddingTop: "10px" }}
+                      style={{ paddingTop: "10px", paddingBottom: "10px" }}
                     >
                       {loan.fileCount}
                     </StatNumber>
                   </Flex>
+                  <Text as="span" color="green.400" fontWeight="bold">
+                    ₹
+                    {totalAmounts[loan.loan_id]?.[loan.loantype_id || "none"] ||
+                      0}
+                  </Text>
                 </Stat>
                 <IconBox
                   borderRadius="50%"
