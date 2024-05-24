@@ -168,7 +168,7 @@ export default function AdminNavbar(props) {
     const currentRoute = filteredRoutes.find(
       (route) => route.layout + route.path === pathname
     );
-   
+
     return generateBreadcrumbItems(currentRoute);
   };
 

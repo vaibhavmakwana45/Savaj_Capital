@@ -78,7 +78,6 @@ const { default: axios } = require("axios");
 // });
 
 router.post("/guarantor-step/:file_id", async (req, res) => {
-
   try {
     const { file_id } = req.params;
     const { loan_step_id, inputs, user_id, loan_step, guarantor_id } = req.body;
@@ -89,7 +88,6 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
     });
 
     if (existingStep) {
-      // Update existing step
       const newInputMap = new Map(inputs.map((input) => [input.label, input]));
 
       existingStep.inputs = existingStep.inputs.map((input) => {
@@ -143,8 +141,7 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
     }
   } catch (error) {
     res.status(5000).json({
-      // Changed status code to 5000
-      statusCode: 5000, // Changed status code to 5000
+      statusCode: 5000,
       message: error.message,
     });
   }

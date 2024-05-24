@@ -249,7 +249,7 @@ router.get("/getusers", async (req, res) => {
 // router.post("/search", async (req, res) => {
 //   try {
 //     const searchValue = req.body.search;
-    
+
 //     if (!searchValue) {
 //       return res.status(400).json({ statusCode: 400, message: "Search parameter is required." });
 //     }
@@ -293,8 +293,6 @@ router.get("/getusers", async (req, res) => {
 //     });
 //   }
 // });
-
-
 
 router.get("/:user_id", async (req, res) => {
   try {
