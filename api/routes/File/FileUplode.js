@@ -1673,9 +1673,13 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
 
     // Calculate amounts based on completed steps
     const amounts = completedSteps.map((step) => {
-      const user = userStatesCities.find((user) => user.user_id === step.user_id);
+      const user = userStatesCities.find(
+        (user) => user.user_id === step.user_id
+      );
       return {
-        amount: parseFloat(step.inputs.find((input) => input.label === "DISPATCH AMOUNT").value),
+        amount: parseFloat(
+          step.inputs.find((input) => input.label === "DISPATCH AMOUNT").value
+        ),
         state: user?.state,
         city: user?.city,
       };
@@ -1684,11 +1688,16 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
     // Filter amounts based on state and city if provided
     const { state, city } = req.query;
     const filteredAmounts = amounts.filter((amount) => {
-      return (!state || amount.state === state) && (!city || amount.city === city);
+      return (
+        (!state || amount.state === state) && (!city || amount.city === city)
+      );
     });
 
     // Calculate total amount
-    const totalAmount = filteredAmounts.reduce((total, item) => total + item.amount, 0);
+    const totalAmount = filteredAmounts.reduce(
+      (total, item) => total + item.amount,
+      0
+    );
 
     res.json({
       statusCode: 200,
@@ -1704,65 +1713,48 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
   }
 });
 
-
-router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
+router.put("/updatestatus/:fileId", async (req, res) => {
   try {
-    const { loan_id, loantype_id } = req.params;
+    const { status } = req.body;
+    const { fileId } = req.params;
 
-    const query = { loan_id, status: "approved" };
-    if (loantype_id) {
-      query.loantype_id = loantype_id;
+    const validStatuses = ["running", "approved", "rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid status. Must be 'running', 'approved', or 'rejected'.",
+      });
     }
 
-    const approvedFiles = await File_Uplode.find(query);
-    const fileIds = approvedFiles.map((file) => file.file_id);
-    const userIds = approvedFiles.map((file) => file.user_id);
+    const updatedFile = await File_Uplode.findOneAndUpdate(
+      { file_id: fileId },
+      {
+        $set: {
+          status: status,
+          updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        },
+      },
+      { new: true }
+    );
 
-    const users = await AddUser.find({ user_id: { $in: userIds } });
-    const userStatesCities = users.map((user) => ({
-      user_id: user.user_id,
-      state: user.state,
-      city: user.city,
-    }));
-
-    const completedSteps = await Compelete_Step.find({
-      file_id: { $in: fileIds },
-      loan_step_id: "1715348798228",
-    });
-
-    const amounts = completedSteps.map((step) => {
-      const user = userStatesCities.find((user) => user.user_id === step.user_id);
-      return {
-        amount: parseFloat(step.inputs.find((input) => input.label === "DISPATCH AMOUNT").value),
-        state: user?.state,
-        city: user?.city,
-      };
-    });
-
-    const { state, city } = req.query;
-    const filteredAmounts = amounts.filter((amount) => {
-      return (!state || amount.state === state) && (!city || amount.city === city);
-    });
-
-    const totalAmount = filteredAmounts.reduce((total, item) => total + item.amount, 0);
+    if (!updatedFile) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found.",
+      });
+    }
 
     res.json({
-      statusCode: 200,
-      totalAmount,
-      loantype_id,
-      message: "Total amount for approved files fetched successfully",
+      success: true,
+      data: updatedFile,
+      message: "File status updated successfully.",
     });
   } catch (error) {
     res.status(500).json({
-      statusCode: 500,
       message: error.message,
     });
   }
 });
-
-
-
-
-
 
 module.exports = router;
