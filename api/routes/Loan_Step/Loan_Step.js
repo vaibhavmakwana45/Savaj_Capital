@@ -391,14 +391,12 @@ router.get("/get_steps/:file_id", async (req, res) => {
             user_id: file.user_id,
           };
 
-          // Fetch guarantor steps and merge
           const guarantorSteps = await Guarantor_Step.find({
             file_id,
             loan_step_id: compeleteStep.loan_step_id,
           });
 
           if (guarantorSteps.length > 0) {
-            // Iterate over guarantorSteps to include guarantor username
             const stepsWithGuarantor = await Promise.all(
               guarantorSteps.map(async (guarantorStep) => {
                 const guarantor = await Guarantor.findOne({
