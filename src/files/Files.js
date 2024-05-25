@@ -52,35 +52,10 @@ function Row(props) {
     file,
     handleEditClick,
     handleDelete,
-    pan_card,
     handleUpdate,
     index,
   } = props;
-  const history = useHistory();
   const [open, setOpen] = useState(false);
-
-  const [fileData, setFileData] = useState([]);
-  let [filePercentageData, setFilePercentageData] = useState("");
-
-  const fetchFileData = async () => {
-    try {
-      const file_id = file.file_id;
-      const response = await AxiosInstance.get(
-        `/file_upload/file-count/${file_id}`
-      );
-      setFileData([
-        ...response.data.data.approvedData,
-        ...response.data.data.pendingData,
-      ]);
-      setFilePercentageData(response.data.data.document_percentage);
-    } catch (error) {
-      console.error("Error: ", error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchFileData();
-  }, [file]);
 
   useEffect(() => {
     $(".progress").each(function () {
@@ -118,7 +93,7 @@ function Row(props) {
         return (percentage / 100) * 360;
       }
     });
-  }, [filePercentageData]);
+  }, []);
 
   return (
     <React.Fragment>
@@ -143,12 +118,6 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              // color:
-              //   file?.status === "approved"
-              //     ? "#4CAF50"
-              //     : file?.status === "rejected"
-              //     ? "#F44336"
-              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -159,12 +128,6 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              // color:
-              //   file?.status === "approved"
-              //     ? "#4CAF50"
-              //     : file?.status === "rejected"
-              //     ? "#F44336"
-              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -213,8 +176,6 @@ function Row(props) {
             )}
             {file?.status !== "rejected" && file?.amount && (
               <>
-                {" "}
-                {/* Check if amount exists */}
                 <br />
                 <span
                   style={{
@@ -223,7 +184,7 @@ function Row(props) {
                     color: "#FFFFFF",
                   }}
                 >
-                  Amount: {file.amount} {/* Display amount */}
+                  Amount: {file.amount}
                 </span>
               </>
             )}
@@ -231,22 +192,26 @@ function Row(props) {
         </TableCell>
 
         <TableCell align="center">
-          {filePercentageData && (
-            <div class="progress " data-value={Number(filePercentageData)}>
-              <span class="progress-left">
-                <span class="progress-bar"></span>
-              </span>
-              <span class="progress-right">
-                <span class="progress-bar"></span>
-              </span>
-              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-                <div class="font-weight-bold">
-                  {Number(filePercentageData)}
-                  <sup class="small">%</sup>
+          {file.document_status?.document_percentage != null &&
+            !isNaN(file.document_status.document_percentage) && (
+              <div
+                className="progress"
+                data-value={Number(file.document_status.document_percentage)}
+              >
+                <span className="progress-left">
+                  <span className="progress-bar"></span>
+                </span>
+                <span className="progress-right">
+                  <span className="progress-bar"></span>
+                </span>
+                <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                  <div className="font-weight-bold">
+                    {Number(file.document_status.document_percentage)}
+                    <sup className="small">%</sup>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </TableCell>
 
         <TableCell>
@@ -346,30 +311,42 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {fileData?.map((documentRow, index) => (
-                      <TableRow key={index}>
-                        <TableCell component="th" scope="row">
-                          {documentRow?.name} ({documentRow?.title})
-                        </TableCell>
-                        <TableCell>
-                          {documentRow?.status === "Uploaded" ? (
-                            <span
-                              style={{ color: "green", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-circle-check"></i>
-                              &nbsp;&nbsp;Uploaded
-                            </span>
-                          ) : (
-                            <span
-                              style={{ color: "#FF9C00 ", fontWeight: "bold" }}
-                            >
-                              <i class="fa-regular fa-clock"></i>
-                              &nbsp;&nbsp;Pending
-                            </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {Array.isArray(file.document_status?.approvedData) &&
+                      file.document_status.approvedData.map(
+                        (documentRow, index) => (
+                          <TableRow key={index}>
+                            <TableCell component="th" scope="row">
+                              {documentRow?.name} ({documentRow?.title})
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                style={{ color: "green", fontWeight: "bold" }}
+                              >
+                                <i className="fa-regular fa-circle-check"></i>
+                                &nbsp;&nbsp;Uploaded
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
+                    {Array.isArray(file.document_status?.pendingData) &&
+                      file.document_status.pendingData.map(
+                        (documentRow, index) => (
+                          <TableRow key={index}>
+                            <TableCell component="th" scope="row">
+                              {documentRow?.name} ({documentRow?.title})
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                style={{ color: "#FF9C00", fontWeight: "bold" }}
+                              >
+                                <i className="fa-regular fa-clock"></i>
+                                &nbsp;&nbsp;Pending
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
                   </TableBody>
                 </Table>
               </Paper>
@@ -453,66 +430,6 @@ export default function CollapsibleTable() {
   const handleCityChange = (event) => {
     setSelectedCity(event.target.value);
   };
-
-  // const filteredUsers = files.filter((file) => {
-  //   const loanSafe =
-  //     file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
-  //   const fileIdSafe =
-  //     file.file_id && typeof file.file_id === "string"
-  //       ? file.file_id.toLowerCase()
-  //       : "";
-  //   const loanTypeSafe =
-  //     file.loan_type && typeof file.loan_type === "string"
-  //       ? file.loan_type.toLowerCase()
-  //       : "";
-  //   const usernameSafe =
-  //     file.user_username && typeof file.user_username === "string"
-  //       ? file.user_username.toLowerCase()
-  //       : "";
-  //   const statusSafe =
-  //     file.status && typeof file.status === "string"
-  //       ? file.status.toLowerCase()
-  //       : "";
-
-  //   return (
-  //     (selectedLoan === "All Loan Types" ||
-  //       loanSafe.includes(selectedLoan.toLowerCase())) &&
-  //     (loanSafe.includes(searchTerm.toLowerCase()) ||
-  //       fileIdSafe.includes(searchTerm.toLowerCase()) ||
-  //       loanTypeSafe.includes(searchTerm.toLowerCase()) ||
-  //       usernameSafe.includes(searchTerm.toLowerCase())) &&
-  //     (selectedStatusSearch === "" ||
-  //       statusSafe === selectedStatusSearch.toLowerCase())
-  //   );
-  // });
-  const filteredUsers = files.filter((file) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const selectedLoanLower = selectedLoan.toLowerCase();
-    const selectedStatusLower = selectedStatusSearch.toLowerCase();
-
-    const matchesSearch =
-      file.file_id?.toLowerCase().includes(searchTermLower) ||
-      file.loan_type?.toLowerCase().includes(searchTermLower) ||
-      file.user_username?.toLowerCase().includes(searchTermLower) ||
-      file.loan?.toLowerCase().includes(searchTermLower) ||
-      file.status?.toLowerCase().includes(searchTermLower);
-
-    const matchesLoan =
-      selectedLoan === "All Loan Types" ||
-      file.loan?.toLowerCase().includes(selectedLoanLower);
-    const matchesStatus =
-      selectedStatusSearch === "" ||
-      file.status?.toLowerCase() === selectedStatusLower;
-    const matchesState = selectedState ? file.state === selectedState : true;
-    const matchesCity = selectedCity ? file.city === selectedCity : true;
-    return (
-      matchesSearch &&
-      matchesLoan &&
-      matchesStatus &&
-      matchesState &&
-      matchesCity
-    );
-  });
 
   const history = useHistory();
 
@@ -598,26 +515,6 @@ export default function CollapsibleTable() {
       setCurrentPage(prevPage);
     }
   };
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const fileResponse = await AxiosInstance.get("/file_upload");
-  //       const loanResponse = await AxiosInstance.get("/loan");
-
-  //       setFiles(fileResponse.data.data);
-  //       setLoans(loanResponse.data.data);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-  // Inside the Row component
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
