@@ -688,7 +688,10 @@ function ViewFile() {
       };
 
       const isNumeric = open.data.inputs
-        .filter((input) => input.label === "Amount" || input.label === "APPROVAL AMOUNT" )
+        .filter(
+          (input) =>
+            input.label === "Amount" || input.label === "APPROVAL AMOUNT"
+        )
         .every((input) => !isNaN(parseFloat(input.value)));
 
       if (!isNumeric) {
@@ -1389,7 +1392,12 @@ function ViewFile() {
                                         )}
                                       </FormControl>
                                     ))}
-
+                                  <div className="mt-4">
+                                    <strong>Date:</strong>{" "}
+                                    {new Date(
+                                      open.data.updatedAt
+                                    ).toLocaleString()}
+                                  </div>
                                   {open.data.status !== "reject" && (
                                     <>
                                       <Button
