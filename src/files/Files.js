@@ -52,15 +52,11 @@ function Row(props) {
     file,
     handleEditClick,
     handleDelete,
-    pan_card,
     handleUpdate,
     index,
   } = props;
-  const history = useHistory();
   const [open, setOpen] = useState(false);
-
   const [fileData, setFileData] = useState([]);
-  let [filePercentageData, setFilePercentageData] = useState("");
 
   const fetchFileData = async () => {
     try {
@@ -72,7 +68,6 @@ function Row(props) {
         ...response.data.data.approvedData,
         ...response.data.data.pendingData,
       ]);
-      setFilePercentageData(response.data.data.document_percentage);
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -118,7 +113,7 @@ function Row(props) {
         return (percentage / 100) * 360;
       }
     });
-  }, [filePercentageData]);
+  }, []);
 
   return (
     <React.Fragment>
@@ -143,12 +138,6 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              // color:
-              //   file?.status === "approved"
-              //     ? "#4CAF50"
-              //     : file?.status === "rejected"
-              //     ? "#F44336"
-              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -159,12 +148,6 @@ function Row(props) {
         <TableCell align="">
           <span
             style={{
-              // color:
-              //   file?.status === "approved"
-              //     ? "#4CAF50"
-              //     : file?.status === "rejected"
-              //     ? "#F44336"
-              //     : " #FF9C00",
               padding: "4px 8px",
               fontWeight: "bold",
             }}
@@ -213,8 +196,6 @@ function Row(props) {
             )}
             {file?.status !== "rejected" && file?.amount && (
               <>
-                {" "}
-                {/* Check if amount exists */}
                 <br />
                 <span
                   style={{
@@ -223,7 +204,7 @@ function Row(props) {
                     color: "#FFFFFF",
                   }}
                 >
-                  Amount: {file.amount} {/* Display amount */}
+                  Amount: {file.amount}
                 </span>
               </>
             )}
@@ -231,22 +212,26 @@ function Row(props) {
         </TableCell>
 
         <TableCell align="center">
-          {filePercentageData && (
-            <div class="progress " data-value={Number(filePercentageData)}>
-              <span class="progress-left">
-                <span class="progress-bar"></span>
-              </span>
-              <span class="progress-right">
-                <span class="progress-bar"></span>
-              </span>
-              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-                <div class="font-weight-bold">
-                  {Number(filePercentageData)}
-                  <sup class="small">%</sup>
+          {file.document_percentage != null &&
+            !isNaN(file.document_percentage) && (
+              <div
+                className="progress"
+                data-value={Number(file.document_percentage)}
+              >
+                <span className="progress-left">
+                  <span className="progress-bar"></span>
+                </span>
+                <span className="progress-right">
+                  <span className="progress-bar"></span>
+                </span>
+                <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                  <div className="font-weight-bold">
+                    {Number(file.document_percentage)}
+                    <sup className="small">%</sup>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </TableCell>
 
         <TableCell>
@@ -454,66 +439,6 @@ export default function CollapsibleTable() {
     setSelectedCity(event.target.value);
   };
 
-  // const filteredUsers = files.filter((file) => {
-  //   const loanSafe =
-  //     file.loan && typeof file.loan === "string" ? file.loan.toLowerCase() : "";
-  //   const fileIdSafe =
-  //     file.file_id && typeof file.file_id === "string"
-  //       ? file.file_id.toLowerCase()
-  //       : "";
-  //   const loanTypeSafe =
-  //     file.loan_type && typeof file.loan_type === "string"
-  //       ? file.loan_type.toLowerCase()
-  //       : "";
-  //   const usernameSafe =
-  //     file.user_username && typeof file.user_username === "string"
-  //       ? file.user_username.toLowerCase()
-  //       : "";
-  //   const statusSafe =
-  //     file.status && typeof file.status === "string"
-  //       ? file.status.toLowerCase()
-  //       : "";
-
-  //   return (
-  //     (selectedLoan === "All Loan Types" ||
-  //       loanSafe.includes(selectedLoan.toLowerCase())) &&
-  //     (loanSafe.includes(searchTerm.toLowerCase()) ||
-  //       fileIdSafe.includes(searchTerm.toLowerCase()) ||
-  //       loanTypeSafe.includes(searchTerm.toLowerCase()) ||
-  //       usernameSafe.includes(searchTerm.toLowerCase())) &&
-  //     (selectedStatusSearch === "" ||
-  //       statusSafe === selectedStatusSearch.toLowerCase())
-  //   );
-  // });
-  const filteredUsers = files.filter((file) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const selectedLoanLower = selectedLoan.toLowerCase();
-    const selectedStatusLower = selectedStatusSearch.toLowerCase();
-
-    const matchesSearch =
-      file.file_id?.toLowerCase().includes(searchTermLower) ||
-      file.loan_type?.toLowerCase().includes(searchTermLower) ||
-      file.user_username?.toLowerCase().includes(searchTermLower) ||
-      file.loan?.toLowerCase().includes(searchTermLower) ||
-      file.status?.toLowerCase().includes(searchTermLower);
-
-    const matchesLoan =
-      selectedLoan === "All Loan Types" ||
-      file.loan?.toLowerCase().includes(selectedLoanLower);
-    const matchesStatus =
-      selectedStatusSearch === "" ||
-      file.status?.toLowerCase() === selectedStatusLower;
-    const matchesState = selectedState ? file.state === selectedState : true;
-    const matchesCity = selectedCity ? file.city === selectedCity : true;
-    return (
-      matchesSearch &&
-      matchesLoan &&
-      matchesStatus &&
-      matchesState &&
-      matchesCity
-    );
-  });
-
   const history = useHistory();
 
   const handleRow = (url) => {
@@ -555,13 +480,18 @@ export default function CollapsibleTable() {
           page: currentPage,
           limit: itemsPerPage,
           searchTerm,
-          selectedLoan: selectedLoan === "All Loan Types" ? "" : selectedLoan,
+          selectedLoan: loan_id
+            ? loan_id === "All Loan Types"
+              ? ""
+              : loan_id
+            : selectedLoan === "All Loan Types"
+            ? ""
+            : selectedLoan,
           selectedStatus: selectedStatusSearch,
           selectedState,
           selectedCity,
         },
       });
-      console.log(response, "vaibhav");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setTotalRecorrds(response.data.totalCount);
@@ -583,6 +513,7 @@ export default function CollapsibleTable() {
     selectedStatusSearch,
     selectedState,
     selectedCity,
+    loan_id,
   ]);
 
   const handleNextPage = () => {
@@ -598,26 +529,6 @@ export default function CollapsibleTable() {
       setCurrentPage(prevPage);
     }
   };
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const fileResponse = await AxiosInstance.get("/file_upload");
-  //       const loanResponse = await AxiosInstance.get("/loan");
-
-  //       setFiles(fileResponse.data.data);
-  //       setLoans(loanResponse.data.data);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-  // Inside the Row component
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
@@ -737,6 +648,7 @@ export default function CollapsibleTable() {
     setSelecteUpdateFileId(id);
     setIsUpdateDialogOpen(true);
   };
+
   const [totalAmount, setTotalAmount] = useState(null);
   const fetchTotalAmount = async () => {
     try {
