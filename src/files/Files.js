@@ -56,6 +56,26 @@ function Row(props) {
     index,
   } = props;
   const [open, setOpen] = useState(false);
+  const [fileData, setFileData] = useState([]);
+
+  const fetchFileData = async () => {
+    try {
+      const file_id = file.file_id;
+      const response = await AxiosInstance.get(
+        `/file_upload/file-count/${file_id}`
+      );
+      setFileData([
+        ...response.data.data.approvedData,
+        ...response.data.data.pendingData,
+      ]);
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchFileData();
+  }, [file]);
 
   useEffect(() => {
     $(".progress").each(function () {
@@ -192,11 +212,11 @@ function Row(props) {
         </TableCell>
 
         <TableCell align="center">
-          {file.document_status?.document_percentage != null &&
-            !isNaN(file.document_status.document_percentage) && (
+          {file.document_percentage != null &&
+            !isNaN(file.document_percentage) && (
               <div
                 className="progress"
-                data-value={Number(file.document_status.document_percentage)}
+                data-value={Number(file.document_percentage)}
               >
                 <span className="progress-left">
                   <span className="progress-bar"></span>
@@ -206,7 +226,7 @@ function Row(props) {
                 </span>
                 <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
                   <div className="font-weight-bold">
-                    {Number(file.document_status.document_percentage)}
+                    {Number(file.document_percentage)}
                     <sup className="small">%</sup>
                   </div>
                 </div>
@@ -311,42 +331,30 @@ function Row(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Array.isArray(file.document_status?.approvedData) &&
-                      file.document_status.approvedData.map(
-                        (documentRow, index) => (
-                          <TableRow key={index}>
-                            <TableCell component="th" scope="row">
-                              {documentRow?.name} ({documentRow?.title})
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                style={{ color: "green", fontWeight: "bold" }}
-                              >
-                                <i className="fa-regular fa-circle-check"></i>
-                                &nbsp;&nbsp;Uploaded
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      )}
-                    {Array.isArray(file.document_status?.pendingData) &&
-                      file.document_status.pendingData.map(
-                        (documentRow, index) => (
-                          <TableRow key={index}>
-                            <TableCell component="th" scope="row">
-                              {documentRow?.name} ({documentRow?.title})
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                style={{ color: "#FF9C00", fontWeight: "bold" }}
-                              >
-                                <i className="fa-regular fa-clock"></i>
-                                &nbsp;&nbsp;Pending
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      )}
+                    {fileData?.map((documentRow, index) => (
+                      <TableRow key={index}>
+                        <TableCell component="th" scope="row">
+                          {documentRow?.name} ({documentRow?.title})
+                        </TableCell>
+                        <TableCell>
+                          {documentRow?.status === "Uploaded" ? (
+                            <span
+                              style={{ color: "green", fontWeight: "bold" }}
+                            >
+                              <i class="fa-regular fa-circle-check"></i>
+                              &nbsp;&nbsp;Uploaded
+                            </span>
+                          ) : (
+                            <span
+                              style={{ color: "#FF9C00 ", fontWeight: "bold" }}
+                            >
+                              <i class="fa-regular fa-clock"></i>
+                              &nbsp;&nbsp;Pending
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </Paper>
@@ -472,13 +480,18 @@ export default function CollapsibleTable() {
           page: currentPage,
           limit: itemsPerPage,
           searchTerm,
-          selectedLoan: selectedLoan === "All Loan Types" ? "" : selectedLoan,
+          selectedLoan: loan_id
+            ? loan_id === "All Loan Types"
+              ? ""
+              : loan_id
+            : selectedLoan === "All Loan Types"
+            ? ""
+            : selectedLoan,
           selectedStatus: selectedStatusSearch,
           selectedState,
           selectedCity,
         },
       });
-      console.log(response, "vaibhav");
       setFiles(response.data.data);
       setTotalPages(response.data.totalPages);
       setTotalRecorrds(response.data.totalCount);
@@ -500,6 +513,7 @@ export default function CollapsibleTable() {
     selectedStatusSearch,
     selectedState,
     selectedCity,
+    loan_id,
   ]);
 
   const handleNextPage = () => {
@@ -634,6 +648,7 @@ export default function CollapsibleTable() {
     setSelecteUpdateFileId(id);
     setIsUpdateDialogOpen(true);
   };
+
   const [totalAmount, setTotalAmount] = useState(null);
   const fetchTotalAmount = async () => {
     try {

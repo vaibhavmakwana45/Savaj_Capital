@@ -30,6 +30,7 @@ function formatPathSegment(pathSegment) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
 export default function AdminNavbar(props) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -103,8 +104,9 @@ export default function AdminNavbar(props) {
   const findRouteByKey = (key) =>
     filteredRoutes.find((route) => route.key === key);
 
-  const generateBreadcrumbItems = (currentRoute, items = []) => {
-    if (!currentRoute) return items;
+  const generateBreadcrumbItems = (currentRoute, items = [], visited = new Set()) => {
+    if (!currentRoute || visited.has(currentRoute.key)) return items;
+    visited.add(currentRoute.key);
 
     const isLast =
       currentRoute.path ===
@@ -157,7 +159,7 @@ export default function AdminNavbar(props) {
     // Recursively prepend parent breadcrumb item if there's a parent
     if (currentRoute.parent) {
       const parentRoute = findRouteByKey(currentRoute.parent);
-      return generateBreadcrumbItems(parentRoute, items);
+      return generateBreadcrumbItems(parentRoute, items, visited);
     }
 
     return items;
@@ -262,14 +264,12 @@ export default function AdminNavbar(props) {
             {generateBreadcrumbs()}
           </Breadcrumb>
           <Link
-            className="linksss"
-            pt="20px"
             color={mainText}
             href="#"
             bg="inherit"
             borderRadius="inherit"
             fontWeight="bold"
-            _hover={{ color: "white", borderBottom: "1px solid white" }}
+            _hover={{ color: { mainText } }}
             _active={{
               bg: "inherit",
               transform: "none",
@@ -282,14 +282,14 @@ export default function AdminNavbar(props) {
             {brandText}
           </Link>
         </Box>
-
         <Box ms="auto" w={{ sm: "100%", md: "unset" }}>
           <AdminNavbarLinks
-            onOpen={props.onOpen}
+            onOpen={onOpen}
             logoText={props.logoText}
             secondary={props.secondary}
-            fixed={props.fixed}
+            fixed={fixed}
             scrolled={scrolled}
+            {...rest}
           />
         </Box>
       </Flex>
