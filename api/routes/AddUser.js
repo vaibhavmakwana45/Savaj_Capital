@@ -39,7 +39,6 @@ const decrypt = (text) => {
     decrypted += decipher.final("utf-8");
     return decrypted;
   } else {
-    // If the text is not encrypted, return it as is
     return text;
   }
 };
@@ -587,7 +586,7 @@ router.get("/customer/:user_id", async (req, res) => {
 });
 router.put("/toggle-active/:user_id", async (req, res) => {
   const { user_id } = req.params;
-  const { isActivate } = req.body; // Updated to match schema field name
+  const { isActivate } = req.body;
 
   try {
     if (typeof isActivate !== "boolean") {

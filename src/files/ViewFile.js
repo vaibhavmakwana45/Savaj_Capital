@@ -688,7 +688,7 @@ function ViewFile() {
       };
 
       const isNumeric = open.data.inputs
-        .filter((input) => input.label === "Amount")
+        .filter((input) => input.label === "Amount" || input.label === "APPROVAL AMOUNT" )
         .every((input) => !isNaN(parseFloat(input.value)));
 
       if (!isNumeric) {

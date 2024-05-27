@@ -18,6 +18,7 @@ import {
   ModalBody,
   Input,
   ModalFooter,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { IconButton } from "@chakra-ui/react";
@@ -49,6 +50,7 @@ function CreateUserFile() {
     user_id: "",
     username: "",
     number: "",
+    cibil_score: "",
     email: "",
     pan_card: "",
     aadhar_card: "",
@@ -56,13 +58,16 @@ function CreateUserFile() {
     country: "India",
     state: "",
     city: "",
+    unit_address: "",
+    gst_number: "",
+    reference: "",
   });
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors },  
   } = useForm();
 
   const fetchUsers = async () => {
@@ -91,6 +96,7 @@ function CreateUserFile() {
 
   const handleLoanTypeChange = async (event) => {
     const loanId = event.target.value;
+    setSelectedLoanId(loanId);
     const selectedType = loanType.find((loan) => loan.loan_id === loanId);
     setSelectedLoanType(selectedType || {});
 
@@ -115,18 +121,12 @@ function CreateUserFile() {
   const [fileData, setFileData] = useState({});
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
 
-  const handleFileInputChange = (
-    event,
-    title_id,
-    index,
-    groupIndex,
-    innerIndex
-  ) => {
+  const handleFileInputChange = (event, title_id, groupIndex, innerIndex) => {
     const file = event.target.files[0];
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-      const key = `${title_id}-${index}-${innerIndex}`;
+      const key = `${title_id}-${documentId}`;
       const filePreview = {
         name: file.name,
         url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
@@ -227,15 +227,28 @@ function CreateUserFile() {
   }, [groupedLoanDocuments]);
 
   const [selectedUser, setSelectedUser] = useState("");
+  const [cibilMessage, setCibilMessage] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
+  const [cibilScore, setCibilScore] = useState(null);
 
   const handleUserChange = (event) => {
-    setSelectedUser(event.target.value);
+    const userId = event.target.value;
+    const user = users.find((u) => u.user_id === userId);
+    setSelectedUser(userId);
+    if (user) {
+      setCibilScore(user.cibil_score);
+      if (user.cibil_score < 730) {
+        setCibilMessage("User's cibil score is less than 730.");
+      } else {
+        setCibilMessage("");
+      }
+    }
   };
 
   const handleLoanChange = (event) => {
     setSelectedLoanId(event.target.value);
+    setSelectedLoanSubtypeId("");
   };
 
   const handleLoanSubtypeChange = (event) => {
@@ -262,62 +275,6 @@ function CreateUserFile() {
     } catch (error) {
       console.error("Error adding user:", error);
       toast.error("Please try again later!");
-    }
-  };
-
-  const handleSubmitData = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const uploadPromises = uploadedFileName.map(async (item) => {
-        const formData = new FormData();
-        formData.append("b_video", item.file);
-
-        const response = await axios.post(
-          "https://cdn.dohost.in/image_upload.php/",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        if (!response.data.success) {
-          throw new Error(response.data.msg || "File upload failed");
-        }
-
-        if (!response.data.iamge_path) {
-          throw new Error("Image path is missing in the response");
-        }
-
-        const imageName = response.data.iamge_path.split("/").pop();
-        return { ...item, path: imageName, documentId: item.documentId };
-      });
-
-      const uploadedFiles = await Promise.all(uploadPromises);
-
-      const payload = {
-        user_id: selectedUser,
-        loan_id: selectedLoanId,
-        loantype_id: selectedLoanSubtypeId,
-        documents: uploadedFiles.map((file) => ({
-          file_path: file.path,
-          loan_document_id: file.documentId,
-          title_id: file.title_id,
-          key: file.key,
-        })),
-      };
-      await AxiosInstance.post("/file_upload", payload);
-
-      history.push("/savajcapitaluser/userfile");
-      toast.success("All data submitted successfully!");
-    } catch (error) {
-      console.error("Error while uploading files or submitting data:", error);
-      toast.error("Submission failed! Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -355,33 +312,159 @@ function CreateUserFile() {
     }));
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  const handleGstChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "gst_number" && value.length <= 15) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleeChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
+  };
+
+  const handleadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && /^\d{0,12}$/.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const uploadPromises = uploadedFileName.map(async (item) => {
+        const formData = new FormData();
+        formData.append("files", item.file);
+
+        const response = await axios.post(
+          "https://cdn.savajcapital.com/api/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data.status !== "ok") {
+          throw new Error(response.data.message || "File upload failed");
+        }
+
+        const uploadedFilesInfo = response.data.files.map((file) => ({
+          filename: file.filename,
+          fileType: file.fileType,
+        }));
+
+        if (!uploadedFilesInfo.length) {
+          throw new Error("No files were processed.");
+        }
+
+        return uploadedFilesInfo.map((file) => ({
+          ...item,
+          path: file.filename,
+          documentId: item.documentId,
+        }));
+      });
+
+      const uploadedFiles = (await Promise.all(uploadPromises)).flat();
+
+      const payload = {
+        user_id: selectedUser,
+        loan_id: selectedLoanId,
+        loantype_id: selectedLoanSubtypeId,
+        documents: uploadedFiles.map((file) => ({
+          file_path: file.path,
+          loan_document_id: file.documentId,
+          title_id: file.title_id,
+          key: file.key,
+        })),
+      };
+      await AxiosInstance.post("/file_upload", payload);
+      history.push("/superadmin/filetable");
+      toast.success("All data submitted successfully!");
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.status === 400
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message || "Submission failed! Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
+            <Flex justifyContent="space-between" className="mainnnn">
               <Text fontSize="xl" color={textColor} fontWeight="bold">
                 Add File
               </Text>
               <Button
                 onClick={onOpen}
-                style={{ backgroundColor: "#b19552", color: "#fff" }}
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
               >
                 Add New User
               </Button>
             </Flex>
           </CardHeader>
           <CardBody>
-            <FormControl id="user_id" mt={4} isRequired>
+            <FormControl>
               <FormLabel>User</FormLabel>
-              <Select placeholder="Select user" onChange={handleUserChange}>
+              <Select
+                placeholder="Select user"
+                onChange={handleUserChange}
+                value={selectedUser}
+              >
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
                     {`${user.username} (${user.email})`}
                   </option>
                 ))}
               </Select>
+              {cibilMessage && (
+                <p style={{ color: "red", marginTop: "10px" }}>
+                  {cibilMessage}
+                </p>
+              )}
             </FormControl>
 
             <FormControl
@@ -430,178 +513,174 @@ function CreateUserFile() {
                 </Select>
               </FormControl>
             )}
-            <div>
-              {Object.entries(groupedLoanDocuments).map(([title_id], index) => (
-                <div key={title_id} className="my-3">
-                  <h2 className="mx-4">
-                    <i>
-                      <u>
-                        <b>{groupedLoanDocuments[title_id][0].title}</b>
-                      </u>
-                    </i>
-                  </h2>
-                  <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                    {groupedLoanDocuments[title_id].map(
-                      (documentGroup, groupIndex) =>
+            {/* <div>
+              {Object.entries(groupedLoanDocuments).map(
+                ([title_id, documentGroups]) => (
+                  <div key={title_id} className="my-3">
+                    <h2 className="mx-4">
+                      <i>
+                        <u>
+                          <b>{documentGroups[0].title}</b>
+                        </u>
+                      </i>
+                    </h2>
+                    <div
+                      className="d-flex mainnnn"
+                      style={{ overflow: "auto" }}
+                    >
+                      {documentGroups.map((documentGroup, groupIndex) =>
                         documentGroup.document_names.map(
-                          (documentName, innerIndex) => (
-                            <div
-                              key={`${title_id}-${index}-${innerIndex}`}
-                              className="upload-area col-xl-12 col-md-12 col-sm-12"
-                              onClick={() => {
-                                document
-                                  .getElementById(
-                                    `fileInput-${title_id}-${index}-${innerIndex}`
-                                  )
-                                  .click();
-                              }}
-                            >
-                              <Text
-                                fontSize="xl"
-                                className="mx-3"
-                                style={{
-                                  fontSize: "12px",
-                                  textTransform: "capitalize",
-                                }}
+                          (documentName, innerIndex) => {
+                            const documentId =
+                              documentGroup.document_ids[innerIndex];
+                            const key = `${title_id}-${documentId}`;
+                            return (
+                              <div
+                                key={key}
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
-                                {documentName}
-                              </Text>
-                              <div className="upload-option">
-                                <input
-                                  type="file"
-                                  id={`fileInput-${title_id}-${index}-${innerIndex}`}
-                                  className="drop-zone__file-input"
-                                  onChange={(event) =>
-                                    handleFileInputChange(
-                                      event,
-                                      title_id,
-                                      index,
-                                      groupIndex,
-                                      innerIndex
-                                    )
-                                  }
-                                  style={{ display: "none" }}
-                                />
-                                {fileData[
-                                  `${title_id}-${index}-${innerIndex}`
-                                ] ? (
-                                  <div
-                                    className="file-preview text-end"
-                                    style={{
-                                      marginTop: "15px",
-                                      justifyContent: "space-between",
-                                      width: "100%",
-                                      padding: "10px",
-                                      backgroundColor: "#e8f0fe",
-                                      borderRadius: "8px",
-                                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                    }}
-                                  >
-                                    <IconButton
-                                      aria-label="Remove file"
-                                      icon={<CloseIcon />}
-                                      size="sm"
-                                      onClick={() =>
-                                        handleRemoveFile(
-                                          `${title_id}-${index}-${innerIndex}`
-                                        )
-                                      }
-                                      style={{ margin: "0 10px" }}
-                                    />
-                                    {fileData[
-                                      `${title_id}-${index}-${innerIndex}`
-                                    ].url ? (
-                                      fileData[
-                                        `${title_id}-${index}-${innerIndex}`
-                                      ].type === "application/pdf" ? (
-                                        <embed
-                                          src={
-                                            fileData[
-                                              `${title_id}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          type="application/pdf"
-                                          style={{
-                                            width: "100%",
-                                            minHeight: "100px",
-                                          }}
-                                        />
-                                      ) : (
-                                        <img
-                                          src={
-                                            fileData[
-                                              `${title_id}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          alt="Preview"
-                                          style={{
-                                            width: 100,
-                                            height: 100,
-                                            margin: "auto",
-                                            borderRadius: "4px",
-                                          }}
-                                        />
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
+                                  style={{
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    id={`fileInput-${key}`}
+                                    className="drop-zone__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(
+                                        event,
+                                        title_id,
+                                        groupIndex,
+                                        innerIndex
                                       )
-                                    ) : (
-                                      <span
-                                        style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          width: "100%",
-                                          padding: "20px",
-                                        }}
-                                      >
-                                        <i className="bx bxs-file"></i>
-                                        {
-                                          fileData[
-                                            `${title_id}-${index}-${innerIndex}`
-                                          ].name
-                                        }
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div
-                                    className={`upload-area__drop-zone drop-zone ${
-                                      isDragging ? "drop-zone--over" : ""
-                                    }`}
-                                    onClick={() => {
-                                      document
-                                        .getElementById(
-                                          `fileInput-${title_id}-${index}-${innerIndex}`
+                                    }
+                                    style={{ display: "none" }}
+                                  />
+                                  {fileData[key] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() => handleRemoveFile(key)}
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[key].url ? (
+                                        fileData[key].type ===
+                                        "application/pdf" ? (
+                                          <embed
+                                            src={fileData[key].url}
+                                            type="application/pdf"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={fileData[key].url}
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
+                                          />
                                         )
-                                        .click();
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      flexDirection: "column",
-                                      border: "2px dashed rgb(171, 202, 255)",
-                                      borderRadius: "15px",
-                                      marginTop: "25px",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    <span className="drop-zone__icon">
-                                      <i className="bx bxs-file-image"></i>
-                                    </span>
-                                    <p className="drop-zone__paragraph">
-                                      Upload Your Documents
-                                    </p>
-                                  </div>
-                                )}
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <i className="bx bxs-file"></i>
+                                          {fileData[key].name}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zone drop-zone`}
+                                      onClick={() => {
+                                        document
+                                          .getElementById(`fileInput-${key}`)
+                                          .click();
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                        border: "2px dashed rgb(171, 202, 255)",
+                                        borderRadius: "15px",
+                                        marginTop: "25px",
+                                        cursor: "pointer",
+                                      }}
+                                    >
+                                      <span className="drop-zone__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zone__paragraph">
+                                        Upload Your Documents
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )
+                            );
+                          }
                         )
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )
+              )}
+            </div> */}
+
+            {/* <FormControl id="stemp_paper_print" mt={4}>
+              <Checkbox
+                name="stemp_paper_print"
+                onChange={handleCheckboxChange}
+                isChecked={formData.stemp_paper_print}
+              >
+                Stemp Paper Print
+              </Checkbox>
+            </FormControl>
+
+            <FormControl id="loan_dispatch" mt={4}>
+              <Checkbox
+                name="loan_dispatch"
+                onChange={handleCheckboxChange}
+                isChecked={formData.loan_dispatch}
+              >
+                Loan Dispatch
+              </Checkbox>
+            </FormControl> */}
 
             <div>
               <Button
@@ -610,10 +689,11 @@ function CreateUserFile() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
+                disabled={cibilScore < 730}
                 style={{
+                  marginTop: 40,
                   backgroundColor: "#b19552",
                   color: "#fff",
-                  marginTop: 40,
                 }}
               >
                 Submit
@@ -621,11 +701,12 @@ function CreateUserFile() {
 
               <Button
                 mt={4}
+                colorScheme="yellow"
                 style={{
-                  backgroundColor: "#414650",
-                  color: "#fff",
                   marginTop: 40,
                   marginLeft: 8,
+                  backgroundColor: "#414650",
+                  color: "#fff",
                 }}
                 onClick={() => history.push("/savajcapitaluser/userfile")}
               >
@@ -645,17 +726,28 @@ function CreateUserFile() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalBody pb={6}>
               <FormControl>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <Input
-                  placeholder="Username"
+                  placeholder="Customer Name"
                   {...register("username", {
                     required: "Username is required",
                   })}
                 />
                 {errors.username && <p>{errors.username.message}</p>}
               </FormControl>
+              <FormControl>
+                <FormLabel>Date of birth</FormLabel>
+                <Input
+                  placeholder="DOB"
+                  type="date"
+                  {...register("dob", {
+                    required: "DOB is required",
+                  })}
+                />
+                {errors.dob && <p>{errors.dob.message}</p>}
+              </FormControl>
               <FormControl mt={4}>
-                <FormLabel>Number</FormLabel>
+                <FormLabel>Mobile Number</FormLabel>
                 <Input
                   placeholder="Number"
                   {...register("number", {
@@ -668,38 +760,75 @@ function CreateUserFile() {
                 />
                 {errors.number && <p>{errors.number.message}</p>}
               </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Email</FormLabel>
+              <FormControl id="cibil_score" mt={4} isRequired>
+                <FormLabel>Cibil Score</FormLabel>
                 <Input
-                  placeholder="Email"
-                  type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  name="cibil_score"
+                  onChange={handleChange}
+                  value={formData.cibil_score}
+                  placeholder="Enter your cibil score"
                 />
-                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
-
-              <FormControl id="country" mt={4} isRequired>
-                <FormLabel>Country</FormLabel>
-
-                <Select
-                  name="country"
-                  value={selectedCountry}
-                  onChange={handleCountryChange}
-                >
-                  {countries.map((country) => (
-                    <option key={country.isoCode} value={country.isoCode}>
-                      {country.name}
-                    </option>
-                  ))}
-                </Select>
+              <FormControl id="gst_number" mt={4} isRequired>
+                <FormLabel>GST Number</FormLabel>
+                <Input
+                  name="gst_number"
+                  type="number"
+                  onChange={handleGstChange}
+                  value={formData.gst_number}
+                  placeholder="Enter GST number"
+                />
               </FormControl>
+              {/* <FormControl className="my-2">
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  placeholder="Aadhar Card"
+                  type="number"
+                  name="aadhar_card"
+                  onChange={handleadharChange}
+                  {...register("aadhar_card", {
+                    required: "Aadhar card is required",
+                  })}
+                  value={formData.aadhar_card}
+                />
+                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
+              </FormControl>
+             
+              <FormControl>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  placeholder="Pan Card"
+                  type="string"
+                  name="pan_card"
+                  onChange={handleeChange}
+                  {...register("pan_card", {
+                    required: "Pan card is required",
+                  })}
+                  value={formData.pan_card}
 
+                />
+                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+              </FormControl> */}
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pan Card</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handleeChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
               <FormControl id="state" mt={4} isRequired>
                 <FormLabel>State</FormLabel>
                 <Select
@@ -708,9 +837,6 @@ function CreateUserFile() {
                   onChange={handleStateChange}
                   disabled={!selectedCountry}
                   value={selectedState}
-                  // {...register("state", {
-                  //   required: "State is required",
-                  // })}
                 >
                   {states.length ? (
                     states.map((state) => (
@@ -723,7 +849,6 @@ function CreateUserFile() {
                   )}
                 </Select>
               </FormControl>
-
               <FormControl id="city" mt={4} isRequired>
                 <FormLabel>City</FormLabel>
                 <Select
@@ -746,41 +871,74 @@ function CreateUserFile() {
                   )}
                 </Select>
               </FormControl>
+              <FormControl id="country" mt={4} isRequired>
+                <FormLabel>Country</FormLabel>
 
-              <FormControl>
-                <FormLabel>Dob</FormLabel>
-                <Input
-                  placeholder="DOB"
-                  type="date"
-                  {...register("dob", {
-                    required: "DOB is required",
-                  })}
-                />
-                {errors.dob && <p>{errors.dob.message}</p>}
+                <Select
+                  name="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
-
-              <FormControl className="my-2">
-                <FormLabel>Aadhar Card</FormLabel>
+              <FormControl id="unit_address" mt={4} isRequired>
+                <FormLabel>Unit Address</FormLabel>
                 <Input
-                  placeholder="Adhar Card"
-                  type="number"
-                  {...register("aadhar_card", {
-                    required: "Aadhar card is required",
-                  })}
-                />
-                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  placeholder="Pan Card"
+                  name="unit_address"
                   type="string"
-                  {...register("pan_card", {
-                    required: "Pan card is required",
+                  onChange={handleChange}
+                  value={formData.unit_address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <FormControl id="reference" mt={4} isRequired>
+                <FormLabel>Reference</FormLabel>
+                <Input
+                  name="reference"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.reference}
+                  placeholder="Enter reference"
+                />
+              </FormControl>
+              {/* <FormControl mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
                   })}
                 />
-                {errors.pan_card && <p>{errors.pan_card.message}</p>}
+                {errors.email && <p>{errors.email.message}</p>}
+              </FormControl> */}
+
+              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
+                Login Credentials
+              </Text>
+              <FormControl mt={4}>
+                {/* <FormLabel>Email</FormLabel> */}
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && <p>{errors.email.message}</p>}
               </FormControl>
             </ModalBody>
 
@@ -789,23 +947,16 @@ function CreateUserFile() {
                 colorScheme="blue"
                 mr={3}
                 type="submit"
-                style={{ backgroundColor: "#b19552", color: "#fff" }}
+                style={{ backgroundColor: "#b19552" }}
               >
                 Save
               </Button>
-              <Button
-                onClick={onClose}
-                style={{
-                  backgroundColor: "#414650",
-                  color: "#fff",
-                }}
-              >
-                Cancel
-              </Button>
+              <Button onClick={onClose}>Cancel</Button>
             </ModalFooter>
           </form>
         </ModalContent>
       </Modal>
+
       <Toaster />
     </>
   );
