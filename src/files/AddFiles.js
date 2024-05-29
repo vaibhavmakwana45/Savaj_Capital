@@ -456,7 +456,7 @@ function AddFiles() {
               >
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
-                    {`${user.username} (${user.email})`}
+                    {`${user.username} (${user.businessname})`}
                   </option>
                 ))}
               </Select>

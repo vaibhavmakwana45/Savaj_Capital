@@ -686,9 +686,12 @@ export default function CollapsibleTable() {
               {loan ? (
                 <>
                   {loan}
-                  <Text as="span" color="green.400" fontWeight="bold" pl="1">
-                    - {totalAmount !== null ? totalAmount : "-"}
-                  </Text>
+                  {selectedStatusSearch !== "running" &&
+                  selectedStatusSearch !== "rejected" ? (
+                    <Text as="span" color="green.400" fontWeight="bold" pl="1">
+                      - {totalAmount !== null ? totalAmount : "-"}
+                    </Text>
+                  ) : null}
                 </>
               ) : (
                 "All Files"

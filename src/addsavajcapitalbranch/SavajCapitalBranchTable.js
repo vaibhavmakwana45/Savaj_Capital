@@ -52,11 +52,11 @@ function SavajCapitalBranchTable() {
     searchTerm.length === 0
       ? savajcapitalbranch
       : savajcapitalbranch.filter(
-          (user) =>
-            user.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.state.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        (user) =>
+          user.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.state.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
   const allHeaders = [
     "Index",
@@ -71,7 +71,7 @@ function SavajCapitalBranchTable() {
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
 
-  const formattedData = filteredUsers?.map((item,index) => [
+  const formattedData = filteredUsers?.map((item, index) => [
     item.branch_id,
     index + 1,
     item.branch_name,
