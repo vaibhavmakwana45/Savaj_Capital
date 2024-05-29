@@ -63,15 +63,15 @@ function SavajCapitalBranchTable() {
     "Savaj Capital Branch",
     "City",
     "State",
-    "create",
-    "update",
+    "",
+    "State",
     "Action",
   ];
 
   let navbarIcon = useColorModeValue("white", "gray.200");
   let menuBg = useColorModeValue("white", "navy.800");
 
-  const formattedData = filteredUsers?.map((item,index) => [
+  const formattedData = filteredUsers?.map((item, index) => [
     item.branch_id,
     index + 1,
     item.branch_name,
@@ -97,6 +97,7 @@ function SavajCapitalBranchTable() {
   const fetchSavajcapitalbranch = async () => {
     try {
       const response = await AxiosInstance.get("/branch");
+      console.log(response, "response");
       setLoading(false);
       setSavajcapitalbranch(response.data.data);
     } catch (error) {
@@ -258,10 +259,10 @@ function SavajCapitalBranchTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={3}
-              removeIndex2={4}
-              documentIndex={4}
-              documentIndex2={5}
+              removeIndex={4}
+              removeIndex2={5}
+              documentIndex={5}
+              documentIndex2={6}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}

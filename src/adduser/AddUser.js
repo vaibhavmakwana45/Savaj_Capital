@@ -60,7 +60,7 @@ function AddUser(props) {
   const getData = async () => {
     try {
       const response = await AxiosInstance.get("/addusers/user/" + id);
-
+      console.log(response, "response");
       if (response.data.success) {
         const { user } = response.data;
 

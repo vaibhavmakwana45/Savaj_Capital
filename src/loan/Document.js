@@ -196,9 +196,21 @@ function Document() {
   // };
   const deleteDocument = async (loanDocumentId) => {
     try {
-      const response = await AxiosInstance.delete(
-        `/loan_docs/${loanDocumentId}`
-      );
+      console.log("Deleting document:", loanDocumentId);
+      console.log("Loan ID:", loan_id);
+      console.log("Loantype ID:", loantype_id);
+      
+      const requestData = { loan_id: loan_id }; // Always include loan_id
+  
+      // Add loantype_id to the request data if available
+      if (loantype_id) {
+        requestData.loantype_id = loantype_id;
+      }
+  
+      const response = await AxiosInstance.delete(`/loan_docs/${loanDocumentId}`, {
+        data: requestData,
+      });
+  
       if (response.data.success) {
         setDocuments(
           documents.filter(
@@ -225,6 +237,7 @@ function Document() {
       setIsDeleteDialogOpen(false);
     }
   };
+  
   const AddDocument = async (loan_document) => {
     try {
       const response = await AxiosInstance.post("/loan_docs/", {

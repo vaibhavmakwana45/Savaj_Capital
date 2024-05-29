@@ -6,6 +6,7 @@ const File_Uplode = require("../../models/File/File_Uplode");
 const User = require("../../models/AddUser");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
+const AddUser = require("../../models/AddUser");
 
 router.post("/", async (req, res) => {
   try {
@@ -117,5 +118,26 @@ router.get("/branch_user/:branchuser_id", async (req, res) => {
     });
   }
 });
+router.get("/:state/:city", async (req, res) => {
+  try {
+    const { state, city } = req.params;
 
+    // Fetch users based on state and city
+    const users = await AddUser.find({ state, city });
+
+    // Get array of user ids
+    const userIds = users.map((user) => user.user_id);
+
+    // Fetch files related to the users
+    const files = await File_Uplode.find({ user_id: { $in: userIds } });
+
+    res.json({
+      statusCode: 200,
+      files,
+      message: "Files fetched successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ statusCode: 500, message: error.message });
+  }
+});
 module.exports = router;

@@ -5,7 +5,6 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
 } from "@chakra-ui/react";
 import {
   Flex,
@@ -16,45 +15,31 @@ import {
   Input,
   Select,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Country, State, City } from "country-state-city";
-import axios from "axios";
+import { State, City } from "country-state-city";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-import upArrow from "../assets/svg/uparrow.svg";
-import downArrow from "../assets/svg/downarrow.svg";
-import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
-function AddSavajCapitalBranch() {
+function AddSavajUser() {
   const textColor = useColorModeValue("gray.700", "white");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [branches, setBranches] = useState(["sbi", "pnb"]);
-  const [roles, setRoles] = useState([
-    "billing checker",
-    "cibil",
-    "aadhar checker",
-  ]);
+  const [branches, setBranches] = useState([]);
+  const [roles, setRoles] = useState([]);
   const cancelRef = React.useRef();
   const [role, setRole] = useState("");
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const branch_id = searchParams.get("branch_id");
-
   const history = useHistory();
 
   const getRolesData = async () => {
@@ -70,6 +55,7 @@ function AddSavajCapitalBranch() {
       console.error(error);
     }
   };
+
   const getBranchesData = async () => {
     try {
       const response = await AxiosInstance.get("/branch/");
@@ -87,20 +73,27 @@ function AddSavajCapitalBranch() {
   const getData = async () => {
     try {
       const response = await AxiosInstance.get("/savaj_user/user/" + id);
-
+      console.log(response, "response");
       if (response.data.success) {
-        const { branch, data } = response.data;
+        const { data } = response.data;
 
         const submissionData = {
           branch_id: data[0].branch_id,
           role_id: data[0].role_id,
           email: data[0].email,
+          state: data[0].state,
+          city: data[0].city,
+          dob: data[0].dob,
+          aadhar_card: data[0].aadhar_card,
+          pan_card: data[0].pan_card,
+          pan_card: data[0].pan_card,
           number: data[0].number,
           full_name: data[0].full_name,
+          address: data[0].address,
           password: data[0].password,
-          
         };
-
+        setSelectedState(data[0].state);
+        console.log(data[0].state, "data[0].state");
         setFormData(submissionData);
       } else {
         alert("Please try again later...!");
@@ -125,20 +118,23 @@ function AddSavajCapitalBranch() {
 
   useEffect(() => {
     if (selectedState) {
-      const citiesOfState = City.getCitiesOfState("IN", selectedState);
-      setCities(citiesOfState);
+      const stateCode = states.find((state) => state.name === selectedState)
+        ?.isoCode;
+      if (stateCode) {
+        const citiesOfState = City.getCitiesOfState("IN", stateCode);
+        setCities(citiesOfState);
+      }
+    } else {
+      setCities([]);
     }
-  }, [selectedState]);
+  }, [selectedState, states]);
 
   const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const stateObj = states.find((state) => state.isoCode === stateCode);
-    const stateFullName = stateObj ? stateObj.name : "";
-
-    setSelectedState(stateCode);
+    const stateName = event.target.value;
+    setSelectedState(stateName);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      state: stateFullName,
+      state: stateName,
     }));
   };
 
@@ -150,6 +146,10 @@ function AddSavajCapitalBranch() {
     state: "",
     city: "",
     full_name: "",
+    dob: "",
+    aadhar_card: "",
+    address: "",
+    pan_card: "",
     number: "",
     branch_id: "",
     email: "",
@@ -164,6 +164,34 @@ function AddSavajCapitalBranch() {
     });
   };
 
+  const handlePanChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+  const handleAadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && value.length <= 12) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "number" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
   const handleAddRole = async (role) => {
     try {
       const response = await AxiosInstance.post("/role", { role });
@@ -218,10 +246,6 @@ function AddSavajCapitalBranch() {
       setLoading(false);
     }
   };
-  const [filteredData, setFilteredData] = useState("");
-  const [filterOpen, setFilterOpen] = useState("");
-  const filterToggle = () => setFilterOpen(!filterOpen);
-  const [selectedLoan, setSelectedLoan] = useState("");
 
   return (
     <>
@@ -239,10 +263,11 @@ function AddSavajCapitalBranch() {
               </Text>
 
               <Button
-                className="ttextt"
+                colorScheme="blue"
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
                 }}
+                ml={3}
                 style={{
                   backgroundColor: "#b19552",
                   color: "#fff",
@@ -275,92 +300,7 @@ function AddSavajCapitalBranch() {
                   ))}
                 </Select>
               </FormControl>
-              {/* <div className="w-100">
-                <FormLabel>Select Loan</FormLabel>
 
-                <input
-                  style={{
-                    width: "100%",
-                    border: "0.5px solid #333",
-                    padding: "5px",
-                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right center",
-                    backgroundSize: "10px",
-                    backgroundPosition: "right 15px center",
-                    borderRadius: "5px",
-                    borderColor: "inherit",
-                  }}
-                  placeholder="Select Loan-Type"
-                  onFocus={() => {
-                    setFilteredData(branches);
-                    setFilterOpen(true);
-                    filterToggle();
-
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      filterToggle();
-                    }, 200);
-                  }}
-                  onChange={(e) => {
-                    if (e.target.value.length !== "") {
-                      setFilterOpen(true);
-                    } else {
-                      setFilterOpen(false);
-                    }
-                    const filterData = branches.filter((item) => {
-                      return (
-                        item.branch_name
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase()) ||
-                        item.city
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase()) ||
-                        item.state
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase())
-                      );
-                    });
-                    setSelectedLoan(e.target.value);
-                    setFilteredData(filterData);
-                  }}
-                  value={selectedLoan}
-                />
-                <Dropdown
-                  className="w-100"
-                  isOpen={filterOpen}
-                  toggle={filterToggle}
-                >
-                  <DropdownMenu className="w-100">
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={(e) => {
-                            setSelectedLoan(
-                              item.branch_name +
-                                ` (${item.city + ", " + item.state})`
-                            );
-                            setFilterOpen(false);
-                            const selectedLoanId = item.branch_id;
-                            setFormData({
-                              ...formData,
-                              loan_id: selectedLoanId,
-                            });
-                          }}
-                        >
-   
-                          {item.branch_name +
-                            ` (${item.city + ", " + item.state})`}
-                        </DropdownItem>
-                      ))
-                    ) : (
-                      <DropdownItem>No data found</DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div> */}
               <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
                 <FormLabel>Select Role</FormLabel>
                 <Select
@@ -374,7 +314,7 @@ function AddSavajCapitalBranch() {
                   {roles.map((city) => (
                     <option
                       key={city.role_id}
-                      name={"fdkasdfadfkl"}
+                      name={"role"}
                       value={city.role_id}
                     >
                       {city.role}
@@ -382,14 +322,8 @@ function AddSavajCapitalBranch() {
                   ))}
                 </Select>
               </FormControl>
-              {/* <FormControl id="branch_name" mt={4} isRequired>
-                  <FormLabel>Branch Name</FormLabel>
-                  <Input name="branch_name" onChange={handleChange} />
-                </FormControl> */}
-
-              {/* User Details */}
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
-                Login Credential
+                User Detail
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Full Name</FormLabel>
@@ -398,8 +332,99 @@ function AddSavajCapitalBranch() {
                   type="full_name"
                   onChange={handleChange}
                   value={formData.full_name}
+                  placeholder="Enter your name"
                 />
               </FormControl>
+              <FormControl id="number" mt={4} isRequired>
+                <FormLabel>Mobile Number</FormLabel>
+                <Input
+                  name="number"
+                  type="number"
+                  onChange={handlePhoneChange}
+                  value={formData.number}
+                  placeholder="Enter your number"
+                />
+              </FormControl>
+              <FormControl id="dob" mt={4} isRequired>
+                <FormLabel>DOB</FormLabel>
+                <Input
+                  name="dob"
+                  type="date"
+                  onChange={handleChange}
+                  value={formData.dob}
+                />
+              </FormControl>
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleAadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pancard</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handlePanChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>State</FormLabel>
+                <Select
+                  name="state"
+                  value={selectedState}
+                  onChange={handleStateChange}
+                  placeholder="Select State"
+                >
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl id="city" mt={4} isRequired>
+                <FormLabel>City</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select city"
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  disabled={!selectedState}
+                  value={formData.city}
+                >
+                  {cities.length ? (
+                    cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Please select a state first</option>
+                  )}
+                </Select>
+              </FormControl>
+              <FormControl id="address" mt={4} isRequired>
+                <FormLabel>Address</FormLabel>
+                <Input
+                  name="address"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
+                Login Credentials
+              </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
@@ -408,6 +433,7 @@ function AddSavajCapitalBranch() {
                   onChange={handleChange}
                   disabled={id}
                   value={formData.email}
+                  placeholder="Enter your Email"
                 />
               </FormControl>
               <FormControl id="password" mt={4} isRequired>
@@ -420,40 +446,6 @@ function AddSavajCapitalBranch() {
                   placeholder="Enter your Password"
                 />
               </FormControl>
-              <FormControl id="number" mt={4} isRequired>
-                <FormLabel>Mobile Number</FormLabel>
-                <Input
-                  name="number"
-                  type="number"
-                  onChange={handleChange}
-                  value={formData.number}
-                />
-              </FormControl>
-
-              {/* {
-                !id &&
-                <FormControl id="password" mt={4} isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem" // ensures that text doesn't go under the icon
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      onChange={handleChange}
-                    />
-                    <InputRightElement width="4.5rem">
-                      <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              } */}
-
               <div className="d-flex">
                 <Button
                   mt={4}
@@ -508,8 +500,8 @@ function AddSavajCapitalBranch() {
                   placeholder="Add role"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      e.preventDefault(); // Prevent the default behavior of Enter key
-                      handleAddRole(role); // Call the addRole function
+                      e.preventDefault();
+                      handleAddRole(role);
                     }
                   }}
                 />
@@ -549,4 +541,4 @@ function AddSavajCapitalBranch() {
   );
 }
 
-export default AddSavajCapitalBranch;
+export default AddSavajUser;

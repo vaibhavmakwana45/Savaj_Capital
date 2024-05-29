@@ -332,7 +332,7 @@ var dashRoutes = [
     component: AssignedSavajUsers,
     hideInSidebar: true,
     layout: "/superadmin",
-    parent: "superadmin",
+    parent: "savajusers",
     key: "savajcapitalbranch",
   },
   {
