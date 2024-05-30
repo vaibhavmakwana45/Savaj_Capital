@@ -68,6 +68,7 @@ function Row(props) {
         ...response.data.data.approvedData,
         ...response.data.data.pendingData,
       ]);
+      console.log(response, "response");
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -553,17 +554,31 @@ export default function CollapsibleTable() {
               `https://cdn.savajcapital.com/api/upload/${document.file_path}`
             );
             if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
-              console.error(
-                "Failed to delete file from CDN:",
-                cdnResponse.data
-              );
-              toast.error("Failed to delete file from CDN");
-              allDeleted = false;
+              if (cdnResponse.status === 404) {
+                console.warn(
+                  "File not found on CDN, treating as deleted:",
+                  document.file_path
+                );
+              } else {
+                console.error(
+                  "Failed to delete file from CDN:",
+                  cdnResponse.data
+                );
+                toast.error("Failed to delete file from CDN");
+                allDeleted = false;
+              }
             }
           } catch (cdnError) {
-            console.error("Error deleting from CDN:", cdnError);
-            toast.error("Error deleting from CDN");
-            allDeleted = false;
+            if (cdnError.response && cdnError.response.status === 404) {
+              console.warn(
+                "File not found on CDN, treating as deleted:",
+                document.file_path
+              );
+            } else {
+              console.error("Error deleting from CDN:", cdnError);
+              toast.error("Error deleting from CDN");
+              allDeleted = false;
+            }
           }
         }
       } else {
@@ -686,9 +701,12 @@ export default function CollapsibleTable() {
               {loan ? (
                 <>
                   {loan}
-                  <Text as="span" color="green.400" fontWeight="bold" pl="1">
-                    - {totalAmount !== null ? totalAmount : "-"}
-                  </Text>
+                  {selectedStatusSearch !== "running" &&
+                  selectedStatusSearch !== "rejected" ? (
+                    <Text as="span" color="green.400" fontWeight="bold" pl="1">
+                      - {totalAmount !== null ? totalAmount : "-"}
+                    </Text>
+                  ) : null}
                 </>
               ) : (
                 "All Files"
@@ -770,7 +788,11 @@ export default function CollapsibleTable() {
                   onClick={() => history.push("/superadmin/addfile")}
                   className="dynamicImportantStyle"
                   colorScheme="blue"
-                  style={{ backgroundColor: "#b19552", color: "white" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "white",
+                    width: "150px",
+                  }}
                 >
                   Add File
                 </Button>

@@ -14,10 +14,12 @@ import {
   Paper,
   Collapse,
   Box,
+  Typography,
 } from "@mui/material";
 import "./userfile.scss";
-import { useHistory } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useHistory } from "react-router-dom";
+import { Select } from "@chakra-ui/react";
 import {
   Button,
   useColorModeValue,
@@ -30,9 +32,10 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Stack,
 } from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
@@ -40,16 +43,22 @@ import {
 } from "@mui/icons-material";
 import Loader from "react-js-loader";
 import AxiosInstance from "config/AxiosInstance";
-
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import { Country, State, City } from "country-state-city";
 const theme = createTheme();
 
 function Row(props) {
-  const { id, file, handleEditClick, handleDelete } = props;
-  const history = useHistory();
+  const {
+    id,
+    file,
+    handleEditClick,
+    handleDelete,
+    handleUpdate,
+    index,
+  } = props;
   const [open, setOpen] = useState(false);
-
   const [fileData, setFileData] = useState([]);
-  const [filePercentageData, setFilePercentageData] = useState("");
+
   const fetchFileData = async () => {
     try {
       const file_id = file.file_id;
@@ -60,7 +69,6 @@ function Row(props) {
         ...response.data.data.approvedData,
         ...response.data.data.pendingData,
       ]);
-      setFilePercentageData(response.data.data.document_percentage);
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -69,6 +77,7 @@ function Row(props) {
   useEffect(() => {
     fetchFileData();
   }, [file]);
+
   useEffect(() => {
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
@@ -105,15 +114,13 @@ function Row(props) {
         return (percentage / 100) * 360;
       }
     });
-  }, [filePercentageData]);
+  }, []);
 
   return (
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() =>
-          props.handleRow("/savajcapitaluser/viewuserfile?id=" + id)
-        }
+        onClick={() => props.handleRow("/superadmin/viewfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -128,30 +135,136 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="">{file?.username}</TableCell>
-        <TableCell align="">{file?.file_id}</TableCell>
+        <TableCell align="">{index}</TableCell>
+        <TableCell align="">
+          <span
+            style={{
+              padding: "4px 8px",
+              fontWeight: "bold",
+            }}
+          >
+            {file?.file_id}
+          </span>
+        </TableCell>
+        <TableCell align="">
+          <span
+            style={{
+              padding: "4px 8px",
+              fontWeight: "bold",
+            }}
+          >
+            {file?.user_username} ({file?.businessname})
+          </span>
+        </TableCell>
+        <TableCell align="">{file?.city}</TableCell>
         <TableCell align="">{file?.loan}</TableCell>
-        <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">{file?.createdAt}</TableCell>
-        <TableCell align="">{file?.updatedAt}</TableCell>
+        <TableCell align="">
+          <div
+            style={{
+              color: "white",
+              backgroundColor:
+                file?.status === "approved"
+                  ? "#4CAF50"
+                  : file?.status === "rejected"
+                  ? "#F44336"
+                  : "#FF9C00",
+              padding: "4px 8px",
+              borderRadius: "10px",
+              display: "inline-block",
+            }}
+          >
+            <span>
+              {file?.status === "approved"
+                ? `Approved`
+                : file?.status === "rejected"
+                ? `Rejected`
+                : `Running`}
+            </span>
+            {file?.status_message && (
+              <>
+                <br />
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: "4px",
+                    fontSize: "0.9em",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {file.status_message}
+                </span>
+              </>
+            )}
+            {file?.status !== "rejected" && file?.amount && (
+              <>
+                <br />
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "0.9em",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Amount: {file.amount}
+                </span>
+              </>
+            )}
+          </div>
+        </TableCell>
+
         <TableCell align="center">
-          {filePercentageData && (
-            <div class="progress " data-value={Number(filePercentageData)}>
-              <span class="progress-left">
-                <span class="progress-bar"></span>
-              </span>
-              <span class="progress-right">
-                <span class="progress-bar"></span>
-              </span>
-              <div class="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
-                <div class="font-weight-bold">
-                  {Number(filePercentageData)}
-                  <sup class="small">%</sup>
+          {file.document_percentage != null &&
+            !isNaN(file.document_percentage) && (
+              <div
+                className="progress"
+                data-value={Number(file.document_percentage)}
+              >
+                <span className="progress-left">
+                  <span className="progress-bar"></span>
+                </span>
+                <span className="progress-right">
+                  <span className="progress-bar"></span>
+                </span>
+                <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                  <div className="font-weight-bold">
+                    {Number(file.document_percentage)}
+                    <sup className="small">%</sup>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+        </TableCell>
+
+        <TableCell>
+          {file.loan_id === "1715150207654" ? (
+            // <Button
+            //   style={{
+            //     padding: "5px",
+            //     borderRadius: "5px",
+            //     backgroundColor: "#ededed",
+            //     width: "100%",
+            //   }}
+            //   onClick={(e) => {
+            //     e.stopPropagation(e.target.value);
+            //     // handleClick(pan_card);
+            //     href="https://ibdlp.indianbank.in/GSTAdvantage/components/"
+
+            //   }}
+            // >
+            //   IDB
+            // </Button>
+            <a
+              href="https://ibdlp.indianbank.in/GSTAdvantage/"
+              target="_blank"
+              onClick={(e) => e.stopPropagation(e.target.value)}
+            >
+              IDB
+            </a>
+          ) : (
+            "-"
           )}
         </TableCell>
+
         <TableCell align="">
           <Flex>
             <IconButton
@@ -171,6 +284,15 @@ function Row(props) {
               }}
               aria-label="Edit bank"
               icon={<EditIcon />}
+              style={{ marginRight: 15, fontSize: "20px" }}
+            />
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdate(file.file_id);
+              }}
+              aria-label="Edit status"
+              icon={<AddIcon />}
               style={{ fontSize: "20px" }}
             />
           </Flex>
@@ -182,17 +304,29 @@ function Row(props) {
             in={open}
             timeout="auto"
             unmountOnExit
-            style={{ width: "50%" }}
+            style={{ width: "100%" }}
           >
-            <Box sx={{ margin: 1 }}>
-              <Paper elevation={3} sx={{ borderRadius: 3 }}>
+            <Box sx={{ margin: 1 }} className="d-flex gap-4 collapse-table">
+              <Paper
+                className="col-8 col-md-8 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "104px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
                 <Table size="small" aria-label="documents">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
                         Document
                       </TableCell>
-                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                      <TableCell
+                        className="status"
+                        sx={{ fontWeight: "bold", fontSize: "1rem" }}
+                      >
                         Status
                       </TableCell>
                     </TableRow>
@@ -213,7 +347,7 @@ function Row(props) {
                             </span>
                           ) : (
                             <span
-                              style={{ color: "#FFB302 ", fontWeight: "bold" }}
+                              style={{ color: "#FF9C00 ", fontWeight: "bold" }}
                             >
                               <i class="fa-regular fa-clock"></i>
                               &nbsp;&nbsp;Pending
@@ -222,6 +356,35 @@ function Row(props) {
                         </TableCell>
                       </TableRow>
                     ))}
+                  </TableBody>
+                </Table>
+              </Paper>
+              <Paper
+                className="col-4 col-md-4 col-sm-12 paper"
+                elevation={3}
+                sx={{ borderRadius: 3 }}
+                style={{
+                  height: "100px",
+                  overflow: "auto",
+                  scrollbarWidth: "thin",
+                }}
+              >
+                <Table size="small" aria-label="documents">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Create
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                        Update
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>{file?.createdAt}</TableCell>
+                      <TableCell>{file?.updatedAt}</TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </Paper>
@@ -253,18 +416,29 @@ export default function CollapsibleTable() {
   const [files, setFiles] = useState([]);
   let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
-  const filteredUsers =
-    searchTerm.length === 0
-      ? files
-      : files.filter(
-          (user) =>
-            (user.loan &&
-              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.file_id &&
-              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.loan_type &&
-              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+  const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
+  const location = useLocation();
+  const { loan, loan_id } = location?.state?.state || {};
+  const [loans, setLoans] = useState([]);
+  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const states = State.getStatesOfCountry("IN");
+  const cities = selectedState
+    ? City.getCitiesOfState(
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
+    : [];
+
+  const handleStateChange = (event) => {
+    setSelectedState(event.target.value);
+    setSelectedCity("");
+  };
+
+  const handleCityChange = (event) => {
+    setSelectedCity(event.target.value);
+  };
 
   const history = useHistory();
 
@@ -272,84 +446,354 @@ export default function CollapsibleTable() {
     history.push(url);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const loanResponse = await AxiosInstance.get("/loan");
+        setLoans(loanResponse.data.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (loan_id) {
+      const timeout = setTimeout(() => {
+        setSelectedLoan(loan_id);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [loan_id, loans, loan]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecorrds] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [accessType, setAccessType] = useState("");
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
+  console.log(accessType, "accessType");
 
-  const [loading, setLoading] = useState(true);
+  const fetchData = async () => {
+    if (accessType) {
+      try {
+        if (!accessType.state || !accessType.city) {
+          console.error("State or city is missing.");
+          return;
+        }
+  
+        const response = await AxiosInstance.get(
+          `/file_upload/savajusers/${accessType.state}/${accessType.city}`,
+          {
+            params: {
+              page: currentPage,
+              limit: itemsPerPage,
+              searchTerm,
+              selectedLoan: loan_id ? (loan_id === "All Loan Types" ? "" : loan_id) : (selectedLoan === "All Loan Types" ? "" : selectedLoan),
+              selectedStatus: selectedStatusSearch,
+              selectedState,
+              selectedCity,
+            },
+          }
+        );
+        console.log(response, "response");
+        setFiles(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setTotalRecorrds(response.data.totalCount);
+        setCurrentPage(response.data.currentPage);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    }
+  };
+  
 
   useEffect(() => {
-    const fetchFiles = async () => {
-      if (accessType.branchuser_id) {
-        try {
-          const response = await AxiosInstance.get(
-            `/branch_assign/branch_user/${accessType.branchuser_id}`
-          );
-          setFiles(response.data.data);
-          setLoading(false);
-        } catch (error) {
-          console.error("Error fetching files:", error);
-        }
-      }
-    };
+    fetchData();
+  }, [
+    currentPage,
+    itemsPerPage,
+    searchTerm,
+    selectedLoan,
+    selectedStatusSearch,
+    selectedState,
+    selectedCity,
+    loan_id,
+    accessType,
+  ]);
 
-    fetchFiles();
-  }, [accessType]);
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    if (nextPage <= totalPages) {
+      setCurrentPage(nextPage);
+    }
+  };
 
- 
+  const handlePrevPage = () => {
+    const prevPage = currentPage - 1;
+    if (prevPage >= 1) {
+      setCurrentPage(prevPage);
+    }
+  };
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
+
   const deletefile = async (fileId) => {
     try {
-      await AxiosInstance.delete(`/file_upload/${fileId}`);
-      setFiles(files.filter((file) => file.file_id !== fileId));
-      setIsDeleteDialogOpen(false);
-      toast.success("File deleted successfully!");
+      const fileData = files?.find((file) => file?.file_id === fileId);
+      let allDeleted = true;
+
+      if (fileData?.documents?.length > 0) {
+        for (const document of fileData.documents) {
+          if (!document.file_path) {
+            console.error("File path is missing for document");
+            toast.error("File path is missing for document");
+            allDeleted = false;
+            continue;
+          }
+
+          try {
+            const cdnResponse = await axios.delete(
+              `https://cdn.savajcapital.com/api/upload/${document.file_path}`
+            );
+            if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
+              console.error(
+                "Failed to delete file from CDN:",
+                cdnResponse.data
+              );
+              toast.error("Failed to delete file from CDN");
+              allDeleted = false;
+            }
+          } catch (cdnError) {
+            console.error("Error deleting from CDN:", cdnError);
+            toast.error("Error deleting from CDN");
+            allDeleted = false;
+          }
+        }
+      } else {
+        console.warn(
+          "No documents found for the file, but will attempt to delete file metadata."
+        );
+      }
+
+      if (allDeleted) {
+        const dbResponse = await AxiosInstance.delete(`/file_upload/${fileId}`);
+        if (dbResponse.status === 200) {
+          setFiles((prevFiles) =>
+            prevFiles.filter((file) => file.file_id !== fileId)
+          );
+          toast.success("File deleted successfully!");
+        } else {
+          console.error("Failed to delete file metadata:", dbResponse.data);
+          toast.error("Failed to delete file metadata");
+          allDeleted = false;
+        }
+      }
+
+      if (!allDeleted) {
+        toast.error("Not all files/documents could be deleted successfully");
+      }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("file not delete");
+      console.error("Error deleting files:", error);
+      toast.error("Files could not be deleted");
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
+
   const handleEditClick = (id) => {
     history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
+
   const handleDelete = (id) => {
     setSelectedFileId(id);
     setIsDeleteDialogOpen(true);
   };
+
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const cancelRef1 = React.useRef();
+
+  const updateFile = async (fileId, newStatus) => {
+    try {
+      if (!newStatus) {
+        console.error("Status not selected");
+        toast.error("Please select a status before updating.");
+        return;
+      }
+
+      const response = await AxiosInstance.put(
+        `/file_upload/updatestatus/${fileId}`,
+        {
+          status: newStatus,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("File status updated successfully!");
+        fetchData();
+      } else {
+        throw new Error(
+          response.data.message || "Failed to update the status."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating file status:", error);
+      toast.error("File status could not be updated: " + error.message);
+    } finally {
+      setIsUpdateDialogOpen(false);
+      setSelectedStatus("");
+      setSelecteUpdateFileId(null);
+    }
+  };
+
+  const handleUpdate = (id) => {
+    setSelecteUpdateFileId(id);
+    setIsUpdateDialogOpen(true);
+  };
+
+  const [totalAmount, setTotalAmount] = useState(null);
+  const fetchTotalAmount = async () => {
+    try {
+      if (loan_id) {
+        const response = await AxiosInstance.get(
+          `/file_upload/amounts/${loan_id}`,
+          {
+            params: {
+              state: selectedState,
+              city: selectedCity,
+            },
+          }
+        );
+        const { totalAmount } = response.data;
+        setTotalAmount(totalAmount);
+      }
+    } catch (error) {
+      console.error("Error fetching total amount:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalAmount();
+  }, [loan_id, selectedState, selectedCity]);
+
   return (
     <>
       <div
         className="card"
-        style={{ marginTop: "120px", borderRadius: "30px" }}
+        style={{ marginTop: "99px ", borderRadius: "30px" }}
       >
-        <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext text-dark">
-              Add Files
+        <CardHeader style={{ padding: "10px" }} className="card-main ">
+          <Flex justifyContent="space-between" p="4" className="mainnnn">
+            <Text fontSize="xl">
+              {loan ? (
+                <>
+                  {loan}
+                  <Text as="span" color="green.400" fontWeight="bold" pl="1">
+                    - {totalAmount !== null ? totalAmount : "-"}
+                  </Text>
+                </>
+              ) : (
+                "All Files"
+              )}
             </Text>
-            <div>
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name"
-                width="250px"
-                marginRight="10px"
-              />
+          </Flex>
+          <Flex justifyContent="end" py="1" className="mainnnn">
+            <Flex className="theaddd p-2">
+              <div className="">
+                {!loan && (
+                  <select
+                    className="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    value={selectedLoan}
+                    onChange={(e) => setSelectedLoan(e.target.value)}
+                  >
+                    <option value="All Loan Types">Select loan type</option>
+                    {loans.map((loan) => (
+                      <option key={loan.loan_id} value={loan.loan_id}>
+                        {loan.loan}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {/* <select
+                  class="form-select loan-type-dropdown"
+                  aria-label="Default select example"
+                  value={selectedState}
+                  onChange={handleStateChange}
+                >
+                  <option selected>Select State</option>
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  class="form-select loan-type-dropdown"
+                  aria-label="Default select example"
+                  disabled={!selectedState}
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                >
+                  <option selected>Select City</option>
+                  {cities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select> */}
+              </div>
 
-              <Button
-                onClick={() => history.push("/savajcapitaluser/adduserfile")}
-                colorScheme="blue"
-                style={{
-                backgroundColor: "#b19552",
-                color: "#fff",
-              }}              >
-                Add File
-              </Button>
-            </div>
+              <div
+                className="d-flex second-drop-section gap-2 "
+                style={{ marginLeft: "10px" }}
+              >
+                <select
+                  class="form-select loan-type-dropdown "
+                  aria-label="Default select example"
+                  value={selectedStatusSearch}
+                  onChange={(e) => setSelectedStatusSearch(e.target.value)}
+                  width="200px"
+                >
+                  <option selected>Select Status</option>
+                  <option value="running">Running</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name"
+                  width="250px"
+                  mr="10px"
+                />
+                <Button
+                  onClick={() => history.push("/savajcapitaluser/adduserfile")}
+                  className="dynamicImportantStyle"
+                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "white",
+                    width: "150px",
+                  }}
+                >
+                  Add File
+                </Button>
+              </div>
+            </Flex>
           </Flex>
         </CardHeader>
         <ThemeProvider theme={theme}>
@@ -362,47 +806,41 @@ export default function CollapsibleTable() {
                 size={50}
               />
             </Flex>
+          ) : files.length === 0 ? (
+            <Flex justify="center" align="center">
+              <Typography variant="h6" color="textSecondary">
+                No data found
+              </Typography>
+            </Flex>
           ) : (
             <TableContainer component={Paper}>
               <Table aria-label="collapsible table">
                 <TableHead style={{ borderBottom: "1px solid red" }}>
                   <TableRow>
                     <TableCell />
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      User Name
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      File Id
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan Type
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Created At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Updated At
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Status
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Action
-                    </TableCell>
+                    <TableCell align="">Index</TableCell>
+                    <TableCell align="">File Id</TableCell>
+                    <TableCell align="">Customer (Business)</TableCell>
+                    <TableCell align="">City</TableCell>
+                    <TableCell align="">Loan</TableCell>
+                    <TableCell align="">File Status</TableCell>
+                    <TableCell align="">Document Status</TableCell>
+                    <TableCell align=""></TableCell>
+                    <TableCell align="">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((file) => (
+                  {files.map((file, index) => (
                     <Row
                       key={file._id}
                       file={file}
                       id={file.file_id}
+                      pan_card={file.pan_card}
+                      index={index + 1}
                       handleRow={handleRow}
                       handleEditClick={handleEditClick}
                       handleDelete={handleDelete}
+                      handleUpdate={handleUpdate}
                     />
                   ))}
                 </TableBody>
@@ -410,6 +848,7 @@ export default function CollapsibleTable() {
             </TableContainer>
           )}
         </ThemeProvider>
+
         <AlertDialog
           isOpen={isDeleteDialogOpen}
           leastDestructiveRef={cancelRef}
@@ -443,7 +882,94 @@ export default function CollapsibleTable() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        <AlertDialog
+          isOpen={isUpdateDialogOpen}
+          leastDestructiveRef={cancelRef1}
+          onClose={() => {
+            setIsUpdateDialogOpen(false);
+            setSelectedStatus("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Update File Status
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure you want to update the status of this file?
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  style={{
+                    marginLeft: "10px",
+                    marginTop: "20px",
+                    width: "100%",
+                    height: "35px",
+                  }}
+                >
+                  <option value="">Select a Status</option>
+                  <option value="running">Running</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef1}
+                  onClick={() => setIsUpdateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => {
+                    updateFile(selecteUpdateFileId, selectedStatus);
+                    setIsUpdateDialogOpen(false);
+                  }}
+                  ml={3}
+                  isDisabled={!selectedStatus}
+                >
+                  Update
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </div>
+      <Flex justifyContent="flex-end" alignItems="center" p="4">
+        <Text mr="4">Total Records: {totalRecords}</Text>
+        <Text mr="2">Rows per page:</Text>
+        <Select
+          value={itemsPerPage}
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          mr="2"
+          width="100px"
+        >
+          {[10, 20, 50].map((perPage) => (
+            <option key={perPage} value={perPage}>
+              {perPage}
+            </option>
+          ))}
+        </Select>
+        <Text mr="4">
+          Page {currentPage} of {totalPages}
+        </Text>
+        <IconButton
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          aria-label="Previous Page"
+          icon={<KeyboardArrowUpIcon />}
+          mr="2"
+        />
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          aria-label="Next Page"
+          icon={<KeyboardArrowDownIcon />}
+        />
+      </Flex>
       <Toaster />
     </>
   );
