@@ -13,7 +13,7 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
+
   useColorModeValue,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
@@ -32,6 +32,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from "reactstrap";
+import Select from "react-select";
 
 function AddSavajUser() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -254,26 +255,26 @@ function AddSavajUser() {
       setLoading(false);
     }
   };
-  // const [loanType, setLoanType] = useState([]);
-  // const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [loanType, setLoanType] = useState([]);
+  const [selectedLoanId, setSelectedLoanId] = useState("");
 
-  // const fetchLoanType = async () => {
-  //   try {
-  //     const response = await AxiosInstance.get("/loan/all-loans");
-  //     console.log(response, "response");
-  //     setLoanType(response.data.data);
-  //   } catch (error) {
-  //     console.error("Error fetching loans:", error);
-  //   }
-  // };
+  const fetchLoanType = async () => {
+    try {
+      const response = await AxiosInstance.get("/loan/all-loans");
+      console.log(response, "response");
+      setLoanType(response.data.data);
+    } catch (error) {
+      console.error("Error fetching loans:", error);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchLoanType();
-  // }, []);
+  useEffect(() => {
+    fetchLoanType();
+  }, []);
 
-  // const handleLoanChange = (event) => {
-  //   setSelectedLoanId(event.target.value);
-  // };
+  const handleLoanChange = (event) => {
+    setSelectedLoanId(event.target.value);
+  };
 
   return (
     <>
@@ -351,7 +352,7 @@ function AddSavajUser() {
                 </Select>
               </FormControl>
 
-              {/* <FormControl id="loan_id" mt={4} isRequired>
+              <FormControl id="loan_id" mt={4} isRequired>
                 <FormLabel>Loan Type</FormLabel>
                 <Select placeholder="Select Loan" onChange={handleLoanChange}>
                   {loanType.flatMap((loan) =>
@@ -371,7 +372,7 @@ function AddSavajUser() {
                     )
                   )}
                 </Select>
-              </FormControl> */}
+              </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 User Detail

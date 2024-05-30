@@ -3,7 +3,6 @@ import "./file.scss";
 import { useHistory } from "react-router-dom";
 import {
   Button,
-  Select,
   useColorModeValue,
   FormControl,
   FormLabel,
@@ -30,6 +29,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import axios from "axios";
 import { Country, State, City } from "country-state-city";
+import Select from "react-select";
 
 function AddFiles() {
   const history = useHistory();
@@ -39,13 +39,19 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
+  console.log(selectedLoanType, "selectedLoanType");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCountry, setSelectedCountry] = useState("IN");
   const [countries, setCountries] = useState([]);
   const [selectedState, setSelectedState] = useState("");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-
+  const [selectedUser, setSelectedUser] = useState("");
+  const [cibilMessage, setCibilMessage] = useState("");
+  const [selectedLoanId, setSelectedLoanId] = useState("");
+  console.log(selectedLoanId, "selectedLoanId");
+  const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
+  const [cibilScore, setCibilScore] = useState(null);
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
@@ -85,7 +91,6 @@ function AddFiles() {
   const fetchLoanType = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
-      console.log(response, "response");
       setLoanType(response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
@@ -95,16 +100,17 @@ function AddFiles() {
     fetchLoanType();
   }, []);
 
-  const handleLoanTypeChange = async (event) => {
-    const loanId = event.target.value;
-    setSelectedLoanId(loanId);
-    const selectedType = loanType.find((loan) => loan.loan_id === loanId);
+  const handleLoanTypeChange = async (selectedOption) => {
+    setSelectedLoanId(selectedOption); // Set the selected loan id
+    const selectedType = loanType.find(
+      (loan) => loan.loan_id === selectedOption.value
+    );
     setSelectedLoanType(selectedType || {});
 
     if (selectedType && selectedType.is_subtype) {
       try {
         const response = await AxiosInstance.get(
-          `/loan_type/loan_type/${loanId}`
+          `/loan_type/loan_type/${selectedOption.value}`
         );
         setLoanSubType(response.data.data);
       } catch (error) {
@@ -166,6 +172,7 @@ function AddFiles() {
     const fetchLoanDocuments = async () => {
       try {
         let url;
+
         if (selectedLoanType.is_subtype) {
           if (selectedLoanType.loan_id && selectedLoanType.loansubtype_id) {
             url = `/loan_docs/documents/${selectedLoanType.loan_id}/${selectedLoanType.loansubtype_id}`;
@@ -173,7 +180,7 @@ function AddFiles() {
         } else if (selectedLoanType.loan_id) {
           url = `/loan_docs/${selectedLoanType.loan_id}`;
         }
-
+        console.log(selectedLoanType, "selectedLoanTypeeeeee");
         if (url) {
           const response = await AxiosInstance.get(url);
           const data = response.data.data;
@@ -227,33 +234,28 @@ function AddFiles() {
     fileInputRefs.current = newFileInputRefs;
   }, [groupedLoanDocuments]);
 
-  const [selectedUser, setSelectedUser] = useState("");
-  const [cibilMessage, setCibilMessage] = useState("");
-  const [selectedLoanId, setSelectedLoanId] = useState("");
-  const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
-  const [cibilScore, setCibilScore] = useState(null);
-
-  const handleUserChange = (event) => {
-    const userId = event.target.value;
-    const user = users.find((u) => u.user_id === userId);
-    setSelectedUser(userId);
-    if (user) {
-      setCibilScore(user.cibil_score);
-      if (user.cibil_score < 730) {
-        setCibilMessage("User's cibil score is less than 730.");
-      } else {
-        setCibilMessage("");
+  const handleUserChange = (selectedOption) => {
+    setSelectedUser(selectedOption);
+    if (selectedOption) {
+      const user = users.find((u) => u.user_id === selectedOption.value);
+      if (user) {
+        setCibilScore(user.cibil_score);
+        if (user.cibil_score < 730) {
+          setCibilMessage("User's cibil score is less than 730.");
+        } else {
+          setCibilMessage("");
+        }
       }
     }
   };
 
-  const handleLoanChange = (event) => {
-    setSelectedLoanId(event.target.value);
+  const handleLoanChange = (selectedOption) => {
+    setSelectedLoanId(selectedOption);
     setSelectedLoanSubtypeId("");
   };
 
-  const handleLoanSubtypeChange = (event) => {
-    setSelectedLoanSubtypeId(event.target.value);
+  const handleLoanSubtypeChange = (selectedOption) => {
+    setSelectedLoanSubtypeId(selectedOption.value); // Update the selected loan subtype id
   };
 
   const onSubmit = async (data) => {
@@ -400,9 +402,9 @@ function AddFiles() {
       const uploadedFiles = (await Promise.all(uploadPromises)).flat();
 
       const payload = {
-        user_id: selectedUser,
-        loan_id: selectedLoanId,
-        loantype_id: selectedLoanSubtypeId,
+        user_id: selectedUser.value,
+        loan_id: selectedLoanId.value,
+        loantype_id: selectedLoanSubtypeId, // Include selectedLoanSubtypeId directly
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
           loan_document_id: file.documentId,
@@ -410,7 +412,8 @@ function AddFiles() {
           key: file.key,
         })),
       };
-      await AxiosInstance.post("/file_upload", payload);
+      const responce = await AxiosInstance.post("/file_upload", payload);
+      console.log(responce, "responce");
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {
@@ -454,13 +457,12 @@ function AddFiles() {
                 placeholder="Select user"
                 onChange={handleUserChange}
                 value={selectedUser}
-              >
-                {users.map((user) => (
-                  <option key={user.user_id} value={user.user_id}>
-                    {`${user.username} (${user.businessname})`}
-                  </option>
-                ))}
-              </Select>
+                options={users.map((user) => ({
+                  value: user.user_id,
+                  label: `${user.username} (${user.businessname})`,
+                }))}
+              />
+
               {cibilMessage && (
                 <p style={{ color: "red", marginTop: "10px" }}>
                   {cibilMessage}
@@ -468,21 +470,18 @@ function AddFiles() {
               )}
             </FormControl>
 
-            <FormControl
-              id="loan_id"
-              mt={4}
-              isRequired
-              onChange={handleLoanChange}
-            >
+            <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
-              <Select placeholder="Select Loan" onChange={handleLoanTypeChange}>
-                {loanType.map((loan) => (
-                  <option key={loan.loan_id} value={loan.loan_id}>
-                    {loan.loan}
-                  </option>
-                ))}
-              </Select>
+              <Select
+                placeholder="Select Loan"
+                onChange={handleLoanTypeChange}
+                options={loanType.map((loan) => ({
+                  value: loan.loan_id,
+                  label: loan.loan,
+                }))}
+              />
             </FormControl>
+
             {selectedLoanType.is_subtype && loanSubType.length > 0 && (
               <FormControl
                 id="loantype_id"
@@ -493,28 +492,16 @@ function AddFiles() {
                 <FormLabel>Loan Subtype</FormLabel>
                 <Select
                   placeholder="Select Loan Subtype"
-                  onChange={(event) => {
-                    setSelectedLoanType({
-                      ...selectedLoanType,
-                      loansubtype_id: event.target.value,
-                    });
-                  }}
-                >
-                  <option key="title" disabled style={{ fontWeight: 800 }}>
-                    {selectedLoanType.loan}
-                  </option>
-                  {loanSubType.map((subType) => (
-                    <option
-                      key={subType.loantype_id}
-                      value={subType.loantype_id}
-                    >
-                      {subType.loan_type}
-                    </option>
-                  ))}
-                </Select>
+                  onChange={handleLoanSubtypeChange} // Use handleLoanSubtypeChange here
+                  options={loanSubType.map((subType) => ({
+                    value: subType.loantype_id,
+                    label: subType.loan_type,
+                  }))}
+                />
               </FormControl>
             )}
-            {/* <div>
+            {/* 
+            <div>
               {Object.entries(groupedLoanDocuments).map(
                 ([title_id, documentGroups]) => (
                   <div key={title_id} className="my-3">
