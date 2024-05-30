@@ -213,4 +213,32 @@ router.get("/loan", async (req, res) => {
   }
 });
 
+router.get("/all-loans", async (req, res) => {
+  try {
+    const loans = await Loan.find({});
+
+    const loansWithSubtypes = await Promise.all(
+      loans.map(async (loan) => {
+        const subtypes = await Loan_Type.find({ loan_id: loan.loan_id });
+        return {
+          ...loan.toObject(),
+          subtypes: subtypes.length > 0 ? subtypes : [],
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: loansWithSubtypes,
+      message: "Loans and their subtypes fetched successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 module.exports = router;

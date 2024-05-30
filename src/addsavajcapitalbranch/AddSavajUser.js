@@ -24,6 +24,14 @@ import toast, { Toaster } from "react-hot-toast";
 import { State, City } from "country-state-city";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "reactstrap";
 
 function AddSavajUser() {
   const textColor = useColorModeValue("gray.700", "white");
@@ -246,6 +254,26 @@ function AddSavajUser() {
       setLoading(false);
     }
   };
+  // const [loanType, setLoanType] = useState([]);
+  // const [selectedLoanId, setSelectedLoanId] = useState("");
+
+  // const fetchLoanType = async () => {
+  //   try {
+  //     const response = await AxiosInstance.get("/loan/all-loans");
+  //     console.log(response, "response");
+  //     setLoanType(response.data.data);
+  //   } catch (error) {
+  //     console.error("Error fetching loans:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchLoanType();
+  // }, []);
+
+  // const handleLoanChange = (event) => {
+  //   setSelectedLoanId(event.target.value);
+  // };
 
   return (
     <>
@@ -322,6 +350,29 @@ function AddSavajUser() {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* <FormControl id="loan_id" mt={4} isRequired>
+                <FormLabel>Loan Type</FormLabel>
+                <Select placeholder="Select Loan" onChange={handleLoanChange}>
+                  {loanType.flatMap((loan) =>
+                    loan.subtypes.length > 0 ? (
+                      loan.subtypes.map((subtype) => (
+                        <option
+                          key={subtype.loantype_id}
+                          value={`${loan.loan_id}_${subtype.loantype_id}`}
+                        >
+                          {`${loan.loan} - ${subtype.loan_type}`}
+                        </option>
+                      ))
+                    ) : (
+                      <option key={loan.loan_id} value={loan.loan_id}>
+                        {loan.loan}
+                      </option>
+                    )
+                  )}
+                </Select>
+              </FormControl> */}
+
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 User Detail
               </Text>
