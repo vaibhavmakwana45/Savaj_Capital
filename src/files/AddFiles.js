@@ -85,6 +85,7 @@ function AddFiles() {
   const fetchLoanType = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
+      console.log(response, "response");
       setLoanType(response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
@@ -456,7 +457,7 @@ function AddFiles() {
               >
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
-                    {`${user.username} (${user.email})`}
+                    {`${user.username} (${user.businessname})`}
                   </option>
                 ))}
               </Select>
@@ -779,36 +780,7 @@ function AddFiles() {
                   placeholder="Enter GST number"
                 />
               </FormControl>
-              {/* <FormControl className="my-2">
-                <FormLabel>Aadhar Card</FormLabel>
-                <Input
-                  placeholder="Aadhar Card"
-                  type="number"
-                  name="aadhar_card"
-                  onChange={handleadharChange}
-                  {...register("aadhar_card", {
-                    required: "Aadhar card is required",
-                  })}
-                  value={formData.aadhar_card}
-                />
-                {errors.aadhar_card && <p>{errors.aadhar_card.message}</p>}
-              </FormControl>
-             
-              <FormControl>
-                <FormLabel>Pan Card</FormLabel>
-                <Input
-                  placeholder="Pan Card"
-                  type="string"
-                  name="pan_card"
-                  onChange={handleeChange}
-                  {...register("pan_card", {
-                    required: "Pan card is required",
-                  })}
-                  value={formData.pan_card}
 
-                />
-                {errors.pan_card && <p>{errors.pan_card.message}</p>}
-              </FormControl> */}
               <FormControl id="aadharcard" mt={4} isRequired>
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
