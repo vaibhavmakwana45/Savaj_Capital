@@ -82,16 +82,11 @@ export default function Dashboard() {
         // Fetch total amounts for each loan and loan type
         const totalAmountPromises = responses[1].data.map(async (loan) => {
           const { loan_id, loantype_id } = loan;
-          console.log(loan, "loan");
+
           const response = await AxiosInstance.get(
             `/file_upload/amounts/${loan_id}/${loantype_id || ""}`
           );
-          console.log(
-            `Total amount for loan_id ${loan_id} and loantype_id ${
-              loantype_id || "none"
-            }:`,
-            response.data.totalAmount
-          ); // Log API response
+
           return {
             loan_id,
             loantype_id,
@@ -111,7 +106,6 @@ export default function Dashboard() {
           {}
         );
         setTotalAmounts(totalAmountsMap);
-        console.log("Total amounts map:", totalAmountsMap); // Log the total amounts map
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }

@@ -68,7 +68,6 @@ function Row(props) {
         ...response.data.data.approvedData,
         ...response.data.data.pendingData,
       ]);
-      console.log(response, "response");
     } catch (error) {
       console.error("Error: ", error.message);
     }

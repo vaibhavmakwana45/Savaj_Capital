@@ -208,6 +208,24 @@ router.get("/getusers", async (req, res) => {
   }
 });
 
+router.get("/getcustomers/:state/:city", async (req, res) => {
+  const { state, city } = req.params;
+
+  try {
+    const users = await AddUser.find({ state, city }, "-password").sort({ updatedAt: -1 });
+    res.json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 // Paination
 // router.get("/getusers", async (req, res) => {
 //   try {

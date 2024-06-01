@@ -39,7 +39,6 @@ function AddFiles() {
   const [loanType, setLoanType] = useState([]);
   const [loanSubType, setLoanSubType] = useState([]);
   const [selectedLoanType, setSelectedLoanType] = useState({});
-  console.log(selectedLoanType, "selectedLoanType");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCountry, setSelectedCountry] = useState("IN");
   const [countries, setCountries] = useState([]);
@@ -49,7 +48,6 @@ function AddFiles() {
   const [selectedUser, setSelectedUser] = useState("");
   const [cibilMessage, setCibilMessage] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
-  console.log(selectedLoanId, "selectedLoanId");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
   const [cibilScore, setCibilScore] = useState(null);
   const [formData, setFormData] = useState({
@@ -180,7 +178,6 @@ function AddFiles() {
         } else if (selectedLoanType.loan_id) {
           url = `/loan_docs/${selectedLoanType.loan_id}`;
         }
-        console.log(selectedLoanType, "selectedLoanTypeeeeee");
         if (url) {
           const response = await AxiosInstance.get(url);
           const data = response.data.data;
@@ -413,7 +410,6 @@ function AddFiles() {
         })),
       };
       const responce = await AxiosInstance.post("/file_upload", payload);
-      console.log(responce, "responce");
       history.push("/superadmin/filetable");
       toast.success("All data submitted successfully!");
     } catch (error) {

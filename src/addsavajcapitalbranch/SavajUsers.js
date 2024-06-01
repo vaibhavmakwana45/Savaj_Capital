@@ -101,7 +101,9 @@ function Tables() {
   };
 
   const navigateToAnotherPageUser = () => {
-    history.push("/superadmin/addsavajcapitaluser?branch_id=" + id);
+    history.push("/superadmin/addsavajcapitaluser?branch_id=" + id, {
+      state: { state: branch.state, city: branch.city },
+    });
   };
 
   const allHeaders = [
@@ -115,7 +117,7 @@ function Tables() {
     "Action",
   ];
 
-  const formattedData = filteredUsers.map((bank,index) => [
+  const formattedData = filteredUsers.map((bank, index) => [
     bank?.branchuser_id,
     index + 1,
     bank?.full_name,

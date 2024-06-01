@@ -13,8 +13,8 @@ import {
   FormControl,
   FormLabel,
   Input,
-
   useColorModeValue,
+  Checkbox,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -32,10 +32,14 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from "reactstrap";
-import Select from "react-select";
+import Select, { components } from "react-select";
+import makeAnimated from "react-select/animated";
+const animatedComponents = makeAnimated();
 
 function AddSavajUser() {
   const textColor = useColorModeValue("gray.700", "white");
+  const location = useLocation();
+  const { state, city } = location?.state?.state || {};
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
@@ -45,107 +49,12 @@ function AddSavajUser() {
   const [roles, setRoles] = useState([]);
   const cancelRef = React.useRef();
   const [role, setRole] = useState("");
-  const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const branch_id = searchParams.get("branch_id");
   const history = useHistory();
-
-  const getRolesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/role/");
-
-      if (response.data.success) {
-        setRoles(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getBranchesData = async () => {
-    try {
-      const response = await AxiosInstance.get("/branch/");
-
-      if (response.data.success) {
-        setBranches(response.data.data);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getData = async () => {
-    try {
-      const response = await AxiosInstance.get("/savaj_user/user/" + id);
-      console.log(response, "response");
-      if (response.data.success) {
-        const { data } = response.data;
-
-        const submissionData = {
-          branch_id: data[0].branch_id,
-          role_id: data[0].role_id,
-          email: data[0].email,
-          state: data[0].state,
-          city: data[0].city,
-          dob: data[0].dob,
-          aadhar_card: data[0].aadhar_card,
-          pan_card: data[0].pan_card,
-          pan_card: data[0].pan_card,
-          number: data[0].number,
-          full_name: data[0].full_name,
-          address: data[0].address,
-          password: data[0].password,
-        };
-        setSelectedState(data[0].state);
-        console.log(data[0].state, "data[0].state");
-        setFormData(submissionData);
-      } else {
-        alert("Please try again later...!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      getData();
-    }
-    if (branch_id) {
-      setFormData({ ...formData, branch_id: branch_id });
-    }
-    getRolesData();
-    getBranchesData();
-    const statesOfIndia = State.getStatesOfCountry("IN");
-    setStates(statesOfIndia);
-  }, []);
-
-  useEffect(() => {
-    if (selectedState) {
-      const stateCode = states.find((state) => state.name === selectedState)
-        ?.isoCode;
-      if (stateCode) {
-        const citiesOfState = City.getCitiesOfState("IN", stateCode);
-        setCities(citiesOfState);
-      }
-    } else {
-      setCities([]);
-    }
-  }, [selectedState, states]);
-
-  const handleStateChange = (event) => {
-    const stateName = event.target.value;
-    setSelectedState(stateName);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      state: stateName,
-    }));
-  };
+  const [loanType, setLoanType] = useState([]);
+  const [selectedLoanIds, setSelectedLoanIds] = useState([]);
 
   const [formData, setFormData] = useState({
     savajcapitalbranch_id: "",
@@ -163,7 +72,154 @@ function AddSavajUser() {
     branch_id: "",
     email: "",
     password: "",
+    password: "",
+    loan_ids: [],
+    add_files: false,
+    add_customers: false,
   });
+
+  const getRolesData = async () => {
+    try {
+      const response = await AxiosInstance.get("/role/");
+
+      if (response.data.success) {
+        setRoles(
+          response.data.data.map((role) => ({
+            value: role.role_id,
+            label: role.role,
+          }))
+        );
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getBranchesData = async () => {
+    try {
+      const response = await AxiosInstance.get("/branch/");
+
+      if (response.data.success) {
+        setBranches(
+          response.data.data.map((branch) => ({
+            value: branch.branch_id,
+            label: `${branch.branch_name} (${branch.city}, ${branch.state})`,
+          }))
+        );
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getData = async () => {
+    try {
+      const response = await AxiosInstance.get("/savaj_user/user/" + id);
+      if (response.data.success) {
+        const { data } = response.data;
+        const loanNames = data[0].loan_ids.map((loanId) => {
+          const loan = loanType.find((loan) => loan.loan_id === loanId);
+          return loan ? loan.loan : "";
+        });
+        const submissionData = {
+          branch_id: data[0].branch_id,
+          role_id: data[0].role_id,
+          email: data[0].email,
+          state: data[0].state,
+          city: data[0].city,
+          dob: data[0].dob,
+          aadhar_card: data[0].aadhar_card,
+          pan_card: data[0].pan_card,
+          number: data[0].number,
+          full_name: data[0].full_name,
+          address: data[0].address,
+          password: data[0].password,
+          loan_ids: data[0].loan_ids.map((loanId, index) => ({
+            label: loanNames[index],
+            value: loanId,
+          })),
+          add_files: data[0].add_files,
+          add_customers: data[0].add_customers,
+        };
+
+        setSelectedState(data[0].state);
+        setFormData(submissionData);
+        setSelectedLoanIds(submissionData.loan_ids);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([getRolesData(), getBranchesData()]);
+        const statesOfIndia = State.getStatesOfCountry("IN");
+        setStates(statesOfIndia);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedState) {
+      const stateCode = states.find((state) => state.name === selectedState)
+        ?.isoCode;
+      if (stateCode) {
+        const citiesOfState = City.getCitiesOfState("IN", stateCode);
+        setCities(citiesOfState);
+      }
+    } else {
+      setCities([]);
+    }
+  }, [selectedState, states]);
+
+  const handleStateChange = (selectedOption) => {
+    setSelectedState(selectedOption.value);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: selectedOption.value,
+    }));
+  };
+
+  useEffect(() => {
+    if (state && city) {
+      setSelectedState(state);
+      const stateCode = states.find((s) => s.name === state)?.isoCode;
+      if (stateCode) {
+        const citiesOfState = City.getCitiesOfState("IN", stateCode);
+        setCities(citiesOfState);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          state: state,
+          city: city,
+        }));
+      }
+    }
+  }, [state, city, states]);
+
+  useEffect(() => {
+    if (id) {
+      getData();
+    }
+    if (branch_id) {
+      setFormData({ ...formData, branch_id: branch_id });
+    }
+    getRolesData();
+    getBranchesData();
+    const statesOfIndia = State.getStatesOfCountry("IN");
+    setStates(statesOfIndia);
+  }, [loanType]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -183,6 +239,7 @@ function AddSavajUser() {
       });
     }
   };
+
   const handleAadharChange = (e) => {
     const { name, value } = e.target;
     if (name === "aadhar_card" && value.length <= 12) {
@@ -192,6 +249,7 @@ function AddSavajUser() {
       });
     }
   };
+
   const handlePhoneChange = (e) => {
     const { name, value } = e.target;
     if (name === "number" && value.length <= 10) {
@@ -201,6 +259,7 @@ function AddSavajUser() {
       });
     }
   };
+
   const handleAddRole = async (role) => {
     try {
       const response = await AxiosInstance.post("/role", { role });
@@ -227,26 +286,33 @@ function AddSavajUser() {
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        loan_ids: selectedLoanIds.map((option) => option.value),
+      };
+
+      let response;
       if (id) {
-        const response = await AxiosInstance.put("/savaj_user/" + id, formData);
-        if (response.data.statusCode === 201) {
-          toast.error("Email already in use");
-        } else if (response.data.statusCode === 202) {
-          toast.error(response.data.message);
-        } else if (response.data.success) {
-          toast.success("Branch and User Updated successfully!");
-          history.push("/superadmin/savajusers?id=" + branch_id);
-        }
+        response = await AxiosInstance.put("/savaj_user/" + id, payload);
       } else {
-        const response = await AxiosInstance.post("/savaj_user", formData);
-        if (response.data.statusCode === 201) {
-          toast.error("Email already in use");
-        } else if (response.data.statusCode === 202) {
-          toast.error(response.data.message);
-        } else if (response.data.success) {
-          toast.success("Branch and User added successfully!");
-          history.push("/superadmin/savajcapitalbranch");
-        }
+        response = await AxiosInstance.post("/savaj_user", payload);
+      }
+
+      if (response.data.statusCode === 201) {
+        toast.error("Email already in use");
+      } else if (response.data.statusCode === 202) {
+        toast.error(response.data.message);
+      } else if (response.data.success) {
+        toast.success(
+          id
+            ? "Branch and User Updated successfully!"
+            : "Branch and User added successfully!"
+        );
+        history.push(
+          id
+            ? "/superadmin/savajusers?id=" + branch_id
+            : "/superadmin/savajcapitalbranch"
+        );
       }
     } catch (error) {
       console.error("Submission error", error);
@@ -255,13 +321,10 @@ function AddSavajUser() {
       setLoading(false);
     }
   };
-  const [loanType, setLoanType] = useState([]);
-  const [selectedLoanId, setSelectedLoanId] = useState("");
 
   const fetchLoanType = async () => {
     try {
       const response = await AxiosInstance.get("/loan/all-loans");
-      console.log(response, "response");
       setLoanType(response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
@@ -272,10 +335,34 @@ function AddSavajUser() {
     fetchLoanType();
   }, []);
 
-  const handleLoanChange = (event) => {
-    setSelectedLoanId(event.target.value);
+  const handleLoanChange = (selectedOptions) => {
+    setSelectedLoanIds(selectedOptions);
+    const selectedLoanIdsValues = selectedOptions.map((option) => option.value);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      loan_ids: selectedLoanIdsValues,
+    }));
   };
 
+  const customOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <input
+          type="checkbox"
+          checked={props.isSelected}
+          onChange={() => null}
+        />{" "}
+        <label>{props.label}</label>
+      </components.Option>
+    );
+  };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -308,70 +395,68 @@ function AddSavajUser() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              <FormControl id="branch_id" isRequired mt={4}>
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Select
-                  name="city"
+                  name="branch_id"
                   placeholder="Select Branch"
-                  onChange={(e) =>
-                    setFormData({ ...formData, branch_id: e.target.value })
+                  onChange={(option) =>
+                    setFormData({ ...formData, branch_id: option.value })
                   }
-                  value={formData?.branch_id}
-                >
-                  {branches.map((city) => (
-                    <option
-                      key={city.branch_name}
-                      name={city.branch_id}
-                      value={city.branch_id}
-                    >
-                      {city.branch_name + ` (${city.city + ", " + city.state})`}
-                    </option>
-                  ))}
-                </Select>
+                  value={branches.find(
+                    (branch) => branch.value === formData.branch_id
+                  )}
+                  options={branches}
+                  isDisabled={branch_id}
+                />
               </FormControl>
 
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              <FormControl id="role_id" isRequired mt={4}>
                 <FormLabel>Select Role</FormLabel>
                 <Select
-                  name="city"
+                  name="role_id"
                   placeholder="Select Role"
-                  onChange={(e) =>
-                    setFormData({ ...formData, role_id: e.target.value })
+                  onChange={(option) =>
+                    setFormData({ ...formData, role_id: option.value })
                   }
-                  value={formData?.role_id}
-                >
-                  {roles.map((city) => (
-                    <option
-                      key={city.role_id}
-                      name={"role"}
-                      value={city.role_id}
-                    >
-                      {city.role}
-                    </option>
-                  ))}
-                </Select>
+                  value={roles.find((role) => role.value === formData.role_id)}
+                  options={roles}
+                />
               </FormControl>
 
-              <FormControl id="loan_id" mt={4} isRequired>
-                <FormLabel>Loan Type</FormLabel>
-                <Select placeholder="Select Loan" onChange={handleLoanChange}>
-                  {loanType.flatMap((loan) =>
-                    loan.subtypes.length > 0 ? (
-                      loan.subtypes.map((subtype) => (
-                        <option
-                          key={subtype.loantype_id}
-                          value={`${loan.loan_id}_${subtype.loantype_id}`}
-                        >
-                          {`${loan.loan} - ${subtype.loan_type}`}
-                        </option>
-                      ))
-                    ) : (
-                      <option key={loan.loan_id} value={loan.loan_id}>
-                        {loan.loan}
-                      </option>
-                    )
-                  )}
-                </Select>
+              <FormControl id="loan_ids" mt={4}>
+                <FormLabel>Loan Types</FormLabel>
+                <Select
+                  components={{ Option: customOption }}
+                  closeMenuOnSelect={false}
+                  isMulti
+                  options={loanType.map((loan) => ({
+                    label: loan.loan,
+                    value: loan.loan_id,
+                  }))}
+                  onChange={handleLoanChange}
+                  value={selectedLoanIds}
+                />
+              </FormControl>
+
+              <FormControl id="add_customers" mt={4}>
+                <Checkbox
+                  name="add_customers"
+                  onChange={handleCheckboxChange}
+                  isChecked={formData.add_customers}
+                >
+                  Add Customer?
+                </Checkbox>
+              </FormControl>
+
+              <FormControl id="add_files" mt={4}>
+                <Checkbox
+                  name="add_files"
+                  onChange={handleCheckboxChange}
+                  isChecked={formData.add_files}
+                >
+                  Add File?
+                </Checkbox>
               </FormControl>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
@@ -426,20 +511,23 @@ function AddSavajUser() {
                   placeholder="Enyrt your PAN"
                 />
               </FormControl>
-              <FormControl isRequired>
+              <FormControl id="state" mt={4} isRequired>
                 <FormLabel>State</FormLabel>
                 <Select
                   name="state"
-                  value={selectedState}
+                  value={
+                    selectedState
+                      ? { label: selectedState, value: selectedState }
+                      : null
+                  }
                   onChange={handleStateChange}
+                  isDisabled={state}
+                  options={states.map((state) => ({
+                    label: state.name,
+                    value: state.name,
+                  }))}
                   placeholder="Select State"
-                >
-                  {states.map((state) => (
-                    <option key={state.isoCode} value={state.name}>
-                      {state.name}
-                    </option>
-                  ))}
-                </Select>
+                />
               </FormControl>
 
               <FormControl id="city" mt={4} isRequired>
@@ -447,23 +535,25 @@ function AddSavajUser() {
                 <Select
                   name="city"
                   placeholder="Select city"
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
+                  onChange={(selectedOption) =>
+                    setFormData((prevFormData) => ({
+                      ...prevFormData,
+                      city: selectedOption.value,
+                    }))
                   }
-                  disabled={!selectedState}
-                  value={formData.city}
-                >
-                  {cities.length ? (
-                    cities.map((city) => (
-                      <option key={city.name} value={city.name}>
-                        {city.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option>Please select a state first</option>
-                  )}
-                </Select>
+                  isDisabled={!selectedState || city}
+                  value={
+                    formData.city
+                      ? { label: formData.city, value: formData.city }
+                      : null
+                  }
+                  options={cities.map((city) => ({
+                    label: city.name,
+                    value: city.name,
+                  }))}
+                />
               </FormControl>
+
               <FormControl id="address" mt={4} isRequired>
                 <FormLabel>Address</FormLabel>
                 <Input

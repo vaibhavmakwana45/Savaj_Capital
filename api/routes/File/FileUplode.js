@@ -269,9 +269,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/savajusers/:state/:city", async (req, res) => {
+router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
   try {
-    const { state, city } = req.params;
+    const { state, city, loan_ids } = req.params;
     const currentPage = parseInt(req.query.page) || 1;
     const dataPerPage = parseInt(req.query.limit) || 10;
 
@@ -330,7 +330,10 @@ router.get("/savajusers/:state/:city", async (req, res) => {
       { $skip: (currentPage - 1) * dataPerPage },
       { $limit: dataPerPage },
     ];
-
+    if (loan_ids) {
+      const loanIdsArray = loan_ids.split(",").map((id) => id.trim());
+      pipeline.splice(1, 0, { $match: { loan_id: { $in: loanIdsArray } } });
+    }
     const data = await File_Uplode.aggregate(pipeline);
 
     const branchUserIds = data.map((item) => item.branchuser_id);

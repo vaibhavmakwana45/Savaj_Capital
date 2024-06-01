@@ -57,6 +57,8 @@ import CustomerFile from "userdashboard/CustomerFiles/CustomerFile";
 import CreateCustomerFile from "userdashboard/CustomerFiles/CreateCustomerFile";
 import EditFileCustomer from "userdashboard/CustomerFiles/EditFileCustomer";
 import DetailCustomerFilePage from "userdashboard/CustomerFiles/DetailCustomerFilePage";
+import AddCustomer from "savajcapitaldashboard/AddCustomer/AddCustomer";
+import Customer from "savajcapitaldashboard/AddCustomer/Customer";
 
 var dashRoutes = [
   //superadmin
@@ -522,6 +524,23 @@ var dashRoutes = [
     hideInSResponsivrUser: true,
   },
   {
+    path: "/customer",
+    name: "Customer",
+    icon: <PersonIcon color="inherit" />,
+    component: Customer,
+    layout: "/savajcapitaluser",
+    hideInSResponsivrUser: true,
+  },
+  {
+    path: "/addcustomer",
+    name: "Add Customer",
+    component: AddCustomer,
+    layout: "/savajcapitaluser",
+    hideInSidebar: true,
+    parent: "customer",
+    key: "addcustomer",
+  },
+  {
     path: "/userfile",
     name: "User File",
     icon: <PersonIcon color="inherit" />,
@@ -556,16 +575,16 @@ var dashRoutes = [
     parent: "adduserfile",
     key: "viewuserfile",
   },
-  {
-    path: "/assignbank",
-    name: "Assign Bank",
-    icon: <CreditIcon color="inherit" />,
-    component: AssignBank,
-    layout: "/savajcapitaluser",
-    hideInSResponsivrUser: true,
-    parent: "savajcapitaluser",
-    key: "assignbank",
-  },
+  // {
+  //   path: "/assignbank",
+  //   name: "Assign Bank",
+  //   icon: <CreditIcon color="inherit" />,
+  //   component: AssignBank,
+  //   layout: "/savajcapitaluser",
+  //   hideInSResponsivrUser: true,
+  //   parent: "savajcapitaluser",
+  //   key: "assignbank",
+  // },
   {
     path: "/assignfile",
     name: "Assign File",
