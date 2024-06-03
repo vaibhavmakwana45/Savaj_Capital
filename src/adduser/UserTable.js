@@ -1,4 +1,3 @@
-// Add axios to your imports
 import axios from "axios";
 import {
   Flex,
@@ -11,7 +10,12 @@ import {
   Td,
   useColorModeValue,
   Button,
+  IconButton,
+  Input,
+  Select,
+  Collapse,
 } from "@chakra-ui/react";
+import Loader from "react-js-loader";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -19,24 +23,25 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
-  Input,
-  Select,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
-import TableComponent from "TableComponent";
 import "./user.css";
+import Typography from "@mui/material/Typography";
 import moment from "moment";
 import { Country, State, City } from "country-state-city";
+import {
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+} from "@mui/icons-material";
+
 function UserTable() {
   const [users, setUsers] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
@@ -48,10 +53,14 @@ function UserTable() {
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const states = State.getStatesOfCountry("IN"); // Assuming 'IN' is the country code for India
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [expandedRow, setExpandedRow] = useState(null);
+  const cancelRef = React.useRef();
+
+  const states = State.getStatesOfCountry("IN");
 
   // Retrieve cities whenever the selectedState changes
-  // Here we find the state object first to get the correct ISO code for fetching cities
   const cities = selectedState
     ? City.getCitiesOfState(
         "IN",
@@ -68,22 +77,50 @@ function UserTable() {
     setSelectedCity(event.target.value);
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecorrds] = useState(0);
+
+  const fetchData = async () => {
+    try {
+      const response = await AxiosInstance.get("/addusers/getusers", {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          searchTerm,
+          selectedState,
+          selectedCity,
+        },
+      });
+      setUsers(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setTotalRecorrds(response.data.totalCount);
+      setCurrentPage(response.data.currentPage);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await AxiosInstance.get("/addusers/getusers");
-        setUsers(response.data.users);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
+    fetchData();
+  }, [currentPage, itemsPerPage, searchTerm, selectedState, selectedCity]);
 
-        console.error("Error fetching users:", error);
-      }
-    };
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    if (nextPage <= totalPages) {
+      setCurrentPage(nextPage);
+    }
+  };
 
-    fetchUsers();
-  }, []);
-
+  const handlePrevPage = () => {
+    const prevPage = currentPage - 1;
+    if (prevPage >= 1) {
+      setCurrentPage(prevPage);
+    }
+  };
   const requestActivateDeactivate = (userId, activate) => {
     setCurrentUser({ id: userId, activate });
     setIsConfirmOpen(true);
@@ -157,93 +194,6 @@ function UserTable() {
         return "black";
     }
   };
-  // Adjusted filteredUsers with state and city filters
-  const filteredUsers = users.filter((user) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const matchesSearch =
-      user.username.toLowerCase().includes(searchTermLower) ||
-      user.email.toLowerCase().includes(searchTermLower) ||
-      user.number.toLowerCase().includes(searchTermLower) ||
-      user.aadhar_card.toString().includes(searchTermLower) ||
-      (user.pan_card && user.pan_card.toLowerCase().includes(searchTermLower));
-
-    const matchesState = selectedState ? user.state === selectedState : true;
-    const matchesCity = selectedCity ? user.city === selectedCity : true;
-
-    return matchesSearch && matchesState && matchesCity;
-  });
-
-  const allHeaders = [
-    "index",
-    "Name",
-    "Business",
-    "Number",
-    "Reference",
-    // "Aadhar Card",
-    // "Pan Card",
-    "Cibil Score",
-    // "create",
-    // "update",
-    "CS Status",
-    "Active/Inactive",
-    "Action",
-  ];
-  const formattedData = filteredUsers.map((item, index) => [
-    `${item.user_id}`,
-    `${index + 1}`,
-    `${item.username}`,
-    `${item.businessname}`,
-    item.number,
-    item.reference,
-    // item.aadhar_card,
-    // item.pan_card,
-    item.cibil_score,
-    <Flex
-      alignItems="center"
-      backgroundColor={getBackgroundColor(
-        getCibilScoreCategory(item.cibil_score)
-      )}
-      color={getTextColor(getCibilScoreCategory(item.cibil_score))}
-      padding="0.5rem"
-      borderRadius="0.5rem"
-    >
-      {getCibilScoreCategory(item.cibil_score)}
-    </Flex>,
-    item.isActivate ? (
-      <Button
-        colorScheme="green"
-        onClick={() => requestActivateDeactivate(item.user_id, false)}
-      >
-        Active
-      </Button>
-    ) : (
-      <Button
-        colorScheme="red"
-        onClick={() => requestActivateDeactivate(item.user_id, true)}
-      >
-        Inactive
-      </Button>
-    ),
-  ]);
-
-  const data = filteredUsers.map((item) => [
-    {
-      Email: item.email,
-      // Country: item.country,
-      "Unit Address": item.unit_address,
-      // Reference: item.reference,
-      "GST Number": item.gst_number,
-      "Aadhar Card": item.aadhar_card,
-      "Pan Card": item.pan_card,
-      State: item.state,
-      City: item.city,
-      // Dob: moment(item.dob).format("DD/MM/YYYY"),
-      // "Country Code": item.country_code,
-      // "State Code": item.state_code,
-      "Create At": moment(item.createdAt).format("DD/MM/YYYY"),
-      // "Update At": moment(item.updatedAt).format("DD/MM/YYYY"),
-    },
-  ]);
 
   const handleDelete = (id) => {
     setSelectedUserId(id);
@@ -254,12 +204,11 @@ function UserTable() {
     history.push("/superadmin/adduser?id=" + id);
   };
 
-  const handleRow = (id) => {};
+  const toggleRowExpansion = (index) => {
+    setExpandedRow(expandedRow === index ? null : index);
+  };
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const cancelRef = React.useRef();
-  const deletebranch = async (userId) => {
+  const deleteBranch = async (userId) => {
     try {
       const response = await AxiosInstance.delete(
         `/addusers/deleteuser/${userId}`
@@ -275,7 +224,7 @@ function UserTable() {
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast.error("user not delete");
+      toast.error("User not deleted");
     }
   };
 
@@ -341,24 +290,183 @@ function UserTable() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <TableComponent
-              // documents={documents}
-              data={formattedData}
-              textColor={textColor}
-              borderColor={borderColor}
-              loading={loading}
-              allHeaders={allHeaders}
-              handleRow={handleRow}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              collapse={true}
-              showPagination={true}
-              // itemsPerPage={itemsPerPage}
-              // setItemsPerPage={setItemsPerPage}
-              // currentPage={currentPage}
-              // setCurrentPage={setCurrentPage}
-              myData={data}
-            />
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th></Th>
+                  <Th>#</Th>
+                  <Th>Name</Th>
+                  <Th>Business</Th>
+                  <Th>Number</Th>
+                  <Th>Reference</Th>
+                  <Th>Cibil Score</Th>
+                  <Th>CS Status</Th>
+                  <Th>Status</Th>
+                  <Th>Actions</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {loading ? (
+                  <Flex justify="center" align="center" height="100vh">
+                    <Loader
+                      type="spinner-circle"
+                      bgColor={"#b19552"}
+                      color={"black"}
+                      size={50}
+                    />
+                  </Flex>
+                ) : users.length === 0 ? (
+                  <Flex justify="center" align="center">
+                    <Typography variant="h6" color="textSecondary">
+                      No data found
+                    </Typography>
+                  </Flex>
+                ) : (
+                  users.map((user, index) => (
+                    <React.Fragment key={user.user_id}>
+                      <Tr
+                        onClick={() => toggleRowExpansion(index)}
+                        cursor="pointer"
+                      >
+                        <Td>
+                          <IconButton
+                            aria-label={
+                              expandedRow === index ? "Collapse" : "Expand"
+                            }
+                            icon={
+                              expandedRow === index ? (
+                                <ChevronUpIcon />
+                              ) : (
+                                <ChevronDownIcon />
+                              )
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRowExpansion(index);
+                            }}
+                          />
+                        </Td>
+                        <Td>{index + 1}</Td>
+                        <Td>{user.username}</Td>
+                        <Td>{user.businessname}</Td>
+                        <Td>{user.number}</Td>
+                        <Td>{user.reference}</Td>
+                        <Td>{user.cibil_score}</Td>
+                        <Td>
+                          <Flex
+                            alignItems="center"
+                            backgroundColor={getBackgroundColor(
+                              getCibilScoreCategory(user.cibil_score)
+                            )}
+                            color={getTextColor(
+                              getCibilScoreCategory(user.cibil_score)
+                            )}
+                            padding="0.5rem"
+                            borderRadius="0.5rem"
+                          >
+                            {getCibilScoreCategory(user.cibil_score)}
+                          </Flex>
+                        </Td>
+                        <Td>
+                          {user.isActivate ? (
+                            <Button
+                              colorScheme="green"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                requestActivateDeactivate(user.user_id, false);
+                              }}
+                            >
+                              Active
+                            </Button>
+                          ) : (
+                            <Button
+                              colorScheme="red"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                requestActivateDeactivate(user.user_id, true);
+                              }}
+                            >
+                              Inactive
+                            </Button>
+                          )}
+                        </Td>
+                        <Td>
+                          <Flex>
+                            <IconButton
+                              aria-label="Edit"
+                              icon={<EditIcon />}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(user.user_id);
+                              }}
+                              mr={2}
+                            />
+                            <IconButton
+                              aria-label="Delete"
+                              icon={<DeleteIcon />}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(user.user_id);
+                              }}
+                            />
+                          </Flex>
+                        </Td>
+                      </Tr>
+                      <Tr>
+                        <Td
+                          colSpan="10"
+                          p={0}
+                          border="none"
+                          style={{
+                            maxHeight: expandedRow === index ? "none" : "0",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Collapse in={expandedRow === index} animateOpacity>
+                            <div
+                              style={{
+                                maxHeight:
+                                  expandedRow === index ? "none" : "100%",
+                                overflow: "hidden",
+                              }}
+                            >
+                              <Table
+                                variant="simple"
+                                bg={useColorModeValue("gray.50", "gray.700")}
+                                style={{ tableLayout: "fixed" }}
+                              >
+                                <Thead>
+                                  <Tr>
+                                    <Th>Email</Th>
+                                    <Th>Unit Address</Th>
+                                    <Th>GST Number</Th>
+                                    <Th>Aadhar Card</Th>
+                                    <Th>Pan Card</Th>
+                                    <Th>State</Th>
+                                    <Th>City</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  <Tr>
+                                    <Td>{user.email}</Td>
+                                    <Td>{user.unit_address}</Td>
+                                    <Td>{user.gst_number}</Td>
+                                    <Td>{user.aadhar_card}</Td>
+                                    <Td>{user.pan_card}</Td>
+                                    <Td>{user.state}</Td>
+                                    <Td>{user.city}</Td>
+                                  </Tr>
+                                </Tbody>
+                              </Table>
+                            </div>
+                          </Collapse>
+                        </Td>
+                      </Tr>
+                    </React.Fragment>
+                  ))
+                )}
+              </Tbody>
+            </Table>
           </CardBody>
         </Card>
         <AlertDialog
@@ -385,7 +493,7 @@ function UserTable() {
                 </Button>
                 <Button
                   colorScheme="red"
-                  onClick={() => deletebranch(selectedUserId)}
+                  onClick={() => deleteBranch(selectedUserId)}
                   ml={3}
                 >
                   Delete
@@ -425,6 +533,54 @@ function UserTable() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+      </Flex>
+      <Flex
+        justifyContent="flex-end"
+        alignItems="center"
+        p="4"
+        borderBottom="1px solid #ccc"
+      >
+        <Text mr="4" fontSize="sm">
+          Total Records: {totalRecords}
+        </Text>
+        <Text mr="2" fontSize="sm">
+          Rows per page:
+        </Text>
+        <Select
+          value={itemsPerPage}
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          mr="2"
+          width="100px"
+          fontSize="sm"
+        >
+          {[10, 20, 50].map((perPage) => (
+            <option key={perPage} value={perPage}>
+              {perPage}
+            </option>
+          ))}
+        </Select>
+        <Text mr="4" fontSize="sm">
+          Page {currentPage} of {totalPages}
+        </Text>
+        <IconButton
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          aria-label="Previous Page"
+          icon={<KeyboardArrowUpIcon />}
+          mr="2"
+          variant="outline"
+          colorScheme="gray"
+          size="sm"
+        />
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          aria-label="Next Page"
+          icon={<KeyboardArrowDownIcon />}
+          variant="outline"
+          colorScheme="gray"
+          size="sm"
+        />
       </Flex>
       <Toaster />
     </>
