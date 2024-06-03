@@ -14,6 +14,7 @@ import {
   Input,
   Select,
   Collapse,
+  Box,
 } from "@chakra-ui/react";
 import Loader from "react-js-loader";
 import {
@@ -89,7 +90,7 @@ function UserTable() {
         params: {
           page: currentPage,
           limit: itemsPerPage,
-          searchTerm,
+          searchTerm: searchTerm, // Include searchTerm here
           selectedState,
           selectedCity,
         },
@@ -104,10 +105,11 @@ function UserTable() {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchData();
   }, [currentPage, itemsPerPage, searchTerm, selectedState, selectedCity]);
+  
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -294,7 +296,6 @@ function UserTable() {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th></Th>
                   <Th>#</Th>
                   <Th>Name</Th>
                   <Th>Business</Th>
@@ -308,24 +309,32 @@ function UserTable() {
               </Thead>
               <Tbody>
                 {loading ? (
-                  <Flex justify="center" align="center" height="100vh">
-                    <Loader
-                      type="spinner-circle"
-                      bgColor={"#b19552"}
-                      color={"black"}
-                      size={50}
-                    />
-                  </Flex>
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="400px">
+                        <Loader
+                          type="spinner-circle"
+                          bgColor={"#b19552"}
+                          color={"black"}
+                          size={50}
+                        />
+                      </Flex>
+                    </Td>
+                  </Tr>
                 ) : users.length === 0 ? (
-                  <Flex justify="center" align="center">
-                    <Text
-                      variant="h6"
-                      color="textSecondary"
-                      style={{ textAlign: "center" }}
-                    >
-                      No data found
-                    </Text>
-                  </Flex>
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="200px">
+                        <Text
+                          variant="h6"
+                          color="textSecondary"
+                          textAlign="center"
+                        >
+                          No data found
+                        </Text>
+                      </Flex>
+                    </Td>
+                  </Tr>
                 ) : (
                   users.map((user, index) => (
                     <React.Fragment key={user.user_id}>
@@ -333,24 +342,6 @@ function UserTable() {
                         onClick={() => toggleRowExpansion(index)}
                         cursor="pointer"
                       >
-                        <Td>
-                          <IconButton
-                            aria-label={
-                              expandedRow === index ? "Collapse" : "Expand"
-                            }
-                            icon={
-                              expandedRow === index ? (
-                                <ChevronUpIcon />
-                              ) : (
-                                <ChevronDownIcon />
-                              )
-                            }
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleRowExpansion(index);
-                            }}
-                          />
-                        </Td>
                         <Td>{index + 1}</Td>
                         <Td>{user.username}</Td>
                         <Td>{user.businessname}</Td>
@@ -412,6 +403,24 @@ function UserTable() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(user.user_id);
+                              }}
+                              mr={2}
+                            />
+
+                            <IconButton
+                              aria-label={
+                                expandedRow === index ? "Collapse" : "Expand"
+                              }
+                              icon={
+                                expandedRow === index ? (
+                                  <ChevronUpIcon />
+                                ) : (
+                                  <ChevronDownIcon />
+                                )
+                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleRowExpansion(index);
                               }}
                             />
                           </Flex>

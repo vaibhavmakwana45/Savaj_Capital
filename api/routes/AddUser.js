@@ -211,30 +211,29 @@ router.get("/getusers", async (req, res) => {
   try {
     const currentPage = parseInt(req.query.page) || 1;
     const dataPerPage = parseInt(req.query.limit) || 10;
-    const searchTerm = req.query.searchTerm
-      ? {
-          $or: [
-            { username: { $regex: new RegExp(req.query.searchTerm, "i") } },
-            { email: { $regex: new RegExp(req.query.searchTerm, "i") } },
-            { number: { $regex: new RegExp(req.query.searchTerm, "i") } },
-            { aadhar_card: { $regex: new RegExp(req.query.searchTerm, "i") } },
-            { pan_card: { $regex: new RegExp(req.query.searchTerm, "i") } },
-            { businessname: { $regex: new RegExp(req.query.searchTerm, "i") } },
-          ],
-        }
-      : {};
-    const selectedState = req.query.selectedState || "";
-    const selectedCity = req.query.selectedCity || "";
+    const searchTerm = req.query.searchTerm;
 
     const matchStage = {};
+
+    if (searchTerm) {
+      matchStage.$or = [
+        { username: { $regex: new RegExp(searchTerm, "i") } },
+        { businessname: { $regex: new RegExp(searchTerm, "i") } },
+        { email: { $regex: new RegExp(searchTerm, "i") } },
+        { number: { $regex: new RegExp(searchTerm, "i") } },
+        { pan_card: { $regex: new RegExp(searchTerm, "i") } },
+        { aadhar_card: parseInt(searchTerm) || -1 },
+      ];
+    }
+
+    const selectedState = req.query.selectedState || "";
     if (selectedState) {
       matchStage.state = selectedState;
     }
+
+    const selectedCity = req.query.selectedCity || "";
     if (selectedCity) {
       matchStage.city = selectedCity;
-    }
-    if (Object.keys(searchTerm).length > 0) {
-      matchStage.$or = searchTerm;
     }
 
     const totalDataCount = await AddUser.countDocuments(matchStage);
@@ -246,6 +245,7 @@ router.get("/getusers", async (req, res) => {
     ];
 
     const data = await AddUser.aggregate(pipeline);
+
     res.json({
       statusCode: 200,
       data,

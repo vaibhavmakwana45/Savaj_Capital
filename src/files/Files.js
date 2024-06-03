@@ -80,6 +80,9 @@ function Files() {
   const toggleRowExpansion = (index) => {
     setExpandedRow(expandedRow === index ? null : index);
   };
+  const handleRowClick = (id) => {
+    history.push(`/superadmin/viewfile?id=${id}`);
+  };
   const history = useHistory();
 
   const handleRow = (url) => {
@@ -525,7 +528,6 @@ function Files() {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th></Th>
                   <Th>#</Th>
                   <Th>File Id</Th>
                   <Th>Customer (Business)</Th>
@@ -539,49 +541,42 @@ function Files() {
               </Thead>
               <Tbody>
                 {loading ? (
-                  <Flex justify="center" align="center" height="100vh">
-                    <Loader
-                      type="spinner-circle"
-                      bgColor={"#b19552"}
-                      color={"black"}
-                      size={50}
-                    />
-                  </Flex>
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="400px">
+                        <Loader
+                          type="spinner-circle"
+                          bgColor={"#b19552"}
+                          color={"black"}
+                          size={50}
+                        />
+                      </Flex>
+                    </Td>
+                  </Tr>
                 ) : files.length === 0 ? (
-                  <Flex justify="center" align="center">
-                    <Text
-                      variant="h6"
-                      color="textSecondary"
-                      style={{ textAlign: "center" }}
-                    >
-                      No data found
-                    </Text>
-                  </Flex>
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="200px">
+                        <Text
+                          variant="h6"
+                          color="textSecondary"
+                          textAlign="center"
+                        >
+                          No data found
+                        </Text>
+                      </Flex>
+                    </Td>
+                  </Tr>
                 ) : (
                   files.map((file, index) => (
                     <React.Fragment key={file.file_id}>
                       <Tr
-                        onClick={() => toggleRowExpansion(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(file.file_id);
+                        }}
                         cursor="pointer"
                       >
-                        <Td>
-                          <IconButton
-                            aria-label={
-                              expandedRow === index ? "Collapse" : "Expand"
-                            }
-                            icon={
-                              expandedRow === index ? (
-                                <ChevronUpIcon />
-                              ) : (
-                                <ChevronDownIcon />
-                              )
-                            }
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleRowExpansion(index);
-                            }}
-                          />
-                        </Td>
                         <Td>{index + 1}</Td>
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
                           {file?.file_id}
@@ -715,57 +710,78 @@ function Files() {
                           )}
                         </Td>
                         <Td>
-                          {" "}
-                          <Flex>
-                            <IconButton
-                              aria-controls="menu"
-                              aria-haspopup="true"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleClick(e);
-                              }}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
+                          <Flex
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Flex>
+                              <IconButton
+                                aria-controls="menu"
+                                aria-haspopup="true"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClick(e);
+                                }}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
 
-                            <Menu
-                              id="menu"
-                              anchorEl={anchorEl}
-                              keepMounted
-                              open={Boolean(anchorEl)}
-                              onClose={handleClose}
-                            >
-                              <MenuItem
+                              <Menu
+                                id="menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                              >
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleDelete(file.file_id);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <DeleteIcon style={{ marginRight: "5px" }} />
+                                  Delete
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleEditClick(file.file_id);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <EditIcon style={{ marginRight: "5px" }} />
+                                  Edit
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleUpdate(file.file_id);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <AddIcon style={{ marginRight: "5px" }} />
+                                  Update
+                                </MenuItem>
+                              </Menu>
+                            </Flex>
+                            <Flex style={{ paddingLeft: "10px" }}>
+                              <IconButton
+                                aria-label={
+                                  expandedRow === index ? "Collapse" : "Expand"
+                                }
                                 onClick={(e) => {
-                                  handleClose();
-                                  handleDelete(file.file_id);
                                   e.stopPropagation();
+                                  toggleRowExpansion(index);
                                 }}
                               >
-                                <DeleteIcon style={{ marginRight: "5px" }} />
-                                Delete
-                              </MenuItem>
-                              <MenuItem
-                                onClick={(e) => {
-                                  handleClose();
-                                  handleEditClick(file.file_id);
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <EditIcon style={{ marginRight: "5px" }} />
-                                Edit
-                              </MenuItem>
-                              <MenuItem
-                                onClick={(e) => {
-                                  handleClose();
-                                  handleUpdate(file.file_id);
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <AddIcon style={{ marginRight: "5px" }} />
-                                Update
-                              </MenuItem>
-                            </Menu>
+                                {expandedRow === index ? (
+                                  <ChevronUpIcon />
+                                ) : (
+                                  <ChevronDownIcon />
+                                )}
+                              </IconButton>
+                            </Flex>
                           </Flex>
                         </Td>
                       </Tr>
@@ -787,59 +803,67 @@ function Files() {
                                 overflow: "hidden",
                               }}
                             >
-                              <Table
-                                variant="simple"
-                                bg={useColorModeValue("gray.50", "gray.700")}
-                                style={{ tableLayout: "fixed" }}
+                              {/* Wrapping the table in a div with a fixed height and scrollable overflow */}
+                              <div
+                                style={{
+                                  maxHeight: "200px",
+                                  overflowY: "auto",
+                                }}
                               >
-                                <Thead>
-                                  <Tr>
-                                    <Th>Document Name</Th>
-                                    <Th>Status</Th>
-                                  </Tr>
-                                </Thead>
-                                <Tbody style={{ fontSize: "14px" }}>
-                                  {fileData?.length > 0 ? (
-                                    fileData.map((documentRow, index) => (
-                                      <Tr key={index}>
-                                        <Td>{documentRow?.name}</Td>
-                                        <Td>
-                                          {documentRow?.status ===
-                                          "Uploaded" ? (
-                                            <span
-                                              style={{
-                                                color: "green",
-                                                fontWeight: "bold",
-                                              }}
-                                            >
-                                              <i className="fa-regular fa-circle-check"></i>
-                                              &nbsp;&nbsp;Uploaded
-                                            </span>
-                                          ) : (
-                                            <span
-                                              style={{
-                                                color: "#FF9C00",
-                                                fontWeight: "bold",
-                                              }}
-                                            >
-                                              <i className="fa-regular fa-clock"></i>
-                                              &nbsp;&nbsp;Pending
-                                            </span>
-                                          )}
+                                <Table
+                                  variant="simple"
+                                  bg={useColorModeValue("gray.50", "gray.700")}
+                                  style={{ tableLayout: "fixed" }}
+                                >
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Document Name</Th>
+                                      <Th>Status</Th>
+                                    </Tr>
+                                  </Thead>
+                                  <Tbody style={{ fontSize: "14px" }}>
+                                    {fileData?.length > 0 ? (
+                                      fileData.map((documentRow, index) => (
+                                        <Tr key={index}>
+                                          <Td>{documentRow?.name}</Td>
+                                          <Td>
+                                            {documentRow?.status ===
+                                            "Uploaded" ? (
+                                              <span
+                                                style={{
+                                                  color: "green",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-circle-check"></i>
+                                                &nbsp;&nbsp;Uploaded
+                                              </span>
+                                            ) : (
+                                              <span
+                                                style={{
+                                                  color: "#FF9C00",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-clock"></i>
+                                                &nbsp;&nbsp;Pending
+                                              </span>
+                                            )}
+                                          </Td>
+                                        </Tr>
+                                      ))
+                                    ) : (
+                                      <Tr>
+                                        <Td colSpan={2} align="center">
+                                          {" "}
+                                          {/* Span across 2 columns */}
+                                          No documents available
                                         </Td>
                                       </Tr>
-                                    ))
-                                  ) : (
-                                    <Tr>
-                                      <Td colSpan={2} align="center">
-                                        {" "}
-                                        {/* Span across 2 columns */}
-                                        No documents available
-                                      </Td>
-                                    </Tr>
-                                  )}
-                                </Tbody>
-                              </Table>
+                                    )}
+                                  </Tbody>
+                                </Table>
+                              </div>
                             </div>
                           </Collapse>
                         </Td>
