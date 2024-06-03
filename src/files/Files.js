@@ -549,9 +549,13 @@ function Files() {
                   </Flex>
                 ) : files.length === 0 ? (
                   <Flex justify="center" align="center">
-                    <Typography variant="h6" color="textSecondary">
+                    <Text
+                      variant="h6"
+                      color="textSecondary"
+                      style={{ textAlign: "center" }}
+                    >
                       No data found
-                    </Typography>
+                    </Text>
                   </Flex>
                 ) : (
                   files.map((file, index) => (

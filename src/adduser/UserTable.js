@@ -34,7 +34,8 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import "./user.css";
-import Typography from "@mui/material/Typography";
+// import Typography from '@mui/material/Typography';
+
 import moment from "moment";
 import { Country, State, City } from "country-state-city";
 import {
@@ -317,9 +318,13 @@ function UserTable() {
                   </Flex>
                 ) : users.length === 0 ? (
                   <Flex justify="center" align="center">
-                    <Typography variant="h6" color="textSecondary">
+                    <Text
+                      variant="h6"
+                      color="textSecondary"
+                      style={{ textAlign: "center" }}
+                    >
                       No data found
-                    </Typography>
+                    </Text>
                   </Flex>
                 ) : (
                   users.map((user, index) => (
