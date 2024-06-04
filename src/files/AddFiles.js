@@ -76,7 +76,7 @@ function AddFiles() {
 
   const fetchUsers = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/getallusers");
+      const response = await AxiosInstance.get("/addusers/getusers");
       setUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -447,7 +447,7 @@ function AddFiles() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <FormControl>
+            <FormControl  id="user_id" mt={4} isRequired>
               <FormLabel>User</FormLabel>
               <Select
                 placeholder="Select user"
