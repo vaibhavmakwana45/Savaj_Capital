@@ -207,6 +207,7 @@ router.get("/getusers", async (req, res) => {
     });
   }
 });
+
 router.get("/getallusers", async (req, res) => {
   try {
     const currentPage = parseInt(req.query.page) || 1;
