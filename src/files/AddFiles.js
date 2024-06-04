@@ -76,7 +76,7 @@ function AddFiles() {
 
   const fetchUsers = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/getusers");
+      const response = await AxiosInstance.get("/addusers/getallusers");
       setUsers(response.data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
