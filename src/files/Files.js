@@ -405,13 +405,16 @@ function Files() {
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = (event) => {
+  const handleClick = (event, fileId) => {
     setAnchorEl(event.currentTarget);
+    setSelectedFileId(fileId);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedFileId(null);
   };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -729,7 +732,7 @@ function Files() {
                                 aria-haspopup="true"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleClick(e);
+                                  handleClick(e, file.file_id);
                                 }}
                               >
                                 <MoreVertIcon />
@@ -745,7 +748,11 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleDelete(file.file_id);
+                                    handleDelete(selectedFileId);
+                                    console.log(
+                                      selectedFileId,
+                                      "selectedFileId"
+                                    );
                                     e.stopPropagation();
                                   }}
                                 >
@@ -755,7 +762,7 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleEditClick(file.file_id);
+                                    handleEditClick(selectedFileId);
                                     e.stopPropagation();
                                   }}
                                 >
@@ -765,7 +772,7 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleUpdate(file.file_id);
+                                    handleUpdate(selectedFileId);
                                     e.stopPropagation();
                                   }}
                                 >

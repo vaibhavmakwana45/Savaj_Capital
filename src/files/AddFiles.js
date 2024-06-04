@@ -491,14 +491,14 @@ function AddFiles() {
               >
                 <FormLabel>Loan Subtype</FormLabel>
                 <Select
-                  placeholder="Select Loan Subtype"
-                  onChange={handleLoanSubtypeChange} // Use handleLoanSubtypeChange here
+                  placeholder="Select Loan Subtype" 
+                  onChange={handleLoanSubtypeChange}
                   options={loanSubType.map((subType) => ({
                     value: subType.loantype_id,
                     label: subType.loan_type,
                   }))}
-                  menuPortalTarget={document.body} // Render dropdown in a portal
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }} // Ensure dropdown appears above other content
+                  menuPortalTarget={document.body}
+                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                 />
               </FormControl>
             )}
