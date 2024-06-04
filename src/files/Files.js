@@ -363,15 +363,15 @@ function Files() {
         await fetchFileData(fileId);
       }
     };
-  
+
     fetchAndSetFileData();
-  
+
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
       var progressBars = $(this).find(".progress-bar");
-  
+
       progressBars.removeClass("red yellow purple blue green");
-  
+
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
       } else if (value >= 20 && value < 40) {
@@ -383,7 +383,7 @@ function Files() {
       } else if (value >= 80 && value <= 100) {
         progressBars.addClass("green");
       }
-  
+
       if (value <= 50) {
         progressBars
           .eq(1)
@@ -402,18 +402,19 @@ function Files() {
       }
     });
   }, [files, fetchFileData]);
-  
-  
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleClick = (event) => {
+  const handleClick = (event, fileId) => {
     setAnchorEl(event.currentTarget);
+    setSelectedFileId(fileId);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedFileId(null);
   };
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -731,7 +732,7 @@ function Files() {
                                 aria-haspopup="true"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleClick(e);
+                                  handleClick(e, file.file_id);
                                 }}
                               >
                                 <MoreVertIcon />
@@ -747,7 +748,11 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleDelete(file.file_id);
+                                    handleDelete(selectedFileId);
+                                    console.log(
+                                      selectedFileId,
+                                      "selectedFileId"
+                                    );
                                     e.stopPropagation();
                                   }}
                                 >
@@ -757,7 +762,7 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleEditClick(file.file_id);
+                                    handleEditClick(selectedFileId);
                                     e.stopPropagation();
                                   }}
                                 >
@@ -767,7 +772,7 @@ function Files() {
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
-                                    handleUpdate(file.file_id);
+                                    handleUpdate(selectedFileId);
                                     e.stopPropagation();
                                   }}
                                 >

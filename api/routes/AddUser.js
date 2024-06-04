@@ -192,22 +192,23 @@ router.post("/adduserbyadmin", async (req, res) => {
   }
 });
 
-// router.get("/getusers", async (req, res) => {
-//   try {
-//     const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
-//     res.json({
-//       success: true,
-//       users,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Internal Server Error",
-//     });
-//   }
-// });
 router.get("/getusers", async (req, res) => {
+  try {
+    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+    res.json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/getallusers", async (req, res) => {
   try {
     const currentPage = parseInt(req.query.page) || 1;
     const dataPerPage = parseInt(req.query.limit) || 10;

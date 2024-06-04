@@ -86,7 +86,7 @@ function UserTable() {
 
   const fetchData = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/getusers", {
+      const response = await AxiosInstance.get("/addusers/getallusers", {
         params: {
           page: currentPage,
           limit: itemsPerPage,
@@ -343,11 +343,11 @@ function UserTable() {
                         cursor="pointer"
                       >
                         <Td>{index + 1}</Td>
-                        <Td>{user.username}</Td>
-                        <Td>{user.businessname}</Td>
-                        <Td>{user.number}</Td>
-                        <Td>{user.reference}</Td>
-                        <Td>{user.cibil_score}</Td>
+                        <Td>{user.username || "N/A"}</Td>
+                        <Td>{user.businessname || "N/A"}</Td>
+                        <Td>{user.number || "N/A"}</Td>
+                        <Td>{user.reference || "N/A"}</Td>
+                        <Td>{user.cibil_score || "N/A"}</Td>
                         <Td>
                           <Flex
                             alignItems="center"

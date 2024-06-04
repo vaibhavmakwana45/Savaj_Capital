@@ -447,7 +447,7 @@ function AddFiles() {
             </Flex>
           </CardHeader>
           <CardBody>
-            <FormControl>
+            <FormControl id="user_id" mt={4} isRequired>
               <FormLabel>User</FormLabel>
               <Select
                 placeholder="Select user"
@@ -457,6 +457,8 @@ function AddFiles() {
                   value: user.user_id,
                   label: `${user.username} (${user.businessname})`,
                 }))}
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
 
               {cibilMessage && (
@@ -475,6 +477,8 @@ function AddFiles() {
                   value: loan.loan_id,
                   label: loan.loan,
                 }))}
+                menuPortalTarget={document.body} // Render dropdown in a portal
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }} // Ensure dropdown appears above other content
               />
             </FormControl>
 
@@ -487,12 +491,14 @@ function AddFiles() {
               >
                 <FormLabel>Loan Subtype</FormLabel>
                 <Select
-                  placeholder="Select Loan Subtype"
-                  onChange={handleLoanSubtypeChange} // Use handleLoanSubtypeChange here
+                  placeholder="Select Loan Subtype" 
+                  onChange={handleLoanSubtypeChange}
                   options={loanSubType.map((subType) => ({
                     value: subType.loantype_id,
                     label: subType.loan_type,
                   }))}
+                  menuPortalTarget={document.body}
+                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                 />
               </FormControl>
             )}
