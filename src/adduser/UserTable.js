@@ -86,7 +86,7 @@ function UserTable() {
 
   const fetchData = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/getusers", {
+      const response = await AxiosInstance.get("/addusers/getallusers", {
         params: {
           page: currentPage,
           limit: itemsPerPage,
