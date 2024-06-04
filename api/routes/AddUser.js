@@ -171,7 +171,7 @@ router.post("/adduserbyadmin", async (req, res) => {
 
     await newUser.save();
     const ApiResponse = await axios.post(
-      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
+      `http://localhost:5882/api/setpassword/passwordmail`,
       {
         email: req.body.userDetails.email,
       }
@@ -192,9 +192,84 @@ router.post("/adduserbyadmin", async (req, res) => {
   }
 });
 
+// router.get("/getusers", async (req, res) => {
+//   try {
+//     const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+//     res.json({
+//       success: true,
+//       users,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
 router.get("/getusers", async (req, res) => {
   try {
-    const users = await AddUser.find({}, "-password").sort({ updatedAt: -1 });
+    const currentPage = parseInt(req.query.page) || 1;
+    const dataPerPage = parseInt(req.query.limit) || 10;
+    const searchTerm = req.query.searchTerm;
+
+    const matchStage = {};
+
+    if (searchTerm) {
+      matchStage.$or = [
+        { username: { $regex: new RegExp(searchTerm, "i") } },
+        { businessname: { $regex: new RegExp(searchTerm, "i") } },
+        { email: { $regex: new RegExp(searchTerm, "i") } },
+        { number: { $regex: new RegExp(searchTerm, "i") } },
+        { pan_card: { $regex: new RegExp(searchTerm, "i") } },
+        { aadhar_card: parseInt(searchTerm) || -1 },
+      ];
+    }
+
+    const selectedState = req.query.selectedState || "";
+    if (selectedState) {
+      matchStage.state = selectedState;
+    }
+
+    const selectedCity = req.query.selectedCity || "";
+    if (selectedCity) {
+      matchStage.city = selectedCity;
+    }
+
+    const totalDataCount = await AddUser.countDocuments(matchStage);
+    const pipeline = [
+      { $match: matchStage },
+      { $sort: { updatedAt: -1 } },
+      { $skip: (currentPage - 1) * dataPerPage },
+      { $limit: dataPerPage },
+    ];
+
+    const data = await AddUser.aggregate(pipeline);
+
+    res.json({
+      statusCode: 200,
+      data,
+      totalPages: Math.ceil(totalDataCount / dataPerPage),
+      currentPage,
+      totalCount: totalDataCount,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
+router.get("/getcustomers/:state/:city", async (req, res) => {
+  const { state, city } = req.params;
+
+  try {
+    const users = await AddUser.find({ state, city }, "-password").sort({
+      updatedAt: -1,
+    });
     res.json({
       success: true,
       users,

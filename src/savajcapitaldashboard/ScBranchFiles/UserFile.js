@@ -479,7 +479,6 @@ export default function CollapsibleTable() {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
-  console.log(accessType, "accessType");
 
   const fetchData = async () => {
     if (accessType) {
@@ -488,22 +487,29 @@ export default function CollapsibleTable() {
           console.error("State or city is missing.");
           return;
         }
-  
+
+        const loanIds = accessType?.loan_ids.join(",");
+
         const response = await AxiosInstance.get(
-          `/file_upload/savajusers/${accessType.state}/${accessType.city}`,
+          `/file_upload/savajusers/${accessType.state}/${accessType.city}/${loanIds}`,
           {
             params: {
               page: currentPage,
               limit: itemsPerPage,
               searchTerm,
-              selectedLoan: loan_id ? (loan_id === "All Loan Types" ? "" : loan_id) : (selectedLoan === "All Loan Types" ? "" : selectedLoan),
+              selectedLoan: loan_id
+                ? loan_id === "All Loan Types"
+                  ? ""
+                  : loan_id
+                : selectedLoan === "All Loan Types"
+                ? ""
+                : selectedLoan,
               selectedStatus: selectedStatusSearch,
               selectedState,
               selectedCity,
             },
           }
         );
-        console.log(response, "response");
         setFiles(response.data.data);
         setTotalPages(response.data.totalPages);
         setTotalRecorrds(response.data.totalCount);
@@ -515,7 +521,6 @@ export default function CollapsibleTable() {
       }
     }
   };
-  
 
   useEffect(() => {
     fetchData();

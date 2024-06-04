@@ -97,7 +97,6 @@ function SavajCapitalBranchTable() {
   const fetchSavajcapitalbranch = async () => {
     try {
       const response = await AxiosInstance.get("/branch");
-      console.log(response, "response");
       setLoading(false);
       setSavajcapitalbranch(response.data.data);
     } catch (error) {

@@ -196,10 +196,6 @@ function Document() {
   // };
   const deleteDocument = async (loanDocumentId) => {
     try {
-      console.log("Deleting document:", loanDocumentId);
-      console.log("Loan ID:", loan_id);
-      console.log("Loantype ID:", loantype_id);
-      
       const requestData = { loan_id: loan_id }; // Always include loan_id
   
       // Add loantype_id to the request data if available
