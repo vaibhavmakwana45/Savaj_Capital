@@ -59,7 +59,7 @@ export default function Dashboard() {
   const [apiData, setApiData] = useState({
     banks: 0,
     users: 0,
-    savajcapitalbranch: 0,
+    savajcapitalbrnach: 0,
     superadmin: 0,
     loans: [],
   });
@@ -123,7 +123,7 @@ export default function Dashboard() {
       >
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -174,7 +174,7 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
@@ -225,7 +225,7 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/alluser")}
         >
           <Flex direction="column">
@@ -274,7 +274,10 @@ export default function Dashboard() {
             </Text> */}
           </Flex>
         </Card>
-        <Card minH="125px">
+        <Card
+          minH="125px"
+          style={{ cursor: "pointer", border: "1px solid black" }}
+        >
           <Flex direction="column">
             <Flex
               flexDirection="row"
@@ -324,7 +327,7 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/savajuserroles")}
         >
           <Flex direction="column">
@@ -376,7 +379,7 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/filetable")}
         >
           <Flex direction="column">
@@ -429,7 +432,7 @@ export default function Dashboard() {
           <Card
             key={loan.loan_id}
             minH="125px"
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", border: "1px solid black" }}
             onClick={() =>
               history.push(`/superadmin/filetable`, {
                 state: { loan: loan.loan, loan_id: loan.loan_id },
