@@ -105,11 +105,10 @@ function UserTable() {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, [currentPage, itemsPerPage, searchTerm, selectedState, selectedCity]);
-  
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -243,8 +242,9 @@ function UserTable() {
                 fontWeight="bold"
                 className="ttext"
               >
-                All Customers
+                All Customers - {totalRecords}
               </Text>
+
               <Flex className="thead" justifyContent="space-between">
                 <Select
                   value={selectedState}

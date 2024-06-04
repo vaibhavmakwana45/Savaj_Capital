@@ -351,18 +351,27 @@ function Files() {
 
   useEffect(() => {
     if (files.length > 0) {
-      const fileId = files[0].file_id; // Assuming you want to fetch file data for the first file in the list
+      const fileId = files[0].file_id;
       fetchFileData(fileId);
     }
   }, [files]);
 
   useEffect(() => {
+    const fetchAndSetFileData = async () => {
+      if (files.length > 0) {
+        const fileId = files[0].file_id;
+        await fetchFileData(fileId);
+      }
+    };
+  
+    fetchAndSetFileData();
+  
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
       var progressBars = $(this).find(".progress-bar");
-
+  
       progressBars.removeClass("red yellow purple blue green");
-
+  
       if (value >= 0 && value < 20) {
         progressBars.addClass("red");
       } else if (value >= 20 && value < 40) {
@@ -374,7 +383,7 @@ function Files() {
       } else if (value >= 80 && value <= 100) {
         progressBars.addClass("green");
       }
-
+  
       if (value <= 50) {
         progressBars
           .eq(1)
@@ -392,7 +401,9 @@ function Files() {
         return (percentage / 100) * 360;
       }
     });
-  }, [fileData]);
+  }, [files, fetchFileData]);
+  
+  
 
   const [anchorEl, setAnchorEl] = useState(null);
 

@@ -243,7 +243,7 @@ export default function Dashboard() {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Total User
+                  Total Customer
                 </StatLabel>
                 <Flex>
                   <StatNumber
