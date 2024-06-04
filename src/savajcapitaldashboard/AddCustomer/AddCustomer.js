@@ -22,7 +22,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
-function AddUser(props) {
+function AddCustomer(props) {
   const location = useLocation();
   const data = location.state;
   const textColor = useColorModeValue("gray.700", "white");
@@ -59,7 +59,7 @@ function AddUser(props) {
 
   const getData = async () => {
     try {
-      const response = await AxiosInstance.get("/addusers/user/" + id);
+      const response = await AxiosInstance.get("/AddCustomers/user/" + id);
       if (response.data.success) {
         const { user } = response.data;
 
@@ -144,7 +144,7 @@ function AddUser(props) {
         };
 
         const response = await AxiosInstance.post(
-          "/addusers/adduserbyadmin",
+          "/AddCustomers/AddCustomerbyadmin",
           submissionData
         );
 
@@ -158,17 +158,17 @@ function AddUser(props) {
           toast.error(response.data.message);
         } else if (response.data.success) {
           toast.success("User added successfully!");
-          history.push("/superadmin/alluser");
+          history.push("/savajcapitaluser/customer");
         }
       } else {
         const response = await AxiosInstance.put(
-          "/addusers/edituser/" + id,
+          "/AddCustomers/edituser/" + id,
           formData
         );
 
         if (response.data.success) {
           toast.success("User Updated successfully!");
-          history.push("/superadmin/alluser");
+          history.push("/savajcapitaluser/customer");
         } else {
           toast.error("Please try again later!");
         }
@@ -489,7 +489,7 @@ function AddUser(props) {
                     backgroundColor: "#414650",
                     color: "#fff",
                   }}
-                  onClick={() => history.push("/superadmin/alluser")}
+                  onClick={() => history.push("/savajcapitaluser/customer")}
                 >
                   Cancel
                 </Button>
@@ -503,4 +503,4 @@ function AddUser(props) {
   );
 }
 
-export default AddUser;
+export default AddCustomer;
