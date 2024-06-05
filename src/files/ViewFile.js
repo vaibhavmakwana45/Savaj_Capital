@@ -1581,6 +1581,12 @@ function ViewFile() {
                                         </FormControl>
                                       )
                                     )}
+                                     <div className="mt-4">
+                                      <strong>Date:</strong>{" "}
+                                      {new Date(
+                                        guarantor.updatedAt
+                                      ).toLocaleString()}
+                                    </div>
                                     {dataIndex ===
                                       open.data.guarantorSteps.length - 1 && (
                                       <Button
