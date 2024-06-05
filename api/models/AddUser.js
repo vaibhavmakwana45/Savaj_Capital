@@ -11,6 +11,18 @@ const UserSchema = new mongoose.Schema({
   businessname: {
     type: String,
   },
+  usertype: {
+    type: String,
+  },
+  businessnumber: {
+    type: String,
+  },
+  businessaddress: {
+    type: String,
+  },
+  businessextranumber: {
+    type: String,
+  },
   email: {
     type: String,
   },

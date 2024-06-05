@@ -699,4 +699,25 @@ router.put("/toggle-active/:user_id", async (req, res) => {
   }
 });
 
+// async function addIsDeleteToWithdrawal() {
+//   try {
+//     // Find documents where you want to add the new is_delete field
+//     const documentsToUpdate = await AddUser.find({  });
+
+//     // Update the documents with the new is_delete field
+//     for (let i = 0; i < documentsToUpdate.length; i++) {
+//       // Add the new is_delete field to the document
+//       documentsToUpdate[i].usertype = "business";
+
+//       // Save the updated document
+//       await documentsToUpdate[i].save();
+//     }
+
+//     console.log("field added successfully!");
+//   } catch (error) {
+//     console.error("Error adding is_delete field:", error);
+//   }
+// }
+// addIsDeleteToWithdrawal();
+
 module.exports = router;
