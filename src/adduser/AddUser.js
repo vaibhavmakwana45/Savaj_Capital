@@ -7,9 +7,6 @@ import {
   Input,
   Select,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
-  useDisclosure,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -17,10 +14,8 @@ import CardHeader from "components/Card/CardHeader.js";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
-import axios from "axios";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
 function AddUser(props) {
   const location = useLocation();
@@ -31,21 +26,21 @@ function AddUser(props) {
   const [cities, setCities] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("IN");
   const [selectedState, setSelectedState] = useState("");
+  const [userType, setUserType] = useState("salaried");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
   const [formData, setFormData] = useState({
+    usertype: "",
     user_id: "",
     username: "",
     number: "",
     cibil_score: "",
     email: "",
     pan_card: "",
-    businessname: "",
     aadhar_card: "",
     dob: "",
     country: "India",
@@ -55,6 +50,10 @@ function AddUser(props) {
     gst_number: "",
     reference: "",
     password: "",
+    businessname: "",
+    businessnumber: "",
+    businessaddress: "",
+    businessextranumber: "",
   });
 
   const getData = async () => {
@@ -64,7 +63,8 @@ function AddUser(props) {
         const { user } = response.data;
 
         const submissionData = {
-          user_id: id,
+          usertype: userType,
+          userType: id,
           username: user.username,
           email: user.email,
           number: user.number,
@@ -81,12 +81,15 @@ function AddUser(props) {
           gst_number: user.gst_number,
           reference: user.reference,
           businessname: user.businessname,
-          password: "",
+          businessextranumber: user.businessextranumber,
+          businessaddress: user.businessaddress,
+          businessnumber: user.businessnumber,
+          password: user.password,
         };
+        setUserType(user.usertype);
         setSelectedState(user.state_code);
         setSelectedCountry(user.country_code);
         setFormData(submissionData);
-        setFormData(user);
       } else {
         alert("Please try again later...!");
       }
@@ -123,6 +126,7 @@ function AddUser(props) {
       if (!id) {
         const submissionData = {
           userDetails: {
+            usertype: userType,
             username: formData.username,
             number: formData.number,
             cibil_score: formData.cibil_score,
@@ -133,13 +137,16 @@ function AddUser(props) {
             password: formData.password,
             country: formData.country,
             unit_address: formData.unit_address,
-            businessname: formData.businessname,
             gst_number: formData.gst_number,
             state: formData.state,
             city: formData.city,
             reference: formData.reference,
             state_code: selectedState,
             country_code: selectedCountry,
+            businessname: formData.businessname,
+            businessextranumber: formData.businessextranumber,
+            businessaddress: formData.businessaddress,
+            businessnumber: formData.businessnumber,
           },
         };
 
@@ -225,7 +232,16 @@ function AddUser(props) {
     }));
   };
 
-  const handleeChange = (e) => {
+  const handleUserTypeChange = (event) => {
+    const newUserType = event.target.value;
+    setUserType(newUserType);
+    setFormData({
+      ...formData,
+      usertype: newUserType,
+    });
+  };
+
+  const handlePanChange = (e) => {
     const { name, value } = e.target;
     if (name === "pan_card" && value.toUpperCase().length <= 10) {
       setFormData({
@@ -235,7 +251,7 @@ function AddUser(props) {
       });
     }
   };
-  const handleadharChange = (e) => {
+  const handleAadharChange = (e) => {
     const { name, value } = e.target;
     if (name === "aadhar_card" && value.length <= 12) {
       setFormData({
@@ -244,7 +260,7 @@ function AddUser(props) {
       });
     }
   };
-  const handlephoneChange = (e) => {
+  const handlePhoneChange = (e) => {
     const { name, value } = e.target;
     if (name === "number" && value.length <= 10) {
       setFormData({
@@ -253,7 +269,25 @@ function AddUser(props) {
       });
     }
   };
-  const handlecibilChange = (e) => {
+  const handleBusonessPhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "businessnumber" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handleExtraPhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "businessextranumber" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+  const handleCibilChange = (e) => {
     const { name, value } = e.target;
     if (name === "cibil_score" && value.length <= 3) {
       setFormData({
@@ -262,7 +296,8 @@ function AddUser(props) {
       });
     }
   };
-  const handlegstChange = (e) => {
+
+  const handleGstChange = (e) => {
     const { name, value } = e.target;
     if (name === "gst_number" && value.toUpperCase().length <= 15) {
       setFormData({
@@ -272,7 +307,6 @@ function AddUser(props) {
       });
     }
   };
-
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -286,7 +320,20 @@ function AddUser(props) {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="username" isRequired>
+              <FormControl id="userType" isRequired>
+                <FormLabel>User Type</FormLabel>
+                <Select
+                  name="userType"
+                  value={userType}
+                  // isDisabled={id}
+                  onChange={handleUserTypeChange}
+                >
+                  <option value="salaried">Salaried</option>
+                  <option value="business">Business</option>
+                </Select>
+              </FormControl>
+
+              <FormControl id="username" mt={4} isRequired>
                 <FormLabel>Customer Name</FormLabel>
                 <Input
                   name="username"
@@ -295,15 +342,59 @@ function AddUser(props) {
                   placeholder="Enter your Name"
                 />
               </FormControl>
-              <FormControl id="businessname" mt={4} isRequired>
-                <FormLabel>Business Name</FormLabel>
-                <Input
-                  name="businessname"
-                  onChange={handleChange}
-                  value={formData.businessname}
-                  placeholder="Enter your business name"
-                />
-              </FormControl>
+
+              {userType === "business" && (
+                <>
+                  <FormControl id="businessname" mt={4} isRequired>
+                    <FormLabel>Business Name</FormLabel>
+                    <Input
+                      name="businessname"
+                      onChange={handleChange}
+                      value={formData.businessname}
+                      placeholder="Enter your business name"
+                    />
+                  </FormControl>
+                  <FormControl id="businessaddress" mt={4} isRequired>
+                    <FormLabel>Business Address</FormLabel>
+                    <Input
+                      name="businessaddress"
+                      onChange={handleChange}
+                      value={formData.businessaddress}
+                      placeholder="Enter business address"
+                    />
+                  </FormControl>
+                  <FormControl id="businessnumber" mt={4} isRequired>
+                    <FormLabel>Business Mobile Number</FormLabel>
+                    <Input
+                      name="businessnumber"
+                      type="number"
+                      onChange={handleBusonessPhoneChange}
+                      value={formData.businessnumber}
+                      placeholder="Enter business mobile number"
+                    />
+                  </FormControl>
+                  <FormControl id="businessextranumber" mt={4}>
+                    <FormLabel>Extra Mobile Number</FormLabel>
+                    <Input
+                      name="businessextranumber"
+                      type="number"
+                      onChange={handleExtraPhoneChange}
+                      value={formData.businessextranumber}
+                      placeholder="Enter extra mobile number"
+                    />
+                  </FormControl>
+                  <FormControl id="gst_number" mt={4} isRequired>
+                    <FormLabel>GST Number</FormLabel>
+                    <Input
+                      name="gst_number"
+                      onChange={handleGstChange}
+                      value={formData.gst_number}
+                      placeholder="Enter GST number"
+                    />
+                  </FormControl>
+                </>
+              )}
+
               <FormControl id="dob" mt={4} isRequired>
                 <FormLabel>DOB</FormLabel>
                 <Input
@@ -318,54 +409,46 @@ function AddUser(props) {
                 <Input
                   name="number"
                   type="number"
-                  onChange={handlephoneChange}
+                  onChange={handlePhoneChange}
                   value={formData.number}
-                  placeholder="Enter your Number"
+                  placeholder="Enter mobile number"
                 />
               </FormControl>
-              <FormControl id="aadharcard" mt={4} isRequired>
-                <FormLabel>Cibil Score</FormLabel>
-                <Input
-                  name="cibil_score"
-                  type="text"
-                  onChange={handlecibilChange}
-                  value={formData.cibil_score}
-                  placeholder="Enter your cibil score"
-                />
-              </FormControl>
-              <FormControl id="aadharcard" mt={4} isRequired>
-                <FormLabel>GST Number</FormLabel>
-                <Input
-                  name="gst_number"
-                  type="text"
-                  onChange={handlegstChange}
-                  value={formData.gst_number}
-                  placeholder="Enter gst number"
-                />
-              </FormControl>
-              <FormControl id="aadharcard" mt={4} isRequired>
+              <FormControl id="aadhar_card" mt={4} isRequired>
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   name="aadhar_card"
-                  type="number"
-                  onChange={handleadharChange}
+                  type="text"
+                  onChange={handleAadharChange}
                   value={formData.aadhar_card}
-                  placeholder="XXXX - XXXX - XXXX"
+                  placeholder="XXXX-XXXX-XXXX"
                 />
               </FormControl>
-              <FormControl id="pancard" mt={4} isRequired>
+
+              <FormControl id="pan_card" mt={4} isRequired>
                 <FormLabel>Pancard</FormLabel>
                 <Input
                   name="pan_card"
                   type="text"
-                  onChange={handleeChange}
+                  onChange={handlePanChange}
                   value={formData.pan_card}
-                  placeholder="Enyrt your PAN"
+                  placeholder="Enter your PAN"
                 />
               </FormControl>
+
+              <FormControl id="cibil_score" mt={4} isRequired>
+                <FormLabel>Cibil Score</FormLabel>
+                <Input
+                  name="cibil_score"
+                  type="number"
+                  onChange={handleCibilChange}
+                  value={formData.cibil_score}
+                  placeholder="Enter your cibil score"
+                />
+              </FormControl>
+
               <FormControl id="country" mt={4} isRequired>
                 <FormLabel>Country</FormLabel>
-
                 <Select
                   name="country"
                   value={selectedCountry}
@@ -422,27 +505,27 @@ function AddUser(props) {
                   )}
                 </Select>
               </FormControl>
-
               <FormControl id="unit_address" mt={4} isRequired>
                 <FormLabel>Unit Address</FormLabel>
                 <Input
                   name="unit_address"
-                  type="string"
                   onChange={handleChange}
                   value={formData.unit_address}
-                  placeholder="Enter unit address"
+                  placeholder="Enter business address"
                 />
               </FormControl>
+
               <FormControl id="reference" mt={4}>
                 <FormLabel>Reference</FormLabel>
                 <Input
                   name="reference"
-                  type="string"
+                  type="text"
                   onChange={handleChange}
                   value={formData.reference}
                   placeholder="Enter reference"
                 />
               </FormControl>
+
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 Login Credentials
               </Text>

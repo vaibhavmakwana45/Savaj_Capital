@@ -30,7 +30,6 @@ import {
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import toast, { Toaster } from "react-hot-toast";
 import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
-
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -841,7 +840,10 @@ function Files() {
                                     {fileData?.length > 0 ? (
                                       fileData.map((documentRow, index) => (
                                         <Tr key={index}>
-                                          <Td>{documentRow?.name}</Td>
+                                          <Td>
+                                            {documentRow?.name} (
+                                            {documentRow?.title})
+                                          </Td>
                                           <Td>
                                             {documentRow?.status ===
                                             "Uploaded" ? (
