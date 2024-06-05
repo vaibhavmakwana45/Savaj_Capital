@@ -338,7 +338,7 @@ function Files() {
       const response = await AxiosInstance.get(
         `/file_upload/file-count/${fileId}`
       );
-      console.log(response, "abc");
+
       setFileData([
         ...response.data.data.approvedData,
         ...response.data.data.pendingData,
@@ -739,10 +739,7 @@ function Files() {
                                   onClick={(e) => {
                                     handleClose();
                                     handleDelete(selectedFileId);
-                                    console.log(
-                                      selectedFileId,
-                                      "selectedFileId"
-                                    );
+
                                     e.stopPropagation();
                                   }}
                                 >

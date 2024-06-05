@@ -1011,14 +1011,14 @@ router.get("/get_documents/:file_id", async (req, res) => {
         name: document.document,
       });
     }
-
+ 
     res.json({
       statusCode: 200,
       data: {
         loan_step: "Documents",
         loan_step_id: "1715348523661",
         pendingData: pendingObject,
-        status: pendingObject.length === 0 ? "complete" : "active",
+        status: pendingObject.length > 0 ? "active" : (approvedObject.length === 0 ? "active" : "complete"),
       },
       message: "Read All Request",
     });
