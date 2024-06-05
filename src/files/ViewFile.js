@@ -1173,7 +1173,11 @@ function ViewFile() {
                         >
                           <div
                             className="accordion-body"
-                            style={{ padding: "1rem" }}
+                                   style={{
+                              padding: "1rem",
+                              overflow: "auto",
+                              maxHeight: "300px",
+                            }}
                           >
                             <table className="table">
                               <thead>
