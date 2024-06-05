@@ -356,15 +356,6 @@ function Files() {
   }, [files]);
 
   useEffect(() => {
-    const fetchAndSetFileData = async () => {
-      if (files.length > 0) {
-        const fileId = files[0].file_id;
-        await fetchFileData(fileId);
-      }
-    };
-
-    fetchAndSetFileData();
-
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
       var progressBars = $(this).find(".progress-bar");
@@ -873,8 +864,6 @@ function Files() {
                                     ) : (
                                       <Tr>
                                         <Td colSpan={2} align="center">
-                                          {" "}
-                                          {/* Span across 2 columns */}
                                           No documents available
                                         </Td>
                                       </Tr>

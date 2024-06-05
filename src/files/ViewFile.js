@@ -527,7 +527,7 @@ function ViewFile() {
 
     if (type === "checkbox") {
       inputs[index].value = checked;
-      inputs[index].is_required = !checked;
+      inputs[index].is_required = false;
     } else if (type === "text") {
       inputs[index].value = value;
       inputs[index].is_required = value === "";

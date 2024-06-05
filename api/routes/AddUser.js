@@ -713,7 +713,6 @@ router.put("/toggle-active/:user_id", async (req, res) => {
 //       await documentsToUpdate[i].save();
 //     }
 
-//     console.log("field added successfully!");
 //   } catch (error) {
 //     console.error("Error adding is_delete field:", error);
 //   }
