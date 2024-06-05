@@ -5,7 +5,6 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
 } from "@chakra-ui/react";
 import {
   Flex,
@@ -14,55 +13,82 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
+  Checkbox,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Country, State, City } from "country-state-city";
-import axios from "axios";
+import { State, City } from "country-state-city";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-
 import upArrow from "../assets/svg/uparrow.svg";
 import downArrow from "../assets/svg/downarrow.svg";
-import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
-function AddSavajCapitalBranch() {
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "reactstrap";
+import Select, { components } from "react-select";
+import makeAnimated from "react-select/animated";
+const animatedComponents = makeAnimated();
+
+function AddSavajUser() {
   const textColor = useColorModeValue("gray.700", "white");
+  const location = useLocation();
+  const { state, city } = location?.state?.state || {};
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedState, setSelectedState] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [branches, setBranches] = useState(["sbi", "pnb"]);
-  const [roles, setRoles] = useState([
-    "billing checker",
-    "cibil",
-    "aadhar checker",
-  ]);
+  const [branches, setBranches] = useState([]);
+  const [roles, setRoles] = useState([]);
   const cancelRef = React.useRef();
   const [role, setRole] = useState("");
-  const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const branch_id = searchParams.get("branch_id");
-
   const history = useHistory();
+  const [loanType, setLoanType] = useState([]);
+  const [selectedLoanIds, setSelectedLoanIds] = useState([]);
+
+  const [formData, setFormData] = useState({
+    savajcapitalbranch_id: "",
+    savajcapitaluser_id: "",
+    savajcapitalbranch_name: "",
+    branch_id: "",
+    state: "",
+    city: "",
+    full_name: "",
+    dob: "",
+    aadhar_card: "",
+    address: "",
+    pan_card: "",
+    number: "",
+    branch_id: "",
+    email: "",
+    password: "",
+    password: "",
+    loan_ids: [],
+    add_files: false,
+    add_customers: false,
+  });
 
   const getRolesData = async () => {
     try {
       const response = await AxiosInstance.get("/role/");
 
       if (response.data.success) {
-        setRoles(response.data.data);
+        setRoles(
+          response.data.data.map((role) => ({
+            value: role.role_id,
+            label: role.role,
+          }))
+        );
       } else {
         alert("Please try again later...!");
       }
@@ -70,12 +96,18 @@ function AddSavajCapitalBranch() {
       console.error(error);
     }
   };
+
   const getBranchesData = async () => {
     try {
       const response = await AxiosInstance.get("/branch/");
 
       if (response.data.success) {
-        setBranches(response.data.data);
+        setBranches(
+          response.data.data.map((branch) => ({
+            value: branch.branch_id,
+            label: `${branch.branch_name} (${branch.city}, ${branch.state})`,
+          }))
+        );
       } else {
         alert("Please try again later...!");
       }
@@ -87,21 +119,36 @@ function AddSavajCapitalBranch() {
   const getData = async () => {
     try {
       const response = await AxiosInstance.get("/savaj_user/user/" + id);
-
       if (response.data.success) {
-        const { branch, data } = response.data;
-
+        const { data } = response.data;
+        const loanNames = data[0].loan_ids.map((loanId) => {
+          const loan = loanType.find((loan) => loan.loan_id === loanId);
+          return loan ? loan.loan : "";
+        });
         const submissionData = {
           branch_id: data[0].branch_id,
           role_id: data[0].role_id,
           email: data[0].email,
+          state: data[0].state,
+          city: data[0].city,
+          dob: data[0].dob,
+          aadhar_card: data[0].aadhar_card,
+          pan_card: data[0].pan_card,
           number: data[0].number,
           full_name: data[0].full_name,
+          address: data[0].address,
           password: data[0].password,
-          
+          loan_ids: data[0].loan_ids.map((loanId, index) => ({
+            label: loanNames[index],
+            value: loanId,
+          })),
+          add_files: data[0].add_files,
+          add_customers: data[0].add_customers,
         };
 
+        setSelectedState(data[0].state);
         setFormData(submissionData);
+        setSelectedLoanIds(submissionData.loan_ids);
       } else {
         alert("Please try again later...!");
       }
@@ -109,6 +156,57 @@ function AddSavajCapitalBranch() {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([getRolesData(), getBranchesData()]);
+        const statesOfIndia = State.getStatesOfCountry("IN");
+        setStates(statesOfIndia);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedState) {
+      const stateCode = states.find((state) => state.name === selectedState)
+        ?.isoCode;
+      if (stateCode) {
+        const citiesOfState = City.getCitiesOfState("IN", stateCode);
+        setCities(citiesOfState);
+      }
+    } else {
+      setCities([]);
+    }
+  }, [selectedState, states]);
+
+  const handleStateChange = (selectedOption) => {
+    setSelectedState(selectedOption.value);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: selectedOption.value,
+    }));
+  };
+
+  useEffect(() => {
+    if (state && city) {
+      setSelectedState(state);
+      const stateCode = states.find((s) => s.name === state)?.isoCode;
+      if (stateCode) {
+        const citiesOfState = City.getCitiesOfState("IN", stateCode);
+        setCities(citiesOfState);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          state: state,
+          city: city,
+        }));
+      }
+    }
+  }, [state, city, states]);
 
   useEffect(() => {
     if (id) {
@@ -121,40 +219,7 @@ function AddSavajCapitalBranch() {
     getBranchesData();
     const statesOfIndia = State.getStatesOfCountry("IN");
     setStates(statesOfIndia);
-  }, []);
-
-  useEffect(() => {
-    if (selectedState) {
-      const citiesOfState = City.getCitiesOfState("IN", selectedState);
-      setCities(citiesOfState);
-    }
-  }, [selectedState]);
-
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const stateObj = states.find((state) => state.isoCode === stateCode);
-    const stateFullName = stateObj ? stateObj.name : "";
-
-    setSelectedState(stateCode);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      state: stateFullName,
-    }));
-  };
-
-  const [formData, setFormData] = useState({
-    savajcapitalbranch_id: "",
-    savajcapitaluser_id: "",
-    savajcapitalbranch_name: "",
-    branch_id: "",
-    state: "",
-    city: "",
-    full_name: "",
-    number: "",
-    branch_id: "",
-    email: "",
-    password: "",
-  });
+  }, [loanType]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -162,6 +227,37 @@ function AddSavajCapitalBranch() {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handlePanChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "pan_card" && value.toUpperCase().length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+        [name]: value.toUpperCase(),
+      });
+    }
+  };
+
+  const handleAadharChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "aadhar_card" && value.length <= 12) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "number" && value.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleAddRole = async (role) => {
@@ -190,26 +286,33 @@ function AddSavajCapitalBranch() {
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        loan_ids: selectedLoanIds.map((option) => option.value),
+      };
+
+      let response;
       if (id) {
-        const response = await AxiosInstance.put("/savaj_user/" + id, formData);
-        if (response.data.statusCode === 201) {
-          toast.error("Email already in use");
-        } else if (response.data.statusCode === 202) {
-          toast.error(response.data.message);
-        } else if (response.data.success) {
-          toast.success("Branch and User Updated successfully!");
-          history.push("/superadmin/savajusers?id=" + branch_id);
-        }
+        response = await AxiosInstance.put("/savaj_user/" + id, payload);
       } else {
-        const response = await AxiosInstance.post("/savaj_user", formData);
-        if (response.data.statusCode === 201) {
-          toast.error("Email already in use");
-        } else if (response.data.statusCode === 202) {
-          toast.error(response.data.message);
-        } else if (response.data.success) {
-          toast.success("Branch and User added successfully!");
-          history.push("/superadmin/savajcapitalbranch");
-        }
+        response = await AxiosInstance.post("/savaj_user", payload);
+      }
+
+      if (response.data.statusCode === 201) {
+        toast.error("Email already in use");
+      } else if (response.data.statusCode === 202) {
+        toast.error(response.data.message);
+      } else if (response.data.success) {
+        toast.success(
+          id
+            ? "Branch and User Updated successfully!"
+            : "Branch and User added successfully!"
+        );
+        history.push(
+          id
+            ? "/superadmin/savajusers?id=" + branch_id
+            : "/superadmin/savajcapitalbranch"
+        );
       }
     } catch (error) {
       console.error("Submission error", error);
@@ -218,11 +321,48 @@ function AddSavajCapitalBranch() {
       setLoading(false);
     }
   };
-  const [filteredData, setFilteredData] = useState("");
-  const [filterOpen, setFilterOpen] = useState("");
-  const filterToggle = () => setFilterOpen(!filterOpen);
-  const [selectedLoan, setSelectedLoan] = useState("");
 
+  const fetchLoanType = async () => {
+    try {
+      const response = await AxiosInstance.get("/loan/all-loans");
+      setLoanType(response.data.data);
+    } catch (error) {
+      console.error("Error fetching loans:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoanType();
+  }, []);
+
+  const handleLoanChange = (selectedOptions) => {
+    setSelectedLoanIds(selectedOptions);
+    const selectedLoanIdsValues = selectedOptions.map((option) => option.value);
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      loan_ids: selectedLoanIdsValues,
+    }));
+  };
+
+  const customOption = (props) => {
+    return (
+      <components.Option {...props}>
+        <input
+          type="checkbox"
+          checked={props.isSelected}
+          onChange={() => null}
+        />{" "}
+        <label>{props.label}</label>
+      </components.Option>
+    );
+  };
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: checked,
+    }));
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -239,10 +379,11 @@ function AddSavajCapitalBranch() {
               </Text>
 
               <Button
-                className="ttextt"
+                colorScheme="blue"
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
                 }}
+                ml={3}
                 style={{
                   backgroundColor: "#b19552",
                   color: "#fff",
@@ -254,142 +395,72 @@ function AddSavajCapitalBranch() {
           </CardHeader>
           <CardBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              <FormControl id="branch_id" isRequired mt={4}>
                 <FormLabel>Savaj Capital Branch Name</FormLabel>
                 <Select
-                  name="city"
+                  name="branch_id"
                   placeholder="Select Branch"
-                  onChange={(e) =>
-                    setFormData({ ...formData, branch_id: e.target.value })
+                  onChange={(option) =>
+                    setFormData({ ...formData, branch_id: option.value })
                   }
-                  value={formData?.branch_id}
-                >
-                  {branches.map((city) => (
-                    <option
-                      key={city.branch_name}
-                      name={city.branch_id}
-                      value={city.branch_id}
-                    >
-                      {city.branch_name + ` (${city.city + ", " + city.state})`}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-              {/* <div className="w-100">
-                <FormLabel>Select Loan</FormLabel>
-
-                <input
-                  style={{
-                    width: "100%",
-                    border: "0.5px solid #333",
-                    padding: "5px",
-                    backgroundImage: `url(${filterOpen ? upArrow : downArrow})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right center",
-                    backgroundSize: "10px",
-                    backgroundPosition: "right 15px center",
-                    borderRadius: "5px",
-                    borderColor: "inherit",
-                  }}
-                  placeholder="Select Loan-Type"
-                  onFocus={() => {
-                    setFilteredData(branches);
-                    setFilterOpen(true);
-                    filterToggle();
-
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      filterToggle();
-                    }, 200);
-                  }}
-                  onChange={(e) => {
-                    if (e.target.value.length !== "") {
-                      setFilterOpen(true);
-                    } else {
-                      setFilterOpen(false);
-                    }
-                    const filterData = branches.filter((item) => {
-                      return (
-                        item.branch_name
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase()) ||
-                        item.city
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase()) ||
-                        item.state
-                          .toLowerCase()
-                          .includes(e.target.value.toLowerCase())
-                      );
-                    });
-                    setSelectedLoan(e.target.value);
-                    setFilteredData(filterData);
-                  }}
-                  value={selectedLoan}
+                  value={branches.find(
+                    (branch) => branch.value === formData.branch_id
+                  )}
+                  options={branches}
+                  isDisabled={branch_id}
                 />
-                <Dropdown
-                  className="w-100"
-                  isOpen={filterOpen}
-                  toggle={filterToggle}
-                >
-                  <DropdownMenu className="w-100">
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={(e) => {
-                            setSelectedLoan(
-                              item.branch_name +
-                                ` (${item.city + ", " + item.state})`
-                            );
-                            setFilterOpen(false);
-                            const selectedLoanId = item.branch_id;
-                            setFormData({
-                              ...formData,
-                              loan_id: selectedLoanId,
-                            });
-                          }}
-                        >
-   
-                          {item.branch_name +
-                            ` (${item.city + ", " + item.state})`}
-                        </DropdownItem>
-                      ))
-                    ) : (
-                      <DropdownItem>No data found</DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div> */}
-              <FormControl id="savajcapitalbranch_name" isRequired mt={4}>
+              </FormControl>
+
+              <FormControl id="role_id" isRequired mt={4}>
                 <FormLabel>Select Role</FormLabel>
                 <Select
-                  name="city"
+                  name="role_id"
                   placeholder="Select Role"
-                  onChange={(e) =>
-                    setFormData({ ...formData, role_id: e.target.value })
+                  onChange={(option) =>
+                    setFormData({ ...formData, role_id: option.value })
                   }
-                  value={formData?.role_id}
-                >
-                  {roles.map((city) => (
-                    <option
-                      key={city.role_id}
-                      name={"fdkasdfadfkl"}
-                      value={city.role_id}
-                    >
-                      {city.role}
-                    </option>
-                  ))}
-                </Select>
+                  value={roles.find((role) => role.value === formData.role_id)}
+                  options={roles}
+                />
               </FormControl>
-              {/* <FormControl id="branch_name" mt={4} isRequired>
-                  <FormLabel>Branch Name</FormLabel>
-                  <Input name="branch_name" onChange={handleChange} />
-                </FormControl> */}
 
-              {/* User Details */}
+              <FormControl id="loan_ids" mt={4}>
+                <FormLabel>Loan Types</FormLabel>
+                <Select
+                  components={{ Option: customOption }}
+                  closeMenuOnSelect={false}
+                  isMulti
+                  options={loanType.map((loan) => ({
+                    label: loan.loan,
+                    value: loan.loan_id,
+                  }))}
+                  onChange={handleLoanChange}
+                  value={selectedLoanIds}
+                />
+              </FormControl>
+
+              <FormControl id="add_customers" mt={4}>
+                <Checkbox
+                  name="add_customers"
+                  onChange={handleCheckboxChange}
+                  isChecked={formData.add_customers}
+                >
+                  Add Customer?
+                </Checkbox>
+              </FormControl>
+
+              <FormControl id="add_files" mt={4}>
+                <Checkbox
+                  name="add_files"
+                  onChange={handleCheckboxChange}
+                  isChecked={formData.add_files}
+                >
+                  Add File?
+                </Checkbox>
+              </FormControl>
+
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
-                Login Credential
+                User Detail
               </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Full Name</FormLabel>
@@ -398,8 +469,104 @@ function AddSavajCapitalBranch() {
                   type="full_name"
                   onChange={handleChange}
                   value={formData.full_name}
+                  placeholder="Enter your name"
                 />
               </FormControl>
+              <FormControl id="number" mt={4} isRequired>
+                <FormLabel>Mobile Number</FormLabel>
+                <Input
+                  name="number"
+                  type="number"
+                  onChange={handlePhoneChange}
+                  value={formData.number}
+                  placeholder="Enter your number"
+                />
+              </FormControl>
+              <FormControl id="dob" mt={4} isRequired>
+                <FormLabel>DOB</FormLabel>
+                <Input
+                  name="dob"
+                  type="date"
+                  onChange={handleChange}
+                  value={formData.dob}
+                />
+              </FormControl>
+              <FormControl id="aadharcard" mt={4} isRequired>
+                <FormLabel>Aadhar Card</FormLabel>
+                <Input
+                  name="aadhar_card"
+                  type="number"
+                  onChange={handleAadharChange}
+                  value={formData.aadhar_card}
+                  placeholder="XXXX - XXXX - XXXX"
+                />
+              </FormControl>
+              <FormControl id="pancard" mt={4} isRequired>
+                <FormLabel>Pancard</FormLabel>
+                <Input
+                  name="pan_card"
+                  type="text"
+                  onChange={handlePanChange}
+                  value={formData.pan_card}
+                  placeholder="Enyrt your PAN"
+                />
+              </FormControl>
+              <FormControl id="state" mt={4} isRequired>
+                <FormLabel>State</FormLabel>
+                <Select
+                  name="state"
+                  value={
+                    selectedState
+                      ? { label: selectedState, value: selectedState }
+                      : null
+                  }
+                  onChange={handleStateChange}
+                  isDisabled={state}
+                  options={states.map((state) => ({
+                    label: state.name,
+                    value: state.name,
+                  }))}
+                  placeholder="Select State"
+                />
+              </FormControl>
+
+              <FormControl id="city" mt={4} isRequired>
+                <FormLabel>City</FormLabel>
+                <Select
+                  name="city"
+                  placeholder="Select city"
+                  onChange={(selectedOption) =>
+                    setFormData((prevFormData) => ({
+                      ...prevFormData,
+                      city: selectedOption.value,
+                    }))
+                  }
+                  isDisabled={!selectedState || city}
+                  value={
+                    formData.city
+                      ? { label: formData.city, value: formData.city }
+                      : null
+                  }
+                  options={cities.map((city) => ({
+                    label: city.name,
+                    value: city.name,
+                  }))}
+                />
+              </FormControl>
+
+              <FormControl id="address" mt={4} isRequired>
+                <FormLabel>Address</FormLabel>
+                <Input
+                  name="address"
+                  type="string"
+                  onChange={handleChange}
+                  value={formData.address}
+                  placeholder="Enter unit address"
+                />
+              </FormControl>
+              <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
+                Login Credentials
+              </Text>
               <FormControl id="email" mt={4} isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
@@ -408,6 +575,7 @@ function AddSavajCapitalBranch() {
                   onChange={handleChange}
                   disabled={id}
                   value={formData.email}
+                  placeholder="Enter your Email"
                 />
               </FormControl>
               <FormControl id="password" mt={4} isRequired>
@@ -420,40 +588,6 @@ function AddSavajCapitalBranch() {
                   placeholder="Enter your Password"
                 />
               </FormControl>
-              <FormControl id="number" mt={4} isRequired>
-                <FormLabel>Mobile Number</FormLabel>
-                <Input
-                  name="number"
-                  type="number"
-                  onChange={handleChange}
-                  value={formData.number}
-                />
-              </FormControl>
-
-              {/* {
-                !id &&
-                <FormControl id="password" mt={4} isRequired>
-                  <FormLabel>Password</FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem" // ensures that text doesn't go under the icon
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      onChange={handleChange}
-                    />
-                    <InputRightElement width="4.5rem">
-                      <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-              } */}
-
               <div className="d-flex">
                 <Button
                   mt={4}
@@ -508,8 +642,8 @@ function AddSavajCapitalBranch() {
                   placeholder="Add role"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      e.preventDefault(); // Prevent the default behavior of Enter key
-                      handleAddRole(role); // Call the addRole function
+                      e.preventDefault();
+                      handleAddRole(role);
                     }
                   }}
                 />
@@ -549,4 +683,4 @@ function AddSavajCapitalBranch() {
   );
 }
 
-export default AddSavajCapitalBranch;
+export default AddSavajUser;

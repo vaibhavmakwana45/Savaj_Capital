@@ -59,7 +59,7 @@ export default function Dashboard() {
   const [apiData, setApiData] = useState({
     banks: 0,
     users: 0,
-    savajcapitalbranch: 0,
+    savajcapitalbrnach: 0,
     superadmin: 0,
     loans: [],
   });
@@ -82,16 +82,11 @@ export default function Dashboard() {
         // Fetch total amounts for each loan and loan type
         const totalAmountPromises = responses[1].data.map(async (loan) => {
           const { loan_id, loantype_id } = loan;
-          console.log(loan, "loan");
+
           const response = await AxiosInstance.get(
             `/file_upload/amounts/${loan_id}/${loantype_id || ""}`
           );
-          console.log(
-            `Total amount for loan_id ${loan_id} and loantype_id ${
-              loantype_id || "none"
-            }:`,
-            response.data.totalAmount
-          ); // Log API response
+
           return {
             loan_id,
             loantype_id,
@@ -111,7 +106,6 @@ export default function Dashboard() {
           {}
         );
         setTotalAmounts(totalAmountsMap);
-        console.log("Total amounts map:", totalAmountsMap); // Log the total amounts map
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -129,7 +123,7 @@ export default function Dashboard() {
       >
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -180,7 +174,7 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
@@ -231,7 +225,7 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/alluser")}
         >
           <Flex direction="column">
@@ -249,7 +243,7 @@ export default function Dashboard() {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Total User
+                  Total Customer
                 </StatLabel>
                 <Flex>
                   <StatNumber
@@ -280,7 +274,10 @@ export default function Dashboard() {
             </Text> */}
           </Flex>
         </Card>
-        <Card minH="125px">
+        <Card
+          minH="125px"
+          style={{ cursor: "pointer", border: "1px solid black" }}
+        >
           <Flex direction="column">
             <Flex
               flexDirection="row"
@@ -330,7 +327,7 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/savajuserroles")}
         >
           <Flex direction="column">
@@ -382,7 +379,7 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/filetable")}
         >
           <Flex direction="column">
@@ -435,7 +432,7 @@ export default function Dashboard() {
           <Card
             key={loan.loan_id}
             minH="125px"
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", border: "1px solid black" }}
             onClick={() =>
               history.push(`/superadmin/filetable`, {
                 state: { loan: loan.loan, loan_id: loan.loan_id },

@@ -184,10 +184,12 @@ router.get("/loan_docs/:loan_id/:loantype_id", async (req, res) => {
 router.delete("/:loan_document_id", async (req, res) => {
   try {
     const { loan_document_id } = req.params;
+    const { loan_id } = req.body;
 
     const loanDocument = await Loan_Documents.findOne({
       loan_document_id: loan_document_id,
     });
+
     if (!loanDocument) {
       return res.status(404).json({
         success: false,
@@ -200,22 +202,26 @@ router.delete("/:loan_document_id", async (req, res) => {
     const isReferenced = await File_Uplode.findOne({
       "documents.loan_document_id": { $in: documentIds },
     });
-    if (isReferenced) {
+
+    const isLoanIdAvailable = await File_Uplode.exists({ loan_id: loan_id });
+
+    if (!isLoanIdAvailable || !isReferenced) {
+      // Proceed with deletion if either loan ID or loan document ID is missing
+      await Loan_Documents.findOneAndDelete({
+        loan_document_id: loan_document_id,
+      });
+
+      return res.json({
+        success: true,
+        message: "Loan document deleted successfully",
+        deletedLoanDocumentId: loan_document_id,
+      });
+    } else {
       return res.status(400).json({
         success: false,
-        message: "Loan document cannot be deleted as its referenced in file",
+        message: "Loan document cannot be deleted as it's associated with a loan or referenced in a file",
       });
     }
-
-    const deletedLoanDocument = await Loan_Documents.findOneAndDelete({
-      loan_document_id: loan_document_id,
-    });
-
-    res.json({
-      success: true,
-      message: "Loan document deleted successfully",
-      deletedLoanDocumentId: loan_document_id,
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -224,6 +230,7 @@ router.delete("/:loan_document_id", async (req, res) => {
     });
   }
 });
+
 
 router.put("/:loan_document_id", async (req, res) => {
   try {

@@ -394,7 +394,6 @@ router.get("/assigned_file/:branchuser_id", async (req, res) => {
 
         const hasMissingDetail =
           !fileData || !loanData || !loanTypeData || !userData;
-    
 
         return entry;
       })

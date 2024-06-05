@@ -185,7 +185,7 @@ function EditSavajCapitalBranch() {
                   onChange={handleSavajCapitalBranchChange}
                 />
               </FormControl>
-              <FormControl isRequired mb={3}>
+              {/* <FormControl isRequired mb={3}>
                 <FormLabel>Password</FormLabel>
                 <Input
                   placeholder="Password"
@@ -194,8 +194,7 @@ function EditSavajCapitalBranch() {
                   value={details.password}
                   onChange={handleSavajCapitalBranchChange}
                 />
-              </FormControl>
-
+              </FormControl> */}
               <Button
                 mt={4}
                 colorScheme="teal"

@@ -250,7 +250,7 @@ function AddLoanDocuments() {
                     borderRadius: "5px",
                     borderColor: "inherit",
                   }}
-                  placeholder="Select Loan-Type"
+                  placeholder="Select Loan"
                   onFocus={() => {
                     setFilteredData(loandata);
                     filterToggle();
