@@ -446,6 +446,105 @@ router.delete("/:loan_step_id", async (req, res) => {
 //   }
 // });
 
+// router.get("/get_steps/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const file = await File_Uplode.findOne({ file_id });
+//     const loan = await Loan.findOne({ loan_id: file.loan_id });
+//     const steps = [];
+
+//     for (const loan_step_id of loan.loan_step_id) {
+//       const stepData = await Loan_Step.findOne({ loan_step_id });
+
+//       if (!stepData) {
+//         continue;
+//       }
+
+//       if (loan_step_id === "1715348523661") {
+//         try {
+//           const response = await axios.get(
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//           );
+//           steps.push({ ...response.data.data, user_id: file.user_id });
+//         } catch (error) {
+//           console.error("Error: ", error.message);
+//         }
+//       } else {
+//         const compeleteStep = await Compelete_Step.findOne({
+//           loan_step_id,
+//           file_id,
+//           user_id: file.user_id,
+//         });
+
+//         if (compeleteStep) {
+//           const updatedInputs = stepData.inputs.map((input) => {
+//             const existingInput = compeleteStep.inputs.find(
+//               (ci) => ci.label === input.label
+//             );
+//             return existingInput || input;
+//           });
+
+//           const mergedStep = {
+//             ...compeleteStep.toObject(),
+//             inputs: updatedInputs,
+//             user_id: file.user_id,
+//             status: "complete", // Set status to "complete" if step is in completed_steps
+//           };
+
+//           const guarantorSteps = await Guarantor_Step.find({
+//             file_id,
+//             loan_step_id: compeleteStep.loan_step_id,
+//           });
+
+//           if (guarantorSteps.length > 0) {
+//             const stepsWithGuarantor = await Promise.all(
+//               guarantorSteps.map(async (guarantorStep) => {
+//                 const guarantor = await Guarantor.findOne({
+//                   guarantor_id: guarantorStep.guarantor_id,
+//                 });
+//                 const username = guarantor ? guarantor.username : null;
+//                 const mergedGuarantorInputs = stepData.inputs.map((input) => {
+//                   const existingInput = guarantorStep.inputs.find(
+//                     (ci) => ci.label === input.label
+//                   );
+//                   return existingInput || input;
+//                 });
+//                 return {
+//                   ...guarantorStep.toObject(),
+//                   inputs: mergedGuarantorInputs,
+//                   username,
+//                 };
+//               })
+//             );
+
+//             mergedStep.guarantorSteps = stepsWithGuarantor;
+//           }
+
+//           steps.push(mergedStep);
+//         } else {
+//           const status = "active";
+//           steps.push({
+//             ...stepData.toObject(),
+//             status,
+//             user_id: file.user_id,
+//           });
+//         }
+//       }
+//     }
+
+//     res.json({
+//       statusCode: 200,
+//       data: steps,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.get("/get_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -488,8 +587,14 @@ router.get("/get_steps/:file_id", async (req, res) => {
             ...compeleteStep.toObject(),
             inputs: updatedInputs,
             user_id: file.user_id,
-            status: "complete", // Set status to "complete" if step is in completed_steps
           };
+
+          // Adjust status based on the actual status of the complete step
+          if (compeleteStep.status === "reject") {
+            mergedStep.status = "reject";
+          } else {
+            mergedStep.status = "complete";
+          }
 
           const guarantorSteps = await Guarantor_Step.find({
             file_id,
