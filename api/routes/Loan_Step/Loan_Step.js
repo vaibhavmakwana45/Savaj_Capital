@@ -592,6 +592,8 @@ router.get("/get_steps/:file_id", async (req, res) => {
           // Adjust status based on the actual status of the complete step
           if (compeleteStep.status === "reject") {
             mergedStep.status = "reject";
+          } else if (compeleteStep.status === "active") {
+            mergedStep.status = "active";
           } else {
             mergedStep.status = "complete";
           }
