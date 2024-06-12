@@ -5,7 +5,6 @@ const Title = require("../../models/AddDocuments/Title");
 const File_Uplode = require("../../models/File/File_Uplode");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
-// Post Documents
 router.post("/", async (req, res) => {
   try {
     let findLoanStep = await Title.findOne({
@@ -42,12 +41,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Documents
 router.get("/", async (req, res) => {
   try {
     const data = await Title.find({});
     if (data.length === 0) {
-      // If no data found
       return res.status(201).json({
         statusCode: 201,
         message: "No data found",
@@ -66,12 +63,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  Update Title
 router.put("/:title_id", async (req, res) => {
   try {
     const { title_id } = req.params;
-
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const result = await Title.findOneAndUpdate(
       { title_id: title_id },
@@ -133,17 +127,14 @@ router.delete("/:title_id", async (req, res) => {
   try {
     const { title_id } = req.params;
 
-    // Check if the title_id exists in any document's title_id field in file-uploads collection
     const titleExistsInFileUploads = await File_Uplode.findOne({
       "documents.title_id": title_id,
     });
 
-    // Check if the title_id exists in any document's title_id field in loan-documents collection
     const titleExistsInLoanDocuments = await Loan_Documents.findOne({
       title_id: title_id,
     });
 
-    // If the title exists in any document in either collection, return an error response
     if (titleExistsInFileUploads || titleExistsInLoanDocuments) {
       return res.status(200).json({
         statusCode: 201,
@@ -151,7 +142,6 @@ router.delete("/:title_id", async (req, res) => {
       });
     }
 
-    // If the title doesn't exist in any document, proceed with deletion
     const deletedTitle = await Title.findOneAndDelete({
       title_id: title_id,
     });

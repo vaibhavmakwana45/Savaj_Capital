@@ -8,8 +8,8 @@ const GuarantorStepSchema = new mongoose.Schema({
   file_id: { type: String },
   user_id: { type: String },
   loan_step: { type: String },
-  inputs: { type: Array },
   status: { type: String },
+  inputs: { type: Array },
   createdAt: { type: String },
   updatedAt: { type: String },
 });

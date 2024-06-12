@@ -14,7 +14,6 @@ import {
   Input,
   Select,
   Collapse,
-  Box,
 } from "@chakra-ui/react";
 import Loader from "react-js-loader";
 import {
@@ -35,9 +34,6 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import "./user.css";
-// import Typography from '@mui/material/Typography';
-
-import moment from "moment";
 import { Country, State, City } from "country-state-city";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
@@ -62,7 +58,6 @@ function UserTable() {
 
   const states = State.getStatesOfCountry("IN");
 
-  // Retrieve cities whenever the selectedState changes
   const cities = selectedState
     ? City.getCitiesOfState(
         "IN",
@@ -72,7 +67,7 @@ function UserTable() {
 
   const handleStateChange = (event) => {
     setSelectedState(event.target.value);
-    setSelectedCity(""); // Reset city selection when state changes
+    setSelectedCity("");
   };
 
   const handleCityChange = (event) => {
@@ -90,7 +85,7 @@ function UserTable() {
         params: {
           page: currentPage,
           limit: itemsPerPage,
-          searchTerm: searchTerm, // Include searchTerm here
+          searchTerm: searchTerm,
           selectedState,
           selectedCity,
         },

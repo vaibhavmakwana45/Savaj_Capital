@@ -9,7 +9,6 @@ import {
   Flex,
   Text,
   IconButton,
-  Checkbox,
 } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";

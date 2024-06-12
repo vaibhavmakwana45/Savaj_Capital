@@ -29,7 +29,6 @@ function AddUser(props) {
   const [userType, setUserType] = useState("salaried");
   const history = useHistory();
   const [loading, setLoading] = useState(false);
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 

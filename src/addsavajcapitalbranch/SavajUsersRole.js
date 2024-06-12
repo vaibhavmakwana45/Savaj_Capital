@@ -39,10 +39,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
-import Loader from "react-js-loader";
 import TableComponent from "TableComponent";
 
 function SavajUsersRole() {
@@ -50,10 +47,8 @@ function SavajUsersRole() {
   const [banks, setBanks] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
-  const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState("");
-  const [branch, setBranch] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
@@ -131,14 +126,11 @@ function SavajUsersRole() {
     setSelectedRoleId(id);
     setIsAddRole(true);
 
-    // Filter out the role based on its role_id
     const role = banks.find((bank) => bank.role_id === id);
 
-    // Check if role exists before accessing its properties
     if (role) {
       setSelectedRole(role.role);
     } else {
-      // Handle the case where the role with the specified id is not found
       console.error("Role not found for id:", id);
     }
   };
@@ -166,10 +158,10 @@ function SavajUsersRole() {
     }
   };
 
-  const editRole = async (role) => {
+  const editRole = async () => {
     try {
-      const response = await AxiosInstance.put("/role/" + selectedRoleId, {
-        role,
+      const response = await AxiosInstance.put(`/role/${selectedRoleId}`, {
+        role: selectedRole,
       });
 
       if (response.data.success) {
@@ -182,8 +174,8 @@ function SavajUsersRole() {
         toast.error(response.data.message || "Please try again later!");
       }
     } catch (error) {
-      console.error("Submission error", error);
-      toast.error("Failed to add. Please try again.");
+      console.error("Error editing role:", error);
+      toast.error("Failed to edit role. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -221,9 +213,9 @@ function SavajUsersRole() {
                   }}
                   colorScheme="blue"
                   style={{
-                  backgroundColor: "#b19552",
-                  color: "#fff",
-                }}
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Role
                 </Button>
@@ -305,9 +297,9 @@ function SavajUsersRole() {
                     placeholder="Add role"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        e.preventDefault(); // Prevent the default behavior of Enter key
+                        e.preventDefault();
                         if (selectedRoleId == "") {
-                          handleAddRole(role); // Call the addRole function
+                          handleAddRole(role);
                         } else {
                           editRole(selectedRole);
                         }
@@ -326,22 +318,21 @@ function SavajUsersRole() {
                   }}
                   style={{
                     backgroundColor: "#414650",
-                    border:"2px solid #b19552"
+                    border: "2px solid #b19552",
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
                   colorScheme="blue"
-                  onClick={() => handleAddRole(role)}
+                  onClick={selectedRoleId ? editRole : handleAddRole}
                   ml={3}
-                  type="submit"
                   style={{
                     backgroundColor: "#b19552",
                     color: "#fff",
                   }}
                 >
-                  {selectedRoleId != "" ? "Updated Now" : "Add Now"}
+                  {selectedRoleId ? "Update Now" : "Add Now"}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

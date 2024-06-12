@@ -4,7 +4,6 @@ import {
   Text,
   useColorModeValue,
   Button,
-  useToast,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -30,7 +29,6 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import TableComponent from "TableComponent";
 import AxiosInstance from "config/AxiosInstance";
-import axios from "axios";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -197,16 +195,19 @@ function Document() {
   const deleteDocument = async (loanDocumentId) => {
     try {
       const requestData = { loan_id: loan_id }; // Always include loan_id
-  
+
       // Add loantype_id to the request data if available
       if (loantype_id) {
         requestData.loantype_id = loantype_id;
       }
-  
-      const response = await AxiosInstance.delete(`/loan_docs/${loanDocumentId}`, {
-        data: requestData,
-      });
-  
+
+      const response = await AxiosInstance.delete(
+        `/loan_docs/${loanDocumentId}`,
+        {
+          data: requestData,
+        }
+      );
+
       if (response.data.success) {
         setDocuments(
           documents.filter(
@@ -233,7 +234,7 @@ function Document() {
       setIsDeleteDialogOpen(false);
     }
   };
-  
+
   const AddDocument = async (loan_document) => {
     try {
       const response = await AxiosInstance.post("/loan_docs/", {

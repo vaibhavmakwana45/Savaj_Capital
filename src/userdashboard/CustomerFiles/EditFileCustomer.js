@@ -38,6 +38,7 @@ function EditFileCustomer() {
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
+
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -183,8 +184,6 @@ function EditFileCustomer() {
         documentId: documentId,
         key: key,
       };
-
-
 
       setFileData((prevData) => ({
         ...prevData,
@@ -380,7 +379,7 @@ function EditFileCustomer() {
                 placeholder="Select user"
                 onChange={(event) => setSelectedUser(event.target.value)}
                 value={selectedUser}
-                disabled={true} // This disables the Select component
+                disabled={true}
               >
                 {users.map((user) => (
                   <option key={user.user_id} value={user.user_id}>
@@ -396,7 +395,7 @@ function EditFileCustomer() {
                 placeholder="Select loan type"
                 onChange={handleLoanTypeChange}
                 value={selectedLoanId}
-                disabled={true} // This disables the Select component
+                disabled={true}
               >
                 {loanType.map((loan) => (
                   <option key={loan.loan_id} value={loan.loan_id}>
@@ -406,7 +405,6 @@ function EditFileCustomer() {
               </Select>
             </FormControl>
 
-            {/* Loan Subtype Select */}
             {selectedLoanType.is_subtype && (
               <FormControl id="loantype_id" mt={4}>
                 <FormLabel>Loan Subtype</FormLabel>
@@ -416,7 +414,7 @@ function EditFileCustomer() {
                     setSelectedLoanSubtypeId(event.target.value)
                   }
                   value={selectedLoanSubtypeId}
-                  disabled={true} // This disables the Select component
+                  disabled={true}
                 >
                   {loanSubType.length > 0 ? (
                     loanSubType.map((subType) => (
@@ -434,7 +432,6 @@ function EditFileCustomer() {
               </FormControl>
             )}
 
-            {/* File Upload Section */}
             <div>
               {Object.entries(groupedLoanDocuments).map(([title_id], index) => (
                 <div key={title_id} className="my-3">
@@ -604,7 +601,7 @@ function EditFileCustomer() {
                 </div>
               ))}
             </div>
-            {/* Submit and Cancel Buttons */}
+        
             <div>
               <Button
                 mt={4}

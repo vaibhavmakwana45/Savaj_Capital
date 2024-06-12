@@ -292,7 +292,6 @@
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
-import axios from "axios";
 import {
   Box,
   Flex,

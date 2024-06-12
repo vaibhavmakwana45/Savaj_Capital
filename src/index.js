@@ -11,7 +11,6 @@ import theme from "./theme/theme";
 import AuthLayout from "./layouts/Auth";
 import AdminLayout from "./layouts/Superadmin";
 
-// Define an AuthGuard component
 const AuthGuard = ({ children }) => {
   const authToken = localStorage.getItem("authToken");
   return authToken ? children : <Redirect to="/auth/signin" />;

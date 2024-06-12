@@ -94,7 +94,6 @@ const FileDisplay = ({ groupedFiles }) => {
               </a>
               {accordionStatus && accordionStatus[title] && (
                 <div className="accordion-content">
-                  {/* Render files related to this title */}
                   {files.map((file, index) => (
                     <div key={index}>{file.name}</div>
                   ))}
@@ -378,6 +377,7 @@ function ViewFile() {
 
     onOpen();
   };
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedGuarantorId, setSelectedGuarantorId] = useState(null);
 
@@ -434,6 +434,7 @@ function ViewFile() {
     fetchData();
     fetchStepsData();
   }, [id]);
+
   const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
 
   const handleAccordionClick = () => {
@@ -496,6 +497,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
+      console.log(response,"guarantors")
 
       setStepData(response.data.data);
       setStepLoader(false);
@@ -663,7 +665,7 @@ function ViewFile() {
 
       if (type === "checkbox") {
         updatedInputs[inputIndex].value = checked;
-        updatedInputs[inputIndex].is_required = !checked;
+        updatedInputs[inputIndex].is_required = false;
       } else if (type === "text") {
         updatedInputs[inputIndex].value = value;
         updatedInputs[inputIndex].is_required = value === "";
@@ -758,7 +760,7 @@ function ViewFile() {
       await fetchData();
       await fetchStepsData();
       setModalOpen({ data: [] });
-      setOpen({ is: false, data: {}, index: "", guarantors: [] }); // Close the modal and reset state
+      setOpen({ is: false, data: {}, index: "", guarantors: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -797,7 +799,7 @@ function ViewFile() {
     }
   };
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [rejectMessage, setRejectMessage] = useState(""); // New state for rejection message
+  const [rejectMessage, setRejectMessage] = useState("");
 
   const handleReject = () => {
     setRejectModalOpen(true);
@@ -839,7 +841,7 @@ function ViewFile() {
 
   const closeRejectModal = () => {
     setRejectModalOpen(false);
-    setRejectMessage(""); // Clear the rejection message when modal is closed
+    setRejectMessage("");
   };
 
   if (loading) {
@@ -1132,6 +1134,7 @@ function ViewFile() {
                         </div>
                       </div>
                     </FormLabel>
+
                     <div className="accordion my-3 mx-3">
                       <div
                         className={`accordion-item ${
@@ -1173,7 +1176,11 @@ function ViewFile() {
                         >
                           <div
                             className="accordion-body"
-                            style={{ padding: "1rem" }}
+                            style={{
+                              padding: "1rem",
+                              overflow: "auto",
+                              maxHeight: "300px",
+                            }}
                           >
                             <table className="table">
                               <thead>
@@ -1577,6 +1584,12 @@ function ViewFile() {
                                         </FormControl>
                                       )
                                     )}
+                                    <div className="mt-4">
+                                      <strong>Date:</strong>{" "}
+                                      {new Date(
+                                        guarantor.updatedAt
+                                      ).toLocaleString()}
+                                    </div>
                                     {dataIndex ===
                                       open.data.guarantorSteps.length - 1 && (
                                       <Button

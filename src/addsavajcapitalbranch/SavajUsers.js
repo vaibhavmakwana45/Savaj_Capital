@@ -1,28 +1,11 @@
-import { FaSignOutAlt } from "react-icons/fa";
 import {
-  ArgonLogoDark,
-  ArgonLogoLight,
-  ChakraLogoDark,
-  ChakraLogoLight,
-  ProfileIcon,
-  SettingsIcon,
-} from "components/Icons/Icons";
-import {
-  Box,
   Button,
   Flex,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
   FormControl,
   Text,
-  useColorMode,
   useColorModeValue,
   Input,
 } from "@chakra-ui/react";
-import axios from "axios";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -34,17 +17,12 @@ import {
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
-import Loader from "react-js-loader";
 import TableComponent from "TableComponent";
 
 function Tables() {
@@ -57,7 +35,6 @@ function Tables() {
   const [role, setRole] = useState("");
   const [branch, setBranch] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 
@@ -358,8 +335,8 @@ function Tables() {
                     placeholder="Add role"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        e.preventDefault(); // Prevent the default behavior of Enter key
-                        handleAddRole(role); // Call the addRole function
+                        e.preventDefault();
+                        handleAddRole(role);
                       }
                     }}
                   />

@@ -12,7 +12,6 @@ import {
   TableRow,
   Paper,
   Collapse,
-  Box,
 } from "@mui/material";
 import { useHistory } from "react-router-dom";
 import {
@@ -29,7 +28,6 @@ import {
   AlertDialogOverlay,
 } from "@chakra-ui/react";
 import CardHeader from "components/Card/CardHeader.js";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { IconButton } from "@chakra-ui/react";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
@@ -277,7 +275,7 @@ export default function CollapsibleTable() {
         <CardHeader style={{ padding: "30px" }}>
           <Flex justifyContent="space-between" className="thead">
             <Text fontSize="xl" fontWeight="bold" className="ttext">
-              All File    
+              All File
             </Text>
             <div>
               <Input

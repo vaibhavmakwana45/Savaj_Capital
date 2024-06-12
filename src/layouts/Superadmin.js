@@ -1,4 +1,3 @@
-// Chakra imports
 import {
   Portal,
   useDisclosure,
@@ -13,15 +12,12 @@ import {
   ChakraLogoDark,
   ChakraLogoLight,
 } from "components/Icons/Icons";
-// Layout components
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import React, { useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import dashRoutes from "routes.js";
-// Custom Chakra theme
 import FixedPlugin from "../components/FixedPlugin/FixedPlugin";
-// Custom components
 import MainPanel from "../components/Layout/MainPanel";
 import PanelContainer from "../components/Layout/PanelContainer";
 import PanelContent from "../components/Layout/PanelContent";

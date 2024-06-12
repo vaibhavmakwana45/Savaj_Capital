@@ -16,11 +16,11 @@ const UserSchema = new mongoose.Schema({
   file_id: {
     type: String,
   },
-  documents: {
-    type: Array,
-  },
   branchuser_id: {
     type: String,
+  },
+  documents: {
+    type: Array,
   },
   branch_id: {
     type: String,

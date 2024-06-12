@@ -18,7 +18,6 @@ module.exports = () => {
     } catch (err) {
       let dbStatus = `*    Error connecting to DB : ${err}\n****************************\n`;
 
-      // Prints initialization
       console.log("****************************");
       console.log("*    Starting Server");
       console.log(`*    Port: ${process.env.PORT}`);
@@ -26,7 +25,6 @@ module.exports = () => {
       console.log(dbStatus);
     }
 
-    // Other event listeners
     mongoose.connection.on("error", console.log);
     mongoose.connection.on("disconnected", connect);
   };

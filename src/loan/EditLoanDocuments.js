@@ -5,7 +5,6 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -15,7 +14,6 @@ import {
   PopoverBody,
   Checkbox,
   CheckboxGroup,
-  Stack,
   useColorModeValue,
   Select,
 } from "@chakra-ui/react";

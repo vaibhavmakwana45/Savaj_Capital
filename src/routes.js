@@ -47,11 +47,11 @@ import EditFileScBranch from "savajcapitaldashboard/ScBranchFiles/EditFileScBran
 import DetailScFilePage from "savajcapitaldashboard/ScBranchFiles/DetailScFilePage";
 import AssignBank from "savajcapitaldashboard/AssignBank/AssignBank";
 import AssignFile from "savajcapitaldashboard/AssignBank/AssignFile";
-import AddAllDocuments from "Document/AddAllDocuments";
+import AddAllDocuments from "loan/AddAllDocuments";
 import AllStep from "Allstep/AllStep";
 import AssignedSavajUsers from "addsavajcapitalbranch/AssignedSavajUsers";
 import AssignedBankUsers from "addbank/AssignedBankUsers";
-import Title from "./Title/Title";
+import Title from "./loan/Title";
 import SavajAssignFile from "addsavajcapitalbranch/SavajAssignFile";
 import CustomerFile from "userdashboard/CustomerFiles/CustomerFile";
 import CreateCustomerFile from "userdashboard/CustomerFiles/CreateCustomerFile";
@@ -270,11 +270,11 @@ var dashRoutes = [
         path: "/savajuserroles",
         name: "Add Roles",
       },
-      {
-        layout: "/superadmin",
-        path: "/branch-assigned-file",
-        name: "Assigned File",
-      },
+      // {
+      //   layout: "/superadmin",
+      //   path: "/branch-assigned-file",
+      //   name: "Assigned File",
+      // },
     ],
   },
   {

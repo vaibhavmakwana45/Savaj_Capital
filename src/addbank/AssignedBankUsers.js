@@ -1,14 +1,6 @@
-// Add axios to your imports
-import axios from "axios";
 import {
   Flex,
-  Table,
-  Tbody,
   Text,
-  Th,
-  Thead,
-  Tr,
-  Td,
   useColorModeValue,
   Button,
 } from "@chakra-ui/react";
@@ -19,8 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
-  Input,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
@@ -28,8 +18,6 @@ import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
@@ -41,7 +29,6 @@ function AssignedBankUsers() {
   const history = useHistory();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
 

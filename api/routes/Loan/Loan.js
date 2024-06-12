@@ -7,20 +7,16 @@ const Loan_Step = require("../../models/Loan_Step/Loan_Step");
 const File_Uplode = require("../../models/File/File_Uplode");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
-// Post Loan
 let loanTypeCounter = 0;
 
 router.post("/", async (req, res) => {
   try {
-    // Check if the loan already exists
     let findLoan = await Loan.findOne({ loan: req.body.loan });
 
     if (!findLoan) {
-      // Create a unique ID for the loan
       const timestamp = Date.now();
       const uniqueId = `${timestamp}`;
 
-      // Add loan to the Loan collection
       const loanData = {
         loan_id: uniqueId,
         loan: req.body.loan,
@@ -31,12 +27,11 @@ router.post("/", async (req, res) => {
       };
       const loan = await Loan.create(loanData);
 
-      // Add loan types to the Loan_Type collection
       if (req.body.loan_type && req.body.loan_type.length > 0) {
         const loanTypesData = req.body.loan_type.map((loanType, index) => {
-          loanTypeCounter++; // Increment the counter for each loan type
+          loanTypeCounter++;
           return {
-            loantype_id: `${timestamp}_${loanTypeCounter}`, // Generate unique ID for each loan type
+            loantype_id: `${timestamp}_${loanTypeCounter}`,
             loan_id: uniqueId,
             loan_type: loanType,
             createdAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
@@ -66,7 +61,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Loan
 router.get("/", async (req, res) => {
   try {
     var loans = await Loan.aggregate([{ $sort: { updatedAt: -1 } }]);
@@ -112,12 +106,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Update Loan
 router.put("/:loan_id", async (req, res) => {
   try {
     const { loan_id } = req.params;
 
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const result = await Loan.findOneAndUpdate(
       { loan_id: loan_id },
@@ -145,7 +137,6 @@ router.put("/:loan_id", async (req, res) => {
   }
 });
 
-// Delete Loan
 router.delete("/:loan_id", async (req, res) => {
   try {
     const { loan_id } = req.params;

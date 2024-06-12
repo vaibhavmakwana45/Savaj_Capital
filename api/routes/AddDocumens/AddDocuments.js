@@ -5,7 +5,6 @@ const AddDocuments = require("../../models/AddDocuments/AddDocuments");
 const File_Uplode = require("../../models/File/File_Uplode");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
-// Post Documents
 router.post("/", async (req, res) => {
   try {
     let findLoanStep = await AddDocuments.findOne({
@@ -42,12 +41,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Documents (// Without pagination)
 router.get("/", async (req, res) => {
   try {
     const data = await AddDocuments.find({}).sort({ updatedAt: -1 });
     if (data.length === 0) {
-      // If no data found
+
       return res.status(201).json({
         statusCode: 201,
         message: "No data found",
@@ -114,14 +112,9 @@ router.get("/", async (req, res) => {
 // });
 
 
-
-
-// Update Documents
 router.put("/:document_id", async (req, res) => {
   try {
     const { document_id } = req.params;
-
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const result = await AddDocuments.findOneAndUpdate(
       { document_id: document_id },
@@ -149,7 +142,6 @@ router.put("/:document_id", async (req, res) => {
   }
 });
 
-//  Delete Documents
 router.delete("/:document_id", async (req, res) => {
   try {
     const { document_id } = req.params;

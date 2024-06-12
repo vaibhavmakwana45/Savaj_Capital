@@ -20,7 +20,6 @@ const decrypt = (text) => {
   decrypted += decipher.final("utf-8");
   return decrypted;
 };
-//working
 // ============================ Reset Password ==================================
 const tokenExpirationMap = new Map();
 

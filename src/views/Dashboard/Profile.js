@@ -1,4 +1,3 @@
-// Chakra imports
 import {
   Avatar,
   AvatarGroup,
@@ -14,7 +13,7 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-// Assets
+
 import avatar2 from "assets/img/avatars/avatar2.png";
 import avatar3 from "assets/img/avatars/avatar3.png";
 import avatar4 from "assets/img/avatars/avatar4.png";
@@ -23,7 +22,6 @@ import avatar6 from "assets/img/avatars/avatar6.png";
 import ImageArchitect1 from "assets/img/ImageArchitect1.png";
 import ImageArchitect2 from "assets/img/ImageArchitect2.png";
 import ImageArchitect3 from "assets/img/ImageArchitect3.png";
-// Custom components
 import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
@@ -40,8 +38,6 @@ import { IoDocumentsSharp } from "react-icons/io5";
 
 function Profile() {
   const { colorMode } = useColorMode();
-
-  // Chakra color mode
   const textColor = useColorModeValue("gray.700", "white");
   const iconColor = useColorModeValue("#b19552", "white");
   const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");

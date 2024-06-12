@@ -478,7 +478,6 @@ const TableComponent = ({
                 key={index}
                 pl="10px"
                 borderColor={"gray.600"}
-                // color="gray.400"
                 display={
                   index === removeIndex || index === removeIndex2
                     ? "none"

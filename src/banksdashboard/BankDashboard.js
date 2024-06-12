@@ -1,27 +1,14 @@
-// Chakra imports
 import {
-  Box,
-  Button,
   Flex,
-  Grid,
-  Progress,
   SimpleGrid,
   Stat,
   StatLabel,
   StatNumber,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
-import BarChart from "components/Charts/BarChart";
-import LineChart from "components/Charts/LineChart";
 import IconBox from "components/Icons/IconBox";
 import {
   CartIcon,
@@ -30,13 +17,6 @@ import {
   WalletIcon,
 } from "components/Icons/Icons.js";
 import React from "react";
-import {
-  barChartData,
-  barChartOptions,
-  lineChartData,
-  lineChartOptions,
-} from "variables/charts";
-import { pageVisits, socialTraffic } from "variables/general";
 
 export default function BankDashboard() {
   const iconBlue = useColorModeValue("#b19552", "#b19552");
@@ -49,158 +29,170 @@ export default function BankDashboard() {
   const { colorMode } = useColorMode();
 
   return (
-    <Flex flexDirection='column' pt={{ base: "120px", md: "75px" }}>
-      <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing='24px' mb='20px'>
-        <Card minH='125px'>
-          <Flex direction='column'>
+    <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
+      <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px" mb="20px">
+        <Card minH="125px">
+          <Flex direction="column">
             <Flex
-              flexDirection='row'
-              align='center'
-              justify='center'
-              w='100%'
-              mb='25px'>
-              <Stat me='auto'>
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
                 <StatLabel
-                  fontSize='xs'
-                  color='gray.400'
-                  fontWeight='bold'
-                  textTransform='uppercase'>
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
                   Today's Money
                 </StatLabel>
                 <Flex>
-                  <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
+                  <StatNumber fontSize="lg" color={textColor} fontWeight="bold">
                     $53,897
                   </StatNumber>
                 </Flex>
               </Stat>
               <IconBox
-                borderRadius='50%'
-                as='box'
+                borderRadius="50%"
+                as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}>
+                bg={iconBlue}
+              >
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
+            <Text color="gray.400" fontSize="sm">
+              <Text as="span" color="green.400" fontWeight="bold">
                 +3.48%{" "}
               </Text>
               Since last month
             </Text>
           </Flex>
         </Card>
-        <Card minH='125px'>
-          <Flex direction='column'>
+        <Card minH="125px">
+          <Flex direction="column">
             <Flex
-              flexDirection='row'
-              align='center'
-              justify='center'
-              w='100%'
-              mb='25px'>
-              <Stat me='auto'>
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
                 <StatLabel
-                  fontSize='xs'
-                  color='gray.400'
-                  fontWeight='bold'
-                  textTransform='uppercase'>
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
                   Today's Users
                 </StatLabel>
                 <Flex>
-                  <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
+                  <StatNumber fontSize="lg" color={textColor} fontWeight="bold">
                     $3,200
                   </StatNumber>
                 </Flex>
               </Stat>
               <IconBox
-                borderRadius='50%'
-                as='box'
+                borderRadius="50%"
+                as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}>
+                bg={iconBlue}
+              >
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
+            <Text color="gray.400" fontSize="sm">
+              <Text as="span" color="green.400" fontWeight="bold">
                 +5.2%{" "}
               </Text>
               Since last month
             </Text>
           </Flex>
         </Card>
-        <Card minH='125px'>
-          <Flex direction='column'>
+        <Card minH="125px">
+          <Flex direction="column">
             <Flex
-              flexDirection='row'
-              align='center'
-              justify='center'
-              w='100%'
-              mb='25px'>
-              <Stat me='auto'>
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
                 <StatLabel
-                  fontSize='xs'
-                  color='gray.400'
-                  fontWeight='bold'
-                  textTransform='uppercase'>
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
                   New Clients
                 </StatLabel>
                 <Flex>
-                  <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
+                  <StatNumber fontSize="lg" color={textColor} fontWeight="bold">
                     +2,503
                   </StatNumber>
                 </Flex>
               </Stat>
               <IconBox
-                borderRadius='50%'
-                as='box'
+                borderRadius="50%"
+                as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}>
+                bg={iconBlue}
+              >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='red.500' fontWeight='bold'>
+            <Text color="gray.400" fontSize="sm">
+              <Text as="span" color="red.500" fontWeight="bold">
                 -2.82%{" "}
               </Text>
               Since last month
             </Text>
           </Flex>
         </Card>
-        <Card minH='125px'>
-          <Flex direction='column'>
+        <Card minH="125px">
+          <Flex direction="column">
             <Flex
-              flexDirection='row'
-              align='center'
-              justify='center'
-              w='100%'
-              mb='25px'>
-              <Stat me='auto'>
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
                 <StatLabel
-                  fontSize='xs'
-                  color='gray.400'
-                  fontWeight='bold'
-                  textTransform='uppercase'>
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
                   Total Sales
                 </StatLabel>
                 <Flex>
-                  <StatNumber fontSize='lg' color={textColor} fontWeight='bold'>
+                  <StatNumber fontSize="lg" color={textColor} fontWeight="bold">
                     $173,000
                   </StatNumber>
                 </Flex>
               </Stat>
               <IconBox
-                borderRadius='50%'
-                as='box'
+                borderRadius="50%"
+                as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={iconBlue}>
+                bg={iconBlue}
+              >
                 <CartIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            <Text color='gray.400' fontSize='sm'>
-              <Text as='span' color='green.400' fontWeight='bold'>
+            <Text color="gray.400" fontSize="sm">
+              <Text as="span" color="green.400" fontWeight="bold">
                 +8.12%{" "}
               </Text>
               Since last month

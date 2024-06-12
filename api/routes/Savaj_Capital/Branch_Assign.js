@@ -8,8 +8,49 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const AddUser = require("../../models/AddUser");
 
+// router.post("/", async (req, res) => {
+//   try {
+//     const timestamp = Date.now();
+//     const uniqueId = `${timestamp}`;
+//     const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
+
+//     req.body["branch_assign_id"] = uniqueId;
+//     req.body["branch_assign_date"] = moment()
+//       .utcOffset(330)
+//       .format("YYYY-MM-DD HH:mm:ss");
+//     req.body["createdAt"] = currentDate;
+//     req.body["updatedAt"] = currentDate;
+//     var data = await BranchAssign.create(req.body);
+//     res.json({
+//       success: true,
+//       data: data,
+//       message: "Documents assigned to the bank successfully.",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 router.post("/", async (req, res) => {
   try {
+    const { file_id, branchuser_id, branch_id } = req.body;
+
+    // Check if the combination of file_id, branchuser_id, and branch_id already exists
+    const existingAssignment = await BranchAssign.findOne({
+      file_id,
+      branchuser_id,
+      branch_id,
+    });
+
+    if (existingAssignment) {
+      return res.status(400).json({
+        success: false,
+        message: "This file is already assigned to this user in this branch.",
+      });
+    }
+
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
     const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
@@ -20,6 +61,7 @@ router.post("/", async (req, res) => {
       .format("YYYY-MM-DD HH:mm:ss");
     req.body["createdAt"] = currentDate;
     req.body["updatedAt"] = currentDate;
+
     var data = await BranchAssign.create(req.body);
     res.json({
       success: true,
@@ -27,13 +69,12 @@ router.post("/", async (req, res) => {
       message: "Documents assigned to the bank successfully.",
     });
   } catch (error) {
-    res.json({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
 });
-
 // router.put("/:bank_assign_id", async (req, res) => {
 //   try {
 //     const { bank_assign_id } = req.params;

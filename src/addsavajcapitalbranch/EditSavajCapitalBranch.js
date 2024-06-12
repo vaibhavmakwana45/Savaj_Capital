@@ -11,7 +11,6 @@ import {
   useColorModeValue,
   Input,
 } from "@chakra-ui/react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { useParams, useHistory } from "react-router-dom";
 import { Country, State, City } from "country-state-city";
