@@ -732,10 +732,7 @@ function Files() {
                           {file?.user_username} ({file?.businessname})
                         </Td>
                         <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
-                        <Td style={{ fontSize: "14px" }}>
-                          {file?.loan}
-                          {file?.loan_type ? `(${file.loan_type})` : ""}
-                        </Td>
+                        <Td style={{ fontSize: "14px" }}>{file?.loan}</Td>
                         <Td>
                           <div
                             style={{
