@@ -81,11 +81,9 @@ function Files() {
   const handleCityChange = (event) => {
     setSelectedCity(event.target.value);
   };
-  const toggleRowExpansion = (fileId) => {
-    setExpandedRow(expandedRow === fileId ? null : fileId);
-    if (expandedRow !== fileId) {
-      fetchFileData(fileId);
-    }
+
+  const toggleRowExpansion = (index) => {
+    setExpandedRow(expandedRow === index ? null : index);
   };
 
   const handleRowClick = (id) => {
@@ -455,61 +453,78 @@ function Files() {
   };
 
   useEffect(() => {
-    fetchTotalAmount();
-  }, [loan_id, selectedState, selectedCity]);
+    fetchFiles();
+  }, []);
 
-  const [fileData, setFileData] = useState({});
+  useEffect(() => {
+    const fetchSavajcapitalbranch = async () => {
+      try {
+        const response = await AxiosInstance.get("/branch");
+        setSavajcapitalbranch(response.data.data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
 
-  const fetchFileData = async (fileId) => {
+    fetchSavajcapitalbranch();
+    getRolesData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSavajcapitalbranchUser = async () => {
+      if (!selectedBranchId) {
+        setSavajcapitalbranchUser([]);
+        return;
+      }
+      try {
+        const response = await AxiosInstance.get(
+          `/savaj_user/${selectedBranchId}`
+        );
+        setSavajcapitalbranchUser(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching branch users:", error);
+      }
+    };
+
+    fetchSavajcapitalbranchUser();
+  }, [selectedBranchId]);
+
+  const getRolesData = async () => {
     try {
-      const response = await AxiosInstance.get(
-        `/file_upload/file-count/${fileId}`
-      );
-
-      setFileData((prevFileData) => ({
-        ...prevFileData,
-        [fileId]: {
-          approvedData: response.data.data.approvedData,
-          pendingData: response.data.data.pendingData,
-        },
-      }));
+      const response = await AxiosInstance.get("/role/");
+      if (response.data.success) {
+        setRoles(response.data.data);
+      } else {
+        alert("Please try again later...!");
+      }
     } catch (error) {
-      console.error("Error: ", error.message);
+      console.error("Error fetching roles:", error);
     }
   };
 
-  useEffect(() => {
-    // Fetch data for the initially expanded rows
-    files.forEach((file) => {
-      if (expandedRow === file.file_id) {
-        fetchFileData(file.file_id);
-      }
-    });
-  }, [expandedRow]);
+  const getRoleName = (roleId) => {
+    const role = roles.find((role) => role.role_id === roleId);
+    return role ? role.role : "No role found";
+  };
 
-  useEffect(() => {
-    $(".progress").each(function () {
-      var value = parseInt($(this).attr("data-value"));
-      var progressBars = $(this).find(".progress-bar");
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-      progressBars.removeClass("red yellow purple blue green");
+    try {
+      const payload = {
+        file_id: selecteAssignFileId,
+        loan_id: selectedLoanId,
+        branch_id: selectedBranchId,
+        branchuser_id: selectedBranchUserId,
+      };
 
-      if (value >= 0 && value < 20) {
-        progressBars.addClass("red");
-      } else if (value >= 20 && value < 40) {
-        progressBars.addClass("yellow");
-      } else if (value >= 40 && value < 60) {
-        progressBars.addClass("purple");
-      } else if (value >= 60 && value < 80) {
-        progressBars.addClass("blue");
-      } else if (value >= 80 && value <= 100) {
-        progressBars.addClass("green");
-      }
+      const response = await AxiosInstance.post("/branch_assign", payload);
 
-      if (value <= 50) {
-        progressBars
-          .eq(1)
-          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      if (response.data.success) {
+        history.push("/superadmin/savajcapitalbranch");
+        toast.success("All data submitted successfully!");
       } else {
         toast.error(
           response.data.message || "Submission failed! Please try again."
@@ -717,10 +732,7 @@ function Files() {
                           {file?.user_username} ({file?.businessname})
                         </Td>
                         <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
-                        <Td style={{ fontSize: "14px" }}>
-                          {file?.loan}{" "}
-                          {file?.loan_type ? `(${file.loan_type})` : ""}
-                        </Td>
+                        <Td style={{ fontSize: "14px" }}>{file?.loan}</Td>
                         <Td>
                           <div
                             style={{
@@ -932,16 +944,14 @@ function Files() {
                             <Flex style={{ paddingLeft: "10px" }}>
                               <IconButton
                                 aria-label={
-                                  expandedRow === file.file_id
-                                    ? "Collapse"
-                                    : "Expand"
+                                  expandedRow === index ? "Collapse" : "Expand"
                                 }
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  toggleRowExpansion(file.file_id);
+                                  toggleRowExpansion(index);
                                 }}
                               >
-                                {expandedRow === file.file_id ? (
+                                {expandedRow === index ? (
                                   <ChevronUpIcon />
                                 ) : (
                                   <ChevronDownIcon />
@@ -961,45 +971,34 @@ function Files() {
                             overflow: "hidden",
                           }}
                         >
-                          <Collapse
-                            in={expandedRow === file.file_id}
-                            animateOpacity
-                          >
+                          <Collapse in={expandedRow === index} animateOpacity>
                             <div
                               style={{
                                 maxHeight:
-                                  expandedRow === file.file_id
-                                    ? "none"
-                                    : "100%",
+                                  expandedRow === index ? "none" : "100%",
                                 overflow: "hidden",
                               }}
                             >
-                              {fileData[file.file_id] ? ( // Check if file data is available
-                                <div
-                                  style={{
-                                    maxHeight: "200px",
-                                    overflowY: "auto",
-                                  }}
+                              <div
+                                style={{
+                                  maxHeight: "200px",
+                                  overflowY: "auto",
+                                }}
+                              >
+                                <Table
+                                  variant="simple"
+                                  bg={useColorModeValue("gray.50", "gray.700")}
+                                  style={{ tableLayout: "fixed" }}
                                 >
-                                  <Table
-                                    variant="simple"
-                                    bg={useColorModeValue(
-                                      "gray.50",
-                                      "gray.700"
-                                    )}
-                                    style={{ tableLayout: "fixed" }}
-                                  >
-                                    <Thead>
-                                      <Tr>
-                                        <Th>Document Name</Th>
-                                        <Th>Status</Th>
-                                      </Tr>
-                                    </Thead>
-                                    <Tbody style={{ fontSize: "14px" }}>
-                                      {(
-                                        fileData[file.file_id]?.approvedData ||
-                                        []
-                                      ).map((documentRow, index) => (
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Document Name</Th>
+                                      <Th>Status</Th>
+                                    </Tr>
+                                  </Thead>
+                                  <Tbody style={{ fontSize: "14px" }}>
+                                    {fileData?.length > 0 ? (
+                                      fileData.map((documentRow, index) => (
                                         <Tr key={index}>
                                           <Td>
                                             {" "}
@@ -1031,53 +1030,17 @@ function Files() {
                                             )}
                                           </Td>
                                         </Tr>
-                                      ))}
-                                      {(
-                                        fileData[file.file_id]?.pendingData ||
-                                        []
-                                      ).map((documentRow, index) => (
-                                        <Tr key={index}>
-                                          <Td>
-                                            {documentRow?.name} (
-                                            {documentRow?.title})
-                                          </Td>
-                                          <Td>
-                                            {documentRow?.status ===
-                                            "Uploaded" ? (
-                                              <span
-                                                style={{
-                                                  color: "green",
-                                                  fontWeight: "bold",
-                                                }}
-                                              >
-                                                <i className="fa-regular fa-circle-check"></i>
-                                                &nbsp;&nbsp;Uploaded
-                                              </span>
-                                            ) : (
-                                              <span
-                                                style={{
-                                                  color: "#FF9C00",
-                                                  fontWeight: "bold",
-                                                }}
-                                              >
-                                                <i className="fa-regular fa-clock"></i>
-                                                &nbsp;&nbsp;Pending
-                                              </span>
-                                            )}
-                                          </Td>
-                                        </Tr>
-                                      ))}
-                                    </Tbody>
-                                  </Table>
-                                </div>
-                              ) : (
-                                <Loader
-                                  type="spinner-circle"
-                                  bgColor={"#b19552"}
-                                  color={"black"}
-                                  size={50}
-                                />
-                              )}
+                                      ))
+                                    ) : (
+                                      <Tr>
+                                        <Td colSpan={2} align="center">
+                                          No documents available
+                                        </Td>
+                                      </Tr>
+                                    )}
+                                  </Tbody>
+                                </Table>
+                              </div>
                             </div>
                           </Collapse>
                         </Td>
