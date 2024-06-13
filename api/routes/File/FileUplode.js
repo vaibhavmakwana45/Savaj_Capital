@@ -230,6 +230,14 @@ router.get("/", async (req, res) => {
       }
     });
 
+    const lastCompletedStepMap = new Map();
+
+    completeSteps.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    completeSteps.forEach((step) => {
+      lastCompletedStepMap.set(step.file_id, step.loan_step);
+    });
+
     for (const item of data) {
       item.branchuser_full_name =
         branchUserMap.get(item.branchuser_id)?.full_name || "";
@@ -275,7 +283,6 @@ router.get("/", async (req, res) => {
     });
   }
 });
-
 router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
   try {
     const { state, city, loan_ids } = req.params;
