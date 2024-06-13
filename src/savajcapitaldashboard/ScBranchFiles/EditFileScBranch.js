@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./userfile.scss";
+import "../../files/file.scss";
 import {
   Button,
   Select,
@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
   IconButton,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -32,12 +33,17 @@ function EditFileScBranch() {
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
   const [fileData, setFileData] = useState({});
-  const CDN_BASE_URL = "https://cdn.dohost.in/upload/";
+  const CDN_BASE_URL = "https://cdn.savajcapital.com/cdn/files/";
   const fileInputRefs = useRef({});
   const [uploadedFileName, setUploadedFileName] = useState([]);
   const [groupedLoanDocuments, setGroupedLoanDocuments] = useState({});
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
+  // const [formData, setFormData] = useState({
+  //   // stemp_paper_print: false,
+  //   // loan_dispatch: false,
+  //   // any other fields that need to be managed
+  // });
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -50,6 +56,12 @@ function EditFileScBranch() {
           setSelectedUser(details.user_id);
           setSelectedLoanId(details.loan_id);
           setSelectedLoanSubtypeId(details.loantype_id);
+          // setFormData({
+          //   stemp_paper_print: details.stemp_paper_print,
+          //   loan_dispatch: details.loan_dispatch,
+          //   // set other necessary fields here
+          // });
+
           const documentsWithCDN = details.documents.map((document) => ({
             ...document,
             file_path: `${CDN_BASE_URL}${document.file_path}`,
@@ -163,22 +175,15 @@ function EditFileScBranch() {
     setSelectedLoanType(selectedLoan || {});
   };
 
-  const handleFileInputChange = (
-    event,
-    title_id,
-    index,
-    groupIndex,
-    innerIndex
-  ) => {
+  const handleFileInputChange = (event, title_id, groupIndex, innerIndex) => {
     const file = event.target.files[0];
     if (file) {
       const documentId =
         groupedLoanDocuments[title_id][groupIndex].document_ids[innerIndex];
-      const key = `${title_id}-${index}-${innerIndex}`;
-      const isImage = file.type.startsWith("image/");
+      const key = `${title_id}-${documentId}`;
       const filePreview = {
         name: file.name,
-        url: isImage ? URL.createObjectURL(file) : null,
+        url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
         type: file.type,
         documentId: documentId,
         key: key,
@@ -281,10 +286,10 @@ function EditFileScBranch() {
       const uploadedFiles = await Promise.all(
         uploadedFileName.map(async (item) => {
           const formData = new FormData();
-          formData.append("b_video", item.file);
+          formData.append("files", item.file);
 
           const response = await axios.post(
-            "https://cdn.dohost.in/image_upload.php/",
+            "https://cdn.savajcapital.com/api/upload",
             formData,
             {
               headers: {
@@ -293,15 +298,15 @@ function EditFileScBranch() {
             }
           );
 
-          if (!response.data.success) {
-            throw new Error(response.data.msg || "File upload failed");
+          if (response.data.status !== "ok") {
+            throw new Error(response.data.message || "File upload failed");
           }
 
-          if (!response.data.iamge_path) {
-            throw new Error("Image path is missing in the response");
+          if (!response.data.files || response.data.files.length === 0) {
+            throw new Error("No file paths returned in the response");
           }
 
-          const imageName = response.data.iamge_path.split("/").pop();
+          const imageName = response.data.files[0].filename.split("/").pop();
           return {
             ...item,
             path: imageName,
@@ -346,7 +351,10 @@ function EditFileScBranch() {
           loan_document_id: file.loan_document_id,
           key: file.key,
         })),
+        // stemp_paper_print: formData.stemp_paper_print,
+        // loan_dispatch: formData.loan_dispatch,
       };
+
       await AxiosInstance.put(`/file_upload/${id}`, payload);
       history.push("/savajcapitaluser/userfile");
       toast.success("All data submitted successfully!");
@@ -357,6 +365,14 @@ function EditFileScBranch() {
       setLoading(false);
     }
   };
+
+  // const handleCheckboxChange = (event) => {
+  //   const { name, checked } = event.target;
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     [name]: checked,
+  //   }));
+  // };
 
   return (
     <>
@@ -430,176 +446,173 @@ function EditFileScBranch() {
               </FormControl>
             )}
 
-            {/* File Upload Section */}
             <div>
-              {Object.entries(groupedLoanDocuments).map(([title_id], index) => (
-                <div key={title_id} className="my-3">
-                  <h2 className="mx-4">
-                    <i>
-                      <u>
-                        <b>{groupedLoanDocuments[title_id][0].title}</b>
-                      </u>
-                    </i>
-                  </h2>
-                  <div className="d-flex mainnnn" style={{ overflow: "auto" }}>
-                    {groupedLoanDocuments[title_id].map(
-                      (documentGroup, groupIndex) =>
+              {Object.entries(groupedLoanDocuments).map(
+                ([title_id, documentGroups]) => (
+                  <div key={title_id} className="my-3">
+                    <h2 className="mx-4">
+                      <i>
+                        <u>
+                          <b>{documentGroups[0].title}</b>
+                        </u>
+                      </i>
+                    </h2>
+                    <div
+                      className="d-flex mainnnn"
+                      style={{ overflow: "auto" }}
+                    >
+                      {documentGroups.map((documentGroup, groupIndex) =>
                         documentGroup.document_names.map(
-                          (documentName, innerIndex) => (
-                            <div
-                              key={`${title_id}-${index}-${innerIndex}`}
-                              className="upload-area col-xl-12 col-md-12 col-sm-12"
-                              onClick={() => {
-                                document
-                                  .getElementById(
-                                    `fileInput-${title_id}-${index}-${innerIndex}`
-                                  )
-                                  .click();
-                              }}
-                            >
-                              <Text
-                                fontSize="xl"
-                                className="mx-3"
-                                style={{
-                                  fontSize: "12px",
-                                  textTransform: "capitalize",
-                                }}
+                          (documentName, innerIndex) => {
+                            const documentId =
+                              documentGroup.document_ids[innerIndex];
+                            const key = `${title_id}-${documentId}`;
+                            return (
+                              <div
+                                key={key}
+                                className="upload-area col-xl-12 col-md-12 col-sm-12"
                               >
-                                {documentName}
-                              </Text>
-                              <div className="upload-option">
-                                <input
-                                  type="file"
-                                  id={`fileInput-${title_id}-${index}-${innerIndex}`}
-                                  className="drop-zone__file-input"
-                                  onChange={(event) =>
-                                    handleFileInputChange(
-                                      event,
-                                      title_id,
-                                      index,
-                                      groupIndex,
-                                      innerIndex
-                                    )
-                                  }
-                                  style={{ display: "none" }}
-                                />
-                                {fileData[
-                                  `${title_id}-${index}-${innerIndex}`
-                                ] ? (
-                                  <div
-                                    className="file-preview text-end"
-                                    style={{
-                                      marginTop: "15px",
-                                      justifyContent: "space-between",
-                                      width: "100%",
-                                      padding: "10px",
-                                      backgroundColor: "#e8f0fe",
-                                      borderRadius: "8px",
-                                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                                    }}
-                                  >
-                                    <IconButton
-                                      aria-label="Remove file"
-                                      icon={<CloseIcon />}
-                                      size="sm"
-                                      onClick={() =>
-                                        handleRemoveFile(
-                                          `${title_id}-${index}-${innerIndex}`
-                                        )
-                                      }
-                                      style={{ margin: "0 10px" }}
-                                    />
-                                    {fileData[
-                                      `${title_id}-${index}-${innerIndex}`
-                                    ].url ? (
-                                      fileData[
-                                        `${title_id}-${index}-${innerIndex}`
-                                      ].type === "application/pdf" ? (
-                                        <embed
-                                          src={
-                                            fileData[
-                                              `${title_id}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          type="application/pdf"
-                                          style={{
-                                            width: "100%",
-                                            minHeight: "100px",
-                                          }}
-                                        />
-                                      ) : (
-                                        <img
-                                          src={
-                                            fileData[
-                                              `${title_id}-${index}-${innerIndex}`
-                                            ].url
-                                          }
-                                          alt="Preview"
-                                          style={{
-                                            width: 100,
-                                            height: 100,
-                                            margin: "auto",
-                                            borderRadius: "4px",
-                                          }}
-                                        />
+                                <Text
+                                  fontSize="xl"
+                                  className="mx-3"
+                                  style={{
+                                    fontSize: "12px",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {documentName}
+                                </Text>
+                                <div className="upload-option">
+                                  <input
+                                    type="file"
+                                    id={`fileInput-${key}`}
+                                    className="drop-zone__file-input"
+                                    onChange={(event) =>
+                                      handleFileInputChange(
+                                        event,
+                                        title_id,
+                                        groupIndex,
+                                        innerIndex
                                       )
-                                    ) : (
-                                      <span
-                                        style={{
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          width: "100%",
-                                          padding: "20px",
-                                        }}
-                                      >
-                                        <i className="bx bxs-file"></i>
-                                        {
-                                          fileData[
-                                            `${title_id}-${index}-${innerIndex}`
-                                          ].name
-                                        }
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div
-                                    onClick={() => {
-                                      document
-                                        .getElementById(
-                                          `fileInput-${title_id}-${index}-${innerIndex}`
+                                    }
+                                    style={{ display: "none" }}
+                                  />
+                                  {fileData[key] ? (
+                                    <div
+                                      className="file-preview text-end"
+                                      style={{
+                                        marginTop: "15px",
+                                        justifyContent: "space-between",
+                                        width: "100%",
+                                        padding: "10px",
+                                        backgroundColor: "#e8f0fe",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      }}
+                                    >
+                                      <IconButton
+                                        aria-label="Remove file"
+                                        icon={<CloseIcon />}
+                                        size="sm"
+                                        onClick={() => handleRemoveFile(key)}
+                                        style={{ margin: "0 10px" }}
+                                      />
+                                      {fileData[key].url ? (
+                                        fileData[key].type ===
+                                        "application/pdf" ? (
+                                          <embed
+                                            src={fileData[key].url}
+                                            type="application/pdf"
+                                            style={{
+                                              width: "100%",
+                                              minHeight: "100px",
+                                            }}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={fileData[key].url}
+                                            alt="Preview"
+                                            style={{
+                                              width: 100,
+                                              height: 100,
+                                              margin: "auto",
+                                              borderRadius: "4px",
+                                            }}
+                                          />
                                         )
-                                        .click();
-                                    }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      flexDirection: "column",
-                                      border: "2px dashed rgb(171, 202, 255)",
-                                      borderRadius: "15px",
-                                      marginTop: "25px",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    <span className="drop-zone__icon">
-                                      <i className="bx bxs-file-image"></i>
-                                    </span>
-                                    <p className="drop-zone__paragraph">
-                                    Upload Your Documents
-                                    </p>
-                                  </div>
-                                )}
+                                      ) : (
+                                        <span
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100%",
+                                            padding: "20px",
+                                          }}
+                                        >
+                                          <i className="bx bxs-file"></i>
+                                          {fileData[key].name}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className={`upload-area__drop-zone drop-zone`}
+                                      onClick={() => {
+                                        document
+                                          .getElementById(`fileInput-${key}`)
+                                          .click();
+                                      }}
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                        border: "2px dashed rgb(171, 202, 255)",
+                                        borderRadius: "15px",
+                                        marginTop: "25px",
+                                        cursor: "pointer",
+                                      }}
+                                    >
+                                      <span className="drop-zone__icon">
+                                        <i className="bx bxs-file-image"></i>
+                                      </span>
+                                      <p className="drop-zone__paragraph">
+                                        Upload Your Documents
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )
+                            );
+                          }
                         )
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
+            {/* <FormControl id="stemp_paper_print" mt={4}>
+              <Checkbox
+                name="stemp_paper_print"
+                onChange={handleCheckboxChange}
+                isChecked={formData.stemp_paper_print}
+              >
+                Stemp Paper Print
+              </Checkbox>
+            </FormControl>
+
+            <FormControl id="loan_dispatch" mt={4}>
+              <Checkbox
+                name="loan_dispatch"
+                onChange={handleCheckboxChange}
+                isChecked={formData.loan_dispatch}
+              >
+                Loan Dispatch
+              </Checkbox>
+            </FormControl> */}
             {/* Submit and Cancel Buttons */}
             <div>
               <Button
@@ -608,22 +621,14 @@ function EditFileScBranch() {
                 onClick={handleSubmitData}
                 isLoading={loading}
                 loadingText="Submitting"
-                style={{
-                  backgroundColor: "#b19552",
-                  color: "#fff",
-                  marginTop: 40,
-                }}
+                style={{ marginTop: 40 }}
               >
                 Submit
               </Button>
               <Button
                 mt={4}
-                style={{
-                  backgroundColor: "#414650",
-                  color: "#fff",
-                  marginTop: 40,
-                  marginLeft: 8,
-                }}
+                colorScheme="yellow"
+                style={{ marginTop: 40, marginLeft: 8 }}
                 onClick={() => history.push("/savajcapitaluser/userfile")}
               >
                 Cancel

@@ -30,7 +30,7 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Form, FormGroup, Table } from "reactstrap";
 import { CheckBox } from "@mui/icons-material";
-import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
+import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
 import { FaUndo } from "react-icons/fa";
@@ -39,41 +39,43 @@ import {
   faChevronUp,
   faEdit,
   faTrashAlt,
+  faMaximize,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { Typography } from "@mui/material";
 
 const FileDisplay = ({ groupedFiles }) => {
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
-  if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
-    return <div>No documents available</div>;
-  }
-
-  const handleDownload = async (filePath) => {
-    try {
-      const fileHandle = await window.showSaveFilePicker();
-      const writableStream = await fileHandle.createWritable();
-      const response = await fetch(filePath);
-      const blob = await response.blob();
-      await writableStream.write(blob);
-      await writableStream.close();
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
-  // const [openPanelIndex, setOpenPanelIndex] = useState(null);
-
-  // const handleAccordionClick = (index) => {
-  //   setOpenPanelIndex(index === openPanelIndex ? null : index);
-  // };
-
   const [openPanelIndex, setOpenPanelIndex] = useState(0);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [accordionStatus, setAccordionStatus] = useState();
 
   const handleAccordionClick = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
   };
 
-  const [accordionStatus, setAccordionStatus] = useState();
+  const handleFileClick = (file) => {
+    setSelectedFile(file);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFile(null);
+  };
+
+  const handleDownload = async () => {
+    if (selectedFile) {
+      try {
+        const fileHandle = await window.showSaveFilePicker();
+        const writableStream = await fileHandle.createWritable();
+        const response = await fetch(`${basePath}${selectedFile.file_path}`);
+        const blob = await response.blob();
+        await writableStream.write(blob);
+        await writableStream.close();
+      } catch (error) {
+        console.error("Error downloading file:", error);
+      }
+    }
+  };
 
   return (
     <>
@@ -82,6 +84,12 @@ const FileDisplay = ({ groupedFiles }) => {
         className="my-3"
         style={{ overflow: "auto" }}
       >
+        <h2
+          className="my-4"
+          style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
+        >
+          Uploaded Documents
+        </h2>
         <ul className="breadcrumb">
           {Object.entries(groupedFiles).map(([title, files], index) => (
             <li key={title} className="breadcrumb-item">
@@ -94,7 +102,6 @@ const FileDisplay = ({ groupedFiles }) => {
               </a>
               {accordionStatus && accordionStatus[title] && (
                 <div className="accordion-content">
-                  {/* Render files related to this title */}
                   {files.map((file, index) => (
                     <div key={index}>{file.name}</div>
                   ))}
@@ -104,12 +111,7 @@ const FileDisplay = ({ groupedFiles }) => {
           ))}
         </ul>
       </nav>
-      <h2
-        className="my-4"
-        style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
-      >
-        Uploaded Documents
-      </h2>
+
       <div>
         {Object.entries(groupedFiles).map(([title, files], index) => (
           <div
@@ -130,7 +132,6 @@ const FileDisplay = ({ groupedFiles }) => {
                 <button
                   className="accordion-button"
                   type="button"
-                  // name="butonnnns"
                   onClick={() => handleAccordionClick(index)}
                   aria-expanded={index === openPanelIndex ? "true" : "false"}
                   style={{
@@ -150,53 +151,6 @@ const FileDisplay = ({ groupedFiles }) => {
                   />
                 </button>
               </h2>
-              {/* <div
-                id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse  ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
-                aria-labelledby={`panelsStayOpen-heading-${index}`}
-              >
-                {files.map((file, idx) => (
-                  <div className="accordion-body" key={idx}>
-                    <p className="mb-3">{file.document_name}</p>
-                    {file.file_path.endsWith(".pdf") ? (
-                      <iframe
-                        src={`${basePath}${file.file_path}`}
-                        type="application/pdf"
-                        className="col-xl-6 col-md-6 col-sm-12"
-                        height="260"
-                        style={{
-                          border: "none",
-                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          borderRadius: "12px",
-                          width: "40%",
-                        }}
-                        title="PDF Viewer"
-                      />
-                    ) : (
-                      <img
-                        src={`${basePath}${file.file_path}`}
-                        alt={file.loan_document_id}
-                        style={{
-                          width: "40%",
-                          height: "260px",
-                          borderRadius: "12px",
-                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          cursor: "pointer",
-                        }}
-                        className="col-xl-6 col-md-6 col-sm-12 details-image"
-                        onClick={() =>
-                          handleDownload(
-                            `${basePath}${file.file_path}`,
-                            file.loan_document_id
-                          )
-                        }
-                      />
-                    )}
-                  </div>
-                ))}
-              </div> */}
               <div
                 id={`panelsStayOpen-collapse-${index}`}
                 className={`accordion-collapse collapse ${
@@ -216,19 +170,35 @@ const FileDisplay = ({ groupedFiles }) => {
                     >
                       <p className="mb-3">{file.document_name}</p>
                       {file.file_path.endsWith(".pdf") ? (
-                        <iframe
-                          src={`${basePath}${file.file_path}`}
-                          type="application/pdf"
-                          className="col-xl-6 col-md-6 col-sm-12"
-                          height="260"
+                        <div
                           style={{
-                            border: "none",
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                            borderRadius: "12px",
+                            position: "relative",
                             width: "100%",
+                            height: "260px",
                           }}
-                          title="PDF Viewer"
-                        />
+                        >
+                          <iframe
+                            src={`${basePath}${file.file_path}`}
+                            type="application/pdf"
+                            className="pdf-viewer"
+                            height="100%"
+                            width="100%"
+                            title="PDF Viewer"
+                          />
+                          <div className="pdf-overlay">
+                            <FontAwesomeIcon
+                              icon={faMaximize}
+                              onClick={() => handleFileClick(file)}
+                              style={{
+                                position: "absolute",
+                                bottom: "8px",
+                                right: "25px",
+                                color: "black",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </div>
+                        </div>
                       ) : (
                         <img
                           src={`${basePath}${file.file_path}`}
@@ -241,12 +211,7 @@ const FileDisplay = ({ groupedFiles }) => {
                             cursor: "pointer",
                           }}
                           className="details-image"
-                          onClick={() =>
-                            handleDownload(
-                              `${basePath}${file.file_path}`,
-                              file.loan_document_id
-                            )
-                          }
+                          onClick={() => handleFileClick(file)}
                         />
                       )}
                     </div>
@@ -256,59 +221,62 @@ const FileDisplay = ({ groupedFiles }) => {
             </div>
           </div>
         ))}
-        {/* <div
-        className="d-flex flex-wrap justify-content-start image-responsive"
-        style={{ overflow: "auto" }}
-      >
-        {Object.entries(groupedFiles).map(([title, files], index) => (
-          <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
-            <h2
-              className="my-4"
-              style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
-            >
-              <u>{title} documents</u>
-            </h2>
-            {files.map((file, idx) => (
-              <div key={idx} className="mb-3">
-                <p className="mb-3">{file.document_name}</p>
-                {file.file_path.endsWith(".pdf") ? (
-                  <iframe
-                    src={`${basePath}${file.file_path}`}
-                    type="application/pdf"
-                    width="100%"
-                    height="260"
-                    style={{
-                      border: "none",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      borderRadius: "12px",
-                    }}
-                    title="PDF Viewer"
-                  />
-                ) : (
-                  <img
-                    src={`${basePath}${file.file_path}`}
-                    alt={file.loan_document_id}
-                    style={{
-                      width: "100%",
-                      height: "260px",
-                      borderRadius: "12px",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() =>
-                      handleDownload(
-                        `${basePath}${file.file_path}`,
-                        file.loan_document_id
-                      )
-                    }
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div> */}
       </div>
+
+      {selectedFile && (
+        <Modal isOpen={true} onClose={handleCloseModal}>
+          <ModalOverlay />
+          <ModalContent
+            style={{
+              width: "80%",
+              maxWidth: "90%",
+            }}
+          >
+            <ModalHeader>Download File</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedFile.file_path.endsWith(".pdf") ? (
+                <iframe
+                  src={`${basePath}${selectedFile.file_path}`}
+                  type="application/pdf"
+                  className="pdf-viewer"
+                  height="500"
+                  style={{
+                    border: "none",
+                    width: "100%",
+                  }}
+                  title="PDF Viewer"
+                />
+              ) : (
+                <img
+                  src={`${basePath}${selectedFile.file_path}`}
+                  alt={selectedFile.loan_document_id}
+                  style={{
+                    width: "100%",
+                    height: "500px",
+                    borderRadius: "12px",
+                    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                  }}
+                  className="details-image"
+                />
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
+                mr={3}
+                onClick={handleDownload}
+              >
+                Download
+              </Button>
+              <Button variant="ghost" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
     </>
   );
 };
@@ -378,6 +346,7 @@ function ViewFile() {
 
     onOpen();
   };
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedGuarantorId, setSelectedGuarantorId] = useState(null);
 
@@ -434,6 +403,7 @@ function ViewFile() {
     fetchData();
     fetchStepsData();
   }, [id]);
+
   const [isOpenGuarantor, setIsOpenGuarantor] = useState(false);
 
   const handleAccordionClick = () => {
@@ -663,7 +633,7 @@ function ViewFile() {
 
       if (type === "checkbox") {
         updatedInputs[inputIndex].value = checked;
-        updatedInputs[inputIndex].is_required = !checked;
+        updatedInputs[inputIndex].is_required = false;
       } else if (type === "text") {
         updatedInputs[inputIndex].value = value;
         updatedInputs[inputIndex].is_required = value === "";
@@ -758,7 +728,7 @@ function ViewFile() {
       await fetchData();
       await fetchStepsData();
       setModalOpen({ data: [] });
-      setOpen({ is: false, data: {}, index: "", guarantors: [] }); // Close the modal and reset state
+      setOpen({ is: false, data: {}, index: "", guarantors: [] });
     } catch (error) {
       console.error("Error: ", error.message);
     }
@@ -797,7 +767,7 @@ function ViewFile() {
     }
   };
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [rejectMessage, setRejectMessage] = useState(""); // New state for rejection message
+  const [rejectMessage, setRejectMessage] = useState("");
 
   const handleReject = () => {
     setRejectModalOpen(true);
@@ -839,7 +809,7 @@ function ViewFile() {
 
   const closeRejectModal = () => {
     setRejectModalOpen(false);
-    setRejectMessage(""); // Clear the rejection message when modal is closed
+    setRejectMessage("");
   };
 
   if (loading) {
@@ -961,23 +931,60 @@ function ViewFile() {
     try {
       const updatedStepData = {
         ...open.data,
-        status: "active",
+        status: "active", // Default to active
         statusMessage: "",
       };
 
-      const response = await AxiosInstance.post(
+      // Find the index of the step being reversed
+      const currentIndex = stepData.findIndex(
+        (step) => step.loan_step_id === open.data.loan_step_id
+      );
+
+      // Check for any complete steps after the current step
+      let isCompleteStepFound = false;
+      for (let i = currentIndex + 1; i < stepData.length; i++) {
+        if (stepData[i]?.status === "complete") {
+          isCompleteStepFound = true;
+          break;
+        }
+      }
+
+      // Update status based on the presence of complete steps
+      if (isCompleteStepFound) {
+        updatedStepData.status = "complete";
+      } else {
+        updatedStepData.status = "active";
+      }
+
+      // Update step status
+      const stepUpdateResponse = await AxiosInstance.post(
         `/loan_step/steps/${id}`,
         updatedStepData
       );
 
-      await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "running",
-      });
-      if (response.status === 200) {
+      console.log("Step Status Update Response:", stepUpdateResponse);
+
+      // Update file status based on the step being reversed
+      if (updatedStepData.loan_step_id === "1715348651727") {
+        console.log("Updating File Status...");
+
+        const fileStatusUpdateResponse = await AxiosInstance.put(
+          `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
+          {
+            status:
+              updatedStepData.status === "complete" ? "approved" : "running",
+          }
+        );
+
+        console.log("File Status Update Response:", fileStatusUpdateResponse);
+      }
+
+      // Check if both step and file updates were successful
+      if (stepUpdateResponse.status === 200) {
         fetchStepsData();
         setOpen({ is: false, data: {}, index: "" });
       } else {
-        console.error("Failed to update status.");
+        console.error("Failed to update step status.");
       }
     } catch (error) {
       console.error("Error: ", error.message);
@@ -1132,6 +1139,7 @@ function ViewFile() {
                         </div>
                       </div>
                     </FormLabel>
+
                     <div className="accordion my-3 mx-3">
                       <div
                         className={`accordion-item ${
@@ -1705,65 +1713,92 @@ function ViewFile() {
                               )}
                           </div>
                           {open.is &&
-                            open.data.loan_step_id === "1715348523661" &&
-                            open.data.pendingData.length !== 0 && (
+                            open.data.loan_step_id === "1715348523661" && (
                               <div className="row">
-                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
-                                  <Table
-                                    size="sm"
-                                    aria-label="documents"
-                                    className="mx-4"
-                                  >
-                                    <thead>
-                                      <tr className="py-2">
-                                        <th
-                                          className="font-weight-bold"
-                                          style={{ fontSize: "1rem" }}
+                                <div className="col px-5 pt-3">
+                                  {open.data?.pendingData &&
+                                    open.data.pendingData.length > 0 && (
+                                      <React.Fragment>
+                                        <h2
+                                          className="my-4"
+                                          style={{
+                                            fontSize: "18px",
+                                            fontWeight: 700,
+                                            color: "#333",
+                                          }}
                                         >
-                                          Document
-                                        </th>
-                                        <th
-                                          className="status font-weight-bold"
-                                          style={{ fontSize: "1rem" }}
+                                          Pending Documents
+                                        </h2>
+                                        <Table
+                                          size="sm"
+                                          aria-label="documents"
+                                          // className="mx-4"
                                         >
-                                          Status
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {open.data?.pendingData?.map(
-                                        (documentRow, index) => (
-                                          <tr key={index}>
-                                            <td>{documentRow?.name}</td>
-                                            <td>
-                                              <span
-                                                style={{
-                                                  color: "#FFB302",
-                                                  fontWeight: "bold",
-                                                }}
+                                          <thead>
+                                            <tr className="py-2">
+                                              <th
+                                                className="font-weight-bold"
+                                                style={{ fontSize: "1rem" }}
                                               >
-                                                Pending
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        )
-                                      )}
-                                    </tbody>
-                                  </Table>
-                                  {open.data.status !== "complete" && (
-                                    <Button
-                                      colorScheme="blue"
-                                      style={{ backgroundColor: "#b19552" }}
-                                      className="mx-3"
-                                      onClick={() =>
-                                        history.push(
-                                          `/superadmin/editfile?id=${id}`
-                                        )
-                                      }
-                                    >
-                                      Upload
-                                    </Button>
+                                                Document
+                                              </th>
+                                              <th
+                                                className="status font-weight-bold"
+                                                style={{ fontSize: "1rem" }}
+                                              >
+                                                Status
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {open.data.pendingData.map(
+                                              (documentRow, index) => (
+                                                <tr key={index}>
+                                                  <td>{documentRow?.name}</td>
+                                                  <td>
+                                                    <span
+                                                      style={{
+                                                        color: "#FFB302",
+                                                        fontWeight: "bold",
+                                                      }}
+                                                    >
+                                                      Pending
+                                                    </span>
+                                                  </td>
+                                                </tr>
+                                              )
+                                            )}
+                                          </tbody>
+                                        </Table>
+                                        {open.data.status !== "complete" && (
+                                          <Button
+                                            colorScheme="blue"
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                            // className="mx-3"
+                                            onClick={() =>
+                                              history.push(
+                                                `/superadmin/editfile?id=${id}`
+                                              )
+                                            }
+                                          >
+                                            Upload
+                                          </Button>
+                                        )}
+                                      </React.Fragment>
+                                    )}
+                                  {fileData?.documents && (
+                                    <div className="mt-3">
+                                      <FileDisplay
+                                        groupedFiles={fileData?.documents}
+                                      />
+                                    </div>
                                   )}
+                                  {!open.data?.pendingData ||
+                                    (open.data.pendingData.length === 0 && (
+                                      <p>No pending documents available.</p>
+                                    ))}
                                 </div>
                               </div>
                             )}
@@ -1771,11 +1806,11 @@ function ViewFile() {
                       </div>
                     )}
                   </div>
-                  <div>
+                  {/* <div>
                     {fileData?.documents && (
                       <FileDisplay groupedFiles={fileData?.documents} />
                     )}
-                  </div>
+                  </div> */}
                 </FormControl>
               </div>
             </CardBody>

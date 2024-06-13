@@ -1,14 +1,6 @@
-// Add axios to your imports
-import axios from "axios";
 import {
   Flex,
-  Table,
-  Tbody,
   Text,
-  Th,
-  Thead,
-  Tr,
-  Td,
   useColorModeValue,
   Button,
 } from "@chakra-ui/react";
@@ -19,19 +11,15 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
-  IconButton,
   Input,
   Select,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 import "../../adduser/user.css";
@@ -50,10 +38,8 @@ function Customer() {
   const [currentUser, setCurrentUser] = useState({ id: null, activate: true });
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const states = State.getStatesOfCountry("IN"); // Assuming 'IN' is the country code for India
+  const states = State.getStatesOfCountry("IN");
 
-  // Retrieve cities whenever the selectedState changes
-  // Here we find the state object first to get the correct ISO code for fetching cities
   const cities = selectedState
     ? City.getCitiesOfState(
         "IN",
@@ -63,7 +49,7 @@ function Customer() {
 
   const handleStateChange = (event) => {
     setSelectedState(event.target.value);
-    setSelectedCity(""); // Reset city selection when state changes
+    setSelectedCity("");
   };
 
   const handleCityChange = (event) => {
@@ -171,7 +157,7 @@ function Customer() {
         return "black";
     }
   };
-  // Adjusted filteredUsers with state and city filters
+
   const filteredUsers = users.filter((user) => {
     const searchTermLower = searchTerm.toLowerCase();
     const matchesSearch =

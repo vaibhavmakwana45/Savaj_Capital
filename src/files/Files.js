@@ -14,10 +14,12 @@ import {
   Input,
   Select,
   Collapse,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import $ from "jquery";
 import { MoreVert as MoreVertIcon } from "@material-ui/icons";
-import { Menu, MenuItem, ListItemIcon } from "@material-ui/core";
+import { Menu, MenuItem } from "@material-ui/core";
 import Loader from "react-js-loader";
 import {
   AlertDialog,
@@ -29,7 +31,12 @@ import {
 } from "@chakra-ui/react";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon, EditIcon, AddIcon } from "@chakra-ui/icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  AddIcon,
+  ExternalLinkIcon,
+} from "@chakra-ui/icons";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -37,9 +44,7 @@ import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
-// import "./user.css";
-import moment from "moment";
-import { Country, State, City } from "country-state-city";
+import { State, City } from "country-state-city";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
@@ -48,8 +53,6 @@ import {
 function Files() {
   const [files, setFiles] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
-
-  let menuBg = useColorModeValue("white", "navy.800");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
   const location = useLocation();
@@ -59,8 +62,10 @@ function Files() {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
+  const history = useHistory();
 
   const states = State.getStatesOfCountry("IN");
+
   const cities = selectedState
     ? City.getCitiesOfState(
         "IN",
@@ -85,11 +90,6 @@ function Files() {
 
   const handleRowClick = (id) => {
     history.push(`/superadmin/viewfile?id=${id}`);
-  };
-  const history = useHistory();
-
-  const handleRow = (url) => {
-    history.push(url);
   };
 
   useEffect(() => {
@@ -177,6 +177,117 @@ function Files() {
     }
   };
 
+  //file percentege count
+  const [fileData, setFileData] = useState([]);
+
+  const fetchFileData = async (fileId) => {
+    try {
+      const response = await AxiosInstance.get(
+        `/file_upload/file-count/${fileId}`
+      );
+      setFileData([
+        ...response.data.data.approvedData,
+        ...response.data.data.pendingData,
+      ]);
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (files.length > 0) {
+      const fileId = files[0].file_id;
+      fetchFileData(fileId);
+    }
+  }, [files]);
+
+  useEffect(() => {
+    $(".progress").each(function () {
+      var value = parseInt($(this).attr("data-value"));
+      var progressBars = $(this).find(".progress-bar");
+
+      progressBars.removeClass("red yellow purple blue green");
+
+      if (value >= 0 && value < 20) {
+        progressBars.addClass("red");
+      } else if (value >= 20 && value < 40) {
+        progressBars.addClass("yellow");
+      } else if (value >= 40 && value < 60) {
+        progressBars.addClass("purple");
+      } else if (value >= 60 && value < 80) {
+        progressBars.addClass("blue");
+      } else if (value >= 80 && value <= 100) {
+        progressBars.addClass("green");
+      }
+
+      if (value <= 50) {
+        progressBars
+          .eq(1)
+          .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
+      } else {
+        progressBars.eq(1).css("transform", "rotate(180deg)");
+        progressBars
+          .eq(0)
+          .css(
+            "transform",
+            "rotate(" + percentageToDegrees(value - 50) + "deg)"
+          );
+      }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
+    });
+  }, [files, fetchFileData]);
+
+  //total loan amount
+  const [totalAmount, setTotalAmount] = useState(null);
+
+  const fetchTotalAmount = async () => {
+    try {
+      if (loan_id) {
+        const response = await AxiosInstance.get(
+          `/file_upload/amounts/${loan_id}`,
+          {
+            params: {
+              state: selectedState,
+              city: selectedCity,
+            },
+          }
+        );
+        const { totalAmount } = response.data;
+        setTotalAmount(totalAmount);
+      }
+    } catch (error) {
+      console.error("Error fetching total amount:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalAmount();
+  }, [loan_id, selectedState, selectedCity]);
+
+  //model open edit delete update assign
+  const [anchorEl, setAnchorEl] = useState(null);
+  const cancelRefAssign = React.useRef();
+
+  const handleClick = (event, fileId, city, loanId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFileId(fileId);
+    setSelectedCityName(city);
+    setSelectedLoanId(loanId);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setSelectedFileId(null);
+  };
+
+  //delete
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
   const cancelRef = React.useRef();
@@ -258,13 +369,15 @@ function Files() {
     }
   };
 
+  //edit
   const handleEditClick = (id) => {
     history.push(`/superadmin/editfile?id=${id}`);
   };
 
-  const handleDelete = (id) => {
-    setSelectedFileId(id);
-    setIsDeleteDialogOpen(true);
+  //update status
+  const handleUpdate = (id) => {
+    setSelecteUpdateFileId(id);
+    setIsUpdateDialogOpen(true);
   };
 
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
@@ -305,29 +418,39 @@ function Files() {
     }
   };
 
-  const handleUpdate = (id) => {
-    setSelecteUpdateFileId(id);
-    setIsUpdateDialogOpen(true);
+  //assign
+  const [selectedCityName, setSelectedCityName] = useState("");
+  const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [selecteAssignFileId, setSelecteAssignFileId] = useState(null);
+  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
+  const [selectedUserFileCount, setSelectedUserFileCount] = useState(0);
+
+  const handleAssign = (id, city, loanId) => {
+    const selectedFile = allFiles.find((file) => file.file_id === id);
+    if (selectedFile) {
+      setSelecteAssignFileId(selectedFile.file_id);
+      setSelectedLoanId(loanId);
+      setSelectedCityName(city);
+      setIsAssignDialogOpen(true);
+    }
   };
 
-  const [totalAmount, setTotalAmount] = useState(null);
-  const fetchTotalAmount = async () => {
+  const [allFiles, setAllFiles] = useState([]);
+
+  const fetchFiles = async () => {
     try {
-      if (loan_id) {
-        const response = await AxiosInstance.get(
-          `/file_upload/amounts/${loan_id}`,
-          {
-            params: {
-              state: selectedState,
-              city: selectedCity,
-            },
-          }
-        );
-        const { totalAmount } = response.data;
-        setTotalAmount(totalAmount);
+      const response = await AxiosInstance.get("/file_upload/allfiles");
+      setAllFiles(response.data.data);
+      if (response.data.data.length > 0) {
+        setSelecteAssignFileId(response.data.data[0].file_id);
       }
     } catch (error) {
-      console.error("Error fetching total amount:", error);
+      console.error("Error fetching files:", error);
     }
   };
 
@@ -388,37 +511,31 @@ function Files() {
           .eq(1)
           .css("transform", "rotate(" + percentageToDegrees(value) + "deg)");
       } else {
-        progressBars.eq(1).css("transform", "rotate(180deg)");
-        progressBars
-          .eq(0)
-          .css(
-            "transform",
-            "rotate(" + percentageToDegrees(value - 50) + "deg)"
-          );
+        toast.error(
+          response.data.message || "Submission failed! Please try again."
+        );
       }
-      function percentageToDegrees(percentage) {
-        return (percentage / 100) * 360;
-      }
-    });
-  }, [files, fetchFileData]);
-
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handleClick = (event, fileId) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedFileId(fileId);
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      console.error("Error response from server:", error.response);
+      toast.error(
+        error.response?.data?.message || "Submission failed! Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-    setSelectedFileId(null);
-  };
+  const filteredBranchUsers = savajcapitalbranchUser.filter(
+    (user) =>
+      Array.isArray(user.loan_ids) && user.loan_ids.includes(selectedLoanId)
+  );
 
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
-          <CardHeader style={{ padding: "10px" }} className="card-main ">
+          <CardHeader style={{ padding: "10px" }} className="card-main">
             <Flex justifyContent="space-between" p="4" className="mainnnn">
               <Text fontSize="xl">
                 {loan ? (
@@ -432,7 +549,8 @@ function Files() {
                         fontWeight="bold"
                         pl="1"
                       >
-                        - {totalAmount !== null ? totalAmount : "-"}
+                        <span style={{ color: "black" }}>-</span>{" "}
+                        {totalAmount !== null ? totalAmount : "-"}
                       </Text>
                     ) : null}
                   </>
@@ -449,7 +567,7 @@ function Files() {
               </Text>
             </Flex>
             <Flex justifyContent="end" py="1" className="mainnnn">
-              <Flex className="theaddd p-2 ">
+              <Flex className="theaddd p-2">
                 <div className="d-flex first-drop-section gap-2">
                   {!loan && (
                     <select
@@ -480,6 +598,7 @@ function Files() {
                       </option>
                     ))}
                   </select>
+
                   <select
                     class="form-select loan-type-dropdown"
                     aria-label="Default select example"
@@ -512,6 +631,7 @@ function Files() {
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                   </select>
+
                   <Input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -614,7 +734,7 @@ function Files() {
                               padding: "4px 8px",
                               borderRadius: "10px",
                               display: "inline-block",
-                              fontSize: "0.8em", // Decrease font size
+                              fontSize: "0.8em",
                             }}
                           >
                             <span>
@@ -631,7 +751,7 @@ function Files() {
                                   style={{
                                     display: "block",
                                     marginTop: "4px",
-                                    fontSize: "0.9em", // Decrease font size
+                                    fontSize: "0.9em",
                                     color: "#FFFFFF",
                                   }}
                                 >
@@ -645,7 +765,7 @@ function Files() {
                                 <span
                                   style={{
                                     display: "block",
-                                    fontSize: "0.9em", // Decrease font size
+                                    fontSize: "0.9em",
                                     color: "#FFFFFF",
                                   }}
                                 >
@@ -653,11 +773,20 @@ function Files() {
                                 </span>
                               </>
                             )}
+
+                            <span
+                              style={{
+                                display: "block",
+                                fontSize: "0.9em",
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              {file.last_completed_step || "CIBIL"}
+                            </span>
                           </div>
                         </Td>
 
                         <Td>
-                          {" "}
                           {file.document_percentage != null &&
                           !isNaN(file.document_percentage) ? (
                             <div
@@ -734,7 +863,12 @@ function Files() {
                                 aria-haspopup="true"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleClick(e, file.file_id);
+                                  handleClick(
+                                    e,
+                                    file.file_id,
+                                    file.city,
+                                    file.loan_id
+                                  );
                                 }}
                               >
                                 <MoreVertIcon />
@@ -751,7 +885,6 @@ function Files() {
                                   onClick={(e) => {
                                     handleClose();
                                     handleDelete(selectedFileId);
-
                                     e.stopPropagation();
                                   }}
                                 >
@@ -777,6 +910,22 @@ function Files() {
                                 >
                                   <AddIcon style={{ marginRight: "5px" }} />
                                   Update
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleAssign(
+                                      selectedFileId,
+                                      selectedCityName,
+                                      selectedLoanId
+                                    );
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <ExternalLinkIcon
+                                    style={{ marginRight: "5px" }}
+                                  />
+                                  Assign
                                 </MenuItem>
                               </Menu>
                             </Flex>
@@ -853,6 +1002,7 @@ function Files() {
                                       ).map((documentRow, index) => (
                                         <Tr key={index}>
                                           <Td>
+                                            {" "}
                                             {documentRow?.name} (
                                             {documentRow?.title})
                                           </Td>
@@ -1022,6 +1172,139 @@ function Files() {
                   isDisabled={!selectedStatus}
                 >
                   Update
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        <AlertDialog
+          isOpen={isAssignDialogOpen}
+          leastDestructiveRef={cancelRefAssign}
+          onClose={() => {
+            setIsAssignDialogOpen(false);
+            setSelecteAssignFileId(null);
+            setSelectedBranchId(null);
+            setSelectedBranchUserId(null);
+            setSelectedCityName("");
+            setSelectedLoanId("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Assign File
+              </AlertDialogHeader>
+              <AlertDialogBody>
+                <FormControl id="file_id" mt={4} isRequired>
+                  <FormLabel>File</FormLabel>
+                  <Select
+                    placeholder="Select File"
+                    value={selecteAssignFileId}
+                    isDisabled={selecteAssignFileId}
+                    onChange={(e) => setSelecteAssignFileId(e.target.value)}
+                  >
+                    {allFiles?.map((file) => (
+                      <option key={file.file_id} value={file.file_id}>
+                        {`${file.file_id}`}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl id="branch_id" mt={4} isRequired>
+                  <FormLabel>Savaj Capital Branch</FormLabel>
+                  <Select
+                    placeholder="Select Branch"
+                    onChange={(e) => setSelectedBranchId(e.target.value)}
+                  >
+                    {savajcapitalbranch
+                      .filter((branch) => branch.city === selectedCityName)
+                      .map((branch) => (
+                        <option key={branch.branch_id} value={branch.branch_id}>
+                          {`${branch.branch_name} (${branch.city})`}
+                        </option>
+                      ))}
+                  </Select>
+                </FormControl>
+                {selectedBranchId && (
+                  <FormControl id="branchuser_id" mt={4} isRequired>
+                    <FormLabel>Branch User</FormLabel>
+                    {filteredBranchUsers.length > 0 ? (
+                      <>
+                        <Select
+                          placeholder="Select User"
+                          onChange={(e) => {
+                            setSelectedBranchUserId(e.target.value);
+                            const user = filteredBranchUsers.find(
+                              (u) => u.branchuser_id === e.target.value
+                            );
+                            if (user) {
+                              setSelectedUserFileCount(
+                                user.assigned_file_count || 0
+                              );
+                            }
+                          }}
+                        >
+                          {filteredBranchUsers.map((user) => (
+                            <option
+                              key={user.branchuser_id}
+                              value={user.branchuser_id}
+                            >
+                              {`${user.full_name} (${getRoleName(
+                                user.role_id
+                              )})`}
+                            </option>
+                          ))}
+                        </Select>
+                        {selectedBranchUserId && (
+                          <Text
+                            style={{ paddingTop: "20px", fontWeight: "bold" }}
+                          >
+                            Assigned Files Count: {selectedUserFileCount}
+                          </Text>
+                        )}
+                      </>
+                    ) : (
+                      <Text>No users available for this branch or loan.</Text>
+                    )}
+                  </FormControl>
+                )}
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  onClick={handleSubmitData}
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 40,
+                  }}
+                >
+                  Assign
+                </Button>
+
+                <Button
+                  mt={4}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 40,
+                    marginLeft: 8,
+                  }}
+                  onClick={() => {
+                    setIsAssignDialogOpen(false);
+                    setSelecteAssignFileId(null);
+                    setSelectedBranchId(null);
+                    setSelectedBranchUserId(null);
+                    setSelectedCityName("");
+                    setSelectedLoanId("");
+                  }}
+                >
+                  Cancel
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

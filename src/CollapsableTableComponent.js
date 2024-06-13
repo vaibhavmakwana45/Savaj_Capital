@@ -40,7 +40,6 @@ const CollapsableTableComponent = ({
             </Th>
           ))}
           <Th pl="0px" borderColor={"gray.600"} color="gray.400"></Th>{" "}
-          {/* Empty cell for action buttons */}
         </Tr>
       </Thead>
       <Tbody>

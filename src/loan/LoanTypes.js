@@ -18,8 +18,8 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
-import "./loan.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import "./loan.css";
 
 function LoanTypes() {
   const [loans, setLoans] = useState([]);

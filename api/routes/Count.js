@@ -36,6 +36,60 @@ router.get("/data-count", async (req, res) => {
 router.get("/loan-files", async (req, res) => {
   try {
     const loans = await Loan.find().lean();
+    const enhancedLoans = [];
+
+    for (const loan of loans) {
+      let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
+      const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
+
+      if (loanTypes.length === 0) {
+        loanTypes = [
+          { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
+        ];
+      }
+
+      for (const loanType of loanTypes) {
+        const filteredFiles = allFiles.filter(
+          (file) =>
+            loanType.loantype_id === "" ||
+            file.loantype_id === loanType.loantype_id
+        );
+        enhancedLoans.push({
+          ...loan,
+          loanType: loanType.loan_type,
+          subtype: loanType.subtype || "Main",
+          files: filteredFiles.map((file) => ({
+            filename: file.filename,
+            typename: file.typename,
+          })),
+          fileCount: filteredFiles.length,
+          loantype_id: loanType.loantype_id,
+        });
+      }
+    }
+
+    const flattenedLoans = enhancedLoans.filter(
+      (loan) => loan.files.length > 0
+    );
+    res.json(flattenedLoans);
+  } catch (error) {
+    console.error("Error fetching loan and file data:", error);
+    res.status(500).send("Error in fetching loan and file data");
+  }
+});
+
+router.get("/loan-files-scbranch/:state/:city/:loan_ids?", async (req, res) => {
+  try {
+    const { state, city, loan_ids } = req.params;
+
+    const loanIdsArray = loan_ids ? loan_ids.split(",") : [];
+
+    let loans;
+    if (loanIdsArray.length > 0) {
+      loans = await Loan.find({ loan_id: { $in: loanIdsArray } }).lean();
+    } else {
+      loans = await Loan.find().lean();
+    }
 
     const enhancedLoans = [];
 
@@ -44,34 +98,50 @@ router.get("/loan-files", async (req, res) => {
       const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
 
       if (loanTypes.length === 0) {
-        loanTypes = [{ loan_type: "Unknown", subtype: "Main", loantype_id: "" }];
+        loanTypes = [
+          { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
+        ];
       }
 
       for (const loanType of loanTypes) {
-        const filteredFiles = allFiles.filter(file =>
-          loanType.loantype_id === "" || file.loantype_id === loanType.loantype_id
+        const filteredFiles = allFiles.filter(
+          (file) =>
+            loanType.loantype_id === "" ||
+            file.loantype_id === loanType.loantype_id
         );
+
+        const stateCityFiles = [];
+        for (const file of filteredFiles) {
+          const user = await AddUser.findOne({ user_id: file.user_id }).lean();
+          if (user && user.state === state && user.city === city) {
+            stateCityFiles.push(file);
+          }
+        }
+
         enhancedLoans.push({
           ...loan,
           loanType: loanType.loan_type,
           subtype: loanType.subtype || "Main",
-          files: filteredFiles.map(file => ({
+          state,
+          city,
+          files: stateCityFiles.map((file) => ({
             filename: file.filename,
             typename: file.typename,
           })),
-          fileCount: filteredFiles.length,
-          loantype_id: loanType.loantype_id, // Include loantype_id for all loan types
+          fileCount: stateCityFiles.length,
+          loantype_id: loanType.loantype_id,
         });
       }
     }
 
-    const flattenedLoans = enhancedLoans.filter(loan => loan.files.length > 0);
+    const flattenedLoans = enhancedLoans.filter(
+      (loan) => loan.files.length > 0
+    );
     res.json(flattenedLoans);
   } catch (error) {
     console.error("Error fetching loan and file data:", error);
     res.status(500).send("Error in fetching loan and file data");
   }
 });
-
 
 module.exports = router;

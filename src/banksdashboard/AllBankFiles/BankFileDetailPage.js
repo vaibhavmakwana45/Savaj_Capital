@@ -17,7 +17,6 @@ import {
   ModalCloseButton,
   Input,
 } from "@chakra-ui/react";
-
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import AxiosInstance from "config/AxiosInstance";
@@ -26,7 +25,6 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const FileDisplay = ({ groupedFiles }) => {

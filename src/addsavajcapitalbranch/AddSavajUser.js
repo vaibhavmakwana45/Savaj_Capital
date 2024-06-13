@@ -15,6 +15,7 @@ import {
   Input,
   useColorModeValue,
   Checkbox,
+  Box,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -24,14 +25,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { State, City } from "country-state-city";
 import { useHistory, useLocation } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import upArrow from "../assets/svg/uparrow.svg";
-import downArrow from "../assets/svg/downarrow.svg";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from "reactstrap";
 import Select, { components } from "react-select";
 import makeAnimated from "react-select/animated";
 const animatedComponents = makeAnimated();
@@ -74,8 +67,13 @@ function AddSavajUser() {
     password: "",
     password: "",
     loan_ids: [],
-    add_files: false,
     add_customers: false,
+    add_files: false,
+    view_files: false,
+    edit_files: false,
+    delete_files: false,
+    status_change_files: false,
+    assign_files: false,
   });
 
   const getRolesData = async () => {
@@ -121,7 +119,7 @@ function AddSavajUser() {
       const response = await AxiosInstance.get("/savaj_user/user/" + id);
       if (response.data.success) {
         const { data } = response.data;
-        const loanNames = data[0].loan_ids.map((loanId) => {
+        const loanNames = data[0].loan_ids?.map((loanId) => {
           const loan = loanType.find((loan) => loan.loan_id === loanId);
           return loan ? loan.loan : "";
         });
@@ -138,12 +136,17 @@ function AddSavajUser() {
           full_name: data[0].full_name,
           address: data[0].address,
           password: data[0].password,
-          loan_ids: data[0].loan_ids.map((loanId, index) => ({
+          loan_ids: data[0].loan_ids?.map((loanId, index) => ({
             label: loanNames[index],
             value: loanId,
           })),
-          add_files: data[0].add_files,
           add_customers: data[0].add_customers,
+          add_files: data[0].add_files,
+          view_files: data[0].view_files,
+          edit_files: data[0].edit_files,
+          delete_files: data[0].delete_files,
+          status_change_files: data[0].status_change_files,
+          assign_files: data[0].assign_files,
         };
 
         setSelectedState(data[0].state);
@@ -288,7 +291,7 @@ function AddSavajUser() {
     try {
       const payload = {
         ...formData,
-        loan_ids: selectedLoanIds.map((option) => option.value),
+        loan_ids: selectedLoanIds?.map((option) => option.value),
       };
 
       let response;
@@ -439,25 +442,80 @@ function AddSavajUser() {
                 />
               </FormControl>
 
-              <FormControl id="add_customers" mt={4}>
-                <Checkbox
-                  name="add_customers"
-                  onChange={handleCheckboxChange}
-                  isChecked={formData.add_customers}
-                >
-                  Add Customer?
-                </Checkbox>
-              </FormControl>
+              <Flex>
+                <Box flex="1">
+                  <FormControl id="add_customers" mt={4}>
+                    <Checkbox
+                      name="add_customers"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.add_customers}
+                    >
+                      Add Customer?
+                    </Checkbox>
+                  </FormControl>
 
-              <FormControl id="add_files" mt={4}>
-                <Checkbox
-                  name="add_files"
-                  onChange={handleCheckboxChange}
-                  isChecked={formData.add_files}
-                >
-                  Add File?
-                </Checkbox>
-              </FormControl>
+                  <FormControl id="add_files" mt={4}>
+                    <Checkbox
+                      name="add_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.add_files}
+                    >
+                      Add File?
+                    </Checkbox>
+                  </FormControl>
+
+                  <FormControl id="view_files" mt={4}>
+                    <Checkbox
+                      name="view_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.view_files}
+                    >
+                      View File?
+                    </Checkbox>
+                  </FormControl>
+                  <FormControl id="edit_files" mt={4}>
+                    <Checkbox
+                      name="edit_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.edit_files}
+                    >
+                      Edit File?
+                    </Checkbox>
+                  </FormControl>
+                </Box>
+
+                <Box flex="1">
+                  <FormControl id="delete_files" mt={4}>
+                    <Checkbox
+                      name="delete_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.delete_files}
+                    >
+                      Delete File?
+                    </Checkbox>
+                  </FormControl>
+
+                  <FormControl id="status_change_files" mt={4}>
+                    <Checkbox
+                      name="status_change_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.status_change_files}
+                    >
+                      Status Change File?
+                    </Checkbox>
+                  </FormControl>
+
+                  <FormControl id="assign_files" mt={4}>
+                    <Checkbox
+                      name="assign_files"
+                      onChange={handleCheckboxChange}
+                      isChecked={formData.assign_files}
+                    >
+                      Assign File?
+                    </Checkbox>
+                  </FormControl>
+                </Box>
+              </Flex>
 
               <Text fontSize="xl" color={textColor} fontWeight="bold" mt={6}>
                 User Detail

@@ -340,40 +340,6 @@
 // export default SignUp;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import {
 //   Box,
 //   Button,
@@ -565,8 +531,6 @@
 // }
 
 // export default SignUp;
-
-
 
 
 import {

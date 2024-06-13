@@ -16,6 +16,7 @@ const SavajCapital_BranchAssign = require("../../models/Savaj_Capital/Branch_Ass
 const Compelete_Step = require("../../models/Loan_Step/Compelete_Step");
 const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
 const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
+const BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
 
 router.post("/", async (req, res) => {
   try {
@@ -241,7 +242,7 @@ router.get("/", async (req, res) => {
       item.loan_type = loanTypeMap.get(item.loantype_id)?.loan_type || "";
       item.status_message = statusMessageMap.get(item.file_id) || "";
       item.amount = amountMap.get(item.file_id) || "";
-
+      item.last_completed_step = lastCompletedStepMap.get(item.file_id) || "";
       const loanDocs =
         documentData.find((dd) => dd.itemId === item._id)?.docs || [];
       item.loan_document_ids = loanDocs.map((doc) => ({
@@ -323,7 +324,7 @@ router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
 
     const fileMatchStage = { user_id: { $in: userIds } };
 
-    const totalDataCount = await File_Uplode.countDocuments(fileMatchStage);
+    let totalDataCount = 0;
 
     const pipeline = [
       {
@@ -336,14 +337,29 @@ router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
       { $skip: (currentPage - 1) * dataPerPage },
       { $limit: dataPerPage },
     ];
+
     if (loan_ids) {
       const loanIdsArray = loan_ids.split(",").map((id) => id.trim());
       pipeline.splice(1, 0, { $match: { loan_id: { $in: loanIdsArray } } });
+
+      const assignFiles = await BranchAssign.find({
+        loan_id: { $in: loanIdsArray },
+      }).select("file_id");
+      const assignFileIds = assignFiles.map((file) => file.file_id);
+
+      pipeline.splice(1, 0, { $match: { file_id: { $in: assignFileIds } } });
+
+      totalDataCount = await File_Uplode.countDocuments({
+        file_id: { $in: assignFileIds },
+      });
+    } else {
+      const stateCityMatch = { state, city };
+      totalDataCount = await AddUser.countDocuments(stateCityMatch);
     }
+
     const data = await File_Uplode.aggregate(pipeline);
 
     const branchUserIds = data.map((item) => item.branchuser_id);
-    // const userIds = data.map((item) => item.user_id);
     const loanIds = data.map((item) => item.loan_id);
     const loanTypeIds = data.map((item) => item.loantype_id);
     const fileIds = data.map((item) => item.file_id);
@@ -487,7 +503,6 @@ router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
   }
 });
 
-// Assuming Title model is imported and available
 router.get("/file_upload/:file_id", async (req, res) => {
   try {
     const file_id = req.params.file_id;
@@ -1045,18 +1060,15 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
   try {
     const { loan_id, loantype_id } = req.params;
 
-    // Build query based on presence of loantype_id
     const query = { loan_id, status: "approved" };
     if (loantype_id) {
       query.loantype_id = loantype_id;
     }
 
-    // Find approved files based on query
     const approvedFiles = await File_Uplode.find(query);
     const fileIds = approvedFiles.map((file) => file.file_id);
     const userIds = approvedFiles.map((file) => file.user_id);
 
-    // Fetch user details
     const users = await AddUser.find({ user_id: { $in: userIds } });
     const userStatesCities = users.map((user) => ({
       user_id: user.user_id,
@@ -1064,13 +1076,11 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
       city: user.city,
     }));
 
-    // Fetch completed steps
     const completedSteps = await Compelete_Step.find({
       file_id: { $in: fileIds },
       loan_step_id: "1715348798228",
     });
 
-    // Calculate amounts based on completed steps
     const amounts = completedSteps.map((step) => {
       const user = userStatesCities.find(
         (user) => user.user_id === step.user_id
@@ -1084,7 +1094,6 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
       };
     });
 
-    // Filter amounts based on state and city if provided
     const { state, city } = req.query;
     const filteredAmounts = amounts.filter((amount) => {
       return (
@@ -1092,7 +1101,6 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
       );
     });
 
-    // Calculate total amount
     const totalAmount = filteredAmounts.reduce(
       (total, item) => total + item.amount,
       0
@@ -1111,6 +1119,76 @@ router.get("/amounts/:loan_id/:loantype_id?", async (req, res) => {
     });
   }
 });
+
+router.get(
+  "/scbranchamounts/:loan_id/:loantype_id/:state/:city",
+  async (req, res) => {
+    try {
+      let { loan_id, loantype_id, state, city } = req.params;
+
+      if (loantype_id === "none") {
+        loantype_id = undefined;
+      }
+
+      const query = { loan_id, status: "approved" };
+      if (loantype_id) {
+        query.loantype_id = loantype_id;
+      }
+
+      const approvedFiles = await File_Uplode.find(query);
+      const fileIds = approvedFiles.map((file) => file.file_id);
+      const userIds = approvedFiles.map((file) => file.user_id);
+
+      const users = await AddUser.find({ user_id: { $in: userIds } });
+      const userStatesCities = users.map((user) => ({
+        user_id: user.user_id,
+        state: user.state,
+        city: user.city,
+      }));
+
+      const completedSteps = await Compelete_Step.find({
+        file_id: { $in: fileIds },
+        loan_step_id: "1715348798228",
+      });
+
+      const amounts = completedSteps.map((step) => {
+        const user = userStatesCities.find(
+          (user) => user.user_id === step.user_id
+        );
+        return {
+          amount: parseFloat(
+            step.inputs.find((input) => input.label === "DISPATCH AMOUNT").value
+          ),
+          state: user?.state,
+          city: user?.city,
+        };
+      });
+
+      const filteredAmounts = amounts.filter((amount) => {
+        return (
+          (!state || amount.state === state) && (!city || amount.city === city)
+        );
+      });
+
+      const totalAmount = filteredAmounts.reduce(
+        (total, item) => total + item.amount,
+        0
+      );
+
+      res.json({
+        statusCode: 200,
+        totalAmount,
+        loantype_id: loantype_id || "None",
+        message: "Total amount for approved files fetched successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        statusCode: 500,
+        message: error.message,
+      });
+    }
+  }
+);
 
 router.put("/updatestatus/:fileId", async (req, res) => {
   try {

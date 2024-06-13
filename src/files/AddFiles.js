@@ -17,11 +17,8 @@ import {
   ModalBody,
   Input,
   ModalFooter,
-  Checkbox,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { IconButton } from "@chakra-ui/react";
-import { CloseIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -491,7 +488,7 @@ function AddFiles() {
               >
                 <FormLabel>Loan Subtype</FormLabel>
                 <Select
-                  placeholder="Select Loan Subtype" 
+                  placeholder="Select Loan Subtype"
                   onChange={handleLoanSubtypeChange}
                   options={loanSubType.map((subType) => ({
                     value: subType.loantype_id,

@@ -5,7 +5,6 @@ import {
   Text,
   useColorModeValue,
   Input,
-  Checkbox,
 } from "@chakra-ui/react";
 import {
   AlertDialog,

@@ -67,7 +67,6 @@ router.get("/:loan_id", async (req, res) => {
     const count = enrichedData.length;
 
     res.json({
-      // statusCode: 200,
       success: true,
       data: enrichedData,
       count: count,
@@ -141,7 +140,6 @@ router.get("/documents/:loan_id/:loantype_id", async (req, res) => {
     const count = enrichedData.length;
 
     res.json({
-      // statusCode: 200,
       success: true,
       data: enrichedData,
       count: count,
@@ -206,7 +204,6 @@ router.delete("/:loan_document_id", async (req, res) => {
     const isLoanIdAvailable = await File_Uplode.exists({ loan_id: loan_id });
 
     if (!isLoanIdAvailable || !isReferenced) {
-      // Proceed with deletion if either loan ID or loan document ID is missing
       await Loan_Documents.findOneAndDelete({
         loan_document_id: loan_document_id,
       });
@@ -387,7 +384,6 @@ router.post("/update", async (req, res) => {
   try {
     const { loan_id, loantype_id, document_id, title_id } = req.body;
 
-    // Find the existing document based on loan_id, loantype_id (if provided), and title
     const existingDocument = await Loan_Documents.findOne({
       loan_id,
       ...(loantype_id && { loantype_id }),
@@ -395,7 +391,7 @@ router.post("/update", async (req, res) => {
     });
 
     if (existingDocument) {
-      existingDocument.document_ids = document_id; // Replace old document_ids with new ones
+      existingDocument.document_ids = document_id;
       existingDocument.updatedAt = moment()
         .utcOffset(330)
         .format("YYYY-MM-DD HH:mm:ss");

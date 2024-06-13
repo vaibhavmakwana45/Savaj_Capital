@@ -5,7 +5,6 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const Loan_Documents = require("../../models/Loan/Loan_Documents");
 
-// Post Loan-Type
 router.post("/", async (req, res) => {
   try {
     let findLoanType = await Loan_Type.findOne({
@@ -45,7 +44,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Loan-Type
 router.get("/:loan_id", async (req, res) => {
   try {
     var data = await Loan_Type.aggregate([
@@ -88,12 +86,10 @@ router.get("/:loan_id", async (req, res) => {
   }
 });
 
-// Update Loan-Type
 router.put("/:loantype_id", async (req, res) => {
   try {
     const { loantype_id } = req.params;
 
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const result = await Loan_Type.findOneAndUpdate(
       { loantype_id: loantype_id },
@@ -159,7 +155,6 @@ router.delete("/:loantype_id", async (req, res) => {
   }
 });
 
-//  Padd loan_id and get Loan-Type
 router.get("/loan_type/:loan_id", async (req, res) => {
   try {
     const loan_id = req.params.loan_id;

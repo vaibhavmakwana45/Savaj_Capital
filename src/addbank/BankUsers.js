@@ -1,14 +1,7 @@
-import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"; // Add axios to your imports// Add axios to your imports
-import axios from "axios";
+import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import {
   Flex,
-  Table,
-  Tbody,
   Text,
-  Th,
-  Thead,
-  Tr,
-  Td,
   useColorModeValue,
   Button,
   Input,
@@ -24,17 +17,12 @@ import {
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
-import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import TablesTableRow from "components/Tables/TablesTableRow";
-import { RocketIcon } from "components/Icons/Icons";
 import AxiosInstance from "config/AxiosInstance";
-import Loader from "react-js-loader";
-
 import TableComponent from "TableComponent";
 
 function BankUsers() {

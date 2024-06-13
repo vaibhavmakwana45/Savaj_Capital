@@ -4,26 +4,16 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input,
   Select,
   useColorModeValue,
-  InputGroup,
-  InputRightElement,
 } from "@chakra-ui/react";
-
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Country, State, City } from "country-state-city";
-import axios from "axios";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import upArrow from "../assets/svg/uparrow.svg";
-import downArrow from "../assets/svg/downarrow.svg";
-import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 
 function SavajAssignFile() {
   const history = useHistory();

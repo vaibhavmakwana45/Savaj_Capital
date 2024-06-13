@@ -1,18 +1,13 @@
-// chakra imports
-import { Box, ChakraProvider, Portal } from "@chakra-ui/react";
-// core components
-// import AuthNavbar from "components/Navbars/AuthNavbar.js";
+import { Box } from "@chakra-ui/react";
 import React from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import routes from "routes.js";
 
 export default function Pages(props) {
   const { ...rest } = props;
-  // ref for the wrapper div
   const wrapper = React.createRef();
   React.useEffect(() => {
     document.body.style.overflow = "unset";
-    // Specify how to clean up after this effect:
     return function cleanup() {};
   });
   const getActiveRoute = (routes) => {

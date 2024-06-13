@@ -30,7 +30,6 @@ const decrypt = (text) => {
   return decrypted;
 };
 
-/* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
@@ -112,9 +111,8 @@ router.post("/login", async (req, res) => {
 
 router.get("/idb_check", async (req, res) => {
   try {
-    const panCard = req.query.panCard; // Retrieve PAN card from query parameter
+    const panCard = req.query.panCard;
 
-    // Launch a headful browser
     const browser = await puppeteer.launch({
       headless: false,
       defaultViewport: null,
@@ -128,27 +126,20 @@ router.get("/idb_check", async (req, res) => {
       await pages[0].close();
     }
 
-    // Navigate to the desired URL
     await page.goto("https://ibdlp.indianbank.in/GSTAdvantage/components");
 
-    // Wait for the "Click Here" link to appear
     await page.waitForSelector('a[onclick="redirectToApplication()"]');
     await delay(1000);
 
-    // Auto-click the "Click Here" link
     await page.evaluate(() => {
       document.querySelector('a[onclick="redirectToApplication()"]').click();
     });
 
-    // Wait for the PAN card input field to appear
     await page.waitForSelector('input[name="textbox1"]');
     await delay(2000);
 
-    // Auto-fill the PAN card field with the retrieved value
     await page.type('input[name="textbox1"]', panCard);
     await delay(2000);
-
-    // You can add more actions here if needed
 
     res.send("PAN card filled successfully.");
   } catch (error) {

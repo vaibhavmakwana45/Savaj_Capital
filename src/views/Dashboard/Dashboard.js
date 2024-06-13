@@ -1,53 +1,24 @@
-// Chakra imports
 import {
-  Box,
-  Button,
-  Center,
   Flex,
-  Grid,
-  Progress,
   SimpleGrid,
   Stat,
   StatLabel,
   StatNumber,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   useColorMode,
   useColorModeValue,
+  Spinner,
 } from "@chakra-ui/react";
-// Custom components
 import Card from "components/Card/Card.js";
-import BarChart from "components/Charts/BarChart";
-import LineChart from "components/Charts/LineChart";
 import IconBox from "components/Icons/IconBox";
-// Custom icons
-import {
-  CartIcon,
-  DocumentIcon,
-  GlobeIcon,
-  WalletIcon,
-} from "components/Icons/Icons.js";
+import { DocumentIcon, GlobeIcon, WalletIcon, PersonIcon } from "components/Icons/Icons.js";
 import React, { useEffect, useState } from "react";
-// Variables
-import {
-  barChartData,
-  barChartOptions,
-  lineChartData,
-  lineChartOptions,
-} from "variables/charts";
-import { pageVisits, socialTraffic } from "variables/general";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { PersonIcon } from "components/Icons/Icons";
+import Loader from "react-js-loader";
 
 export default function Dashboard() {
   const history = useHistory();
-  // Chakra Color Mode
   const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
@@ -64,6 +35,7 @@ export default function Dashboard() {
     loans: [],
   });
   const [totalAmounts, setTotalAmounts] = useState({});
+  const [loading, setLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,11 +80,26 @@ export default function Dashboard() {
         setTotalAmounts(totalAmountsMap);
       } catch (error) {
         console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
       }
     };
 
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" height="400px">
+      <Loader
+        type="spinner-circle"
+        bgColor={"#b19552"}
+        color={"black"}
+        size={50}
+      />
+    </Flex>
+    );
+  }
 
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
@@ -164,12 +151,6 @@ export default function Dashboard() {
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="green.400" fontWeight="bold">
-                +3.48%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
         <Card
@@ -215,12 +196,6 @@ export default function Dashboard() {
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="green.400" fontWeight="bold">
-                +5.2%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
         <Card
@@ -266,12 +241,6 @@ export default function Dashboard() {
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="red.500" fontWeight="bold">
-                -2.82%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
         <Card
@@ -316,12 +285,6 @@ export default function Dashboard() {
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="green.400" fontWeight="bold">
-                +8.12%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
 
@@ -368,12 +331,6 @@ export default function Dashboard() {
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="red.500" fontWeight="bold">
-                -2.82%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
 
@@ -420,12 +377,6 @@ export default function Dashboard() {
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
-            {/* <Text color="gray.400" fontSize="sm">
-              <Text as="span" color="red.500" fontWeight="bold">
-                -2.82%{" "}
-              </Text>
-              Since last month
-            </Text> */}
           </Flex>
         </Card>
         {apiData.loans.map((loan) => (
@@ -454,7 +405,6 @@ export default function Dashboard() {
                     fontWeight="bold"
                     textTransform="uppercase"
                   >
-                    {/* Check if loanType is not 'Unknown' to determine subtype */}
                     {loan.loanType !== "Unknown"
                       ? `${loan.loan} (${loan.loanType})`
                       : loan.loan}

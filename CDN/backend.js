@@ -113,7 +113,6 @@ app.delete("/upload/:filename", async (req, res) => {
   }
 });
 
-//put api
 app.put("/upload/:filename", upload.single("files"), async (req, res) => {
   try {
     const filename = req.params.filename;

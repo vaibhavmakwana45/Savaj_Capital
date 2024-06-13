@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import PropTypes from "prop-types";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import $ from "jquery";
@@ -18,7 +17,6 @@ import {
 import "./userfile.scss";
 import { useHistory } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
 import {
   Button,
   useColorModeValue,

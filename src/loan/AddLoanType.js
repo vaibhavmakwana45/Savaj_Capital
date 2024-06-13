@@ -125,8 +125,6 @@ function AddLoanType() {
     }
   };
 
-  // ======================== Loan Steps =================================================
-
   const [loanSteps, setLoanSteps] = useState([]);
   const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
 

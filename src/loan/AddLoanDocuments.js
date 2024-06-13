@@ -5,7 +5,6 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Input,
   Popover,
   PopoverTrigger,
   PopoverContent,
@@ -15,7 +14,6 @@ import {
   PopoverBody,
   Checkbox,
   CheckboxGroup,
-  Stack,
   useColorModeValue,
   Select,
 } from "@chakra-ui/react";
@@ -25,7 +23,6 @@ import CardHeader from "components/Card/CardHeader.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 import upArrow from "../assets/svg/uparrow.svg";
 import downArrow from "../assets/svg/downarrow.svg";

@@ -65,10 +65,10 @@ const UserSchema = new mongoose.Schema({
   country_code: {
     type: String,
   },
-  state_code: {
+  status: {
     type: String,
   },
-  status: {
+  state_code: {
     type: String,
   },
   createdAt: {

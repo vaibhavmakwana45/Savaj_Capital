@@ -11,12 +11,12 @@ const SuperAdminSignupSchema = new mongoose.Schema({
   lastname: {
     type: String,
   },
+  phonenumber: {
+    type: Number,
+  },
   email: {
     type: String,
     lowercase: true,
-  },
-  phonenumber: {
-    type: Number,
   },
   password: {
     type: String,

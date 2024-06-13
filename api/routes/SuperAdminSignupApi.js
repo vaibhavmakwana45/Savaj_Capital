@@ -2,11 +2,6 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const SuperAdminSignup = require("../models/SuperAdminSignupSchema");
-// const {
-//   hashPassword,
-//   hashCompare,
-//   createToken,
-// } = require("../utils/authhelper");
 const { superAdminToken } = require("../utils/authhelper");
 const crypto = require("crypto");
 

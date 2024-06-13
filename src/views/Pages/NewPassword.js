@@ -14,8 +14,8 @@ import {
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import BgSignUp from "assets/img/BgSignUp.png";
 import { useHistory, useLocation } from "react-router-dom";
-import AxiosInstance from "config/AxiosInstance";
 import toast, { Toaster } from "react-hot-toast";
+import AxiosInstance from "config/AxiosInstance";
 
 function NewPassword() {
   const location = useLocation();

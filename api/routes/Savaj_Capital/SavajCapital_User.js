@@ -29,17 +29,14 @@ const encrypt = (text) => {
 // };
 
 const decrypt = (text) => {
-  // Check if the text contains hexadecimal characters (indicative of encryption)
   const isEncrypted = /[0-9A-Fa-f]{6}/.test(text);
 
-  // If the text is encrypted, decrypt it
   if (isEncrypted) {
     const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
     let decrypted = decipher.update(text, "hex", "utf-8");
     decrypted += decipher.final("utf-8");
     return decrypted;
   } else {
-    // If the text is not encrypted, return it as is
     return text;
   }
 };
@@ -128,7 +125,6 @@ router.get("/:branch_id", async (req, res) => {
         $sort: { updatedAt: -1 },
       },
     ]);
-
     const branch = await SavajCapital_Branch.findOne({ branch_id });
 
     for (let i = 0; i < data.length; i++) {
@@ -141,6 +137,19 @@ router.get("/:branch_id", async (req, res) => {
       }
     }
 
+    data = await Promise.all(
+      data.map(async (user) => {
+        const count = await Branch_Assign.countDocuments({
+          branchuser_id: user.branchuser_id,
+        });
+        return { ...user, assigned_file_count: count };
+      })
+    );
+
+    const totalCount = data.reduce(
+      (acc, user) => acc + (user.assigned_file_count || 0),
+      0
+    );
     const count = data.length;
 
     res.json({
@@ -148,6 +157,8 @@ router.get("/:branch_id", async (req, res) => {
       branch,
       data: data,
       count: count,
+      totalCount,
+
       message: "Read All Request",
     });
   } catch (error) {
@@ -157,7 +168,62 @@ router.get("/:branch_id", async (req, res) => {
     });
   }
 });
+// router.get("branch_users/:branch_id", async (req, res) => {
+//   try {
+//     const branch_id = req.params.branch_id;
 
+//     // Fetch branch users
+//     var data = await SavajCapital_User.aggregate([
+//       {
+//         $match: { branch_id: branch_id },
+//       },
+//       {
+//         $sort: { updatedAt: -1 },
+//       },
+//     ]);
+
+//     // Fetch count of assigned files for each branch user
+//     data = await Promise.all(
+//       data.map(async (user) => {
+//         const count = await Branch_Assign.countDocuments({
+//           branchuser_id: user.branchuser_id,
+//         });
+//         return { ...user, assigned_file_count: count };
+//       })
+//     );
+
+//     // Fetch branch details
+//     const branch = await SavajCapital_Branch.findOne({ branch_id });
+
+//     // Update roles
+//     for (let i = 0; i < data.length; i++) {
+//       const role_id = data[i].role_id;
+//       const branch_data = await SavajCapital_Role.findOne({ role_id: role_id });
+//       if (branch_data) {
+//         data[i].role = branch_data.role;
+//       }
+//     }
+
+//     // Calculate total count
+//     const totalCount = data.reduce(
+//       (acc, user) => acc + (user.assigned_file_count || 0),
+//       0
+//     );
+
+//     res.json({
+//       statusCode: 200,
+//       branch,
+//       data,
+//       totalCount,
+//       message: "Read All Request",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 router.put("/:branchuser_id", async (req, res) => {
   try {
     const { branchuser_id } = req.params;
