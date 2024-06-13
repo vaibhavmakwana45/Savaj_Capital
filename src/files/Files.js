@@ -785,6 +785,16 @@ function Files() {
                                 </span>
                               </>
                             )}
+
+                            <span
+                              style={{
+                                display: "block",
+                                fontSize: "0.9em",
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              {file.last_completed_step || "CIBIL"}
+                            </span>
                           </div>
                         </Td>
 

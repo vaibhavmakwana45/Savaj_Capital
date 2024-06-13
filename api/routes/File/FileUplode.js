@@ -136,7 +136,7 @@ router.get("/", async (req, res) => {
       userData,
       loanData,
       loanTypeData,
-      statusMessages,
+      completeSteps,
       amountData,
       documentData,
       countData,
@@ -152,7 +152,7 @@ router.get("/", async (req, res) => {
         "loantype_id loan_type"
       ),
       Compelete_Step.find({ file_id: { $in: fileIds } }).select(
-        "file_id statusMessage"
+        "file_id statusMessage loan_step status inputs"
       ),
       Compelete_Step.find({ loan_step_id: "1715348798228" }).select(
         "file_id inputs"
@@ -214,17 +214,30 @@ router.get("/", async (req, res) => {
     const loanTypeMap = new Map(
       loanTypeData.map((loanType) => [loanType.loantype_id, loanType])
     );
-    const statusMessageMap = new Map(
-      statusMessages.map((status) => [status.file_id, status.statusMessage])
-    );
-    const amountMap = new Map(
-      amountData.map((step) => {
+    const statusMessageMap = new Map();
+    const amountMap = new Map();
+    completeSteps.forEach((step) => {
+      if (step.statusMessage) {
+        statusMessageMap.set(step.file_id, step.statusMessage);
+      }
+      if (step.loan_step === "DISPATCH ") {
         const dispatchAmountInput = step.inputs.find(
           (input) => input.label === "DISPATCH AMOUNT"
         );
-        return [step.file_id, dispatchAmountInput?.value];
-      })
-    );
+        if (dispatchAmountInput) {
+          amountMap.set(step.file_id, dispatchAmountInput.value);
+        }
+      }
+    });
+
+    const lastCompletedStepMap = new Map();
+
+    completeSteps.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    completeSteps.forEach((step) => {
+      lastCompletedStepMap.set(step.file_id, step.loan_step);
+    });
+
     for (const item of data) {
       item.branchuser_full_name =
         branchUserMap.get(item.branchuser_id)?.full_name || "";
@@ -237,7 +250,7 @@ router.get("/", async (req, res) => {
       item.loan_type = loanTypeMap.get(item.loantype_id)?.loan_type || "";
       item.status_message = statusMessageMap.get(item.file_id) || "";
       item.amount = amountMap.get(item.file_id) || "";
-
+      item.last_completed_step = lastCompletedStepMap.get(item.file_id) || "";
       const loanDocs =
         documentData.find((dd) => dd.itemId === item._id)?.docs || [];
       item.loan_document_ids = loanDocs.map((doc) => ({
@@ -263,6 +276,7 @@ router.get("/", async (req, res) => {
       message: "Read All Request",
     });
   } catch (error) {
+    console.error("Error occurred:", error);
     res.status(500).json({
       statusCode: 500,
       message: error.message,

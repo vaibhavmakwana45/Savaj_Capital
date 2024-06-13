@@ -93,7 +93,7 @@ router.post("/", async (req, res) => {
 
     var data = await BankUser.create(req.body);
     const ApiResponse = await axios.post(
-      `http://localhost:5882/api/setpassword/passwordmail`,
+      `https://admin.savajcapital.com/api/setpassword/passwordmail`,
       {
         email: req.body.email,
       }

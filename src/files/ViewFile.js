@@ -932,23 +932,60 @@ function ViewFile() {
     try {
       const updatedStepData = {
         ...open.data,
-        status: "active",
+        status: "active", // Default to active
         statusMessage: "",
       };
 
-      const response = await AxiosInstance.post(
+      // Find the index of the step being reversed
+      const currentIndex = stepData.findIndex(
+        (step) => step.loan_step_id === open.data.loan_step_id
+      );
+
+      // Check for any complete steps after the current step
+      let isCompleteStepFound = false;
+      for (let i = currentIndex + 1; i < stepData.length; i++) {
+        if (stepData[i]?.status === "complete") {
+          isCompleteStepFound = true;
+          break;
+        }
+      }
+
+      // Update status based on the presence of complete steps
+      if (isCompleteStepFound) {
+        updatedStepData.status = "complete";
+      } else {
+        updatedStepData.status = "active";
+      }
+
+      // Update step status
+      const stepUpdateResponse = await AxiosInstance.post(
         `/loan_step/steps/${id}`,
         updatedStepData
       );
 
-      await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "running",
-      });
-      if (response.status === 200) {
+      console.log("Step Status Update Response:", stepUpdateResponse);
+
+      // Update file status based on the step being reversed
+      if (updatedStepData.loan_step_id === "1715348651727") {
+        console.log("Updating File Status...");
+
+        const fileStatusUpdateResponse = await AxiosInstance.put(
+          `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
+          {
+            status:
+              updatedStepData.status === "complete" ? "approved" : "running",
+          }
+        );
+
+        console.log("File Status Update Response:", fileStatusUpdateResponse);
+      }
+
+      // Check if both step and file updates were successful
+      if (stepUpdateResponse.status === 200) {
         fetchStepsData();
         setOpen({ is: false, data: {}, index: "" });
       } else {
-        console.error("Failed to update status.");
+        console.error("Failed to update step status.");
       }
     } catch (error) {
       console.error("Error: ", error.message);
