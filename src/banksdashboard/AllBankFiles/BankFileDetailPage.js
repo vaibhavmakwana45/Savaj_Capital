@@ -1799,7 +1799,7 @@ function BankFileDetailPage() {
                                             )}
                                           </tbody>
                                         </Table>
-                                        {open.data.status !== "complete" && (
+                                        {/* {open.data.status !== "complete" && (
                                           <Button
                                             colorScheme="blue"
                                             style={{
@@ -1814,7 +1814,7 @@ function BankFileDetailPage() {
                                           >
                                             Upload
                                           </Button>
-                                        )}
+                                        )} */}
                                       </React.Fragment>
                                     )}
                                   {fileData?.documents && (
