@@ -33,7 +33,7 @@ import { CheckBox } from "@mui/icons-material";
 import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
-import { FaUndo } from "react-icons/fa";
+import { FaUndo, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import {
   faChevronDown,
   faChevronUp,
@@ -75,6 +75,23 @@ const FileDisplay = ({ groupedFiles }) => {
         console.error("Error downloading file:", error);
       }
     }
+  };
+
+  const handleShareWhatsApp = () => {
+    const url = `${basePath}${selectedFile.file_path}`;
+    const message = `Check out this document: ${url}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  const handleShareEmail = () => {
+    const url = `${basePath}${selectedFile.file_path}`;
+    const subject = "Check out this document";
+    const body = `Here is the link to the document: ${url}`;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, "_blank");
   };
 
   return (
@@ -232,7 +249,7 @@ const FileDisplay = ({ groupedFiles }) => {
               maxWidth: "90%",
             }}
           >
-            <ModalHeader>Download File</ModalHeader>
+            <ModalHeader>Download or Share File</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               {selectedFile.file_path.endsWith(".pdf") ? (
@@ -270,6 +287,18 @@ const FileDisplay = ({ groupedFiles }) => {
               >
                 Download
               </Button>
+              <Button
+                leftIcon={<FaWhatsapp />}
+                colorScheme="whatsapp"
+                mr={3}
+                onClick={handleShareWhatsApp}
+              ></Button>
+              <Button
+                leftIcon={<FaEnvelope />}
+                colorScheme="teal"
+                mr={3}
+                onClick={handleShareEmail}
+              ></Button>
               <Button variant="ghost" onClick={handleCloseModal}>
                 Close
               </Button>
@@ -466,7 +495,7 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response,"response")
+      console.log(response, "response");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -1181,7 +1210,7 @@ function ViewFile() {
                         >
                           <div
                             className="accordion-body"
-                                   style={{
+                            style={{
                               padding: "1rem",
                               overflow: "auto",
                               maxHeight: "300px",
@@ -1589,7 +1618,7 @@ function ViewFile() {
                                         </FormControl>
                                       )
                                     )}
-                                     <div className="mt-4">
+                                    <div className="mt-4">
                                       <strong>Date:</strong>{" "}
                                       {new Date(
                                         guarantor.updatedAt

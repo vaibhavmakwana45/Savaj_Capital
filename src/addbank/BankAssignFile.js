@@ -24,10 +24,6 @@ function BankAssignFile() {
   const textColor = useColorModeValue("gray.700", "white");
   const [files, setFiles] = useState([]);
 
-  const [formData, setFormData] = useState({
-    loan_id: "",
-  });
-
   const fetchFiles = async () => {
     try {
       const response = await AxiosInstance.get("/file_upload/allfiles");
@@ -108,14 +104,6 @@ function BankAssignFile() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedLoan, setSelectedLoan] = useState("");
 
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Assuming you have bankUser and selectedBankId defined somewhere
-
-  const filteredUsers = bankUser.filter((user) =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -142,21 +130,7 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl>
-            {/* <FormControl id="bank_id" mt={4} isRequired>
-              <FormLabel>Select Bank</FormLabel>
-
-              <Select
-                placeholder="Select File"
-                onChange={(e) => setSelectedBankId(e.target.value)}
-              >
-                {banks?.map((bank) => (
-                  <option key={bank.bank_id} value={bank.bank_id}>
-                    {`${bank.bank_name} (${bank.branch_name})`}
-                  </option>
-                ))}
-              </Select>
-            </FormControl> */}
-
+    
             <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
               <input

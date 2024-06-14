@@ -1,25 +1,27 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import $ from "jquery";
-import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Collapse,
-} from "@mui/material";
-import { useHistory } from "react-router-dom";
-import {
-  Button,
-  useColorModeValue,
-  Input,
   Flex,
+  Table,
+  Tbody,
   Text,
+  Th,
+  Thead,
+  Tr,
+  Td,
+  useColorModeValue,
+  Button,
+  IconButton,
+  Input,
+  Select,
+  Collapse,
+  FormControl,
+  FormLabel,
+} from "@chakra-ui/react";
+import $ from "jquery";
+import { MoreVert as MoreVertIcon } from "@material-ui/icons";
+import { Menu, MenuItem } from "@material-ui/core";
+import Loader from "react-js-loader";
+import {
   AlertDialog,
   AlertDialogBody,
   AlertDialogFooter,
@@ -27,167 +29,104 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
 } from "@chakra-ui/react";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  DeleteIcon,
+  EditIcon,
+  AddIcon,
+  ExternalLinkIcon,
+} from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import Card from "components/Card/Card.js";
+import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
-import { IconButton } from "@chakra-ui/react";
+import AxiosInstance from "config/AxiosInstance";
+import { State, City } from "country-state-city";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
-import Loader from "react-js-loader";
-import AxiosInstance from "config/AxiosInstance";
 import { jwtDecode } from "jwt-decode";
-import moment from "moment";
 
-const theme = createTheme();
-
-function Row(props) {
-  const { id, file } = props;
-  const history = useHistory();
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <React.Fragment>
-      <TableRow
-        sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() => props.handleRow("/bankuser/viewbankfile?id=" + id)}
-        style={{ cursor: "pointer" }}
-      >
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={(e) => {
-              setOpen(!open);
-              e.stopPropagation();
-            }}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell align="">{file?.file_id}</TableCell>
-        <TableCell align="">{file?.username}</TableCell>
-        <TableCell align="">{file?.loan}</TableCell>
-        <TableCell align="">{file?.loan_type || "-"}</TableCell>
-        <TableCell align="">
-          {moment(file?.bank_assign_date).format("DD/MM/YYYY hh:mm")}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse
-            in={open}
-            timeout="auto"
-            unmountOnExit
-            style={{ width: "100%" }}
-          >
-            {/* <div
-              className="container-fluid progress-bar-area"
-              style={{ height: "20%" }}
-            >
-              <div className="row  ">
-                <div className="col">
-                  <ul className="progressbar">
-                    <li id="step1" className="complete">
-                      <div className="circle-container">
-                        <a href="#">
-                          <div className="circle-button"></div>
-                        </a>
-                      </div>
-                      Step 1
-                    </li>
-
-                    <li id="step2" className="complete">
-                      <div className="circle-container">
-                        <a href="#">
-                          <div className="circle-button"></div>
-                        </a>
-                      </div>
-                      Step 2
-                    </li>
-
-                    <li id="step3" className="active">
-                      <div className="circle-container">
-                        <a href="#">
-                          <div className="circle-button"></div>
-                        </a>
-                      </div>
-                      Step 3
-                    </li>
-
-                    <li id="step4">
-                      <div className="circle-container">
-                        <a href="#">
-                          <div className="circle-button"></div>
-                        </a>
-                      </div>
-                      Step 4
-                    </li>
-
-                    <li id="step5">
-                      <div className="circle-container">
-                        <a href="#">
-                          <div className="circle-button"></div>
-                        </a>
-                      </div>
-                      Step 5
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div> */}
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
-Row.propTypes = {
-  file: PropTypes.shape({
-    file_id: PropTypes.string.isRequired,
-    loan: PropTypes.string.isRequired,
-    loan_type: PropTypes.string.isRequired,
-    protein: PropTypes.number.isRequired,
-    history: PropTypes.arrayOf(
-      PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        customerId: PropTypes.string.isRequired,
-        date: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
-};
-
-export default function CollapsibleTable() {
+function Files() {
   const [files, setFiles] = useState([]);
-  let menuBg = useColorModeValue("white", "navy.800");
+  const textColor = useColorModeValue("gray.700", "white");
   const [searchTerm, setSearchTerm] = useState("");
-  const filteredUsers =
-    searchTerm.length === 0
-      ? files
-      : files.filter(
-          (user) =>
-            (user.loan &&
-              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.file_id &&
-              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.loan_type &&
-              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-
+  const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
+  const location = useLocation();
+  const { loan, loan_id } = location?.state?.state || {};
+  const [loans, setLoans] = useState([]);
+  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [expandedRow, setExpandedRow] = useState(null);
   const history = useHistory();
 
-  const handleRow = (url) => {
-    history.push(url);
+  const states = State.getStatesOfCountry("IN");
+
+  const cities = selectedState
+    ? City.getCitiesOfState(
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
+    : [];
+
+  const handleStateChange = (event) => {
+    setSelectedState(event.target.value);
+    setSelectedCity("");
   };
+
+  const handleCityChange = (event) => {
+    setSelectedCity(event.target.value);
+  };
+
+  const toggleRowExpansion = (fileId) => {
+    setExpandedRow(expandedRow === fileId ? null : fileId);
+    if (expandedRow !== fileId) {
+      fetchFileData(fileId);
+    }
+  };
+
+  const handleRowClick = (id) => {
+    history.push(`/bankuser/viewbankfile?id=${id}`);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const loanResponse = await AxiosInstance.get("/loan");
+        setLoans(loanResponse.data.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (loan_id) {
+      const timeout = setTimeout(() => {
+        setSelectedLoan(loan_id);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [loan_id, loans, loan]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecorrds] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [accessType, setAccessType] = useState("");
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
-
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -196,6 +135,7 @@ export default function CollapsibleTable() {
           const response = await AxiosInstance.get(
             `/bank_approval/bank_user/${accessType.bankuser_id}`
           );
+          console.log(response, "response");
           setFiles(response.data.data);
           setLoading(false);
         } catch (error) {
@@ -207,7 +147,51 @@ export default function CollapsibleTable() {
     fetchFiles();
   }, [accessType]);
 
-  $(function () {
+  const handleNextPage = () => {
+    const nextPage = currentPage + 1;
+    if (nextPage <= totalPages) {
+      setCurrentPage(nextPage);
+    }
+  };
+
+  const handlePrevPage = () => {
+    const prevPage = currentPage - 1;
+    if (prevPage >= 1) {
+      setCurrentPage(prevPage);
+    }
+  };
+
+  //file percentege count
+  const [fileData, setFileData] = useState([]);
+
+  const fetchFileData = async (fileId) => {
+    try {
+      const response = await AxiosInstance.get(
+        `/file_upload/file-count/${fileId}`
+      );
+
+      setFileData((prevFileData) => ({
+        ...prevFileData,
+        [fileId]: {
+          approvedData: response.data.data.approvedData,
+          pendingData: response.data.data.pendingData,
+        },
+      }));
+    } catch (error) {
+      console.error("Error: ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch data for the initially expanded rows
+    files.forEach((file) => {
+      if (expandedRow === file.file_id) {
+        fetchFileData(file.file_id);
+      }
+    });
+  }, [expandedRow]);
+
+  useEffect(() => {
     $(".progress").each(function () {
       var value = parseInt($(this).attr("data-value"));
       var progressBars = $(this).find(".progress-bar");
@@ -239,139 +223,569 @@ export default function CollapsibleTable() {
             "rotate(" + percentageToDegrees(value - 50) + "deg)"
           );
       }
+      function percentageToDegrees(percentage) {
+        return (percentage / 100) * 360;
+      }
     });
+  }, [files, fetchFileData]);
 
-    function percentageToDegrees(percentage) {
-      return (percentage / 100) * 360;
-    }
-  });
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedFileId, setSelectedFileId] = useState(null);
-  const cancelRef = React.useRef();
-  const deletefile = async (fileId) => {
+  //total loan amount
+  const [totalAmount, setTotalAmount] = useState(null);
+
+  const fetchTotalAmount = async () => {
     try {
-      await AxiosInstance.delete(`/file_upload/${fileId}`);
-      setFiles(files.filter((file) => file.file_id !== fileId));
-      setIsDeleteDialogOpen(false);
-      toast.success("File deleted successfully!");
+      if (loan_id) {
+        const response = await AxiosInstance.get(
+          `/file_upload/amounts/${loan_id}`,
+          {
+            params: {
+              state: selectedState,
+              city: selectedCity,
+            },
+          }
+        );
+        const { totalAmount } = response.data;
+        setTotalAmount(totalAmount);
+      }
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("file not delete");
+      console.error("Error fetching total amount:", error);
     }
   };
-  const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
-  };
-  const handleDelete = (id) => {
-    setSelectedFileId(id);
-    setIsDeleteDialogOpen(true);
-  };
+
+  useEffect(() => {
+    fetchTotalAmount();
+  }, [loan_id, selectedState, selectedCity]);
+
   return (
     <>
-      <div
-        className="card"
-        style={{ marginTop: "120px", borderRadius: "30px" }}
-      >
-        <CardHeader style={{ padding: "30px" }}>
-          <Flex justifyContent="space-between" className="thead">
-            <Text fontSize="xl" fontWeight="bold" className="ttext">
-              All File
-            </Text>
-            <div>
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name"
-                width="250px"
-                marginRight="10px"
-              />
-            </div>
-          </Flex>
-        </CardHeader>
-        <ThemeProvider theme={theme}>
-          {loading ? (
-            <Flex justify="center" align="center" height="100vh">
-              <Loader
-                type="spinner-circle"
-                bgColor={"#b19552"}
-                color={"black"}
-                size={50}
-              />
+      <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+        <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
+          <CardHeader style={{ padding: "10px" }} className="card-main">
+            <Flex justifyContent="space-between" p="4" className="mainnnn">
+              <Text fontSize="xl">
+                {loan ? (
+                  <>
+                    {loan}
+                    {selectedStatusSearch !== "running" &&
+                    selectedStatusSearch !== "rejected" ? (
+                      <Text
+                        as="span"
+                        color="green.400"
+                        fontWeight="bold"
+                        pl="1"
+                      >
+                        <span style={{ color: "black" }}>-</span>{" "}
+                        {totalAmount !== null ? totalAmount : "-"}
+                      </Text>
+                    ) : null}
+                  </>
+                ) : (
+                  <Text
+                    fontSize="xl"
+                    color={textColor}
+                    fontWeight="bold"
+                    className="ttext"
+                  >
+                    All Files
+                  </Text>
+                )}
+              </Text>
             </Flex>
-          ) : (
-            <TableContainer component={Paper}>
-              <Table aria-label="collapsible table">
-                <TableHead style={{ borderBottom: "1px solid red" }}>
-                  <TableRow>
-                    <TableCell />
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      File Id
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Username
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Loan Type
-                    </TableCell>
-                    <TableCell align="" style={{ color: "#BEC7D4" }}>
-                      Assign Date
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredUsers.map((file) => (
-                    <Row
-                      key={file._id}
-                      file={file}
-                      id={file.file_id}
-                      handleRow={handleRow}
-                      handleEditClick={handleEditClick}
-                      handleDelete={handleDelete}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </ThemeProvider>
-        <AlertDialog
-          isOpen={isDeleteDialogOpen}
-          leastDestructiveRef={cancelRef}
-          onClose={() => setIsDeleteDialogOpen(false)}
+            <Flex justifyContent="end" py="1" className="mainnnn">
+              <Flex className="theaddd p-2">
+                <div className="d-flex first-drop-section gap-2">
+                  {!loan && (
+                    <select
+                      className="form-select loan-type-dropdown"
+                      aria-label="Default select example"
+                      value={selectedLoan}
+                      onChange={(e) => setSelectedLoan(e.target.value)}
+                    >
+                      <option value="All Loan Types">Select loan type</option>
+                      {loans.map((loan) => (
+                        <option key={loan.loan_id} value={loan.loan_id}>
+                          {loan.loan}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  <select
+                    class="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    value={selectedState}
+                    onChange={handleStateChange}
+                  >
+                    <option selected>Select State</option>
+                    {states.map((state) => (
+                      <option key={state.isoCode} value={state.name}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    class="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    disabled={!selectedState}
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                  >
+                    <option selected>Select City</option>
+                    {cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div
+                  className="d-flex second-drop-section gap-2 "
+                  style={{ marginLeft: "10px" }}
+                >
+                  <select
+                    class="form-select loan-type-dropdown "
+                    aria-label="Default select example"
+                    value={selectedStatusSearch}
+                    onChange={(e) => setSelectedStatusSearch(e.target.value)}
+                    width="200px"
+                  >
+                    <option selected>Select Status</option>
+                    <option value="running">Running</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by name"
+                    width="250px"
+                    mr="10px"
+                  />
+                  {/* <Button
+                    onClick={() => history.push("/superadmin/addfile")}
+                    className="dynamicImportantStyle"
+                    colorScheme="blue"
+                    style={{
+                      backgroundColor: "#b19552",
+                      color: "white",
+                      width: "150px",
+                    }}
+                  >
+                    Add File
+                  </Button> */}
+                </div>
+              </Flex>
+            </Flex>
+          </CardHeader>
+          <CardBody>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>#</Th>
+                  <Th>File Id</Th>
+                  <Th>Customer</Th>
+                  <Th>Loan</Th>
+                  <Th>File Status</Th>
+                  <Th>Assign Date</Th>
+                  {/* <Th>Document Status</Th> */}
+                  <Th></Th>
+                  <Th>Action</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {loading ? (
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="400px">
+                        <Loader
+                          type="spinner-circle"
+                          bgColor={"#b19552"}
+                          color={"black"}
+                          size={50}
+                        />
+                      </Flex>
+                    </Td>
+                  </Tr>
+                ) : files.length === 0 ? (
+                  <Tr>
+                    <Td colSpan="10">
+                      <Flex justify="center" align="center" height="200px">
+                        <Text
+                          variant="h6"
+                          color="textSecondary"
+                          textAlign="center"
+                        >
+                          No data found
+                        </Text>
+                      </Flex>
+                    </Td>
+                  </Tr>
+                ) : (
+                  files.map((file, index) => (
+                    <React.Fragment key={file.file_id}>
+                      <Tr
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(file.file_id);
+                        }}
+                        cursor="pointer"
+                      >
+                        <Td>{index + 1}</Td>
+                        <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
+                          {file?.file_id}
+                        </Td>
+
+                        <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
+                          {file?.username}
+                        </Td>
+
+                        <Td style={{ fontSize: "14px" }}>{file?.loan}</Td>
+                        <Td>
+                          <div
+                            style={{
+                              color: "white",
+                              backgroundColor:
+                                file?.status === "approved"
+                                  ? "#4CAF50"
+                                  : file?.status === "rejected"
+                                  ? "#F44336"
+                                  : "#FF9C00",
+                              padding: "4px 8px",
+                              borderRadius: "10px",
+                              display: "inline-block",
+                              fontSize: "0.8em",
+                            }}
+                          >
+                            <span>
+                              {file?.status === "approved"
+                                ? `Approved`
+                                : file?.status === "rejected"
+                                ? `Rejected`
+                                : `Running`}
+                            </span>
+
+                            {file?.status_message && (
+                              <div
+                                style={{
+                                  marginTop: "4px",
+                                  fontSize: "0.9em",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                {file.status_message}
+                              </div>
+                            )}
+
+                            {file?.status !== "rejected" && file?.amount && (
+                              <div
+                                style={{
+                                  fontSize: "0.9em",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                Amount: {file.amount}
+                              </div>
+                            )}
+
+                            <div
+                              style={{
+                                fontSize: "0.9em",
+                                color: "#FFFFFF",
+                              }}
+                            >
+                              {file.running_step_name || "CIBIL"}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td style={{ fontSize: "14px" }}>
+                          {file?.bank_assign_date}
+                        </Td>
+                        {/* <Td>
+                          {file.document_percentage != null &&
+                          !isNaN(file.document_percentage) ? (
+                            <div
+                              className="progress"
+                              data-value={Number(file.document_percentage)}
+                            >
+                              <span className="progress-left">
+                                <span className="progress-bar"></span>
+                              </span>
+                              <span className="progress-right">
+                                <span className="progress-bar"></span>
+                              </span>
+                              <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                                <div className="font-weight-bold">
+                                  {Number(file.document_percentage)}
+                                  <sup className="small">%</sup>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="progress" data-value="0">
+                              <span className="progress-left">
+                                <span className="progress-bar"></span>
+                              </span>
+                              <span className="progress-right">
+                                <span className="progress-bar"></span>
+                              </span>
+                              <div className="progress-value w-100 h-100 rounded-circle d-flex align-items-center justify-content-center">
+                                <div className="font-weight-bold">
+                                  0<sup className="small">%</sup>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Td> */}
+                        <Td style={{ fontSize: "14px" }}>
+                          {" "}
+                          {file.loan_id === "1715150207654" ? (
+                            // <Button
+                            //   style={{
+                            //     padding: "5px",
+                            //     borderRadius: "5px",
+                            //     backgroundColor: "#ededed",
+                            //     width: "100%",
+                            //   }}
+                            //   onClick={(e) => {
+                            //     e.stopPropagation(e.target.value);
+                            //     // handleClick(pan_card);
+                            //     href="https://ibdlp.indianbank.in/GSTAdvantage/components/"
+
+                            //   }}
+                            // >
+                            //   IDB
+                            // </Button>
+                            <a
+                              href="https://ibdlp.indianbank.in/GSTAdvantage/"
+                              target="_blank"
+                              onClick={(e) => e.stopPropagation(e.target.value)}
+                            >
+                              IDB
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          <Flex
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Flex style={{ paddingLeft: "10px" }}>
+                              <IconButton
+                                aria-label={
+                                  expandedRow === file.file_id
+                                    ? "Collapse"
+                                    : "Expand"
+                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleRowExpansion(file.file_id);
+                                }}
+                              >
+                                {expandedRow === file.file_id ? (
+                                  <ChevronUpIcon />
+                                ) : (
+                                  <ChevronDownIcon />
+                                )}
+                              </IconButton>
+                            </Flex>
+                          </Flex>
+                        </Td>
+                      </Tr>
+                      <Tr>
+                        <Td
+                          colSpan="10"
+                          p={0}
+                          border="none"
+                          style={{
+                            maxHeight: expandedRow === index ? "none" : "0",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <Collapse
+                            in={expandedRow === file.file_id}
+                            animateOpacity
+                          >
+                            <div
+                              style={{
+                                maxHeight:
+                                  expandedRow === file.file_id
+                                    ? "none"
+                                    : "100%",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {fileData[file.file_id] ? ( // Check if file data is available
+                                <div
+                                  style={{
+                                    maxHeight: "200px",
+                                    overflowY: "auto",
+                                  }}
+                                >
+                                  <Table
+                                    variant="simple"
+                                    bg={useColorModeValue(
+                                      "gray.50",
+                                      "gray.700"
+                                    )}
+                                    style={{ tableLayout: "fixed" }}
+                                  >
+                                    <Thead>
+                                      <Tr>
+                                        <Th>Document Name</Th>
+                                        <Th>Status</Th>
+                                      </Tr>
+                                    </Thead>
+                                    <Tbody style={{ fontSize: "14px" }}>
+                                      {(
+                                        fileData[file.file_id]?.approvedData ||
+                                        []
+                                      ).map((documentRow, index) => (
+                                        <Tr key={index}>
+                                          <Td>
+                                            {" "}
+                                            {documentRow?.name} (
+                                            {documentRow?.title})
+                                          </Td>
+                                          <Td>
+                                            {documentRow?.status ===
+                                            "Uploaded" ? (
+                                              <span
+                                                style={{
+                                                  color: "green",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-circle-check"></i>
+                                                &nbsp;&nbsp;Uploaded
+                                              </span>
+                                            ) : (
+                                              <span
+                                                style={{
+                                                  color: "#FF9C00",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-clock"></i>
+                                                &nbsp;&nbsp;Pending
+                                              </span>
+                                            )}
+                                          </Td>
+                                        </Tr>
+                                      ))}
+                                      {(
+                                        fileData[file.file_id]?.pendingData ||
+                                        []
+                                      ).map((documentRow, index) => (
+                                        <Tr key={index}>
+                                          <Td>
+                                            {documentRow?.name} (
+                                            {documentRow?.title})
+                                          </Td>
+                                          <Td>
+                                            {documentRow?.status ===
+                                            "Uploaded" ? (
+                                              <span
+                                                style={{
+                                                  color: "green",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-circle-check"></i>
+                                                &nbsp;&nbsp;Uploaded
+                                              </span>
+                                            ) : (
+                                              <span
+                                                style={{
+                                                  color: "#FF9C00",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                <i className="fa-regular fa-clock"></i>
+                                                &nbsp;&nbsp;Pending
+                                              </span>
+                                            )}
+                                          </Td>
+                                        </Tr>
+                                      ))}
+                                    </Tbody>
+                                  </Table>
+                                </div>
+                              ) : (
+                                <Loader
+                                  type="spinner-circle"
+                                  bgColor={"#b19552"}
+                                  color={"black"}
+                                  size={50}
+                                />
+                              )}
+                            </div>
+                          </Collapse>
+                        </Td>
+                      </Tr>
+                    </React.Fragment>
+                  ))
+                )}
+              </Tbody>
+            </Table>
+          </CardBody>
+        </Card>
+      </Flex>
+      <Flex
+        justifyContent="flex-end"
+        alignItems="center"
+        p="4"
+        borderBottom="1px solid #ccc"
+      >
+        <Text mr="4" fontSize="sm">
+          Total Records: {totalRecords}
+        </Text>
+        <Text mr="2" fontSize="sm">
+          Rows per page:
+        </Text>
+        <Select
+          value={itemsPerPage}
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+          mr="2"
+          width="100px"
+          fontSize="sm"
         >
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                Delete File
-              </AlertDialogHeader>
-
-              <AlertDialogBody>
-                Are you sure? You can't undo this action afterwards.
-              </AlertDialogBody>
-
-              <AlertDialogFooter>
-                <Button
-                  ref={cancelRef}
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  colorScheme="red"
-                  onClick={() => deletefile(selectedFileId)}
-                  ml={3}
-                >
-                  Delete
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-      </div>
+          {[10, 20, 50].map((perPage) => (
+            <option key={perPage} value={perPage}>
+              {perPage}
+            </option>
+          ))}
+        </Select>
+        <Text mr="4" fontSize="sm">
+          Page {currentPage} of {totalPages}
+        </Text>
+        <IconButton
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          aria-label="Previous Page"
+          icon={<KeyboardArrowUpIcon />}
+          mr="2"
+          variant="outline"
+          colorScheme="gray"
+          size="sm"
+        />
+        <IconButton
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          aria-label="Next Page"
+          icon={<KeyboardArrowDownIcon />}
+          variant="outline"
+          colorScheme="gray"
+          size="sm"
+        />
+      </Flex>
       <Toaster />
     </>
   );
 }
+
+export default Files;

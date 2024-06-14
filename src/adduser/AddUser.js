@@ -53,6 +53,7 @@ function AddUser(props) {
     businessnumber: "",
     businessaddress: "",
     businessextranumber: "",
+    jobaddress: "",
   });
 
   const getData = async () => {
@@ -394,6 +395,19 @@ function AddUser(props) {
                 </>
               )}
 
+              {userType === "salaried" && (
+                <>
+                  <FormControl id="businessaddress" mt={4} isRequired>
+                    <FormLabel>Job Address</FormLabel>
+                    <Input
+                      name="jobaddress"
+                      onChange={handleChange}
+                      value={formData.jobaddress}
+                      placeholder="Enter job address"
+                    />
+                  </FormControl>
+                </>
+              )}
               <FormControl id="dob" mt={4} isRequired>
                 <FormLabel>DOB</FormLabel>
                 <Input

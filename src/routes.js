@@ -369,11 +369,11 @@ var dashRoutes = [
         name: "Add Bank User",
         layout: "/superadmin",
       },
-      {
-        path: "/bankassignfile",
-        name: "Assign File",
-        layout: "/superadmin",
-      },
+      // {
+      //   path: "/bankassignfile",
+      //   name: "Assign File",
+      //   layout: "/superadmin",
+      // },
     ],
   },
   {

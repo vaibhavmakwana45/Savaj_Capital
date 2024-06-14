@@ -478,13 +478,16 @@ router.put("/edituser/:userId", async (req, res) => {
 router.get("/bankuser/:bank_id", async (req, res) => {
   try {
     const bank_id = req.params.bank_id;
+
     const bankUser = await BankUser.findOne({ bank_id });
+
     const bankData = await BankSchema.findOne({ bank_id });
 
-    if (!bankUser) {
-      return res
-        .status(200)
-        .send({ statusCode: 201, message: "User not found" });
+    if (!bankData) {
+      return res.status(200).json({
+        success: false,
+        message: "Bank data not found",
+      });
     }
 
     const bankDetails = {
@@ -498,12 +501,15 @@ router.get("/bankuser/:bank_id", async (req, res) => {
       bank_id: bankData.bank_id,
     };
 
-    const userDetails = {
-      email: bankUser.email,
-      password: bankUser.password,
-      bankuser_id: bankUser.bankuser_id,
-      bank_id: bankUser.bank_id,
-    };
+    let userDetails = {};
+    if (bankUser) {
+      userDetails = {
+        email: bankUser.email,
+        password: bankUser.password,
+        bankuser_id: bankUser.bankuser_id,
+        bank_id: bankUser.bank_id,
+      };
+    }
 
     res.json({
       success: true,
@@ -511,10 +517,11 @@ router.get("/bankuser/:bank_id", async (req, res) => {
       userDetails,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching bank user or bank data:", error);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 });

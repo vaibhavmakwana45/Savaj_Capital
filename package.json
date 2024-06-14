@@ -40,6 +40,7 @@
 		"filepond-plugin-image-preview": "^4.6.12",
 		"fix": "^0.0.6",
 		"framer-motion": "^4.1.17",
+		"jspdf": "^2.5.1",
 		"jwt-decode": "^4.0.0",
 		"match-sorter": "6.3.0",
 		"moment": "2.29.1",

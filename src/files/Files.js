@@ -49,6 +49,9 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
+import upArrow from "../assets/svg/uparrow.svg";
+import downArrow from "../assets/svg/downarrow.svg";
+import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 
 function Files() {
   const [files, setFiles] = useState([]);
@@ -281,6 +284,7 @@ function Files() {
     setAnchorEl(event.currentTarget);
     setSelectedFileId(fileId);
     setSelectedCityName(city);
+    setSelectedBankCityName(city);
     setSelectedLoanId(loanId);
   };
 
@@ -555,6 +559,103 @@ function Files() {
       Array.isArray(user.loan_ids) && user.loan_ids.includes(selectedLoanId)
   );
 
+  //Bank Assign
+  const [selectedBankCityName, setSelectedBankCityName] = useState("");
+  const [bankFiles, setBankFiles] = useState([]);
+  const [selectedBankId, setSelectedBankId] = useState(null);
+  const [bankUser, setBankUser] = useState([]);
+  const [selectedBankUserId, setSelectedBankUserId] = useState(null);
+  const [selectedFileBankId, setSelectedFileBankId] = useState(null);
+  const [filteredData, setFilteredData] = useState("");
+  const [filterOpen, setFilterOpen] = useState("");
+  const filterToggle = () => setFilterOpen(!filterOpen);
+  const [selectedBankLoan, setSelectedBankLoan] = useState("");
+  const [isBankAssignDialogOpen, setIsBankAssignDialogOpen] = useState(false);
+
+  const handleBankAssign = (id, city, loanId) => {
+    const selectedFile = allFiles.find((file) => file.file_id === id);
+    if (selectedFile) {
+      setSelectedFileBankId(selectedFile.file_id);
+      setSelectedLoanId(loanId);
+      setSelectedBankCityName(city);
+      setIsBankAssignDialogOpen(true);
+    }
+  };
+  const fetchBankFiles = async () => {
+    try {
+      const response = await AxiosInstance.get("/file_upload/allfiles");
+      setBankFiles(response.data.data);
+      if (response.data.data.length > 0) {
+        setSelectedFileBankId(response.data.data[0].file_id);
+      }
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBankFiles();
+  }, []);
+  const [banks, setBanks] = useState([]);
+
+  const fetchBanks = async () => {
+    try {
+      const response = await AxiosInstance.get("/addbankuser");
+      console.log("Fetched banks:", response.data.data); // Check fetched data
+      setBanks(response.data.data);
+    } catch (error) {
+      console.error("Error fetching banks:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBanks();
+  }, []); // Fetch banks on component mount
+
+  useEffect(() => {
+    const fetchBankUser = async () => {
+      if (!selectedBankId) {
+        setBankUser([]);
+        return;
+      }
+      try {
+        const response = await AxiosInstance.get(
+          `/bank_user/${selectedBankId}`
+        );
+        setBankUser(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching branch users:", error);
+      }
+    };
+
+    fetchBankUser();
+  }, [selectedBankId]);
+
+  const handleSubmitBankData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        file_id: selectedFileBankId,
+        bank_id: selectedBankId,
+        bankuser_id: selectedBankUserId,
+      };
+
+      await AxiosInstance.post("/bank_approval", payload);
+
+      history.push("/superadmin/bank");
+      toast.success("All data submitted successfully!");
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      toast.error("Submission failed! Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  console.log("banks:", banks);
+  console.log("selectedBankCityName:", selectedBankCityName);
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -765,45 +866,38 @@ function Files() {
                                 ? `Rejected`
                                 : `Running`}
                             </span>
+
                             {file?.status_message && (
-                              <>
-                                <br />
-                                <span
-                                  style={{
-                                    display: "block",
-                                    marginTop: "4px",
-                                    fontSize: "0.9em",
-                                    color: "#FFFFFF",
-                                  }}
-                                >
-                                  {file.status_message}
-                                </span>
-                              </>
-                            )}
-                            {file?.status !== "rejected" && file?.amount && (
-                              <>
-                                <br />
-                                <span
-                                  style={{
-                                    display: "block",
-                                    fontSize: "0.9em",
-                                    color: "#FFFFFF",
-                                  }}
-                                >
-                                  Amount: {file.amount}
-                                </span>
-                              </>
+                              <div
+                                style={{
+                                  marginTop: "4px",
+                                  fontSize: "0.9em",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                {file.status_message}
+                              </div>
                             )}
 
-                            <span
+                            {file?.status !== "rejected" && file?.amount && (
+                              <div
+                                style={{
+                                  fontSize: "0.9em",
+                                  color: "#FFFFFF",
+                                }}
+                              >
+                                Amount: {file.amount}
+                              </div>
+                            )}
+
+                            <div
                               style={{
-                                display: "block",
                                 fontSize: "0.9em",
                                 color: "#FFFFFF",
                               }}
                             >
-                              {file.last_completed_step || "CIBIL"}
-                            </span>
+                              {file.running_step_name || "CIBIL"}
+                            </div>
                           </div>
                         </Td>
 
@@ -946,7 +1040,23 @@ function Files() {
                                   <ExternalLinkIcon
                                     style={{ marginRight: "5px" }}
                                   />
-                                  Assign
+                                  Branch Assign
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleBankAssign(
+                                      selectedFileId,
+                                      selectedBankCityName,
+                                      selectedLoanId
+                                    );
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <ExternalLinkIcon
+                                    style={{ marginRight: "5px" }}
+                                  />
+                                  Bank Assign
                                 </MenuItem>
                               </Menu>
                             </Flex>
@@ -1327,6 +1437,143 @@ function Files() {
                 >
                   Cancel
                 </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        <AlertDialog
+          isOpen={isBankAssignDialogOpen}
+          leastDestructiveRef={cancelRefAssign}
+          onClose={() => {
+            setIsBankAssignDialogOpen(false);
+            setSelectedFileBankId(null);
+            setSelectedBankId(null);
+            setSelectedBankUserId(null);
+            setSelectedBankCityName("");
+            // setSelectedLoanId("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Assign File
+              </AlertDialogHeader>
+              <AlertDialogBody>
+                <FormControl id="file_id" mt={4} isRequired>
+                  <FormLabel>File</FormLabel>
+                  <Select
+                    placeholder="Select File"
+                    value={selectedFileBankId}
+                    isDisabled={selectedFileBankId}
+                    onChange={(e) => setSelectedFileBankId(e.target.value)}
+                  >
+                    {bankFiles?.map((file) => (
+                      <option key={file.file_id} value={file.file_id}>
+                        {`${file.file_id}`}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl id="bank_id" mt={4} isRequired>
+                  <FormLabel>Select Branch</FormLabel>
+                  {banks.length > 0 ? (
+                    <Select
+                      placeholder="Select Branch"
+                      onChange={(e) => setSelectedBankId(e.target.value)}
+                    >
+                      {banks
+                        .filter((bank) => bank.city === selectedBankCityName)
+                        .map((bank) => (
+                          <option key={bank.bank_id} value={bank.bank_id}>
+                            {`${bank.bank_name} (${bank.city})`}
+                          </option>
+                        ))}
+                    </Select>
+                  ) : (
+                    <Text>No branches available for this city.</Text>
+                  )}
+                </FormControl>
+                {/* <div className="w-100 my-3">
+                  <FormLabel>Select Bank</FormLabel>
+                  {bankUser.length > 0 ? (
+                      <Select
+                        placeholder="Select User"
+                        onChange={(e) => setSelectedBankUserId(e.target.value)}
+                      >
+                  {banks
+                    .filter((bank) => bank.city === selectedBankCityName)
+                    .map((bank) => (
+                      <option key={bank.bank_id} value={bank.bank_id}>
+                        {`${bank.bank_name} (${bank.city})`}
+                      </option>
+                    ))}
+                  ) : (
+                      <Text>No users available for this branch.</Text>
+                    )}
+                </div> */}
+
+                {selectedBankId && (
+                  <FormControl id="bankuser_id" mt={4} isRequired>
+                    <FormLabel>Bank User</FormLabel>
+                    {bankUser.length > 0 ? (
+                      <Select
+                        placeholder="Select User"
+                        onChange={(e) => setSelectedBankUserId(e.target.value)}
+                      >
+                        {bankUser.map((user) => (
+                          <option
+                            key={user.bankuser_id}
+                            value={user.bankuser_id}
+                          >
+                            {`${user.email}`}
+                          </option>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Text>No users available for this branch.</Text>
+                    )}
+                  </FormControl>
+                )}
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <div>
+                  <Button
+                    mt={4}
+                    colorScheme="teal"
+                    onClick={handleSubmitBankData}
+                    isLoading={loading}
+                    loadingText="Submitting"
+                    style={{
+                      backgroundColor: "#b19552",
+                      color: "#fff",
+                      marginTop: 40,
+                    }}
+                  >
+                    Assign
+                  </Button>
+
+                  <Button
+                    mt={4}
+                    style={{
+                      backgroundColor: "#414650",
+                      color: "#fff",
+                      marginTop: 40,
+                      marginLeft: 8,
+                    }}
+                    onClick={() => {
+                      setIsBankAssignDialogOpen(false);
+                      setSelectedFileBankId(null);
+                      setSelectedBankId(null);
+                      setSelectedBankUserId(null);
+                      setSelectedBankCityName("");
+                      // setSelectedLoanId("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>

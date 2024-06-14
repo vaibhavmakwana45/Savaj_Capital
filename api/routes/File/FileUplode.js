@@ -64,6 +64,8 @@ router.post("/", async (req, res) => {
   }
 });
 
+const axios = require("axios");
+
 router.get("/", async (req, res) => {
   try {
     const currentPage = parseInt(req.query.page) || 1;
@@ -116,6 +118,7 @@ router.get("/", async (req, res) => {
     }
 
     const totalDataCount = await File_Uplode.countDocuments(matchStage);
+
     const pipeline = [
       { $match: matchStage },
       { $sort: { updatedAt: -1 } },
@@ -137,7 +140,6 @@ router.get("/", async (req, res) => {
       loanData,
       loanTypeData,
       completeSteps,
-      amountData,
       documentData,
       countData,
     ] = await Promise.all([
@@ -153,9 +155,6 @@ router.get("/", async (req, res) => {
       ),
       Compelete_Step.find({ file_id: { $in: fileIds } }).select(
         "file_id statusMessage loan_step status inputs"
-      ),
-      Compelete_Step.find({ loan_step_id: "1715348798228" }).select(
-        "file_id inputs"
       ),
       Promise.all(
         data.map(async (item) => {
@@ -230,13 +229,36 @@ router.get("/", async (req, res) => {
       }
     });
 
-    const lastCompletedStepMap = new Map();
+    const stepsPromises = data.map(async (item) => {
+      try {
+        const stepsResponse = await axios.get(
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+        );
+        const stepsData = stepsResponse.data.data;
 
-    completeSteps.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        const rejectedStep = stepsData.find(
+          (step) => step.status === "rejected"
+        );
+        const activeStep = stepsData.find((step) => step.status === "active");
 
-    completeSteps.forEach((step) => {
-      lastCompletedStepMap.set(step.file_id, step.loan_step);
+        if (rejectedStep) {
+          item.running_step_name = rejectedStep.loan_step;
+        } else if (activeStep) {
+          item.running_step_name = activeStep.loan_step;
+        } else {
+          // If no rejected or active step, fallback to the step with highest index
+          const lastIndex = stepsData.length - 1;
+          item.running_step_name = stepsData[lastIndex].loan_step;
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching steps for file_id ${item.file_id}:`,
+          error.message
+        );
+      }
     });
+
+    await Promise.all(stepsPromises);
 
     for (const item of data) {
       item.branchuser_full_name =
@@ -250,16 +272,6 @@ router.get("/", async (req, res) => {
       item.loan_type = loanTypeMap.get(item.loantype_id)?.loan_type || "";
       item.status_message = statusMessageMap.get(item.file_id) || "";
       item.amount = amountMap.get(item.file_id) || "";
-      item.last_completed_step = lastCompletedStepMap.get(item.file_id) || "";
-      const loanDocs =
-        documentData.find((dd) => dd.itemId === item._id)?.docs || [];
-      item.loan_document_ids = loanDocs.map((doc) => ({
-        loan_document_id: doc.loan_document_id,
-        loan_document: doc?.loan_document,
-        is_uploaded: item.documents.some(
-          (d) => d.loan_document_id === doc.loan_document_id
-        ),
-      }));
 
       const countInfo = countData.find((info) => info.file_id === item.file_id);
       if (countInfo) {
@@ -283,6 +295,73 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
+router.get("/get_all_documents/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const data = await File_Uplode.findOne({ file_id });
+    const loanIds = data.documents.map((item) => ({
+      loan_document_id: item.loan_document_id,
+      title_id: item.title_id,
+    }));
+
+    const { loan_id, loantype_id } = data;
+    const data2 = await Loan_Documents.find({ loan_id, loantype_id });
+    const loanDocumentIds = data2.flatMap((item) =>
+      item.document_ids.map((loan_document_id) => ({
+        loan_document_id,
+        title_id: item.title_id,
+      }))
+    );
+
+    const commonIds = loanIds.filter((id) =>
+      loanDocumentIds.some(
+        (docId) =>
+          docId.loan_document_id === id.loan_document_id &&
+          docId.title_id === id.title_id
+      )
+    );
+
+    const differentIds = loanDocumentIds.filter(
+      (id) =>
+        !loanIds.some(
+          (docId) =>
+            docId.loan_document_id === id.loan_document_id &&
+            docId.title_id === id.title_id
+        )
+    );
+
+    const pendingObject = [];
+
+    for (const item of differentIds) {
+      const document = await AddDocuments.findOne({
+        document_id: item.loan_document_id,
+      });
+      pendingObject.push({
+        name: document.document,
+      });
+    }
+
+    const status =
+      pendingObject.length > 0
+        ? "active"
+        : commonIds.length === loanIds.length
+        ? "complete"
+        : "active";
+
+    res.json({
+      statusCode: 200,
+      status,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
 router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
   try {
     const { state, city, loan_ids } = req.params;

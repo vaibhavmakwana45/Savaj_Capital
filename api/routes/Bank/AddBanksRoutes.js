@@ -126,26 +126,43 @@ router.put("/:bank_id", async (req, res) => {
   const updates = req.body;
 
   try {
-    // Update password if provided
-    // if (updates.password) {
-    //   updates.password = await encrypt(updates.password);
-    // }
+    // Ensure only valid fields are updated
+    const allowedUpdates = [
+      "bank_name",
+      "country",
+      "state_code",
+      "country_code",
+      "state",
+      "city",
+      "branch_name",
+    ];
+    const updatesKeys = Object.keys(updates);
+    const isValidOperation = updatesKeys.every((update) =>
+      allowedUpdates.includes(update)
+    );
 
-    // Extract bankDetails and userDetails from updates object
-    const { bankDetails } = updates;
-
-    if (!req.body.password) {
-      delete req.body.password;
+    if (!isValidOperation) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid updates!",
+      });
     }
 
-    // Update bankDetails data in Bank collection
+    // Update bank details in the Bank collection
     const updatedBank = await Bank.findOneAndUpdate(
       { bank_id: bank_id },
-      bankDetails,
+      updates,
       { new: true, runValidators: true }
     );
 
-    // Send response with updated user and bank data
+    if (!updatedBank) {
+      return res.status(404).json({
+        success: false,
+        message: "Bank not found",
+      });
+    }
+
+    // Send response with updated bank data
     res.json({
       success: true,
       message: "Bank data updated successfully",
@@ -156,6 +173,7 @@ router.put("/:bank_id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message, // Optionally send the error message for debugging
     });
   }
 });

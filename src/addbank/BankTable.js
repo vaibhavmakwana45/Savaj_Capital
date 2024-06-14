@@ -1,10 +1,4 @@
-import {
-  Flex,
-  Text,
-  useColorModeValue,
-  Button,
-  Input,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button, Input } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -61,7 +55,6 @@ function Tables() {
       history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
@@ -69,13 +62,17 @@ function Tables() {
       history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
-    history.push("/superadmin/addbankuser");
   };
 
   const navigateToAssignFile = () => {
     history.push("/superadmin/bankassignfile");
   };
-
+  const navigateToAddBank = () => {
+    history.push("/superadmin/addbank");
+  };
+  const navigateToAddBankUser = () => {
+    history.push("/superadmin/addbankuser");
+  };
   const allHeaders = [
     "Index",
     "Bank Name",
@@ -159,20 +156,27 @@ function Tables() {
                   width="250px"
                   marginRight="10px"
                 />
-                {/* <Button
-                  onClick={navigateToAnotherPage}
+                <Button
+                  onClick={navigateToAddBank}
                   colorScheme="blue"
-                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginRight: "10px",
+                  }}
                 >
                   Add Bank
-                </Button>{" "} */}
-                {/* <Button
-                  onClick={navigateToAnotherPageUser}
+                </Button>
+                <Button
+                  onClick={navigateToAddBankUser}
                   colorScheme="blue"
-                  style={{ marginRight: "10px", marginBottom: "10px" }}
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                  }}
                 >
                   Add Bank User
-                </Button> */}
+                </Button>
                 {/* <Menu>
                   <MenuButton>
                     <Button

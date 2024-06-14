@@ -652,6 +652,75 @@ router.get("/get_steps/:file_id", async (req, res) => {
   }
 });
 
+router.get("/get_all_steps/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+
+    // Fetch file and loan details concurrently
+    const [file, loan] = await Promise.all([
+      File_Uplode.findOne({ file_id }).lean(),
+      File_Uplode.findOne({ file_id }).then((file) =>
+        Loan.findOne({ loan_id: file.loan_id }).lean()
+      ),
+    ]);
+
+    if (!file || !loan) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "File or Loan not found",
+      });
+    }
+
+    const steps = await Promise.all(
+      loan.loan_step_id.map(async (loan_step_id) => {
+        const stepData = await Loan_Step.findOne({ loan_step_id }).lean();
+        if (!stepData) return null;
+
+        if (loan_step_id === "1715348523661") {
+          try {
+            await axios.get(
+              `https://admin.savajcapital.com/api/file_upload/get_all_documents/${file_id}`
+            );
+            return { loan_step: stepData.loan_step, status: "complete" };
+          } catch (error) {
+            console.error("Error fetching documents: ", error.message);
+            return { loan_step: stepData.loan_step, status: "error" };
+          }
+        } else {
+          const completedStep = await Compelete_Step.findOne({
+            loan_step_id,
+            file_id,
+            user_id: file.user_id,
+          }).lean();
+
+          let status = "active";
+          if (completedStep) {
+            status = completedStep.status;
+          }
+
+          return { loan_step: stepData.loan_step, status };
+        }
+      })
+    );
+
+    // Filter out null values from steps
+    const filteredSteps = steps.filter((step) => step !== null);
+
+    // Send response with steps data
+    res.json({
+      statusCode: 200,
+      data: filteredSteps,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    // Handle any errors
+    res.status(500).json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
 router.post("/steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
