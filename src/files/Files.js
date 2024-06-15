@@ -71,9 +71,9 @@ function Files() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-        "IN",
-        states.find((state) => state.name === selectedState)?.isoCode
-      )
+      "IN",
+      states.find((state) => state.name === selectedState)?.isoCode
+    )
     : [];
 
   const handleStateChange = (event) => {
@@ -136,8 +136,8 @@ function Files() {
               ? ""
               : loan_id
             : selectedLoan === "All Loan Types"
-            ? ""
-            : selectedLoan,
+              ? ""
+              : selectedLoan,
           selectedStatus: selectedStatusSearch,
           selectedState,
           selectedCity,
@@ -571,6 +571,7 @@ function Files() {
   const filterToggle = () => setFilterOpen(!filterOpen);
   const [selectedBankLoan, setSelectedBankLoan] = useState("");
   const [isBankAssignDialogOpen, setIsBankAssignDialogOpen] = useState(false);
+  const [selectedBankUserFileCount, setSelectedBankUserFileCount] = useState(0);
 
   const handleBankAssign = (id, city, loanId) => {
     const selectedFile = allFiles.find((file) => file.file_id === id);
@@ -623,6 +624,7 @@ function Files() {
           `/bank_user/${selectedBankId}`
         );
         setBankUser(response.data.data || []);
+        console.log(response.data.data, "responseee");
         setLoading(false);
       } catch (error) {
         console.error("Error fetching branch users:", error);
@@ -643,19 +645,27 @@ function Files() {
         bankuser_id: selectedBankUserId,
       };
 
-      await AxiosInstance.post("/bank_approval", payload);
+      const response = await AxiosInstance.post("/bank_approval", payload);
 
-      history.push("/superadmin/bank");
-      toast.success("All data submitted successfully!");
+      if (response.data.success) {
+        history.push("/superadmin/bank");
+        toast.success("All data submitted successfully!");
+      } else {
+        toast.error(
+          response.data.message || "Submission failed! Please try again."
+        );
+      }
     } catch (error) {
       console.error("Error while uploading files or submitting data:", error);
-      toast.error("Submission failed! Please try again.");
+      console.error("Error response from server:", error.response);
+      toast.error(
+        error.response?.data?.message || "Submission failed! Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
-  console.log("banks:", banks);
-  console.log("selectedBankCityName:", selectedBankCityName);
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -667,7 +677,7 @@ function Files() {
                   <>
                     {loan}
                     {selectedStatusSearch !== "running" &&
-                    selectedStatusSearch !== "rejected" ? (
+                      selectedStatusSearch !== "rejected" ? (
                       <Text
                         as="span"
                         color="green.400"
@@ -851,8 +861,8 @@ function Files() {
                                 file?.status === "approved"
                                   ? "#4CAF50"
                                   : file?.status === "rejected"
-                                  ? "#F44336"
-                                  : "#FF9C00",
+                                    ? "#F44336"
+                                    : "#FF9C00",
                               padding: "4px 8px",
                               borderRadius: "10px",
                               display: "inline-block",
@@ -863,8 +873,8 @@ function Files() {
                               {file?.status === "approved"
                                 ? `Approved`
                                 : file?.status === "rejected"
-                                ? `Rejected`
-                                : `Running`}
+                                  ? `Rejected`
+                                  : `Running`}
                             </span>
 
                             {file?.status_message && (
@@ -903,7 +913,7 @@ function Files() {
 
                         <Td>
                           {file.document_percentage != null &&
-                          !isNaN(file.document_percentage) ? (
+                            !isNaN(file.document_percentage) ? (
                             <div
                               className="progress"
                               data-value={Number(file.document_percentage)}
@@ -1139,7 +1149,7 @@ function Files() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                            "Uploaded" ? (
+                                              "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1174,7 +1184,7 @@ function Files() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                            "Uploaded" ? (
+                                              "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1486,7 +1496,7 @@ function Files() {
                         .filter((bank) => bank.city === selectedBankCityName)
                         .map((bank) => (
                           <option key={bank.bank_id} value={bank.bank_id}>
-                            {`${bank.bank_name} (${bank.city})`}
+                            {`${bank.bank_name} (${bank.branch_name})`}
                           </option>
                         ))}
                     </Select>
@@ -1517,19 +1527,38 @@ function Files() {
                   <FormControl id="bankuser_id" mt={4} isRequired>
                     <FormLabel>Bank User</FormLabel>
                     {bankUser.length > 0 ? (
-                      <Select
-                        placeholder="Select User"
-                        onChange={(e) => setSelectedBankUserId(e.target.value)}
-                      >
-                        {bankUser.map((user) => (
-                          <option
-                            key={user.bankuser_id}
-                            value={user.bankuser_id}
+                      <>
+                        <Select
+                          placeholder="Select User"
+                          onChange={(e) => {
+                            setSelectedBankUserId(e.target.value);
+                            const user = bankUser.find(
+                              (u) => u.bankuser_id === e.target.value
+                            );
+                            if (user) {
+                              setSelectedBankUserFileCount(
+                                user.assigned_file_count || 0
+                              );
+                            }
+                          }}
+                        >
+                          {bankUser.map((user) => (
+                            <option
+                              key={user.bankuser_id}
+                              value={user.bankuser_id}
+                            >
+                              {user.email}
+                            </option>
+                          ))}
+                        </Select>
+                        {selectedBankUserId && (
+                          <Text
+                            style={{ paddingTop: "20px", fontWeight: "bold" }}
                           >
-                            {`${user.email}`}
-                          </option>
-                        ))}
-                      </Select>
+                            Assigned Files Count: {selectedBankUserFileCount}
+                          </Text>
+                        )}
+                      </>
                     ) : (
                       <Text>No users available for this branch.</Text>
                     )}

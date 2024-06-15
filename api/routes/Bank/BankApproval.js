@@ -11,10 +11,21 @@ const Loan_Type = require("../../models/Loan/Loan_Type");
 
 router.post("/", async (req, res) => {
   try {
-    // let findBranchName = await Bank.findOne({
-    //   bank_name: req.body.bank_name,
-    // });
-    // if (!findBranchName) {
+    const { file_id, bank_id, bankuser_id } = req.body;
+
+    const existingAssignment = await BankApproval.findOne({
+      file_id,
+      bank_id,
+      bankuser_id,
+    });
+
+    if (existingAssignment) {
+      return res.status(400).json({
+        success: false,
+        message: "This file is already assigned to this user in this branch.",
+      });
+    }
+
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
 
@@ -29,12 +40,6 @@ router.post("/", async (req, res) => {
       data: data,
       message: "Documents assigned to the bank successfully.",
     });
-    // } else {
-    //   res.json({
-    //     statusCode: 201,
-    //     message: `${req.body.branch_name} Name Already Added`,
-    //   });
-    // }
   } catch (error) {
     res.json({
       statusCode: 500,

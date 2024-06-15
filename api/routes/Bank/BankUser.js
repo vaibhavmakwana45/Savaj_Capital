@@ -220,7 +220,19 @@ router.get("/:bank_id", async (req, res) => {
     const bank = await Bank.findOne({
       bank_id: bank_id,
     });
+    data = await Promise.all(
+      data.map(async (user) => {
+        const count = await BankApproval.countDocuments({
+          bankuser_id: user.bankuser_id,
+        });
+        return { ...user, assigned_file_count: count };
+      })
+    );
 
+    const totalCount = data.reduce(
+      (acc, user) => acc + (user.assigned_file_count || 0),
+      0
+    );
     const count = data.length;
 
     res.json({
@@ -228,6 +240,7 @@ router.get("/:bank_id", async (req, res) => {
       bank,
       data: data,
       count: count,
+      totalCount,
       message: "Read All Request",
     });
   } catch (error) {
