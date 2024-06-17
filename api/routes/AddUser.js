@@ -599,6 +599,10 @@ router.get("/bankuser/by-user-id/:bankuser_id", async (req, res) => {
       mobile: bankUser.mobile,
       adhar: bankUser.adhar,
       emergancy_contact: bankUser.emergancy_contact,
+      state_code: bankUser.state_code,
+      country_code: bankUser.country_code,
+      state: bankUser.state,
+      city: bankUser.city,
     };
 
     res.json({

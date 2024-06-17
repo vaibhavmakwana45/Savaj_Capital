@@ -386,7 +386,7 @@ export default function Dashboard() {
             style={{ cursor: "pointer", border: "1px solid black" }}
             onClick={() =>
               history.push(`/superadmin/filetable`, {
-                state: { loan: loan.loan, loan_id: loan.loan_id },
+                state: { loan: loan.loan, loan_id: loan.loan_id ,loantype_id : loan.loantype_id  },
               })
             }
           >

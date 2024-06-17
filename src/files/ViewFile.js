@@ -1187,11 +1187,7 @@ function ViewFile() {
                                                 type="file"
                                                 required={input.is_required}
                                                 onChange={(e) =>
-                                                  handleChange(
-                                                    e,
-                                                    inputIndex,
-                                                    dataIndex
-                                                  )
+                                                  handleChange(e, index)
                                                 }
                                               />
                                               {input.value.endsWith(".pdf") ? (
@@ -1229,7 +1225,9 @@ function ViewFile() {
                                                     />
                                                   </div>
                                                 </div>
-                                              ) : (
+                                              ) : input.value.match(
+                                                  /\.(jpeg|jpg|gif|png)$/
+                                                ) ? (
                                                 <img
                                                   src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                   alt="Uploaded"
@@ -1248,6 +1246,11 @@ function ViewFile() {
                                                     })
                                                   }
                                                 />
+                                              ) : (
+                                                <div>
+                                                  No preview available for this
+                                                  file type
+                                                </div>
                                               )}
                                             </div>
                                           )
@@ -1443,7 +1446,9 @@ function ViewFile() {
                                                       />
                                                     </div>
                                                   </div>
-                                                ) : (
+                                                ) : input.value.match(
+                                                    /\.(jpeg|jpg|gif|png)$/
+                                                  ) ? (
                                                   <img
                                                     src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                     alt="Uploaded"
@@ -1462,6 +1467,11 @@ function ViewFile() {
                                                       })
                                                     }
                                                   />
+                                                ) : (
+                                                  <div>
+                                                    No preview available for
+                                                    this file type
+                                                  </div>
                                                 )}
                                               </div>
                                             )

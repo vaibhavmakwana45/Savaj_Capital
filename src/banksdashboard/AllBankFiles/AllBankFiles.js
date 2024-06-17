@@ -51,7 +51,7 @@ import {
 } from "@mui/icons-material";
 import { jwtDecode } from "jwt-decode";
 
-function Files() {
+function AllBankFiles() {
   const [files, setFiles] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,7 +82,6 @@ function Files() {
   const handleCityChange = (event) => {
     setSelectedCity(event.target.value);
   };
-
   const toggleRowExpansion = (fileId) => {
     setExpandedRow(expandedRow === fileId ? null : fileId);
     if (expandedRow !== fileId) {
@@ -128,24 +127,59 @@ function Files() {
     setAccessType(jwt._id);
   }, []);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      if (accessType.bankuser_id) {
-        try {
-          const response = await AxiosInstance.get(
-            `/bank_approval/bank_user/${accessType.bankuser_id}`
-          );
-          console.log(response, "response");
-          setFiles(response.data.data);
-          setLoading(false);
-        } catch (error) {
-          console.error("Error fetching files:", error);
+  const fetchData = async () => {
+    if (accessType) {
+      try {
+        if (!accessType.state || !accessType.city) {
+          console.error("State or city is missing.");
+          return;
         }
-      }
-    };
 
-    fetchFiles();
-  }, [accessType]);
+        const response = await AxiosInstance.get(
+          `/file_upload/bankusers/${accessType.state}/${accessType.city}/${accessType.bankuser_id}`,
+          {
+            params: {
+              page: currentPage,
+              limit: itemsPerPage,
+              searchTerm,
+              selectedLoan: loan_id
+                ? loan_id === "All Loan Types"
+                  ? ""
+                  : loan_id
+                : selectedLoan === "All Loan Types"
+                ? ""
+                : selectedLoan,
+              selectedStatus: selectedStatusSearch,
+              selectedState,
+              selectedCity,
+            },
+          }
+        );
+        setFiles(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setTotalRecorrds(response.data.totalCount);
+        setCurrentPage(response.data.currentPage);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [
+    currentPage,
+    itemsPerPage,
+    searchTerm,
+    selectedLoan,
+    selectedStatusSearch,
+    selectedState,
+    selectedCity,
+    loan_id,
+    accessType,
+  ]);
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -256,6 +290,290 @@ function Files() {
     fetchTotalAmount();
   }, [loan_id, selectedState, selectedCity]);
 
+  //model open edit delete update assign
+  const [anchorEl, setAnchorEl] = useState(null);
+  const cancelRefAssign = React.useRef();
+
+  const handleClick = (event, fileId, city, loanId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFileId(fileId);
+    setSelectedCityName(city);
+    setSelectedLoanId(loanId);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setSelectedFileId(null);
+  };
+
+  //delete
+
+  const handleDelete = (id) => {
+    setSelectedFileId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const cancelRef = React.useRef();
+
+  const deletefile = async (fileId) => {
+    try {
+      const fileData = files?.find((file) => file?.file_id === fileId);
+      let allDeleted = true;
+
+      if (fileData?.documents?.length > 0) {
+        for (const document of fileData.documents) {
+          if (!document.file_path) {
+            console.error("File path is missing for document");
+            toast.error("File path is missing for document");
+            allDeleted = false;
+            continue;
+          }
+
+          try {
+            const cdnResponse = await axios.delete(
+              `https://cdn.savajcapital.com/api/upload/${document.file_path}`
+            );
+            if (cdnResponse.status !== 204 && cdnResponse.status !== 200) {
+              if (cdnResponse.status === 404) {
+                console.warn(
+                  "File not found on CDN, treating as deleted:",
+                  document.file_path
+                );
+              } else {
+                console.error(
+                  "Failed to delete file from CDN:",
+                  cdnResponse.data
+                );
+                toast.error("Failed to delete file from CDN");
+                allDeleted = false;
+              }
+            }
+          } catch (cdnError) {
+            if (cdnError.response && cdnError.response.status === 404) {
+              console.warn(
+                "File not found on CDN, treating as deleted:",
+                document.file_path
+              );
+            } else {
+              console.error("Error deleting from CDN:", cdnError);
+              toast.error("Error deleting from CDN");
+              allDeleted = false;
+            }
+          }
+        }
+      } else {
+        console.warn(
+          "No documents found for the file, but will attempt to delete file metadata."
+        );
+      }
+
+      if (allDeleted) {
+        const dbResponse = await AxiosInstance.delete(`/file_upload/${fileId}`);
+        if (dbResponse.status === 200) {
+          setFiles((prevFiles) =>
+            prevFiles.filter((file) => file.file_id !== fileId)
+          );
+          toast.success("File deleted successfully!");
+        } else {
+          console.error("Failed to delete file metadata:", dbResponse.data);
+          toast.error("Failed to delete file metadata");
+          allDeleted = false;
+        }
+      }
+
+      if (!allDeleted) {
+        toast.error("Not all files/documents could be deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting files:", error);
+      toast.error("Files could not be deleted");
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  //edit
+  const handleEditClick = (id) => {
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
+  };
+
+  //update status
+
+  const handleUpdate = (id) => {
+    setSelecteUpdateFileId(id);
+    setIsUpdateDialogOpen(true);
+  };
+
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const cancelRef1 = React.useRef();
+
+  const updateFile = async (fileId, newStatus) => {
+    try {
+      if (!newStatus) {
+        console.error("Status not selected");
+        toast.error("Please select a status before updating.");
+        return;
+      }
+
+      const response = await AxiosInstance.put(
+        `/file_upload/updatestatus/${fileId}`,
+        {
+          status: newStatus,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("File status updated successfully!");
+        fetchData();
+      } else {
+        throw new Error(
+          response.data.message || "Failed to update the status."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating file status:", error);
+      toast.error("File status could not be updated: " + error.message);
+    } finally {
+      setIsUpdateDialogOpen(false);
+      setSelectedStatus("");
+      setSelecteUpdateFileId(null);
+    }
+  };
+
+  //assign
+  const [selectedCityName, setSelectedCityName] = useState("");
+  const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [selecteAssignFileId, setSelecteAssignFileId] = useState(null);
+  const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [savajcapitalbranchUser, setSavajcapitalbranchUser] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
+  const [selectedUserFileCount, setSelectedUserFileCount] = useState(0);
+
+  const handleAssign = (id, city, loanId) => {
+    const selectedFile = allFiles.find((file) => file.file_id === id);
+    if (selectedFile) {
+      setSelecteAssignFileId(selectedFile.file_id);
+      setSelectedLoanId(loanId);
+      setSelectedCityName(city);
+      setIsAssignDialogOpen(true);
+    }
+  };
+
+  const [allFiles, setAllFiles] = useState([]);
+
+  const fetchFiles = async () => {
+    try {
+      const response = await AxiosInstance.get("/file_upload/allfiles");
+      setAllFiles(response.data.data);
+      if (response.data.data.length > 0) {
+        setSelecteAssignFileId(response.data.data[0].file_id);
+      }
+    } catch (error) {
+      console.error("Error fetching files:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
+  useEffect(() => {
+    const fetchSavajcapitalbranch = async () => {
+      try {
+        const response = await AxiosInstance.get("/branch");
+        setSavajcapitalbranch(response.data.data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
+
+    fetchSavajcapitalbranch();
+    getRolesData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSavajcapitalbranchUser = async () => {
+      if (!selectedBranchId) {
+        setSavajcapitalbranchUser([]);
+        return;
+      }
+      try {
+        const response = await AxiosInstance.get(
+          `/savaj_user/${selectedBranchId}`
+        );
+        setSavajcapitalbranchUser(response.data.data || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching branch users:", error);
+      }
+    };
+
+    fetchSavajcapitalbranchUser();
+  }, [selectedBranchId]);
+
+  const getRolesData = async () => {
+    try {
+      const response = await AxiosInstance.get("/role/");
+      if (response.data.success) {
+        setRoles(response.data.data);
+      } else {
+        alert("Please try again later...!");
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  const getRoleName = (roleId) => {
+    const role = roles.find((role) => role.role_id === roleId);
+    return role ? role.role : "No role found";
+  };
+
+  const handleSubmitData = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        file_id: selecteAssignFileId,
+        loan_id: selectedLoanId,
+        branch_id: selectedBranchId,
+        branchuser_id: selectedBranchUserId,
+      };
+
+      const response = await AxiosInstance.post("/branch_assign", payload);
+
+      if (response.data.success) {
+        history.push("/savajcapitaluser/userfile");
+        toast.success("All data submitted successfully!");
+      } else {
+        toast.error(
+          response.data.message || "Submission failed! Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error while uploading files or submitting data:", error);
+      console.error("Error response from server:", error.response);
+      toast.error(
+        error.response?.data?.message || "Submission failed! Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredBranchUsers = savajcapitalbranchUser.filter(
+    (user) =>
+      Array.isArray(user.loan_ids) && user.loan_ids.includes(selectedLoanId)
+  );
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -292,7 +610,7 @@ function Files() {
               </Text>
             </Flex>
             <Flex justifyContent="end" py="1" className="mainnnn">
-              <Flex className="theaddd p-2">
+              <Flex className="theaddd p-2 ">
                 <div className="d-flex first-drop-section gap-2">
                   {!loan && (
                     <select
@@ -323,7 +641,6 @@ function Files() {
                       </option>
                     ))}
                   </select>
-
                   <select
                     class="form-select loan-type-dropdown"
                     aria-label="Default select example"
@@ -356,7 +673,6 @@ function Files() {
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                   </select>
-
                   <Input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -364,18 +680,21 @@ function Files() {
                     width="250px"
                     mr="10px"
                   />
+
                   {/* <Button
-                    onClick={() => history.push("/superadmin/addfile")}
-                    className="dynamicImportantStyle"
-                    colorScheme="blue"
-                    style={{
-                      backgroundColor: "#b19552",
-                      color: "white",
-                      width: "150px",
-                    }}
-                  >
-                    Add File
-                  </Button> */}
+                      onClick={() =>
+                        history.push("/savajcapitaluser/adduserfile")
+                      }
+                      className="dynamicImportantStyle"
+                      colorScheme="blue"
+                      style={{
+                        backgroundColor: "#b19552",
+                        color: "white",
+                        width: "150px",
+                      }}
+                    >
+                      Add File
+                    </Button> */}
                 </div>
               </Flex>
             </Flex>
@@ -386,11 +705,11 @@ function Files() {
                 <Tr>
                   <Th>#</Th>
                   <Th>File Id</Th>
-                  <Th>Customer</Th>
+                  <Th>Customer (Business)</Th>
+                  <Th>City</Th>
                   <Th>Loan</Th>
                   <Th>File Status</Th>
-                  <Th>Assign Date</Th>
-                  {/* <Th>Document Status</Th> */}
+                  <Th>Document Status</Th>
                   <Th></Th>
                   <Th>Action</Th>
                 </Tr>
@@ -439,9 +758,9 @@ function Files() {
                         </Td>
 
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
-                          {file?.username}
+                          {file?.user_username} ({file?.businessname})
                         </Td>
-
+                        <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
                         <Td style={{ fontSize: "14px" }}>{file?.loan}</Td>
                         <Td>
                           <div
@@ -466,44 +785,40 @@ function Files() {
                                 ? `Rejected`
                                 : `Running`}
                             </span>
-
                             {file?.status_message && (
-                              <div
-                                style={{
-                                  marginTop: "4px",
-                                  fontSize: "0.9em",
-                                  color: "#FFFFFF",
-                                }}
-                              >
-                                {file.status_message}
-                              </div>
+                              <>
+                                <br />
+                                <span
+                                  style={{
+                                    display: "block",
+                                    marginTop: "4px",
+                                    fontSize: "0.9em",
+                                    color: "#FFFFFF",
+                                  }}
+                                >
+                                  {file.status_message}
+                                </span>
+                              </>
                             )}
-
                             {file?.status !== "rejected" && file?.amount && (
-                              <div
-                                style={{
-                                  fontSize: "0.9em",
-                                  color: "#FFFFFF",
-                                }}
-                              >
-                                Amount: {file.amount}
-                              </div>
+                              <>
+                                <br />
+                                <span
+                                  style={{
+                                    display: "block",
+                                    fontSize: "0.9em", // Decrease font size
+                                    color: "#FFFFFF",
+                                  }}
+                                >
+                                  Amount: {file.amount}
+                                </span>
+                              </>
                             )}
-
-                            <div
-                              style={{
-                                fontSize: "0.9em",
-                                color: "#FFFFFF",
-                              }}
-                            >
-                              {file.running_step_name || "CIBIL"}
-                            </div>
                           </div>
                         </Td>
-                        <Td style={{ fontSize: "14px" }}>
-                          {file?.bank_assign_date}
-                        </Td>
-                        {/* <Td>
+
+                        <Td>
+                          {" "}
                           {file.document_percentage != null &&
                           !isNaN(file.document_percentage) ? (
                             <div
@@ -538,7 +853,7 @@ function Files() {
                               </div>
                             </div>
                           )}
-                        </Td> */}
+                        </Td>
                         <Td style={{ fontSize: "14px" }}>
                           {" "}
                           {file.loan_id === "1715150207654" ? (
@@ -574,6 +889,81 @@ function Files() {
                             justifyContent="space-between"
                             alignItems="center"
                           >
+                            {/* <Flex>
+                              <IconButton
+                                aria-controls="menu"
+                                aria-haspopup="true"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClick(
+                                    e,
+                                    file.file_id,
+                                    file.city,
+                                    file.loan_id
+                                  );
+                                }}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+
+                              <Menu
+                                id="menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                              >
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleDelete(selectedFileId);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <DeleteIcon style={{ marginRight: "5px" }} />
+                                  Delete
+                                </MenuItem>
+
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleEditClick(selectedFileId);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <EditIcon style={{ marginRight: "5px" }} />
+                                  Edit
+                                </MenuItem>
+
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleUpdate(selectedFileId);
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <AddIcon style={{ marginRight: "5px" }} />
+                                  Update
+                                </MenuItem>
+
+                                <MenuItem
+                                  onClick={(e) => {
+                                    handleClose();
+                                    handleAssign(
+                                      selectedFileId,
+                                      selectedCityName,
+                                      selectedLoanId
+                                    );
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <ExternalLinkIcon
+                                    style={{ marginRight: "5px" }}
+                                  />
+                                  Assign
+                                </MenuItem>
+                              </Menu>
+                            </Flex> */}
                             <Flex style={{ paddingLeft: "10px" }}>
                               <IconButton
                                 aria-label={
@@ -734,6 +1124,227 @@ function Files() {
             </Table>
           </CardBody>
         </Card>
+        <AlertDialog
+          isOpen={isDeleteDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Delete File
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure? You can't undo this action afterwards.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef}
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => deletefile(selectedFileId)}
+                  ml={3}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        <AlertDialog
+          isOpen={isUpdateDialogOpen}
+          leastDestructiveRef={cancelRef1}
+          onClose={() => {
+            setIsUpdateDialogOpen(false);
+            setSelectedStatus("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Update File Status
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure you want to update the status of this file?
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  style={{
+                    marginLeft: "10px",
+                    marginTop: "20px",
+                    width: "100%",
+                    height: "35px",
+                  }}
+                >
+                  <option value="">Select a Status</option>
+                  <option value="running">Running</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  ref={cancelRef1}
+                  onClick={() => setIsUpdateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={() => {
+                    updateFile(selecteUpdateFileId, selectedStatus);
+                    setIsUpdateDialogOpen(false);
+                  }}
+                  ml={3}
+                  isDisabled={!selectedStatus}
+                >
+                  Update
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+        <AlertDialog
+          isOpen={isAssignDialogOpen}
+          leastDestructiveRef={cancelRefAssign}
+          onClose={() => {
+            setIsAssignDialogOpen(false);
+            setSelecteAssignFileId(null);
+            setSelectedBranchId(null);
+            setSelectedBranchUserId(null);
+            setSelectedCityName("");
+            setSelectedLoanId("");
+          }}
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Assign File
+              </AlertDialogHeader>
+              <AlertDialogBody>
+                <FormControl id="file_id" mt={4} isRequired>
+                  <FormLabel>File</FormLabel>
+                  <Select
+                    placeholder="Select File"
+                    value={selecteAssignFileId}
+                    isDisabled={selecteAssignFileId}
+                    onChange={(e) => setSelecteAssignFileId(e.target.value)}
+                  >
+                    {allFiles?.map((file) => (
+                      <option key={file.file_id} value={file.file_id}>
+                        {`${file.file_id}`}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl id="branch_id" mt={4} isRequired>
+                  <FormLabel>Savaj Capital Branch</FormLabel>
+                  <Select
+                    placeholder="Select Branch"
+                    onChange={(e) => setSelectedBranchId(e.target.value)}
+                  >
+                    {savajcapitalbranch
+                      .filter((branch) => branch.city === selectedCityName)
+                      .map((branch) => (
+                        <option key={branch.branch_id} value={branch.branch_id}>
+                          {`${branch.branch_name} (${branch.city})`}
+                        </option>
+                      ))}
+                  </Select>
+                </FormControl>
+                {selectedBranchId && (
+                  <FormControl id="branchuser_id" mt={4} isRequired>
+                    <FormLabel>Branch User</FormLabel>
+                    {filteredBranchUsers.length > 0 ? (
+                      <>
+                        <Select
+                          placeholder="Select User"
+                          onChange={(e) => {
+                            setSelectedBranchUserId(e.target.value);
+                            const user = filteredBranchUsers.find(
+                              (u) => u.branchuser_id === e.target.value
+                            );
+                            if (user) {
+                              setSelectedUserFileCount(
+                                user.assigned_file_count || 0
+                              );
+                            }
+                          }}
+                        >
+                          {filteredBranchUsers.map((user) => (
+                            <option
+                              key={user.branchuser_id}
+                              value={user.branchuser_id}
+                            >
+                              {`${user.full_name} (${getRoleName(
+                                user.role_id
+                              )})`}
+                            </option>
+                          ))}
+                        </Select>
+                        {selectedBranchUserId && (
+                          <Text
+                            style={{ paddingTop: "20px", fontWeight: "bold" }}
+                          >
+                            Assigned Files Count: {selectedUserFileCount}
+                          </Text>
+                        )}
+                      </>
+                    ) : (
+                      <Text>No users available for this branch or loan.</Text>
+                    )}
+                  </FormControl>
+                )}
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button
+                  mt={4}
+                  colorScheme="teal"
+                  onClick={handleSubmitData}
+                  isLoading={loading}
+                  loadingText="Submitting"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginTop: 40,
+                  }}
+                >
+                  Assign
+                </Button>
+
+                <Button
+                  mt={4}
+                  style={{
+                    backgroundColor: "#414650",
+                    color: "#fff",
+                    marginTop: 40,
+                    marginLeft: 8,
+                  }}
+                  onClick={() => {
+                    setIsAssignDialogOpen(false);
+                    setSelecteAssignFileId(null);
+                    setSelectedBranchId(null);
+                    setSelectedBranchUserId(null);
+                    setSelectedCityName("");
+                    setSelectedLoanId("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </Flex>
       <Flex
         justifyContent="flex-end"
@@ -788,4 +1399,4 @@ function Files() {
   );
 }
 
-export default Files;
+export default AllBankFiles;
