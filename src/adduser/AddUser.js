@@ -117,6 +117,12 @@ function AddUser(props) {
     setLoading(true);
 
     try {
+      if (formData.number.length !== 10) {
+        toast.error("Mobile number must be exactly 10 digits long.");
+        setLoading(false);
+        return;
+      }
+
       if (formData.cibil_score < 300 || formData.cibil_score > 900) {
         toast.error("CIBIL score must be between 300 and 900");
         setLoading(false);
@@ -262,13 +268,14 @@ function AddUser(props) {
   };
   const handlePhoneChange = (e) => {
     const { name, value } = e.target;
-    if (name === "number" && value.length <= 10) {
+    if (name === "number" && value.length <= 10 && /^[0-9]*$/.test(value)) {
       setFormData({
         ...formData,
         [name]: value,
       });
     }
   };
+
   const handleBusonessPhoneChange = (e) => {
     const { name, value } = e.target;
     if (name === "businessnumber" && value.length <= 10) {
@@ -421,7 +428,7 @@ function AddUser(props) {
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
                   name="number"
-                  type="number"
+                  type="tel"
                   onChange={handlePhoneChange}
                   value={formData.number}
                   placeholder="Enter mobile number"
@@ -519,12 +526,12 @@ function AddUser(props) {
                 </Select>
               </FormControl>
               <FormControl id="unit_address" mt={4} isRequired>
-                <FormLabel>Unit Address</FormLabel>
+                <FormLabel>Residential Address</FormLabel>
                 <Input
                   name="unit_address"
                   onChange={handleChange}
                   value={formData.unit_address}
-                  placeholder="Enter business address"
+                  placeholder="Enter residential address"
                 />
               </FormControl>
 

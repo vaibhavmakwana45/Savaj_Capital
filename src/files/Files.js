@@ -55,6 +55,7 @@ import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 
 function Files() {
   const [files, setFiles] = useState([]);
+  console.log(files, "files");
   const textColor = useColorModeValue("gray.700", "white");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
@@ -71,9 +72,9 @@ function Files() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-      "IN",
-      states.find((state) => state.name === selectedState)?.isoCode
-    )
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
     : [];
 
   const handleStateChange = (event) => {
@@ -136,8 +137,8 @@ function Files() {
               ? ""
               : loan_id
             : selectedLoan === "All Loan Types"
-              ? ""
-              : selectedLoan,
+            ? ""
+            : selectedLoan,
           selectedStatus: selectedStatusSearch,
           selectedState,
           selectedCity,
@@ -251,27 +252,36 @@ function Files() {
 
   //total loan amount
   const [totalAmount, setTotalAmount] = useState(null);
+  const [totalFiles, setTotalFiles] = useState(null);
 
   const fetchTotalAmount = async () => {
     try {
+      // Construct the URL based on available parameters
+      let url = `/file_upload/amounts`;
       if (loan_id) {
-        const response = await AxiosInstance.get(
-          `/file_upload/amounts/${loan_id}`,
-          {
-            params: {
-              state: selectedState,
-              city: selectedCity,
-            },
-          }
-        );
-        const { totalAmount } = response.data;
-        setTotalAmount(totalAmount);
+        url += `/${loan_id}`;
       }
+
+      // Make the request with optional query parameters for state and city
+      const response = await AxiosInstance.get(url, {
+        params: {
+          state: selectedState,
+          city: selectedCity,
+        },
+      });
+
+      // Extract and set the total amount from the response
+      const { totalAmount } = response.data;
+      const { fileCount } = response.data;
+      setTotalAmount(totalAmount);
+      setTotalFiles(fileCount);
+      console.log(totalAmount, "totalAmount");
     } catch (error) {
       console.error("Error fetching total amount:", error);
     }
   };
 
+  // Fetch the total amount when relevant parameters change
   useEffect(() => {
     fetchTotalAmount();
   }, [loan_id, selectedState, selectedCity]);
@@ -280,12 +290,13 @@ function Files() {
   const [anchorEl, setAnchorEl] = useState(null);
   const cancelRefAssign = React.useRef();
 
-  const handleClick = (event, fileId, city, loanId) => {
+  const handleClick = (event, fileId, city, loanId, loanSubtypeId) => {
     setAnchorEl(event.currentTarget);
     setSelectedFileId(fileId);
     setSelectedCityName(city);
     setSelectedBankCityName(city);
     setSelectedLoanId(loanId);
+    setSelectedLoanSubtypeId(loanSubtypeId);
   };
 
   const handleClose = () => {
@@ -432,6 +443,7 @@ function Files() {
   //assign
   const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selecteAssignFileId, setSelecteAssignFileId] = useState(null);
   const [savajcapitalbranch, setSavajcapitalbranch] = useState([]);
@@ -441,13 +453,19 @@ function Files() {
   const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
   const [selectedUserFileCount, setSelectedUserFileCount] = useState(0);
 
-  const handleAssign = (id, city, loanId) => {
+  const handleAssign = (id, city, loanId, loanSubtypeId) => {
     const selectedFile = allFiles.find((file) => file.file_id === id);
     if (selectedFile) {
       setSelecteAssignFileId(selectedFile.file_id);
       setSelectedLoanId(loanId);
+      setSelectedLoanSubtypeId(loanSubtypeId);
+      setSelectedCityName(city);
       setSelectedCityName(city);
       setIsAssignDialogOpen(true);
+      console.log("Clicked on file:", id);
+      console.log("City:", city);
+      console.log("Loan ID:", loanId);
+      console.log("Loan Type ID:", loanSubtypeId);
     }
   };
 
@@ -529,6 +547,7 @@ function Files() {
       const payload = {
         file_id: selecteAssignFileId,
         loan_id: selectedLoanId,
+        loantype_id: selectedLoanSubtypeId,
         branch_id: selectedBranchId,
         branchuser_id: selectedBranchUserId,
       };
@@ -642,7 +661,9 @@ function Files() {
       const payload = {
         file_id: selectedFileBankId,
         bank_id: selectedBankId,
+        loan_id: selectedLoanId,
         bankuser_id: selectedBankUserId,
+        loantype_id: selectedLoanSubtypeId,
       };
 
       const response = await AxiosInstance.post("/bank_approval", payload);
@@ -677,26 +698,30 @@ function Files() {
                   <>
                     {loan}
                     {selectedStatusSearch !== "running" &&
-                      selectedStatusSearch !== "rejected" ? (
+                    selectedStatusSearch !== "rejected" ? (
                       <Text
                         as="span"
                         color="green.400"
                         fontWeight="bold"
                         pl="1"
                       >
-                        <span style={{ color: "black" }}>-</span>{" "}
-                        {totalAmount !== null ? totalAmount : "-"}
+                        <span style={{ color: "black" }}>-</span> ₹{" "}
+                        {totalAmount !== null ? totalAmount : "-"}{" "}
+                        <span style={{ color: "black" }}>-</span> {totalFiles}{" "}
+                        files
                       </Text>
                     ) : null}
                   </>
                 ) : (
                   <Text
                     fontSize="xl"
-                    color={textColor}
+                    color="green.400"
                     fontWeight="bold"
                     className="ttext"
                   >
-                    All Files
+                    <span style={{ color: "black" }}> All Files -</span> ₹{" "}
+                    {totalAmount !== null ? totalAmount : "-"}{" "}
+                    <span style={{ color: "black" }}>-</span> {totalFiles} files
                   </Text>
                 )}
               </Text>
@@ -800,6 +825,7 @@ function Files() {
                   <Th>City</Th>
                   <Th>Loan</Th>
                   <Th>File Status</Th>
+                  <Th>Current Step</Th>
                   <Th>Document Status</Th>
                   <Th></Th>
                   <Th>Action</Th>
@@ -852,7 +878,13 @@ function Files() {
                           {file?.user_username} ({file?.businessname})
                         </Td>
                         <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
-                        <Td style={{ fontSize: "14px" }}>{file?.loan}</Td>
+                        <Td style={{ fontSize: "14px" }}>
+                          {" "}
+                          {`${file.loan}${
+                            file.loan_type ? ` (${file.loan_type})` : ""
+                          }`}
+                        </Td>
+
                         <Td>
                           <div
                             style={{
@@ -861,8 +893,8 @@ function Files() {
                                 file?.status === "approved"
                                   ? "#4CAF50"
                                   : file?.status === "rejected"
-                                    ? "#F44336"
-                                    : "#FF9C00",
+                                  ? "#F44336"
+                                  : "#FF9C00",
                               padding: "4px 8px",
                               borderRadius: "10px",
                               display: "inline-block",
@@ -873,8 +905,8 @@ function Files() {
                               {file?.status === "approved"
                                 ? `Approved`
                                 : file?.status === "rejected"
-                                  ? `Rejected`
-                                  : `Running`}
+                                ? `Rejected`
+                                : `Running`}
                             </span>
 
                             {file?.status_message && (
@@ -899,21 +931,23 @@ function Files() {
                                 Amount: {file.amount}
                               </div>
                             )}
-
-                            <div
+                            {/* <div
                               style={{
                                 fontSize: "0.9em",
                                 color: "#FFFFFF",
                               }}
                             >
                               {file.running_step_name || "CIBIL"}
-                            </div>
+                            </div> */}
                           </div>
                         </Td>
-
+                        <Td style={{ fontSize: "14px" }}>
+                          {" "}
+                          {file.running_step_name || "CIBIL"}
+                        </Td>
                         <Td>
                           {file.document_percentage != null &&
-                            !isNaN(file.document_percentage) ? (
+                          !isNaN(file.document_percentage) ? (
                             <div
                               className="progress"
                               data-value={Number(file.document_percentage)}
@@ -992,7 +1026,8 @@ function Files() {
                                     e,
                                     file.file_id,
                                     file.city,
-                                    file.loan_id
+                                    file.loan_id,
+                                    file.loantype_id || ""
                                   );
                                 }}
                               >
@@ -1042,7 +1077,8 @@ function Files() {
                                     handleAssign(
                                       selectedFileId,
                                       selectedCityName,
-                                      selectedLoanId
+                                      selectedLoanId,
+                                      selectedLoanSubtypeId
                                     );
                                     e.stopPropagation();
                                   }}
@@ -1058,7 +1094,8 @@ function Files() {
                                     handleBankAssign(
                                       selectedFileId,
                                       selectedBankCityName,
-                                      selectedLoanId
+                                      selectedLoanId,
+                                      selectedLoanSubtypeId
                                     );
                                     e.stopPropagation();
                                   }}
@@ -1149,7 +1186,7 @@ function Files() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1184,7 +1221,7 @@ function Files() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",

@@ -5,6 +5,7 @@ const BranchSchema = new mongoose.Schema({
   branch_assign_id: { type: String },
   file_id: { type: String },
   loan_id: { type: String },
+  loantype_id: { type: String },
   branch_assign_date: { type: String },
   branch_id: { type: String },
   branchuser_id: { type: String },

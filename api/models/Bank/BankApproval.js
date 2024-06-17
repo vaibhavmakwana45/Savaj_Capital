@@ -4,6 +4,8 @@ const moment = require("moment");
 const BankSchema = new mongoose.Schema({
   bank_assign_id: { type: String },
   file_id: { type: String },
+  loan_id: { type: String },
+  loantype_id: { type: String },
   bank_assign_date: { type: String },
   bank_id: { type: String },
   bankuser_id: { type: String },

@@ -82,6 +82,7 @@ function AddBankUser() {
       const response = await AxiosInstance.get(
         "/addusers/bankuser/by-user-id/" + id
       );
+      console.log(response, "response");
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 
@@ -94,16 +95,16 @@ function AddBankUser() {
           mobile: userDetails.mobile,
           adhar: userDetails.adhar,
           emergancy_contact: userDetails.emergancy_contact,
-          bank_name: bankDetails.bank_name,
           country: bankDetails.country,
           bankuser_name: userDetails.bankuser_name,
           password: userDetails.password,
           state: bankDetails.state,
           city: bankDetails.city,
-          branch_name: bankDetails.branch_name,
           email: userDetails.email,
           country_code: bankDetails.country_code,
           state_code: bankDetails.state_code,
+          bank_name: bankDetails.bank_name,
+          branch_name: bankDetails.branch_name,
         };
 
         setSelectedState(bankDetails.state_code);
@@ -306,7 +307,6 @@ function AddBankUser() {
                   ))}
                 </Select>
               </FormControl>
-
               <FormControl id="country" mt={4} isRequired>
                 <FormLabel>Country</FormLabel>
 
@@ -410,10 +410,12 @@ function AddBankUser() {
                 <Input
                   name="email"
                   type="email"
+                  placeholder="Enter email"
                   onChange={handleChange}
                   value={formData.email}
                 />
               </FormControl>
+
               <FormControl id="adress" mt={4}>
                 <FormLabel>Address</FormLabel>
                 <Input
