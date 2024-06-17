@@ -248,9 +248,29 @@ router.get(
           loantype_id: approval.loantype_id,
         }).lean();
 
-        const allFiles = await File_Uplode.find({
+        const stateCityFiles = [];
+
+        // Fetch files for the current bank approval entry
+        const files = await File_Uplode.find({
           loan_id: loan.loan_id,
+          loantype_id: approval.loantype_id,
         }).lean();
+
+        for (const file of files) {
+          const user = await AddUser.findOne({
+            user_id: file.user_id,
+          }).lean();
+
+          // Check if the user matches the state and city criteria
+          if (user && user.state === state && user.city === city) {
+            stateCityFiles.push({
+              filename: file.filename,
+              typename: file.typename,
+            });
+          }
+        }
+
+        const fileCount = stateCityFiles.length;
 
         if (loanTypes.length === 0) {
           loanTypes.push({
@@ -261,32 +281,13 @@ router.get(
         }
 
         for (const loanType of loanTypes) {
-          const filteredFiles = allFiles.filter(
-            (file) => file.loantype_id === loanType.loantype_id
-          );
-
-          const stateCityFiles = [];
-          for (const file of filteredFiles) {
-            const user = await AddUser.findOne({
-              user_id: file.user_id,
-            }).lean();
-            if (user && user.state === state && user.city === city) {
-              stateCityFiles.push(file);
-            }
-          }
-
-          const fileCount = stateCityFiles.length;
-
           enhancedLoans.push({
             ...loan,
             loanType: loanType.loan_type,
             subtype: loanType.subtype || "Main",
             state,
             city,
-            files: stateCityFiles.map((file) => ({
-              filename: file.filename,
-              typename: file.typename,
-            })),
+            files: stateCityFiles,
             fileCount,
             loantype_id: loanType.loantype_id,
           });
@@ -296,6 +297,7 @@ router.get(
       const flattenedLoans = enhancedLoans.filter(
         (loan) => loan.files.length > 0
       );
+
       res.json(flattenedLoans);
     } catch (error) {
       console.error("Error fetching loan and file data:", error);

@@ -135,10 +135,10 @@ function UserFile() {
           return;
         }
 
-        const loanIds = accessType?.loan_ids.join(",");
+        // const loanIds = accessType?.loan_ids.join(",");
 
         const response = await AxiosInstance.get(
-          `/file_upload/savajusers/${accessType.state}/${accessType.city}/${loanIds}`,
+          `/file_upload/savajusers/${accessType.state}/${accessType.city}/${accessType.branchuser_id}`,
           {
             params: {
               page: currentPage,
