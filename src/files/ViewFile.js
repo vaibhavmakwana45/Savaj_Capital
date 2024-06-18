@@ -1182,75 +1182,108 @@ function ViewFile() {
                                         ) : (
                                           input.type === "file" && (
                                             <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                type="file"
-                                                required={input.is_required}
-                                                onChange={(e) =>
-                                                  handleChange(e, index)
-                                                }
-                                              />
-                                              {input.value.endsWith(".pdf") ? (
-                                                <div
+                                              <label
+                                                style={{
+                                                  display: "block",
+                                                  marginBottom: "8px",
+                                                }}
+                                              >
+                                                {input.label}
+                                              </label>
+                                              <label
+                                                style={{
+                                                  display: "inline-block",
+                                                  padding: "5px 20px",
+                                                  backgroundColor:
+                                                    "rgb(65, 70, 80)",
+                                                  color: "white",
+                                                  borderRadius: "5px",
+                                                  cursor: "pointer",
+                                                }}
+                                              >
+                                                Choose File
+                                                <Input
+                                                  type="file"
+                                                  required={input.is_required}
+                                                  onChange={(e) =>
+                                                    handleChange(e, index)
+                                                  }
                                                   style={{
-                                                    position: "relative",
-                                                    width: "100%",
-                                                    height: "260px",
+                                                    display: "none",
                                                   }}
-                                                >
-                                                  <iframe
-                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                    type="application/pdf"
-                                                    className="pdf-viewer"
-                                                    height="100%"
-                                                    width="100%"
-                                                    title="PDF Viewer"
-                                                  />
-                                                  <div className="pdf-overlay">
-                                                    <FontAwesomeIcon
-                                                      icon={faMaximize}
+                                                />
+                                              </label>
+                                              {input.value && (
+                                                <>
+                                                  {input.value.endsWith(
+                                                    ".pdf"
+                                                  ) ? (
+                                                    <div
+                                                      style={{
+                                                        position: "relative",
+                                                        width: "100%",
+                                                        height: "260px",
+                                                        marginTop: "10px",
+                                                      }}
+                                                    >
+                                                      <iframe
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                        type="application/pdf"
+                                                        className="pdf-viewer"
+                                                        height="100%"
+                                                        width="100%"
+                                                        title="PDF Viewer"
+                                                      />
+                                                      <div className="pdf-overlay">
+                                                        <FontAwesomeIcon
+                                                          icon={faMaximize}
+                                                          onClick={() =>
+                                                            handleFileClick({
+                                                              file_path:
+                                                                input.value,
+                                                            })
+                                                          }
+                                                          style={{
+                                                            position:
+                                                              "absolute",
+                                                            bottom: "8px",
+                                                            right: "25px",
+                                                            color: "black",
+                                                            cursor: "pointer",
+                                                          }}
+                                                        />
+                                                      </div>
+                                                    </div>
+                                                  ) : input.value.match(
+                                                      /\.(jpeg|jpg|gif|png)$/
+                                                    ) ? (
+                                                    <img
+                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                      alt="Uploaded"
+                                                      style={{
+                                                        width: "100%",
+                                                        height: "260px",
+                                                        borderRadius: "12px",
+                                                        boxShadow:
+                                                          "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                        cursor: "pointer",
+                                                        marginTop: "10px",
+                                                      }}
+                                                      className="details-image"
                                                       onClick={() =>
                                                         handleFileClick({
                                                           file_path:
                                                             input.value,
                                                         })
                                                       }
-                                                      style={{
-                                                        position: "absolute",
-                                                        bottom: "8px",
-                                                        right: "25px",
-                                                        color: "black",
-                                                        cursor: "pointer",
-                                                      }}
                                                     />
-                                                  </div>
-                                                </div>
-                                              ) : input.value.match(
-                                                  /\.(jpeg|jpg|gif|png)$/
-                                                ) ? (
-                                                <img
-                                                  src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                  alt="Uploaded"
-                                                  style={{
-                                                    width: "100%",
-                                                    height: "260px",
-                                                    borderRadius: "12px",
-                                                    boxShadow:
-                                                      "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                  className="details-image"
-                                                  onClick={() =>
-                                                    handleFileClick({
-                                                      file_path: input.value,
-                                                    })
-                                                  }
-                                                />
-                                              ) : (
-                                                <div>
-                                                  No preview available for this
-                                                  file type
-                                                </div>
+                                                  ) : (
+                                                    <div>
+                                                      No preview available for
+                                                      this file type
+                                                    </div>
+                                                  )}
+                                                </>
                                               )}
                                             </div>
                                           )
@@ -1397,81 +1430,112 @@ function ViewFile() {
                                           ) : (
                                             input.type === "file" && (
                                               <div>
-                                                <label>{input.label}</label>
-                                                <Input
-                                                  type="file"
-                                                  required={input.is_required}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      e,
-                                                      inputIndex,
-                                                      dataIndex
-                                                    )
-                                                  }
-                                                />
-                                                {input.value.endsWith(
-                                                  ".pdf"
-                                                ) ? (
-                                                  <div
+                                                <label
+                                                  style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                  }}
+                                                >
+                                                  {input.label}
+                                                </label>
+                                                <label
+                                                  style={{
+                                                    display: "inline-block",
+                                                    padding: "5px 20px",
+                                                    backgroundColor:
+                                                      "rgb(65, 70, 80)",
+                                                    color: "white",
+                                                    borderRadius: "5px",
+                                                    cursor: "pointer",
+                                                  }}
+                                                >
+                                                  Choose File
+                                                  <Input
+                                                    type="file"
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
                                                     style={{
-                                                      position: "relative",
-                                                      width: "100%",
-                                                      height: "260px",
+                                                      display: "none",
                                                     }}
-                                                  >
-                                                    <iframe
-                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                      type="application/pdf"
-                                                      className="pdf-viewer"
-                                                      height="100%"
-                                                      width="100%"
-                                                      title="PDF Viewer"
-                                                    />
-                                                    <div className="pdf-overlay">
-                                                      <FontAwesomeIcon
-                                                        icon={faMaximize}
+                                                  />
+                                                </label>
+                                                {input.value && (
+                                                  <>
+                                                    {input.value.endsWith(
+                                                      ".pdf"
+                                                    ) ? (
+                                                      <div
+                                                        style={{
+                                                          position: "relative",
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          marginTop: "10px",
+                                                        }}
+                                                      >
+                                                        <iframe
+                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                          type="application/pdf"
+                                                          className="pdf-viewer"
+                                                          height="100%"
+                                                          width="100%"
+                                                          title="PDF Viewer"
+                                                        />
+                                                        <div className="pdf-overlay">
+                                                          <FontAwesomeIcon
+                                                            icon={faMaximize}
+                                                            onClick={() =>
+                                                              handleFileClick({
+                                                                file_path:
+                                                                  input.value,
+                                                              })
+                                                            }
+                                                            style={{
+                                                              position:
+                                                                "absolute",
+                                                              bottom: "8px",
+                                                              right: "25px",
+                                                              color: "black",
+                                                              cursor: "pointer",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    ) : input.value.match(
+                                                        /\.(jpeg|jpg|gif|png)$/
+                                                      ) ? (
+                                                      <img
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                        alt="Uploaded"
+                                                        style={{
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          borderRadius: "12px",
+                                                          boxShadow:
+                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                          cursor: "pointer",
+                                                          marginTop: "10px",
+                                                        }}
+                                                        className="details-image"
                                                         onClick={() =>
                                                           handleFileClick({
                                                             file_path:
                                                               input.value,
                                                           })
                                                         }
-                                                        style={{
-                                                          position: "absolute",
-                                                          bottom: "8px",
-                                                          right: "25px",
-                                                          color: "black",
-                                                          cursor: "pointer",
-                                                        }}
                                                       />
-                                                    </div>
-                                                  </div>
-                                                ) : input.value.match(
-                                                    /\.(jpeg|jpg|gif|png)$/
-                                                  ) ? (
-                                                  <img
-                                                    src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                    alt="Uploaded"
-                                                    style={{
-                                                      width: "100%",
-                                                      height: "260px",
-                                                      borderRadius: "12px",
-                                                      boxShadow:
-                                                        "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                      cursor: "pointer",
-                                                    }}
-                                                    className="details-image"
-                                                    onClick={() =>
-                                                      handleFileClick({
-                                                        file_path: input.value,
-                                                      })
-                                                    }
-                                                  />
-                                                ) : (
-                                                  <div>
-                                                    No preview available for
-                                                    this file type
-                                                  </div>
+                                                    ) : (
+                                                      <div>
+                                                        No preview available for
+                                                        this file type
+                                                      </div>
+                                                    )}
+                                                  </>
                                                 )}
                                               </div>
                                             )
