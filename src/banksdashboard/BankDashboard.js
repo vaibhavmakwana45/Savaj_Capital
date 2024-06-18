@@ -98,7 +98,7 @@ export default function BankDashboard() {
               minH="125px"
               style={{ cursor: "pointer", border: "1px solid black" }}
               onClick={() =>
-                history.push(`/savajcapitaluser/userfile`, {
+                history.push(`/bankuser/allfiles`, {
                   state: { loan: loan.loan, loan_id: loan.loan_id },
                 })
               }
