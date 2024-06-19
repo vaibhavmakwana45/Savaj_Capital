@@ -32,6 +32,7 @@ const TitleRoutes = require("./routes/AddDocumens/Title");
 const BranchAssignRoutes = require("./routes/Savaj_Capital/Branch_Assign");
 const GuarantorRoutes = require("./routes/AddGuarantor/AddGuarantor");
 const GuarantorStepRoutes = require("./routes/AddGuarantor/GuarantorStep");
+const NotificationRoutes = require("./routes/Notification/Notification");
 // const IDBAccountRoutes = require("./routes/Bank/IDB_Account");
 
 // view engine setup
@@ -67,6 +68,7 @@ app.use("/api/title", TitleRoutes);
 app.use("/api/branch_assign", BranchAssignRoutes);
 app.use("/api/add-guarantor", GuarantorRoutes);
 app.use("/api/guarantor-step", GuarantorStepRoutes);
+app.use("/api/notifications", NotificationRoutes);
 // app.use("/api/ibd_account", IDBAccountRoutes);
 
 // catch 404 and forward to error handler

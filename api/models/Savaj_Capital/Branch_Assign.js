@@ -4,6 +4,7 @@ const moment = require("moment");
 const BranchSchema = new mongoose.Schema({
   branch_assign_id: { type: String },
   file_id: { type: String },
+  user_id: { type: String },
   loan_id: { type: String },
   loantype_id: { type: String },
   branch_assign_date: { type: String },

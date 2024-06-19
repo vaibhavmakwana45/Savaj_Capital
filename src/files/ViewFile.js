@@ -42,6 +42,7 @@ import {
   faMaximize,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
+import { jsPDF } from "jspdf";
 
 function ViewFile() {
   const location = useLocation();
@@ -61,7 +62,7 @@ function ViewFile() {
   const [openPanelIndex, setOpenPanelIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isMaximized, setIsMaximized] = useState(false);
-  console.log(selectedFile?.file_path, "selectedFile");
+
   const handleAccordionClickDocument = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
   };
@@ -88,6 +89,20 @@ function ViewFile() {
       } catch (error) {
         console.error("Error downloading file:", error);
       }
+    }
+  };
+  const handleConvertToPdf = () => {
+    if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
+      const pdf = new jsPDF();
+      pdf.addImage(
+        `${basePath}${selectedFile.file_path}`,
+        "JPEG",
+        15,
+        40,
+        180,
+        160
+      );
+      pdf.save(`${selectedFile.loan_document_id}.pdf`);
     }
   };
 
@@ -151,6 +166,7 @@ function ViewFile() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentGuarantorId, setCurrentGuarantorId] = useState(null);
+
   const handleEditGuarantor = (guarantor) => {
     setIsEditMode(true);
     setCurrentGuarantorId(guarantor.guarantor_id);
@@ -159,7 +175,6 @@ function ViewFile() {
     for (const key in guarantor) {
       setValue(key, guarantor[key]);
     }
-
     onOpen();
   };
 
@@ -282,7 +297,6 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "response");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -498,11 +512,9 @@ function ViewFile() {
           cibil_score: cibilScore,
         };
 
-        // Update user data
         await AxiosInstance.put(`/addusers/edituser/${userId}`, formData);
       }
 
-      // Check if the current step is "Dispatch" to update the file status
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
           status: "approved",
@@ -591,7 +603,6 @@ function ViewFile() {
 
   const handleRejectConfirm = async () => {
     try {
-      // Check if reject message is empty
       if (!rejectMessage.trim()) {
         toast.error("Please provide a reason for rejection.");
         return;
@@ -614,7 +625,7 @@ function ViewFile() {
         fetchStepsData();
         setRejectModalOpen(false);
         setOpen({ is: false, data: {}, index: "" });
-        setRejectMessage(""); // Clear the rejection message
+        setRejectMessage("");
       } else {
         console.error("Failed to update status.");
       }
@@ -747,16 +758,14 @@ function ViewFile() {
     try {
       const updatedStepData = {
         ...open.data,
-        status: "active", // Default to active
+        status: "active",
         statusMessage: "",
       };
 
-      // Find the index of the step being reversed
       const currentIndex = stepData.findIndex(
         (step) => step.loan_step_id === open.data.loan_step_id
       );
 
-      // Check for any complete steps after the current step
       let isCompleteStepFound = false;
       for (let i = currentIndex + 1; i < stepData.length; i++) {
         if (stepData[i]?.status === "complete") {
@@ -765,37 +774,27 @@ function ViewFile() {
         }
       }
 
-      // Update status based on the presence of complete steps
       if (isCompleteStepFound) {
         updatedStepData.status = "complete";
       } else {
         updatedStepData.status = "active";
       }
 
-      // Update step status
       const stepUpdateResponse = await AxiosInstance.post(
         `/loan_step/steps/${id}`,
         updatedStepData
       );
 
-      console.log("Step Status Update Response:", stepUpdateResponse);
-
-      // Update file status based on the step being reversed
       if (updatedStepData.loan_step_id === "1715348651727") {
-        console.log("Updating File Status...");
-
         const fileStatusUpdateResponse = await AxiosInstance.put(
-          `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
+          `/file_upload/updatestatus/${updatedStepData.file_id}`,
           {
             status:
               updatedStepData.status === "complete" ? "approved" : "running",
           }
         );
-
-        console.log("File Status Update Response:", fileStatusUpdateResponse);
       }
 
-      // Check if both step and file updates were successful
       if (stepUpdateResponse.status === 200) {
         fetchStepsData();
         setOpen({ is: false, data: {}, index: "" });
@@ -1338,8 +1337,8 @@ function ViewFile() {
                                           </span>
                                         </p>
                                         <IconButton
-                                          icon={<Icon as={FaUndo} />} // Your desired icon
-                                          onClick={handleReverse} // Function to handle reversing the status
+                                          icon={<Icon as={FaUndo} />}
+                                          onClick={handleReverse}
                                           colorScheme="blue"
                                           className="buttonss mt-3"
                                           style={{ backgroundColor: "#007bff" }}
@@ -1683,11 +1682,7 @@ function ViewFile() {
                                         >
                                           Pending Documents
                                         </h2>
-                                        <Table
-                                          size="sm"
-                                          aria-label="documents"
-                                          // className="mx-4"
-                                        >
+                                        <Table size="sm" aria-label="documents">
                                           <thead>
                                             <tr className="py-2">
                                               <th
@@ -1730,7 +1725,6 @@ function ViewFile() {
                                             style={{
                                               backgroundColor: "#b19552",
                                             }}
-                                            // className="mx-3"
                                             onClick={() =>
                                               history.push(
                                                 `/superadmin/editfile?id=${id}`
@@ -2250,6 +2244,16 @@ function ViewFile() {
               >
                 Download
               </Button>
+              {!selectedFile.file_path.endsWith(".pdf") && (
+                <Button
+                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552" }}
+                  mr={3}
+                  onClick={handleConvertToPdf}
+                >
+                  Convert to PDF
+                </Button>
+              )}
               <Button
                 leftIcon={<FaWhatsapp />}
                 colorScheme="whatsapp"

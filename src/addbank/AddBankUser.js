@@ -82,7 +82,6 @@ function AddBankUser() {
       const response = await AxiosInstance.get(
         "/addusers/bankuser/by-user-id/" + id
       );
-      console.log(response, "response");
       if (response.data.success) {
         const { bankDetails, userDetails } = response.data;
 

@@ -31,7 +31,6 @@
 //   const [apiData, setApiData] = useState({});
 //   const [totalAmounts, setTotalAmounts] = useState({});
 //   const [accessType, setAccessType] = useState("");
-//   console.log(accessType,"accessType")
 //   React.useEffect(() => {
 //     const jwt = jwtDecode(localStorage.getItem("authToken"));
 //     setAccessType(jwt._id);
@@ -202,7 +201,7 @@ export default function SavajCapitalDashboard() {
   const [apiData, setApiData] = useState({});
   const [totalAmounts, setTotalAmounts] = useState({});
   const [accessType, setAccessType] = useState("");
-  console.log(accessType)
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);

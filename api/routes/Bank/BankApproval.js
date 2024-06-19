@@ -8,15 +8,55 @@ const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
 const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
+const Notification = require("../../models/Notification/Notification");
+const AddUser = require("../../models/AddUser");
 
+// router.post("/", async (req, res) => {
+//   try {
+//     const { file_id, bank_id, bankuser_id } = req.body;
+
+//     const existingAssignment = await BankApproval.findOne({
+//       file_id,
+//       bank_id,
+//       bankuser_id,
+//     });
+
+//     if (existingAssignment) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This file is already assigned to this user in this branch.",
+//       });
+//     }
+
+//     const timestamp = Date.now();
+//     const uniqueId = `${timestamp}`;
+
+//     req.body["bank_assign_id"] = uniqueId;
+//     req.body["bank_assign_date"] = moment()
+//       .utcOffset(330)
+//       .format("YYYY-MM-DD HH:mm:ss");
+
+//     var data = await BankApproval.create(req.body);
+//     res.json({
+//       success: true,
+//       data: data,
+//       message: "Documents assigned to the bank successfully.",
+//     });
+//   } catch (error) {
+//     res.json({
+//       statusCode: 500,
+//       message: error.message,
+//     });
+//   }
+// });
 router.post("/", async (req, res) => {
   try {
-    const { file_id, bank_id, bankuser_id } = req.body;
+    const { file_id, bank_id, bankuser_id, loan_id, user_id } = req.body;
 
     const existingAssignment = await BankApproval.findOne({
       file_id,
-      bank_id,
       bankuser_id,
+      bank_id,
     });
 
     if (existingAssignment) {
@@ -28,26 +68,62 @@ router.post("/", async (req, res) => {
 
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
+    const currentDate = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
 
     req.body["bank_assign_id"] = uniqueId;
-    req.body["bank_assign_date"] = moment()
-      .utcOffset(330)
-      .format("YYYY-MM-DD HH:mm:ss");
+    req.body["bank_assign_date"] = currentDate;
+    req.body["createdAt"] = currentDate;
+    req.body["updatedAt"] = currentDate;
 
-    var data = await BankApproval.create(req.body);
+    const branchAssignData = await BankApproval.create(req.body);
+    const loanDetails = await Loan.findOne({ loan_id });
+
+    if (!loanDetails) {
+      throw new Error(`Loan with ID ${loan_id} not found.`);
+    }
+
+    const userDetails = await AddUser.findOne({ user_id });
+
+    if (!userDetails) {
+      throw new Error(`User with ID ${user_id} not found.`);
+    }
+
+    const message = `You have a new file assigned on ${moment(
+      currentDate
+    ).format("MMMM Do YYYY, h:mm:ss a")} for ${loanDetails.loan} of ${
+      userDetails.username
+    }.`;
+
+    const notification = new Notification({
+      notification_id: uniqueId,
+      file_id,
+      bankuser_id,
+      bank_id,
+      loan_id,
+      user_id,
+      message: message,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    });
+
+    const savedNotification = await notification.save();
+
     res.json({
       success: true,
-      data: data,
-      message: "Documents assigned to the bank successfully.",
+      data: {
+        branchAssignData,
+        notification: savedNotification,
+      },
+      message:
+        "Documents assigned to the bank and notification sent successfully.",
     });
   } catch (error) {
-    res.json({
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
 });
-
 router.put("/:bank_assign_id", async (req, res) => {
   try {
     const { bank_assign_id } = req.params;

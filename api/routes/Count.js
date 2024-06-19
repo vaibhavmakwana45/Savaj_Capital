@@ -153,18 +153,15 @@ router.get(
       const { state, city, branchuser_id } = req.params;
 
       // Find all branch assignments for the given branchuser_id
-      const branchAssignments = await Branch_Assign.find({ branchuser_id }).lean();
+      const branchAssignments = await Branch_Assign.find({
+        branchuser_id,
+      }).lean();
 
       const enhancedLoans = [];
 
       for (const assignment of branchAssignments) {
         // Find the corresponding loan for each branch assignment
         const loan = await Loan.findOne({ loan_id: assignment.loan_id }).lean();
-
-        if (!loan) {
-          console.log(`Loan with ID ${assignment.loan_id} not found.`);
-          continue;
-        }
 
         // Find the loan types corresponding to the current loan and loantype_id from the assignment
         const loanTypes = await Loan_Type.find({
@@ -225,18 +222,40 @@ router.get(
         }
       }
 
+      // Consolidate loans with the same loan_id and empty loantype_id
+      const consolidatedLoans = [];
+      const loanMap = new Map();
+
+      for (const loan of enhancedLoans) {
+        if (loan.loanType === "Unknown" && loan.loantype_id === "") {
+          if (loanMap.has(loan.loan_id)) {
+            const existingLoan = loanMap.get(loan.loan_id);
+            existingLoan.fileCount += loan.fileCount;
+            existingLoan.files.push(...loan.files);
+          } else {
+            loanMap.set(loan.loan_id, { ...loan });
+          }
+        } else {
+          consolidatedLoans.push(loan);
+        }
+      }
+
+      for (const loan of loanMap.values()) {
+        consolidatedLoans.push(loan);
+      }
+
       // Filter loans that have files meeting the criteria
-      const flattenedLoans = enhancedLoans.filter(
+      const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
       );
-      res.json(flattenedLoans);
+
+      res.json(filteredLoans);
     } catch (error) {
       console.error("Error fetching loan and file data:", error);
       res.status(500).send("Error in fetching loan and file data");
     }
   }
 );
-
 
 router.get(
   "/loan-files-bankbranch/:state/:city/:bankuser_id?",
@@ -316,20 +335,39 @@ router.get(
         }
       }
 
+      // Consolidate loans with the same loan_id and empty loantype_id
+      const consolidatedLoans = [];
+      const loanMap = new Map();
+
+      for (const loan of enhancedLoans) {
+        if (loan.loanType === "Unknown" && loan.loantype_id === "") {
+          if (loanMap.has(loan.loan_id)) {
+            const existingLoan = loanMap.get(loan.loan_id);
+            existingLoan.fileCount += loan.fileCount;
+            existingLoan.files.push(...loan.files);
+          } else {
+            loanMap.set(loan.loan_id, { ...loan });
+          }
+        } else {
+          consolidatedLoans.push(loan);
+        }
+      }
+
+      for (const loan of loanMap.values()) {
+        consolidatedLoans.push(loan);
+      }
+
       // Filter loans that have files meeting the criteria
-      const flattenedLoans = enhancedLoans.filter(
+      const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
       );
 
-      res.json(flattenedLoans);
+      res.json(filteredLoans);
     } catch (error) {
       console.error("Error fetching loan and file data:", error);
       res.status(500).send("Error in fetching loan and file data");
     }
   }
 );
-
-
-
 
 module.exports = router;

@@ -495,7 +495,6 @@ function BankFileDetailPage() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      console.log(response, "response");
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -991,12 +990,9 @@ function BankFileDetailPage() {
         updatedStepData
       );
 
-      console.log("Step Status Update Response:", stepUpdateResponse);
-
       // Update file status based on the step being reversed
       if (updatedStepData.loan_step_id === "1715348651727") {
-        console.log("Updating File Status...");
-
+  
         const fileStatusUpdateResponse = await AxiosInstance.put(
           `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
           {
@@ -1005,7 +1001,6 @@ function BankFileDetailPage() {
           }
         );
 
-        console.log("File Status Update Response:", fileStatusUpdateResponse);
       }
 
       // Check if both step and file updates were successful

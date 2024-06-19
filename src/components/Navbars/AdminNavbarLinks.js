@@ -35,6 +35,7 @@ import {
   FaSignOutAlt,
   FaUser,
   FaVoicemail,
+  FaEye,
 } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
@@ -42,18 +43,40 @@ import { useHistory } from "react-router-dom";
 import { ItemContent } from "components/Menu/ItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
 import { jwtDecode } from "jwt-decode";
+import AxiosInstance from "config/AxiosInstance";
 
 export default function HeaderLinks(props) {
+  const [notifications, setNotifications] = useState([]);
   const [accessType, setAccessType] = useState("");
-  React.useEffect(() => {
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false); // State to manage notification menu open/close
+
+  useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
+    fetchNotifications();
   }, []);
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await AxiosInstance.get("/notifications", {
+        params: {
+          branchuser_id: accessType.branchuser_id,
+          bankuser_id: accessType.bankuser_id,
+        },
+      });
+      setNotifications(response.data.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [accessType]);
   const {
     variant,
     children,
@@ -71,16 +94,63 @@ export default function HeaderLinks(props) {
     fixed && scrolled
       ? useColorModeValue("gray.700", "gray.200")
       : useColorModeValue("white", "gray.200");
-  let menuBg = useColorModeValue("white", "navy.800");
+  const menuBg = useColorModeValue("white", "navy.800");
+  const notificationBg = useColorModeValue("gray.50", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const boxShadow = useColorModeValue(
+    "0 4px 6px rgba(0, 0, 0, 0.1)",
+    "0 4px 6px rgba(0, 0, 0, 0.3)"
+  );
+  const notificationHoverBg = useColorModeValue("gray.100", "gray.600");
   if (secondary) {
     navbarIcon = "white";
   }
   const history = useHistory();
+
   const handleLogout = async () => {
     localStorage.removeItem("decodedToken");
     localStorage.removeItem("authToken");
     history.push("/auth/signin");
   };
+
+  const handleViewNotification = async (notificationId) => {
+    try {
+      const response = await AxiosInstance.put(
+        `/notifications/${notificationId}`,
+        {
+          isUnRead: false,
+        }
+      );
+
+      if (response.data.success) {
+        const notificationToUpdate = notifications.find(
+          (notification) => notification.notification_id === notificationId
+        );
+
+        const fileId = notificationToUpdate.file_id;
+
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notification) =>
+            notification.notification_id === notificationId
+              ? { ...notification, isUnRead: false }
+              : notification
+          )
+        );
+
+        if (accessType.branchuser_id) {
+          history.push(`/savajcapitaluser/viewuserfile?id=${fileId}`);
+        } else if (accessType.bankuser_id) {
+          history.push(`/bankuser/viewbankfile?id=${fileId}`);
+        }
+        fetchNotifications();
+        setNotificationMenuOpen(false);
+      }
+    } catch (error) {
+      console.error("Error updating notification:", error);
+    }
+  };
+  const notificationCount = notifications.length;
+  console.log(notificationCount)
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
@@ -99,44 +169,94 @@ export default function HeaderLinks(props) {
         w="18px"
         h="18px"
       />
-      <Menu>
-        <MenuButton>
-          <BellIcon color={navbarIcon} w="18px" h="18px" />
-        </MenuButton>
-        <MenuList p="16px 8px" bg={menuBg} mt="10px">
+      <Menu isOpen={notificationMenuOpen}>
+      <MenuButton
+    onClick={() => setNotificationMenuOpen(!notificationMenuOpen)}
+    position="relative"
+  >
+    <BellIcon color={navbarIcon} w="18px" h="18px" />
+
+    {/* Display notification count */}
+    {notifications.length > 0 && (
+      <Box
+        position="absolute"
+        top="-5px"
+        right="-15px"
+        bg="red.500"
+        color="white"
+        fontSize="xs"
+        fontWeight="bold"
+        borderRadius="full"
+        px="2"
+        lineHeight="1"
+      >
+        {notifications.length}
+      </Box>
+    )}
+  </MenuButton>
+        <MenuList
+          p="16px 8px"
+          bg={menuBg}
+          mt="10px"
+          boxShadow={boxShadow}
+          borderColor={borderColor}
+          borderRadius="md"
+        >
           <Flex flexDirection="column">
-            {name === "/superadmin" && (
-              <>
-                <MenuItem borderRadius="8px" mb="10px">
-                  <ItemContent
-                    time="13 minutes ago"
-                    info="from Alicia"
-                    boldInfo="New Message"
-                    aName="Alicia"
-                    aSrc={avatar1}
-                  />
-                </MenuItem>
-                <MenuItem borderRadius="8px" mb="10px">
-                  <ItemContent
-                    time="2 days ago"
-                    info="by Josh Henry"
-                    boldInfo="New Album"
-                    aName="Josh Henry"
-                    aSrc={avatar2}
-                  />
-                </MenuItem>
-              </>
-            )}
-            {name === "/bank" && (
-              <MenuItem borderRadius="8px">
-                <ItemContent
-                  time="3 days ago"
-                  info="Payment successfully completed!"
-                  boldInfo=""
-                  aName="Kara"
-                  aSrc={avatar3}
-                />
-              </MenuItem>
+            <Text
+              fontSize="sm"
+              fontWeight="bold"
+              mb="2"
+              color={useColorModeValue("gray.700", "white")}
+            >
+              Notifications
+            </Text>
+            {notifications.length === 0 ? (
+              <Text fontSize="sm" color="gray.500">
+                No notifications found.
+              </Text>
+            ) : (
+              notifications.map((notification, index) => (
+                <Box
+                  key={index}
+                  mb="2"
+                  p="3"
+                  bg={notificationBg}
+                  borderRadius="md"
+                  boxShadow="sm"
+                  border="1px solid"
+                  borderColor={borderColor}
+                  _hover={{ bg: notificationHoverBg }}
+                  transition="background-color 0.2s ease"
+                >
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Box flex="1" mr="4">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        mb="1"
+                        color={useColorModeValue("gray.800", "white")}
+                      >
+                        {notification.title}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        {notification.message}
+                      </Text>
+                    </Box>
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() =>
+                        handleViewNotification(notification.notification_id)
+                      }
+                      leftIcon={<FaEye />}
+                      variant="outline"
+                    >
+                      View
+                    </Button>
+                  </Flex>
+                </Box>
+              ))
             )}
           </Flex>
         </MenuList>

@@ -55,7 +55,6 @@ import { Dropdown, DropdownItem, DropdownMenu } from "reactstrap";
 
 function Files() {
   const [files, setFiles] = useState([]);
-  console.log(files, "files");
   const textColor = useColorModeValue("gray.700", "white");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
@@ -275,7 +274,6 @@ function Files() {
       const { fileCount } = response.data;
       setTotalAmount(totalAmount);
       setTotalFiles(fileCount);
-      console.log(totalAmount, "totalAmount");
     } catch (error) {
       console.error("Error fetching total amount:", error);
     }
@@ -290,12 +288,13 @@ function Files() {
   const [anchorEl, setAnchorEl] = useState(null);
   const cancelRefAssign = React.useRef();
 
-  const handleClick = (event, fileId, city, loanId, loanSubtypeId) => {
+  const handleClick = (event, fileId, city, loanId, loanSubtypeId ,userId) => {
     setAnchorEl(event.currentTarget);
     setSelectedFileId(fileId);
     setSelectedCityName(city);
     setSelectedBankCityName(city);
     setSelectedLoanId(loanId);
+    setSelectedUserId(userId);
     setSelectedLoanSubtypeId(loanSubtypeId);
   };
 
@@ -443,6 +442,7 @@ function Files() {
   //assign
   const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedLoanSubtypeId, setSelectedLoanSubtypeId] = useState("");
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selecteAssignFileId, setSelecteAssignFileId] = useState(null);
@@ -453,19 +453,16 @@ function Files() {
   const [selectedBranchUserId, setSelectedBranchUserId] = useState(null);
   const [selectedUserFileCount, setSelectedUserFileCount] = useState(0);
 
-  const handleAssign = (id, city, loanId, loanSubtypeId) => {
+  const handleAssign = (id, city, loanId, loanSubtypeId, userId) => {
     const selectedFile = allFiles.find((file) => file.file_id === id);
     if (selectedFile) {
       setSelecteAssignFileId(selectedFile.file_id);
       setSelectedLoanId(loanId);
       setSelectedLoanSubtypeId(loanSubtypeId);
       setSelectedCityName(city);
-      setSelectedCityName(city);
+      setSelectedUserId(userId);
       setIsAssignDialogOpen(true);
-      console.log("Clicked on file:", id);
-      console.log("City:", city);
-      console.log("Loan ID:", loanId);
-      console.log("Loan Type ID:", loanSubtypeId);
+      console.log(userId, "userId");
     }
   };
 
@@ -550,6 +547,7 @@ function Files() {
         loantype_id: selectedLoanSubtypeId,
         branch_id: selectedBranchId,
         branchuser_id: selectedBranchUserId,
+        user_id: selectedUserId,
       };
 
       const response = await AxiosInstance.post("/branch_assign", payload);
@@ -592,12 +590,14 @@ function Files() {
   const [isBankAssignDialogOpen, setIsBankAssignDialogOpen] = useState(false);
   const [selectedBankUserFileCount, setSelectedBankUserFileCount] = useState(0);
 
-  const handleBankAssign = (id, city, loanId) => {
+  const handleBankAssign = (id, city, loanId, loanSubtypeId, userId) => {
     const selectedFile = allFiles.find((file) => file.file_id === id);
     if (selectedFile) {
       setSelectedFileBankId(selectedFile.file_id);
       setSelectedLoanId(loanId);
       setSelectedBankCityName(city);
+      setSelectedUserId(userId);
+      setSelectedLoanSubtypeId(loanSubtypeId);
       setIsBankAssignDialogOpen(true);
     }
   };
@@ -621,7 +621,6 @@ function Files() {
   const fetchBanks = async () => {
     try {
       const response = await AxiosInstance.get("/addbankuser");
-      console.log("Fetched banks:", response.data.data); // Check fetched data
       setBanks(response.data.data);
     } catch (error) {
       console.error("Error fetching banks:", error);
@@ -643,7 +642,6 @@ function Files() {
           `/bank_user/${selectedBankId}`
         );
         setBankUser(response.data.data || []);
-        console.log(response.data.data, "responseee");
         setLoading(false);
       } catch (error) {
         console.error("Error fetching branch users:", error);
@@ -664,6 +662,7 @@ function Files() {
         loan_id: selectedLoanId,
         bankuser_id: selectedBankUserId,
         loantype_id: selectedLoanSubtypeId,
+        user_id: selectedUserId,
       };
 
       const response = await AxiosInstance.post("/bank_approval", payload);
@@ -862,6 +861,7 @@ function Files() {
                 ) : (
                   files.map((file, index) => (
                     <React.Fragment key={file.file_id}>
+                      {console.log("file", file)}
                       <Tr
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1027,7 +1027,8 @@ function Files() {
                                     file.file_id,
                                     file.city,
                                     file.loan_id,
-                                    file.loantype_id || ""
+                                    file.loantype_id || "",
+                                    file.user_id
                                   );
                                 }}
                               >
@@ -1078,7 +1079,8 @@ function Files() {
                                       selectedFileId,
                                       selectedCityName,
                                       selectedLoanId,
-                                      selectedLoanSubtypeId
+                                      selectedLoanSubtypeId,
+                                      selectedUserId
                                     );
                                     e.stopPropagation();
                                   }}
@@ -1095,7 +1097,8 @@ function Files() {
                                       selectedFileId,
                                       selectedBankCityName,
                                       selectedLoanId,
-                                      selectedLoanSubtypeId
+                                      selectedLoanSubtypeId,
+                                      selectedUserId
                                     );
                                     e.stopPropagation();
                                   }}
