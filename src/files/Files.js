@@ -61,11 +61,11 @@ function Files() {
   const location = useLocation();
   const { loan, loan_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
-  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
   const history = useHistory();
+  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
 
   const states = State.getStatesOfCountry("IN");
 
@@ -288,7 +288,7 @@ function Files() {
   const [anchorEl, setAnchorEl] = useState(null);
   const cancelRefAssign = React.useRef();
 
-  const handleClick = (event, fileId, city, loanId, loanSubtypeId ,userId) => {
+  const handleClick = (event, fileId, city, loanId, loanSubtypeId, userId) => {
     setAnchorEl(event.currentTarget);
     setSelectedFileId(fileId);
     setSelectedCityName(city);
@@ -396,6 +396,25 @@ function Files() {
   };
 
   //update status
+  const [allLoanStatus, setAllLoanStatus] = useState([]);
+  const getLoanStatusData = async () => {
+    try {
+      const response = await AxiosInstance.get("/loanstatus");
+      if (response.data.success) {
+        setAllLoanStatus(response.data.data);
+        setLoading(false);
+      } else if (response.data.statusCode === 201) {
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    getLoanStatusData();
+  }, []);
+
   const handleUpdate = (id) => {
     setSelecteUpdateFileId(id);
     setIsUpdateDialogOpen(true);
@@ -1183,7 +1202,6 @@ function Files() {
                                       ).map((documentRow, index) => (
                                         <Tr key={index}>
                                           <Td>
-                                            {" "}
                                             {documentRow?.name} (
                                             {documentRow?.title})
                                           </Td>
@@ -1329,10 +1347,14 @@ function Files() {
                     height: "35px",
                   }}
                 >
-                  <option value="">Select a Status</option>
-                  <option value="running">Running</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  {allLoanStatus.map((loanstatus) => (
+                    <option
+                      key={loanstatus.loanstatus}
+                      value={loanstatus.loanstatus_id}
+                    >
+                      {loanstatus.loanstatus}
+                    </option>
+                  ))}
                 </select>
               </AlertDialogBody>
 

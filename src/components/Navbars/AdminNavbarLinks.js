@@ -150,7 +150,7 @@ export default function HeaderLinks(props) {
     }
   };
   const notificationCount = notifications.length;
-  console.log(notificationCount)
+  console.log(notificationCount);
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
@@ -170,30 +170,30 @@ export default function HeaderLinks(props) {
         h="18px"
       />
       <Menu isOpen={notificationMenuOpen}>
-      <MenuButton
-    onClick={() => setNotificationMenuOpen(!notificationMenuOpen)}
-    position="relative"
-  >
-    <BellIcon color={navbarIcon} w="18px" h="18px" />
+        <MenuButton
+          onClick={() => setNotificationMenuOpen(!notificationMenuOpen)}
+          position="relative"
+        >
+          <BellIcon color={navbarIcon} w="18px" h="18px" />
 
-    {/* Display notification count */}
-    {notifications.length > 0 && (
-      <Box
-        position="absolute"
-        top="-5px"
-        right="-15px"
-        bg="red.500"
-        color="white"
-        fontSize="xs"
-        fontWeight="bold"
-        borderRadius="full"
-        px="2"
-        lineHeight="1"
-      >
-        {notifications.length}
-      </Box>
-    )}
-  </MenuButton>
+          {/* Display notification count */}
+          {notifications.length > 0 && (
+            <Box
+              position="absolute"
+              top="-5px"
+              right="-15px"
+              bg="red.500"
+              color="white"
+              fontSize="xs"
+              fontWeight="bold"
+              borderRadius="full"
+              px="2"
+              lineHeight="1"
+            >
+              {notifications.length}
+            </Box>
+          )}
+        </MenuButton>
         <MenuList
           p="16px 8px"
           bg={menuBg}

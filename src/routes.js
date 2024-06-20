@@ -59,6 +59,7 @@ import EditFileCustomer from "userdashboard/CustomerFiles/EditFileCustomer";
 import DetailCustomerFilePage from "userdashboard/CustomerFiles/DetailCustomerFilePage";
 import AddCustomer from "savajcapitaldashboard/AddCustomer/AddCustomer";
 import Customer from "savajcapitaldashboard/AddCustomer/Customer";
+import LoanStatus from "loan/LoanStatus";
 
 var dashRoutes = [
   //superadmin
@@ -170,6 +171,11 @@ var dashRoutes = [
         name: "Loan Step",
         layout: "/superadmin",
       },
+      {
+        layout: "/superadmin",
+        path: "/addloanstatus",
+        name: "Loan Status",
+      },
       // {
       //   path: "/addloantype",
       //   name: "Add Loan",
@@ -270,6 +276,7 @@ var dashRoutes = [
         path: "/savajuserroles",
         name: "Add Roles",
       },
+
       // {
       //   layout: "/superadmin",
       //   path: "/branch-assigned-file",
@@ -441,6 +448,15 @@ var dashRoutes = [
     name: "Loan Step",
     icon: <CreditIcon color="inherit" />,
     component: AllStep,
+    layout: "/superadmin",
+    hideInSidebar: true,
+    // hideInSResponsive: true,
+  },
+  {
+    path: "/addloanstatus",
+    name: "Loan Status",
+    icon: <CreditIcon color="inherit" />,
+    component: LoanStatus,
     layout: "/superadmin",
     hideInSidebar: true,
     // hideInSResponsive: true,
