@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   status: {
     type: String,
     // enum: ["running", "approved", "rejected"],
-    // default: "running",
+    default: "1718861587262",
   },
 });
 

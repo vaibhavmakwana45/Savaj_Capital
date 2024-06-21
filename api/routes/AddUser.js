@@ -730,4 +730,34 @@ router.put("/toggle-active/:user_id", async (req, res) => {
 // }
 // addIsDeleteToWithdrawal();
 
+// async function updateStatuses() {
+//   try {
+//     // Find documents where you want to update the status field
+//     const documentsToUpdate = await File_Uplode.find({}); // Adjust the query if needed
+
+//     // Update the documents with the new status field
+//     for (let i = 0; i < documentsToUpdate.length; i++) {
+//       // Check the current status and update accordingly
+//       switch (documentsToUpdate[i].status) {
+//         case "running":
+//           documentsToUpdate[i].status = "1718861587262";
+//           break;
+//         case "approved":
+//           documentsToUpdate[i].status = "1718861579508";
+//           break;
+//         case "rejected":
+//           documentsToUpdate[i].status = "1718861593296";
+//           break;
+//       }
+
+//       // Save the updated document
+//       await documentsToUpdate[i].save();
+//     }
+//   } catch (error) {
+//     console.error("Error updating status field:", error);
+//   }
+// }
+
+// updateStatuses();
+
 module.exports = router;

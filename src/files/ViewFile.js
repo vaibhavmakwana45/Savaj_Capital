@@ -517,7 +517,7 @@ function ViewFile() {
 
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-          status: "approved",
+          status: "1718861579508",
         });
       }
 
@@ -619,7 +619,7 @@ function ViewFile() {
       );
 
       await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "rejected",
+        status: "1718861593296",
       });
       if (response.status === 200) {
         fetchStepsData();
@@ -790,7 +790,7 @@ function ViewFile() {
           `/file_upload/updatestatus/${updatedStepData.file_id}`,
           {
             status:
-              updatedStepData.status === "complete" ? "approved" : "running",
+              updatedStepData.status === "complete" ? "1718861579508" : "1718861587262",
           }
         );
       }

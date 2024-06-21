@@ -678,10 +678,14 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
 
         if (loan_step_id === "1715348523661") {
           try {
-            await axios.get(
+            const response = await axios.get(
               `http://localhost:5882/api/file_upload/get_all_documents/${file_id}`
             );
-            return { loan_step: stepData.loan_step, status: "complete" };
+
+            // Check the status returned by the /get_all_documents endpoint
+            const documentStatus = response.data.status;
+
+            return { loan_step: stepData.loan_step, status: documentStatus };
           } catch (error) {
             console.error("Error fetching documents: ", error.message);
             return { loan_step: stepData.loan_step, status: "error" };
@@ -714,9 +718,10 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
     });
   } catch (error) {
     // Handle any errors
+    console.error("Error in /get_all_steps: ", error.message);
     res.status(500).json({
       statusCode: 500,
-      message: error.message,
+      message: "Internal Server Error",
     });
   }
 });

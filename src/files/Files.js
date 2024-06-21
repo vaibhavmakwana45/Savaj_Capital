@@ -433,7 +433,7 @@ function Files() {
 
       if (response.data.success) {
         toast.success("File status updated successfully!");
-        // Call fetchData() here if you need to refresh data after the update
+        fetchData();
       } else {
         throw new Error(
           response.data.message || "Failed to update the status."
@@ -898,25 +898,14 @@ function Files() {
                           <div
                             style={{
                               color: "white",
-                              backgroundColor:
-                                file?.status === "approved"
-                                  ? "#4CAF50"
-                                  : file?.status === "rejected"
-                                  ? "#F44336"
-                                  : "#FF9C00",
+                              backgroundColor: file?.color,
                               padding: "4px 8px",
                               borderRadius: "10px",
                               display: "inline-block",
                               fontSize: "0.8em",
                             }}
                           >
-                            <span>
-                              {file?.status === "approved"
-                                ? `Approved`
-                                : file?.status === "rejected"
-                                ? `Rejected`
-                                : `Running`}
-                            </span>
+                            <span>{file?.status}</span>
 
                             {file?.status_message && (
                               <div

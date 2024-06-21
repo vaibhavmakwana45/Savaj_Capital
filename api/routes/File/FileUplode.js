@@ -477,9 +477,7 @@ router.get("/", async (req, res) => {
         );
         const stepsData = stepsResponse.data.data;
 
-        const rejectedStep = stepsData.find(
-          (step) => step.status === "rejected"
-        );
+        const rejectedStep = stepsData.find((step) => step.status === "reject");
         const activeStep = stepsData.find((step) => step.status === "active");
 
         if (rejectedStep) {
@@ -592,8 +590,8 @@ router.get("/get_all_documents/:file_id", async (req, res) => {
       pendingObject.length > 0
         ? "active"
         : commonIds.length === loanIds.length
-          ? "complete"
-          : "active";
+        ? "complete"
+        : "active";
 
     res.json({
       statusCode: 200,
@@ -1823,8 +1821,8 @@ router.get("/get_documents/:file_id", async (req, res) => {
           pendingObject.length > 0
             ? "active"
             : approvedObject.length === 0
-              ? "active"
-              : "complete",
+            ? "active"
+            : "complete",
       },
       message: "Read All Request",
     });
@@ -1841,7 +1839,7 @@ router.get("/amounts/:loan_id?/:loantype_id?", async (req, res) => {
     const { loan_id, loantype_id } = req.params;
 
     // Construct the query object
-    const query = { status: "approved" };
+    const query = { status: "1718861579508" };
     if (loan_id) {
       query.loan_id = loan_id;
     }
@@ -1924,7 +1922,7 @@ router.get(
         loantype_id = undefined;
       }
 
-      const query = { loan_id, status: "approved" };
+      const query = { loan_id, status: "1718861579508" };
       if (loantype_id) {
         query.loantype_id = loantype_id;
       }

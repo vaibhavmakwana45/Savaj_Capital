@@ -117,9 +117,8 @@ const FileDisplay = ({ groupedFiles }) => {
             key={index}
           >
             <div
-              className={`accordion-item ${
-                index === openPanelIndex ? "show" : ""
-              }`}
+              className={`accordion-item ${index === openPanelIndex ? "show" : ""
+                }`}
               key={index}
             >
               <h2
@@ -198,9 +197,8 @@ const FileDisplay = ({ groupedFiles }) => {
               </div> */}
               <div
                 id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
+                className={`accordion-collapse collapse ${index === openPanelIndex ? "show" : ""
+                  }`}
                 aria-labelledby={`panelsStayOpen-heading-${index}`}
               >
                 <div
@@ -570,26 +568,26 @@ function DetailScFilePage() {
       ...prevState,
       data: prevState?.data
         ? [
-            ...prevState.data,
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
+          ...prevState.data,
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
             },
-          ]
+          },
+        ]
         : [
-            {
-              ...newData,
-              is: false,
-              data: {
-                ...newData.data,
-                inputs: updatedInputs,
-              },
+          {
+            ...newData,
+            is: false,
+            data: {
+              ...newData.data,
+              inputs: updatedInputs,
             },
-          ],
+          },
+        ],
     }));
   };
 
@@ -720,7 +718,7 @@ function DetailScFilePage() {
       // Check if the current step is "Dispatch" to update the file status
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-          status: "approved",
+          status: "1718861579508",
         });
       }
 
@@ -822,7 +820,7 @@ function DetailScFilePage() {
       );
 
       await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "rejected",
+        status: "1718861593296",
       });
       if (response.status === 200) {
         fetchStepsData();
@@ -971,7 +969,7 @@ function DetailScFilePage() {
       );
 
       await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "running",
+        status: "1718861587262",
       });
       if (response.status === 200) {
         fetchStepsData();
@@ -1135,9 +1133,8 @@ function DetailScFilePage() {
 
                     <div className="accordion my-3 mx-3">
                       <div
-                        className={`accordion-item ${
-                          isOpenGuarantor ? "show" : ""
-                        }`}
+                        className={`accordion-item ${isOpenGuarantor ? "show" : ""
+                          }`}
                       >
                         <h2
                           className="accordion-header"
@@ -1167,9 +1164,8 @@ function DetailScFilePage() {
                         </h2>
                         <div
                           id="panelsStayOpen-collapse-0"
-                          className={`accordion-collapse collapse ${
-                            isOpenGuarantor ? "show" : ""
-                          }`}
+                          className={`accordion-collapse collapse ${isOpenGuarantor ? "show" : ""
+                            }`}
                           aria-labelledby="panelsStayOpen-heading-0"
                         >
                           <div
@@ -1590,15 +1586,15 @@ function DetailScFilePage() {
                                     </div>
                                     {dataIndex ===
                                       open.data.guarantorSteps.length - 1 && (
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                    )}
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          style={{ backgroundColor: "#b19552" }}
+                                        >
+                                          Submit
+                                        </Button>
+                                      )}
                                   </Form>
                                 )
                               )}
@@ -1606,7 +1602,7 @@ function DetailScFilePage() {
                             {modalOpen &&
                               modalOpen.data?.map((item, dataIndex) =>
                                 item.is &&
-                                item.data.loan_step_id !== "1715348523661" ? (
+                                  item.data.loan_step_id !== "1715348523661" ? (
                                   <Form
                                     onSubmit={(e) => {
                                       e.preventDefault();
@@ -1691,16 +1687,16 @@ function DetailScFilePage() {
                                     )}
                                     {dataIndex ===
                                       modalOpen.data.length - 1 && (
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        mr={3}
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                    )}
+                                        <Button
+                                          colorScheme="blue"
+                                          className="mt-3"
+                                          type="submit"
+                                          mr={3}
+                                          style={{ backgroundColor: "#b19552" }}
+                                        >
+                                          Submit
+                                        </Button>
+                                      )}
                                   </Form>
                                 ) : null
                               )}

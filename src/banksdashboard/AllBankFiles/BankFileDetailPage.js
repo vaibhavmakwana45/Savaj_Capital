@@ -717,7 +717,7 @@ function BankFileDetailPage() {
       // Check if the current step is "Dispatch" to update the file status
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-          status: "approved",
+          status: "1718861579508",
         });
       }
 
@@ -820,7 +820,7 @@ function BankFileDetailPage() {
       );
 
       await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "rejected",
+        status: "1718861593296",
       });
       if (response.status === 200) {
         fetchStepsData();
@@ -997,7 +997,7 @@ function BankFileDetailPage() {
           `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
           {
             status:
-              updatedStepData.status === "complete" ? "approved" : "running",
+              updatedStepData.status === "complete" ? "1718861579508" : "1718861587262",
           }
         );
 

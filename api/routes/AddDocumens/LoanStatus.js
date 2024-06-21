@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const LoanStatus = require("../../models/AddDocuments/LoanStatus");
+const File_Uplode = require("../../models/File/File_Uplode");
 
 router.post("/", async (req, res) => {
   try {
@@ -91,12 +92,49 @@ router.put("/:loanstatus_id", async (req, res) => {
   }
 });
 
+// router.delete("/:loanstatus_id", async (req, res) => {
+//   try {
+//     const { loanstatus_id } = req.params;
+
+//     const deletedDocument = await LoanStatus.findOneAndDelete({
+//       loanstatus_id: loanstatus_id,
+//     });
+
+//     if (!deletedDocument) {
+//       return res.status(200).json({
+//         statusCode: 202,
+//         message: "Loan Status not found",
+//       });
+//     }
+
+//     res.json({
+//       success: true,
+//       message: "Loan Status deleted successfully",
+//       deletedDocumentId: loanstatus_id,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
 router.delete("/:loanstatus_id", async (req, res) => {
   try {
     const { loanstatus_id } = req.params;
 
+    const isStatusInUse = await File_Uplode.findOne({ status: loanstatus_id });
+
+    if (isStatusInUse) {
+      return res.status(200).json({
+        statusCode: 202,
+        message: "Deletion not allowed: Loan Status is currently in use",
+      });
+    }
+
     const deletedDocument = await LoanStatus.findOneAndDelete({
-      loanstatus_id: loanstatus_id,
+      loanstatus_id,
     });
 
     if (!deletedDocument) {
