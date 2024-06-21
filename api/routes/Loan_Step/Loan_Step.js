@@ -678,10 +678,14 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
 
         if (loan_step_id === "1715348523661") {
           try {
-            await axios.get(
+            const response = await axios.get(
               `https://admin.savajcapital.com/api/file_upload/get_all_documents/${file_id}`
             );
-            return { loan_step: stepData.loan_step, status: "complete" };
+
+            // Check the status returned by the /get_all_documents endpoint
+            const documentStatus = response.data.status;
+
+            return { loan_step: stepData.loan_step, status: documentStatus };
           } catch (error) {
             console.error("Error fetching documents: ", error.message);
             return { loan_step: stepData.loan_step, status: "error" };
@@ -720,6 +724,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
     });
   }
 });
+
 
 router.post("/steps/:file_id", async (req, res) => {
   try {
