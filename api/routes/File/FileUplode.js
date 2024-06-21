@@ -917,6 +917,7 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
     const loanIds = data.map((item) => item.loan_id);
     const loanTypeIds = data.map((item) => item.loantype_id);
     const fileIds = data.map((item) => item.file_id);
+    const statusIds = data.map((item) => item.status);
 
     const [
       branchUserData,
@@ -927,6 +928,8 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
       amountData,
       documentData,
       countData,
+      loanStatusData,
+      completeSteps
     ] = await Promise.all([
       SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }).select(
         "branchuser_id full_name"
@@ -991,6 +994,9 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
           };
         })
       ),
+      LoanStatus.find({ loanstatus_id: { $in: statusIds } }).select(
+        "loanstatus_id loanstatus color"
+      ),
     ]);
 
     const branchUserMap = new Map(
@@ -1012,6 +1018,50 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
         return [step.file_id, dispatchAmountInput?.value];
       })
     );
+    const loanStatusMap = new Map(
+      loanStatusData.map((status) => [status.loanstatus_id.toString(), status])
+    );
+    completeSteps?.forEach((step) => {
+      if (step.statusMessage) {
+        statusMessageMap.set(step.file_id, step.statusMessage);
+      }
+      if (step.loan_step === "DISPATCH ") {
+        const dispatchAmountInput = step.inputs.find(
+          (input) => input.label === "DISPATCH AMOUNT"
+        );
+        if (dispatchAmountInput) {
+          amountMap.set(step.file_id, dispatchAmountInput.value);
+        }
+      }
+    });
+
+    const stepsPromises = data.map(async (item) => {
+      try {
+        const stepsResponse = await axios.get(
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+        );
+        const stepsData = stepsResponse.data.data;
+
+        const rejectedStep = stepsData.find((step) => step.status === "reject");
+        const activeStep = stepsData.find((step) => step.status === "active");
+
+        if (rejectedStep) {
+          item.running_step_name = rejectedStep.loan_step;
+        } else if (activeStep) {
+          item.running_step_name = activeStep.loan_step;
+        } else {
+          const lastIndex = stepsData.length - 1;
+          item.running_step_name = stepsData[lastIndex].loan_step;
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching steps for file_id ${item.file_id}:`,
+          error.message
+        );
+      }
+    });
+
+    await Promise.all(stepsPromises);
     for (const item of data) {
       item.branchuser_full_name =
         branchUserMap.get(item.branchuser_id)?.full_name || "";
@@ -1034,6 +1084,12 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
           (d) => d.loan_document_id === doc.loan_document_id
         ),
       }));
+
+      if (loanStatusMap.has(item.status)) {
+        const loanStatus = loanStatusMap.get(item.status);
+        item.status = loanStatus.loanstatus;
+        item.color = loanStatus.color;
+      }
 
       const countInfo = countData.find((info) => info.file_id === item.file_id);
       if (countInfo) {
