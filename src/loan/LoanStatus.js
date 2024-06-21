@@ -35,6 +35,8 @@ function LoanStatus() {
   const [selectedLoanStatus, setSelectedLoanStatus] = useState("");
   const [selectedColor, setSelectedColor] = useState("#ffffff");
 
+  const restrictedIds = ["1718861593296", "1718861587262", "1718861579508"];
+
   const getLoanStatusData = async () => {
     try {
       const response = await AxiosInstance.get("/loanstatus");
@@ -50,7 +52,7 @@ function LoanStatus() {
     }
   };
 
-  const fllteredLoanStatus =
+  const filteredLoanStatus =
     searchTerm.length === 0
       ? allLoanStatus
       : allLoanStatus.filter((doc) =>
@@ -70,7 +72,7 @@ function LoanStatus() {
     "Action",
   ];
 
-  const formattedData = fllteredLoanStatus.map((loanstatus, index) => [
+  const formattedData = filteredLoanStatus.map((loanstatus, index) => [
     loanstatus.loanstatus_id,
     index + 1,
     loanstatus.loanstatus,
@@ -314,13 +316,15 @@ function LoanStatus() {
                     }}
                   />
                 </FormControl>
-                <FormControl id="color" mt={4}>
-                  <Text mb={2}>Select Color</Text>
-                  <SketchPicker
-                    color={selectedColor}
-                    onChangeComplete={(color) => setSelectedColor(color.hex)}
-                  />
-                </FormControl>
+                {!restrictedIds.includes(selectedLoanStatusId) && (
+                  <FormControl id="color" mt={4}>
+                    <Text mb={2}>Select Color</Text>
+                    <SketchPicker
+                      color={selectedColor}
+                      onChangeComplete={(color) => setSelectedColor(color.hex)}
+                    />
+                  </FormControl>
+                )}
               </AlertDialogBody>
 
               <AlertDialogFooter>

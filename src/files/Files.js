@@ -787,7 +787,7 @@ function Files() {
                   className="d-flex second-drop-section gap-2 "
                   style={{ marginLeft: "10px" }}
                 >
-                  <select
+                  {/* <select
                     class="form-select loan-type-dropdown "
                     aria-label="Default select example"
                     value={selectedStatusSearch}
@@ -798,6 +798,26 @@ function Files() {
                     <option value="running">Running</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
+                  </select> */}
+
+                  <select
+                    className="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    value={selectedStatusSearch}
+                    onChange={(e) => setSelectedStatusSearch(e.target.value)}
+                    width="200px"
+                  >
+                    <option value="" disabled selected>
+                      Select Status
+                    </option>
+                    {allLoanStatus?.map((loanstatus) => (
+                      <option
+                        key={loanstatus.loanstatus_id}
+                        value={loanstatus.loanstatus_id}
+                      >
+                        {loanstatus.loanstatus}
+                      </option>
+                    ))}
                   </select>
 
                   <Input
