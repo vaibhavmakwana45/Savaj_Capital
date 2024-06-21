@@ -61,11 +61,11 @@ function Files() {
   const location = useLocation();
   const { loan, loan_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
+  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
   const history = useHistory();
-  const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
 
   const states = State.getStatesOfCountry("IN");
 
@@ -255,13 +255,11 @@ function Files() {
 
   const fetchTotalAmount = async () => {
     try {
-      // Construct the URL based on available parameters
       let url = `/file_upload/amounts`;
       if (loan_id) {
         url += `/${loan_id}`;
       }
 
-      // Make the request with optional query parameters for state and city
       const response = await AxiosInstance.get(url, {
         params: {
           state: selectedState,
@@ -269,7 +267,6 @@ function Files() {
         },
       });
 
-      // Extract and set the total amount from the response
       const { totalAmount } = response.data;
       const { fileCount } = response.data;
       setTotalAmount(totalAmount);
@@ -279,7 +276,6 @@ function Files() {
     }
   };
 
-  // Fetch the total amount when relevant parameters change
   useEffect(() => {
     fetchTotalAmount();
   }, [loan_id, selectedState, selectedCity]);
@@ -396,38 +392,33 @@ function Files() {
   };
 
   //update status
-  const [allLoanStatus, setAllLoanStatus] = useState([]);
-  const getLoanStatusData = async () => {
-    try {
-      const response = await AxiosInstance.get("/loanstatus");
-      if (response.data.success) {
-        setAllLoanStatus(response.data.data);
-        setLoading(false);
-      } else if (response.data.statusCode === 201) {
-        setLoading(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    getLoanStatusData();
-  }, []);
-
   const handleUpdate = (id) => {
     setSelecteUpdateFileId(id);
     setIsUpdateDialogOpen(true);
   };
 
+  const [allLoanStatus, setAllLoanStatus] = useState([]); // Initialize as an empty array
+  const [selecteLoanStatusId, setSelecteLoanStatusId] = useState("");
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState("");
   const cancelRef1 = React.useRef();
 
-  const updateFile = async (fileId, newStatus) => {
+  useEffect(() => {
+    const fetchLoanStatus = async () => {
+      try {
+        const response = await AxiosInstance.get("/loanstatus");
+        setAllLoanStatus(response.data.data);
+      } catch (error) {
+        console.error("Error fetching loan statuses:", error);
+      }
+    };
+
+    fetchLoanStatus();
+  }, []);
+
+  const updateFile = async (fileId, newStatusId) => {
     try {
-      if (!newStatus) {
+      if (!newStatusId) {
         console.error("Status not selected");
         toast.error("Please select a status before updating.");
         return;
@@ -436,13 +427,13 @@ function Files() {
       const response = await AxiosInstance.put(
         `/file_upload/updatestatus/${fileId}`,
         {
-          status: newStatus,
+          status: newStatusId,
         }
       );
 
       if (response.data.success) {
         toast.success("File status updated successfully!");
-        fetchData();
+        // Call fetchData() here if you need to refresh data after the update
       } else {
         throw new Error(
           response.data.message || "Failed to update the status."
@@ -453,11 +444,10 @@ function Files() {
       toast.error("File status could not be updated: " + error.message);
     } finally {
       setIsUpdateDialogOpen(false);
-      setSelectedStatus("");
+      setSelecteLoanStatusId("");
       setSelecteUpdateFileId(null);
     }
   };
-
   //assign
   const [selectedCityName, setSelectedCityName] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
@@ -1202,6 +1192,7 @@ function Files() {
                                       ).map((documentRow, index) => (
                                         <Tr key={index}>
                                           <Td>
+                                            {" "}
                                             {documentRow?.name} (
                                             {documentRow?.title})
                                           </Td>
@@ -1326,7 +1317,7 @@ function Files() {
           leastDestructiveRef={cancelRef1}
           onClose={() => {
             setIsUpdateDialogOpen(false);
-            setSelectedStatus("");
+            setSelecteLoanStatusId("");
           }}
         >
           <AlertDialogOverlay>
@@ -1337,25 +1328,20 @@ function Files() {
 
               <AlertDialogBody>
                 Are you sure you want to update the status of this file?
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  style={{
-                    marginLeft: "10px",
-                    marginTop: "20px",
-                    width: "100%",
-                    height: "35px",
-                  }}
+                <Select
+                  placeholder="Select Status"
+                  value={selecteLoanStatusId}
+                  onChange={(e) => setSelecteLoanStatusId(e.target.value)}
                 >
-                  {allLoanStatus.map((loanstatus) => (
+                  {allLoanStatus?.map((loanstatus) => (
                     <option
-                      key={loanstatus.loanstatus}
+                      key={loanstatus.loanstatus_id}
                       value={loanstatus.loanstatus_id}
                     >
                       {loanstatus.loanstatus}
                     </option>
                   ))}
-                </select>
+                </Select>
               </AlertDialogBody>
 
               <AlertDialogFooter>
@@ -1368,11 +1354,11 @@ function Files() {
                 <Button
                   colorScheme="red"
                   onClick={() => {
-                    updateFile(selecteUpdateFileId, selectedStatus);
+                    updateFile(selecteUpdateFileId, selecteLoanStatusId);
                     setIsUpdateDialogOpen(false);
                   }}
                   ml={3}
-                  isDisabled={!selectedStatus}
+                  isDisabled={!selecteLoanStatusId}
                 >
                   Update
                 </Button>
