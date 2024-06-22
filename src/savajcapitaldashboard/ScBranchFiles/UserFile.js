@@ -94,7 +94,7 @@ function UserFile() {
   };
 
   const handleRowClick = (id) => {
-    history.push(`/superadmin/viewfile?id=${id}`);
+    history.push(`/savajcapitaluser/viewuserfile?id=${id}`);
   };
 
   useEffect(() => {
@@ -409,7 +409,7 @@ function UserFile() {
 
   //edit
   const handleEditClick = (id) => {
-    history.push(`/superadmin/editfile?id=${id}`);
+    history.push(`/savajcapitaluser/edituserfile?id=${id}`);
   };
 
   //update status
@@ -583,7 +583,7 @@ function UserFile() {
       const response = await AxiosInstance.post("/branch_assign", payload);
 
       if (response.data.success) {
-        history.push("/superadmin/savajcapitalbranch");
+        history.push("/savajcapitaluser/userfile");
         toast.success("All data submitted successfully!");
       } else {
         toast.error(
@@ -698,7 +698,7 @@ function UserFile() {
       const response = await AxiosInstance.post("/bank_approval", payload);
 
       if (response.data.success) {
-        history.push("/superadmin/bank");
+        history.push("/savajcapitaluser/userfile");
         toast.success("All data submitted successfully!");
       } else {
         toast.error(
@@ -726,8 +726,8 @@ function UserFile() {
                 {loan ? (
                   <>
                     {loan}
-                    {selectedStatusSearch !== "running" &&
-                    selectedStatusSearch !== "rejected" ? (
+                    {selectedStatusSearch !== "1718861587262" &&
+                    selectedStatusSearch !== "1718861593296" ? (
                       <Text
                         as="span"
                         color="green.400"
@@ -775,7 +775,7 @@ function UserFile() {
                     </select>
                   )}
 
-                  <select
+                  {/* <select
                     class="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     value={selectedState}
@@ -802,7 +802,7 @@ function UserFile() {
                         {city.name}
                       </option>
                     ))}
-                  </select>
+                  </select> */}
                 </div>
 
                 <div
@@ -850,7 +850,9 @@ function UserFile() {
                     mr="10px"
                   />
                   <Button
-                    onClick={() => history.push("/superadmin/addfile")}
+                    onClick={() =>
+                      history.push("/savajcapitaluser/adduserfile")
+                    }
                     className="dynamicImportantStyle"
                     colorScheme="blue"
                     style={{
@@ -961,7 +963,7 @@ function UserFile() {
                               </div>
                             )}
 
-                            {file?.status !== "rejected" && file?.amount && (
+                            {file?.status !== "1718861593296" && file?.amount && (
                               <div
                                 style={{
                                   fontSize: "0.9em",

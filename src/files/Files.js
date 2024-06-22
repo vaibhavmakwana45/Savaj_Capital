@@ -705,8 +705,8 @@ function Files() {
                 {loan ? (
                   <>
                     {loan}
-                    {selectedStatusSearch !== "running" &&
-                    selectedStatusSearch !== "rejected" ? (
+                    {selectedStatusSearch !== "1718861587262" &&
+                    selectedStatusSearch !== "1718861593296" ? (
                       <Text
                         as="span"
                         color="green.400"
@@ -939,7 +939,7 @@ function Files() {
                               </div>
                             )}
 
-                            {file?.status !== "rejected" && file?.amount && (
+                            {file?.status !== "1718861593296" && file?.amount && (
                               <div
                                 style={{
                                   fontSize: "0.9em",
@@ -949,6 +949,7 @@ function Files() {
                                 Amount: {file.amount}
                               </div>
                             )}
+
                             {/* <div
                               style={{
                                 fontSize: "0.9em",
