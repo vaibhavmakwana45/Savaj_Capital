@@ -126,7 +126,6 @@ function UserFile() {
   const [loading, setLoading] = useState(true);
 
   const [accessType, setAccessType] = useState("");
-  console.log(accessType, "accessType");
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
@@ -492,7 +491,6 @@ function UserFile() {
       setSelectedCityName(city);
       setSelectedUserId(userId);
       setIsAssignDialogOpen(true);
-      console.log(userId, "userId");
     }
   };
 
@@ -915,7 +913,6 @@ function UserFile() {
                 ) : (
                   files.map((file, index) => (
                     <React.Fragment key={file.file_id}>
-                      {console.log("file", file)}
                       <Tr
                         onClick={(e) => {
                           e.stopPropagation();

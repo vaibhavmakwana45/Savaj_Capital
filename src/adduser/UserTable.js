@@ -298,7 +298,7 @@ function UserTable() {
                   <Th>Reference</Th>
                   <Th>Cibil Score</Th>
                   <Th>CS Status</Th>
-                  <Th>Status</Th>
+                  {/* <Th>Status</Th> */}
                   <Th>Actions</Th>
                 </Tr>
               </Thead>
@@ -358,7 +358,7 @@ function UserTable() {
                             {getCibilScoreCategory(user.cibil_score)}
                           </Flex>
                         </Td>
-                        <Td>
+                        {/* <Td>
                           {user.isActivate ? (
                             <Button
                               colorScheme="green"
@@ -380,7 +380,7 @@ function UserTable() {
                               Inactive
                             </Button>
                           )}
-                        </Td>
+                        </Td> */}
                         <Td>
                           <Flex>
                             <IconButton

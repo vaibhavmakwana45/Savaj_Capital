@@ -113,8 +113,6 @@ router.post("/", async (req, res) => {
   try {
     const { file_id, branchuser_id, branch_id, loan_id, user_id } = req.body;
 
-    console.log("Received request body:", req.body);
-
     const existingAssignment = await BranchAssign.findOne({
       file_id,
       branchuser_id,
@@ -137,24 +135,19 @@ router.post("/", async (req, res) => {
     req.body["createdAt"] = currentDate;
     req.body["updatedAt"] = currentDate;
 
-    console.log("Processed request body for branch assignment:", req.body);
-
     const branchAssignData = await BranchAssign.create(req.body);
-    console.log("Branch assignment created:", branchAssignData);
 
     const loanDetails = await Loan.findOne({ loan_id });
 
     if (!loanDetails) {
       throw new Error(`Loan with ID ${loan_id} not found.`);
     }
-    console.log("Loan details found:", loanDetails);
 
     const userDetails = await AddUser.findOne({ user_id });
 
     if (!userDetails) {
       throw new Error(`User with ID ${user_id} not found.`);
     }
-    console.log("User details found:", userDetails);
 
     const message = `You have a new file assigned on ${moment(
       currentDate
@@ -174,11 +167,8 @@ router.post("/", async (req, res) => {
       updatedAt: currentDate,
     });
 
-    console.log("Notification to be saved:", notification);
-
     // Save notification to database
     const savedNotification = await notification.save();
-    console.log("Notification saved:", savedNotification);
 
     // Return success response
     res.json({

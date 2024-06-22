@@ -150,7 +150,6 @@ export default function HeaderLinks(props) {
     }
   };
   const notificationCount = notifications.length;
-  console.log(notificationCount);
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}

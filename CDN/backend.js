@@ -7,26 +7,14 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 
-app.get("/", async (req, res) => {
-  res.send("Success!!!!!!");
+app.listen(4568, () => {
+  console.log("Server is running on port 9278");
 });
 
-app.listen(5883, () => {});
-
-function getCurrentDateAndTime() {
-  const currentDate = new Date();
-  const year = currentDate.getFullYear();
-  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-  const day = String(currentDate.getDate()).padStart(2, "0");
-  const hours = String(currentDate.getHours()).padStart(2, "0");
-  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
-  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
-  return (formattedDateTime = `${year}-${month}-${day}-${hours}-${minutes}-${seconds}-`);
-}
-
+// Middleware to configure Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let destinationFolder = "./files/";
+    const destinationFolder = "./files/";
     cb(null, destinationFolder);
   },
   filename: function (req, file, cb) {
@@ -36,105 +24,131 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/upload", upload.array("files", 12), async (req, res) => {
+function getCurrentDateAndTime() {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const day = String(currentDate.getDate()).padStart(2, "0");
+  const hours = String(currentDate.getHours()).padStart(2, "0");
+  const minutes = String(currentDate.getMinutes()).padStart(2, "0");
+  const seconds = String(currentDate.getSeconds()).padStart(2, "0");
+  return `${year}${month}${day}${hours}${minutes}${seconds}_`;
+}
+
+function getContentType(filename) {
+  const extension = path.extname(filename).toLowerCase();
+  switch (extension) {
+    case ".pdf":
+      return "application/pdf";
+    case ".doc":
+    case ".docx":
+      return (
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        "application/msword"
+      );
+    case ".jpeg":
+    case ".jpg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".mp3":
+      return "audio/mpeg";
+    case ".wav":
+      return "audio/wav";
+    case ".mp4":
+      return "video/mp4";
+    case ".avi":
+      return "video/x-msvideo";
+    case ".mov":
+      return "video/quicktime";
+    case ".mkv":
+      return "video/x-matroska";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+function fileExistsMiddleware(req, res, next) {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "files", filename);
+
+  if (fs.existsSync(filePath)) {
+    req.filePath = filePath;
+    next();
+  } else {
+    res.status(404).json({ status: "error", message: "File not found" });
+  }
+}
+
+function errorHandlerMiddleware(err, req, res, next) {
+  res.status(500).json({ status: "error", message: err.message });
+}
+
+app.get("/api", (req, res) => {
+  res.send("Success!!!!!!");
+});
+
+app.post("/api/upload", upload.array("files", 12), (req, res) => {
   try {
-    const uploadedFiles = req.files.map((file, index) => {
+    const uploadedFiles = req.files.map((file) => {
       return {
         fileType: file.mimetype.split("/")[1],
         filename: file.filename,
       };
     });
-    return res.status(200).json({
+    res.status(200).json({
       status: "ok",
       message: "Files uploaded successfully!",
       files: uploadedFiles,
     });
   } catch (error) {
-    let errorMessage = "Internal Server Error";
-    if (error.message === "Unsupported file type") {
-      errorMessage =
-        "Unsupported file type. Please upload a PDF, DOC, JPEG, or PNG file.";
-    }
-    return res
-      .status(500)
-      .json({ status: "error", message: error.message || errorMessage });
+    next(error);
   }
 });
 
-app.get("/upload/:filename", async (req, res) => {
+app.get("/api/upload/:filename", fileExistsMiddleware, (req, res) => {
   try {
-    const filename = req.params.filename;
-    const filePath = path.join("./files", filename);
-
-    if (fs.existsSync(filePath)) {
-      let contentType;
-      if (filename.endsWith(".pdf")) {
-        contentType = "application/pdf";
-      } else if (filename.endsWith(".doc") || filename.endsWith(".docx")) {
-        contentType =
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-          "application/msword";
-      } else if (filename.endsWith(".jpeg") || filename.endsWith(".jpg")) {
-        contentType = "image/jpeg";
-      } else if (filename.endsWith(".png")) {
-        contentType = "image/png";
-      } else {
-        contentType =
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-          "application/msword";
-      }
-      const fileBuffer = fs.readFileSync(filePath);
-      res.set("Content-Type", contentType);
-      res.send(fileBuffer);
-    } else {
-      res.status(404).json({ status: "error", message: "Document not found" });
-    }
+    const contentType = getContentType(req.params.filename);
+    const fileBuffer = fs.readFileSync(req.filePath);
+    res.set("Content-Type", contentType);
+    res.send(fileBuffer);
   } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+    next(error);
   }
 });
 
-app.delete("/upload/:filename", async (req, res) => {
+app.delete("/api/upload/:filename", fileExistsMiddleware, (req, res) => {
   try {
-    const filename = req.params.filename;
-
-    const filePath = path.join("./files/", filename);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      res
-        .status(200)
-        .json({ status: "success", message: "File deleted successfully!" });
-    } else {
-      res.status(404).json({ status: "error", message: "File not found" });
-    }
+    fs.unlinkSync(req.filePath);
+    res
+      .status(200)
+      .json({ status: "success", message: "File deleted successfully!" });
   } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+    next(error);
   }
 });
 
-app.put("/upload/:filename", upload.single("files"), async (req, res) => {
-  try {
-    const filename = req.params.filename;
-
-    const filePath = path.join("./files/", filename);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      const uploadedFiles = req.file;
+app.put(
+  "/api/upload/:filename",
+  upload.single("files"),
+  fileExistsMiddleware,
+  (req, res) => {
+    try {
+      fs.unlinkSync(req.filePath);
+      const uploadedFile = req.file;
       const data = {
-        fileType: uploadedFiles.mimetype.split("/")[1],
-        filename: uploadedFiles.filename,
+        fileType: uploadedFile.mimetype.split("/")[1],
+        filename: uploadedFile.filename,
       };
-      return res.status(200).json({
+      res.status(200).json({
         status: "ok",
-        message: "Files Updated successfully!",
-        files: data,
+        message: "File updated successfully!",
+        file: data,
       });
-    } else {
-      res.status(404).json({ status: "error", message: "File not found" });
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
   }
-});
+);
+
+app.use(errorHandlerMiddleware);
