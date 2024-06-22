@@ -126,7 +126,6 @@ function AllBankFiles() {
   const [loading, setLoading] = useState(true);
 
   const [accessType, setAccessType] = useState("");
-  console.log(accessType, "accessType");
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
@@ -492,7 +491,6 @@ function AllBankFiles() {
       setSelectedCityName(city);
       setSelectedUserId(userId);
       setIsAssignDialogOpen(true);
-      console.log(userId, "userId");
     }
   };
 
@@ -914,8 +912,7 @@ function AllBankFiles() {
                   </Tr>
                 ) : (
                   files.map((file, index) => (
-                    <React.Fragment key={file.file_id}>
-                      {console.log("file", file)}
+                    <React.Fragment key={file.file_id}>                   
                       <Tr
                         onClick={(e) => {
                           e.stopPropagation();

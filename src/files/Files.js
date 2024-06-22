@@ -471,7 +471,6 @@ function Files() {
       setSelectedCityName(city);
       setSelectedUserId(userId);
       setIsAssignDialogOpen(true);
-      console.log(userId, "userId");
     }
   };
 
@@ -850,7 +849,7 @@ function Files() {
                   <Th>#</Th>
                   <Th>File Id</Th>
                   <Th>Customer (Business)</Th>
-                  <Th>City</Th>
+                  {/* <Th>City</Th> */}
                   <Th>Loan</Th>
                   <Th>File Status</Th>
                   <Th>Current Step</Th>
@@ -890,7 +889,6 @@ function Files() {
                 ) : (
                   files.map((file, index) => (
                     <React.Fragment key={file.file_id}>
-                      {console.log("file", file)}
                       <Tr
                         onClick={(e) => {
                           e.stopPropagation();
@@ -906,7 +904,7 @@ function Files() {
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
                           {file?.user_username} ({file?.businessname})
                         </Td>
-                        <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
+                        {/* <Td style={{ fontSize: "14px" }}>{file?.city}</Td> */}
                         <Td style={{ fontSize: "14px" }}>
                           {" "}
                           {`${file.loan}${

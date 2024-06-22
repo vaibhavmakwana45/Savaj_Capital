@@ -95,7 +95,7 @@ function ViewFile() {
     if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
       const pdf = new jsPDF();
       pdf.addImage(
-        `${basePath}${selectedFile.file_path}`,
+        `https://cdn.savajcapital.com/api/upload/${selectedFile.file_path}`,
         "JPEG",
         15,
         40,
@@ -790,7 +790,9 @@ function ViewFile() {
           `/file_upload/updatestatus/${updatedStepData.file_id}`,
           {
             status:
-              updatedStepData.status === "complete" ? "1718861579508" : "1718861587262",
+              updatedStepData.status === "complete"
+                ? "1718861579508"
+                : "1718861587262",
           }
         );
       }

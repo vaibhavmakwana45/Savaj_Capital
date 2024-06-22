@@ -272,11 +272,6 @@ router.get(
         // Find the corresponding loan for each bank approval
         const loan = await Loan.findOne({ loan_id: approval.loan_id }).lean();
 
-        if (!loan) {
-          console.log(`Loan with ID ${approval.loan_id} not found.`);
-          continue;
-        }
-
         // Find the loan types corresponding to the current loan and loantype_id from the approval
         const loanTypes = await Loan_Type.find({
           loan_id: loan.loan_id,
