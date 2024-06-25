@@ -417,7 +417,7 @@ function UserFile() {
     setIsUpdateDialogOpen(true);
   };
 
-  const [allLoanStatus, setAllLoanStatus] = useState([]); // Initialize as an empty array
+  const [allLoanStatus, setAllLoanStatus] = useState([]);
   const [selecteLoanStatusId, setSelecteLoanStatusId] = useState("");
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
@@ -657,7 +657,7 @@ function UserFile() {
 
   useEffect(() => {
     fetchBanks();
-  }, []); // Fetch banks on component mount
+  }, []);
 
   useEffect(() => {
     const fetchBankUser = async () => {
@@ -773,7 +773,6 @@ function UserFile() {
                     </select>
                   )}
 
-                  {/* mansi */}
                   {/* <select
                     class="form-select loan-type-dropdown"
                     aria-label="Default select example"

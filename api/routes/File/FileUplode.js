@@ -1489,6 +1489,7 @@ router.get("/file_upload/:file_id", async (req, res) => {
         loan_type: loanType?.loan_type,
         user: user,
         documents: formattedData,
+        logs: fileData.logs, // Include the logs here
         createdAt: fileData.createdAt,
         updatedAt: fileData.updatedAt,
         __v: fileData.__v,
@@ -1590,6 +1591,52 @@ router.delete("/:fileId", async (req, res) => {
   }
 });
 
+// router.put("/:file_id", async (req, res) => {
+//   try {
+//     const { file_id } = req.params;
+//     const updateData = req.body;
+
+//     if (updateData.documents && updateData.documents.length > 0) {
+//       const timestampForDocId = moment().unix();
+//       updateData.documents.forEach((doc, index) => {
+//         doc.doc_id = `${timestampForDocId}_${Math.floor(
+//           Math.random() * 1000
+//         )}_${index}`;
+//       });
+//     }
+
+//     updateData.updatedAt = moment()
+//       .utcOffset(330)
+//       .format("YYYY-MM-DD HH:mm:ss");
+
+//     const updatedFile = await File_Uplode.findOneAndUpdate(
+//       { file_id: file_id },
+//       { $set: updateData },
+//       { new: true }
+//     );
+
+//     if (!updatedFile) {
+//       return res.status(404).json({
+//         statusCode: 404,
+//         message: "File not found",
+//       });
+//     }
+
+//     res.json({
+//       statusCode: 200,
+//       success: true,
+//       message: "File updated successfully",
+//       data: updatedFile,
+//     });
+//   } catch (error) {
+//     console.error(`Error when trying to update file: ${error}`);
+//     res.status(500).json({
+//       statusCode: 500,
+//       message: "Internal Server Error",
+//       error: error.message,
+//     });
+//   }
+// });
 router.put("/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -1636,7 +1683,6 @@ router.put("/:file_id", async (req, res) => {
     });
   }
 });
-
 router.get("/get/:branchuser_id", async (req, res) => {
   try {
     const branchuser_id = req.params.branchuser_id;
