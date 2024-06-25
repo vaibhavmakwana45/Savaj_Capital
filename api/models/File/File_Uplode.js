@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema({
   updatedAt: {
     type: String,
   },
+  logs: { type: Array }, // Add logs field
   status: {
     type: String,
     // enum: ["running", "approved", "rejected"],

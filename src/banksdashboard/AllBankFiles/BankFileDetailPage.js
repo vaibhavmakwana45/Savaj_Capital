@@ -18,18 +18,19 @@ import {
   ModalCloseButton,
   Checkbox,
   Select,
+  Box,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
+import { TiArrowMaximise, TiArrowMinimise } from "react-icons/ti";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom";
-import { ArrowBackIcon, CloseIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import { Form, FormGroup, Table } from "reactstrap";
-import { CheckBox } from "@mui/icons-material";
+import { Form, Table } from "reactstrap";
 import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
@@ -42,24 +43,51 @@ import {
   faMaximize,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
-import { Typography } from "@mui/material";
+import { jsPDF } from "jspdf";
+import { jwtDecode } from "jwt-decode";
 
-const FileDisplay = ({ groupedFiles }) => {
+function BankFileDetailPage() {
+  const location = useLocation();
+  const history = useHistory();
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get("id");
+  const [fileData, setFileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpensGuarantor,
+    onOpen: onOpensGuarantor,
+    onClose: onClosesGuarantor,
+  } = useDisclosure();
+  const {
+    isOpen: isOpensLogs,
+    onOpen: onOpensLogs,
+    onClose: onClosesLogs,
+  } = useDisclosure();
+  const [logs, setLogs] = useState([]);
+  const [logMessage, setLogMessage] = useState("");
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
   const [openPanelIndex, setOpenPanelIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [accordionStatus, setAccordionStatus] = useState();
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
 
-  const handleAccordionClick = (index) => {
+  const handleAccordionClickDocument = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
   };
 
   const handleFileClick = (file) => {
     setSelectedFile(file);
+    setIsMaximized(false);
   };
 
   const handleCloseModal = () => {
     setSelectedFile(null);
+    setIsMaximized(false);
   };
 
   const handleDownload = async () => {
@@ -74,6 +102,20 @@ const FileDisplay = ({ groupedFiles }) => {
       } catch (error) {
         console.error("Error downloading file:", error);
       }
+    }
+  };
+  const handleConvertToPdf = () => {
+    if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
+      const pdf = new jsPDF();
+      pdf.addImage(
+        `https://cdn.savajcapital.com/api/upload/${selectedFile.file_path}`,
+        "JPEG",
+        15,
+        40,
+        180,
+        160
+      );
+      pdf.save(`${selectedFile.loan_document_id}.pdf`);
     }
   };
 
@@ -94,236 +136,9 @@ const FileDisplay = ({ groupedFiles }) => {
     window.open(mailtoUrl, "_blank");
   };
 
-  return (
-    <>
-      <nav
-        aria-label="breadcrumb"
-        className="my-3"
-        style={{ overflow: "auto" }}
-      >
-        <h2
-          className="my-4"
-          style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
-        >
-          Uploaded Documents
-        </h2>
-        <ul className="breadcrumb">
-          {Object.entries(groupedFiles).map(([title, files], index) => (
-            <li key={title} className="breadcrumb-item">
-              <a
-                href={`#${title}`}
-                onClick={() => handleAccordionClick(index)}
-                style={{ color: "#414650" }}
-              >
-                {title} documents
-              </a>
-              {accordionStatus && accordionStatus[title] && (
-                <div className="accordion-content">
-                  {files.map((file, index) => (
-                    <div key={index}>{file.name}</div>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div>
-        {Object.entries(groupedFiles).map(([title, files], index) => (
-          <div
-            className="accordion my-3"
-            id={`accordionPanelsStayOpenExample-${index}`}
-            key={index}
-          >
-            <div
-              className={`accordion-item ${
-                index === openPanelIndex ? "show" : ""
-              }`}
-              key={index}
-            >
-              <h2
-                className="accordion-header"
-                id={`panelsStayOpen-heading-${index}`}
-              >
-                <button
-                  className="accordion-button"
-                  type="button"
-                  onClick={() => handleAccordionClick(index)}
-                  aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "14px",
-                    backgroundColor: "#414650",
-                    justifyContent: "space-between",
-                  }}
-                  id={title}
-                >
-                  {title} documents
-                  <FontAwesomeIcon
-                    icon={
-                      index === openPanelIndex ? faChevronUp : faChevronDown
-                    }
-                  />
-                </button>
-              </h2>
-              <div
-                id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
-                aria-labelledby={`panelsStayOpen-heading-${index}`}
-              >
-                <div
-                  className="accordion-body"
-                  style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
-                >
-                  {files.map((file, idx) => (
-                    <div
-                      key={idx}
-                      className="image-responsive"
-                      style={{ width: "45%" }}
-                    >
-                      <p className="mb-3">{file.document_name}</p>
-                      {file.file_path.endsWith(".pdf") ? (
-                        <div
-                          style={{
-                            position: "relative",
-                            width: "100%",
-                            height: "260px",
-                          }}
-                        >
-                          <iframe
-                            src={`${basePath}${file.file_path}`}
-                            type="application/pdf"
-                            className="pdf-viewer"
-                            height="100%"
-                            width="100%"
-                            title="PDF Viewer"
-                          />
-                          <div className="pdf-overlay">
-                            <FontAwesomeIcon
-                              icon={faMaximize}
-                              onClick={() => handleFileClick(file)}
-                              style={{
-                                position: "absolute",
-                                bottom: "8px",
-                                right: "25px",
-                                color: "black",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <img
-                          src={`${basePath}${file.file_path}`}
-                          alt={file.loan_document_id}
-                          style={{
-                            width: "100%",
-                            height: "260px",
-                            borderRadius: "12px",
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                            cursor: "pointer",
-                          }}
-                          className="details-image"
-                          onClick={() => handleFileClick(file)}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {selectedFile && (
-        <Modal isOpen={true} onClose={handleCloseModal}>
-          <ModalOverlay />
-          <ModalContent
-            style={{
-              width: "80%",
-              maxWidth: "90%",
-            }}
-          >
-            <ModalHeader>Download or Share File</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {selectedFile.file_path.endsWith(".pdf") ? (
-                <iframe
-                  src={`${basePath}${selectedFile.file_path}`}
-                  type="application/pdf"
-                  className="pdf-viewer"
-                  height="500"
-                  style={{
-                    border: "none",
-                    width: "100%",
-                  }}
-                  title="PDF Viewer"
-                />
-              ) : (
-                <img
-                  src={`${basePath}${selectedFile.file_path}`}
-                  alt={selectedFile.loan_document_id}
-                  style={{
-                    width: "100%",
-                    height: "500px",
-                    borderRadius: "12px",
-                    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                  }}
-                  className="details-image"
-                />
-              )}
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                style={{ backgroundColor: "#b19552" }}
-                mr={3}
-                onClick={handleDownload}
-              >
-                Download
-              </Button>
-              <Button
-                leftIcon={<FaWhatsapp />}
-                colorScheme="whatsapp"
-                mr={3}
-                onClick={handleShareWhatsApp}
-              ></Button>
-              <Button
-                leftIcon={<FaEnvelope />}
-                colorScheme="teal"
-                mr={3}
-                onClick={handleShareEmail}
-              ></Button>
-              <Button variant="ghost" onClick={handleCloseModal}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
-    </>
-  );
-};
-
-function BankFileDetailPage() {
-  const location = useLocation();
-  const history = useHistory();
-  const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get("id");
-  const [fileData, setFileData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: isOpensGuarantor,
-    onOpen: onOpensGuarantor,
-    onClose: onClosesGuarantor,
-  } = useDisclosure();
-
+  const toggleMaximize = () => {
+    setIsMaximized(!isMaximized);
+  };
   const {
     register,
     handleSubmit,
@@ -364,6 +179,7 @@ function BankFileDetailPage() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentGuarantorId, setCurrentGuarantorId] = useState(null);
+
   const handleEditGuarantor = (guarantor) => {
     setIsEditMode(true);
     setCurrentGuarantorId(guarantor.guarantor_id);
@@ -372,7 +188,6 @@ function BankFileDetailPage() {
     for (const key in guarantor) {
       setValue(key, guarantor[key]);
     }
-
     onOpen();
   };
 
@@ -421,13 +236,13 @@ function BankFileDetailPage() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
     fetchStepsData();
@@ -710,11 +525,9 @@ function BankFileDetailPage() {
           cibil_score: cibilScore,
         };
 
-        // Update user data
         await AxiosInstance.put(`/addusers/edituser/${userId}`, formData);
       }
 
-      // Check if the current step is "Dispatch" to update the file status
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
           status: "1718861579508",
@@ -803,7 +616,6 @@ function BankFileDetailPage() {
 
   const handleRejectConfirm = async () => {
     try {
-      // Check if reject message is empty
       if (!rejectMessage.trim()) {
         toast.error("Please provide a reason for rejection.");
         return;
@@ -826,7 +638,7 @@ function BankFileDetailPage() {
         fetchStepsData();
         setRejectModalOpen(false);
         setOpen({ is: false, data: {}, index: "" });
-        setRejectMessage(""); // Clear the rejection message
+        setRejectMessage("");
       } else {
         console.error("Failed to update status.");
       }
@@ -959,16 +771,14 @@ function BankFileDetailPage() {
     try {
       const updatedStepData = {
         ...open.data,
-        status: "active", // Default to active
+        status: "active",
         statusMessage: "",
       };
 
-      // Find the index of the step being reversed
       const currentIndex = stepData.findIndex(
         (step) => step.loan_step_id === open.data.loan_step_id
       );
 
-      // Check for any complete steps after the current step
       let isCompleteStepFound = false;
       for (let i = currentIndex + 1; i < stepData.length; i++) {
         if (stepData[i]?.status === "complete") {
@@ -977,33 +787,29 @@ function BankFileDetailPage() {
         }
       }
 
-      // Update status based on the presence of complete steps
       if (isCompleteStepFound) {
         updatedStepData.status = "complete";
       } else {
         updatedStepData.status = "active";
       }
 
-      // Update step status
       const stepUpdateResponse = await AxiosInstance.post(
         `/loan_step/steps/${id}`,
         updatedStepData
       );
 
-      // Update file status based on the step being reversed
       if (updatedStepData.loan_step_id === "1715348651727") {
-  
         const fileStatusUpdateResponse = await AxiosInstance.put(
-          `/file_upload/updatestatus/${updatedStepData.file_id}`, // Assuming file_id is accessible from updatedStepData
+          `/file_upload/updatestatus/${updatedStepData.file_id}`,
           {
             status:
-              updatedStepData.status === "complete" ? "1718861579508" : "1718861587262",
+              updatedStepData.status === "complete"
+                ? "1718861579508"
+                : "1718861587262",
           }
         );
-
       }
 
-      // Check if both step and file updates were successful
       if (stepUpdateResponse.status === 200) {
         fetchStepsData();
         setOpen({ is: false, data: {}, index: "" });
@@ -1012,6 +818,29 @@ function BankFileDetailPage() {
       }
     } catch (error) {
       console.error("Error: ", error.message);
+    }
+  };
+  console.log(accessType, "accessType");
+  const handleAddLog = async () => {
+    if (logMessage.trim()) {
+      const newLog = {
+        message: logMessage,
+        timestamp: new Date().toISOString(),
+        role: `bankuser(${accessType.bankuser_name})`,
+      };
+
+      try {
+        const response = await AxiosInstance.put(`/file_upload/${id}`, {
+          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+        });
+
+        setLogs(response.data.data.logs);
+        setLogMessage("");
+        toast.success("Log Added Successfully!");
+      } catch (error) {
+        console.error("Error adding log:", error);
+        toast.error("Please try again later!");
+      }
     }
   };
 
@@ -1048,13 +877,25 @@ function BankFileDetailPage() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button
-                    colorScheme="blue"
-                    style={{ backgroundColor: "#b19552" }}
-                    onClick={handleAddGuarantor}
-                  >
-                    Add Guarantor
-                  </Button>
+                  <div>
+                    <Button
+                      colorScheme="blue"
+                      style={{
+                        backgroundColor: "#b19552",
+                        marginRight: "10PX",
+                      }}
+                      onClick={onOpensLogs}
+                    >
+                      Logs
+                    </Button>
+                    {/* <Button
+                      colorScheme="blue"
+                      style={{ backgroundColor: "#b19552" }}
+                      onClick={handleAddGuarantor}
+                    >
+                      Add Guarantor
+                    </Button> */}
+                  </div>
                 </Flex>
               </FormLabel>
 
@@ -1390,38 +1231,108 @@ function BankFileDetailPage() {
                                         ) : (
                                           input.type === "file" && (
                                             <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                type="file"
-                                                required={input.is_required}
-                                                onChange={(e) =>
-                                                  handleChange(e, index)
-                                                }
-                                              />
+                                              <label
+                                                style={{
+                                                  display: "block",
+                                                  marginBottom: "8px",
+                                                }}
+                                              >
+                                                {input.label}
+                                              </label>
+                                              <label
+                                                style={{
+                                                  display: "inline-block",
+                                                  padding: "5px 20px",
+                                                  backgroundColor:
+                                                    "rgb(65, 70, 80)",
+                                                  color: "white",
+                                                  borderRadius: "5px",
+                                                  cursor: "pointer",
+                                                }}
+                                              >
+                                                Choose File
+                                                <Input
+                                                  type="file"
+                                                  required={input.is_required}
+                                                  onChange={(e) =>
+                                                    handleChange(e, index)
+                                                  }
+                                                  style={{
+                                                    display: "none",
+                                                  }}
+                                                />
+                                              </label>
                                               {input.value && (
-                                                <div
-                                                  style={{ marginTop: "10px" }}
-                                                >
-                                                  {input.value
-                                                    .toLowerCase()
-                                                    .endsWith(".pdf") ? (
-                                                    <embed
-                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                      type="application/pdf"
-                                                      width="100%"
-                                                      height="200px"
-                                                    />
-                                                  ) : (
+                                                <>
+                                                  {input.value.endsWith(
+                                                    ".pdf"
+                                                  ) ? (
+                                                    <div
+                                                      style={{
+                                                        position: "relative",
+                                                        width: "100%",
+                                                        height: "260px",
+                                                        marginTop: "10px",
+                                                      }}
+                                                    >
+                                                      <iframe
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                        type="application/pdf"
+                                                        className="pdf-viewer"
+                                                        height="100%"
+                                                        width="100%"
+                                                        title="PDF Viewer"
+                                                      />
+                                                      <div className="pdf-overlay">
+                                                        <FontAwesomeIcon
+                                                          icon={faMaximize}
+                                                          onClick={() =>
+                                                            handleFileClick({
+                                                              file_path:
+                                                                input.value,
+                                                            })
+                                                          }
+                                                          style={{
+                                                            position:
+                                                              "absolute",
+                                                            bottom: "8px",
+                                                            right: "25px",
+                                                            color: "black",
+                                                            cursor: "pointer",
+                                                          }}
+                                                        />
+                                                      </div>
+                                                    </div>
+                                                  ) : input.value.match(
+                                                      /\.(jpeg|jpg|gif|png)$/
+                                                    ) ? (
                                                     <img
                                                       src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                       alt="Uploaded"
                                                       style={{
                                                         width: "100%",
-                                                        height: "200px",
+                                                        height: "260px",
+                                                        borderRadius: "12px",
+                                                        boxShadow:
+                                                          "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                        cursor: "pointer",
+                                                        marginTop: "10px",
                                                       }}
+                                                      className="details-image"
+                                                      onClick={() =>
+                                                        handleFileClick({
+                                                          file_path:
+                                                            input.value,
+                                                        })
+                                                      }
                                                     />
+                                                  ) : (
+                                                    <div>
+                                                      No preview available for
+                                                      this file type
+                                                    </div>
                                                   )}
-                                                </div>
+                                                </>
                                               )}
                                             </div>
                                           )
@@ -1476,8 +1387,8 @@ function BankFileDetailPage() {
                                           </span>
                                         </p>
                                         <IconButton
-                                          icon={<Icon as={FaUndo} />} // Your desired icon
-                                          onClick={handleReverse} // Function to handle reversing the status
+                                          icon={<Icon as={FaUndo} />}
+                                          onClick={handleReverse}
                                           colorScheme="blue"
                                           className="buttonss mt-3"
                                           style={{ backgroundColor: "#007bff" }}
@@ -1568,44 +1479,112 @@ function BankFileDetailPage() {
                                           ) : (
                                             input.type === "file" && (
                                               <div>
-                                                <label>{input.label}</label>
-                                                <Input
-                                                  type="file"
-                                                  required={input.is_required}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      e,
-                                                      inputIndex,
-                                                      dataIndex
-                                                    )
-                                                  }
-                                                />
-                                                {input.value && (
-                                                  <div
+                                                <label
+                                                  style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                  }}
+                                                >
+                                                  {input.label}
+                                                </label>
+                                                <label
+                                                  style={{
+                                                    display: "inline-block",
+                                                    padding: "5px 20px",
+                                                    backgroundColor:
+                                                      "rgb(65, 70, 80)",
+                                                    color: "white",
+                                                    borderRadius: "5px",
+                                                    cursor: "pointer",
+                                                  }}
+                                                >
+                                                  Choose File
+                                                  <Input
+                                                    type="file"
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
                                                     style={{
-                                                      marginTop: "10px",
+                                                      display: "none",
                                                     }}
-                                                  >
-                                                    {input.value
-                                                      .toLowerCase()
-                                                      .endsWith(".pdf") ? (
-                                                      <embed
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                        type="application/pdf"
-                                                        width="100%"
-                                                        height="200px"
-                                                      />
-                                                    ) : (
+                                                  />
+                                                </label>
+                                                {input.value && (
+                                                  <>
+                                                    {input.value.endsWith(
+                                                      ".pdf"
+                                                    ) ? (
+                                                      <div
+                                                        style={{
+                                                          position: "relative",
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          marginTop: "10px",
+                                                        }}
+                                                      >
+                                                        <iframe
+                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                          type="application/pdf"
+                                                          className="pdf-viewer"
+                                                          height="100%"
+                                                          width="100%"
+                                                          title="PDF Viewer"
+                                                        />
+                                                        <div className="pdf-overlay">
+                                                          <FontAwesomeIcon
+                                                            icon={faMaximize}
+                                                            onClick={() =>
+                                                              handleFileClick({
+                                                                file_path:
+                                                                  input.value,
+                                                              })
+                                                            }
+                                                            style={{
+                                                              position:
+                                                                "absolute",
+                                                              bottom: "8px",
+                                                              right: "25px",
+                                                              color: "black",
+                                                              cursor: "pointer",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    ) : input.value.match(
+                                                        /\.(jpeg|jpg|gif|png)$/
+                                                      ) ? (
                                                       <img
                                                         src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                         alt="Uploaded"
                                                         style={{
                                                           width: "100%",
-                                                          height: "200px",
+                                                          height: "260px",
+                                                          borderRadius: "12px",
+                                                          boxShadow:
+                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                          cursor: "pointer",
+                                                          marginTop: "10px",
                                                         }}
+                                                        className="details-image"
+                                                        onClick={() =>
+                                                          handleFileClick({
+                                                            file_path:
+                                                              input.value,
+                                                          })
+                                                        }
                                                       />
+                                                    ) : (
+                                                      <div>
+                                                        No preview available for
+                                                        this file type
+                                                      </div>
                                                     )}
-                                                  </div>
+                                                  </>
                                                 )}
                                               </div>
                                             )
@@ -1753,11 +1732,7 @@ function BankFileDetailPage() {
                                         >
                                           Pending Documents
                                         </h2>
-                                        <Table
-                                          size="sm"
-                                          aria-label="documents"
-                                          // className="mx-4"
-                                        >
+                                        <Table size="sm" aria-label="documents">
                                           <thead>
                                             <tr className="py-2">
                                               <th
@@ -1800,10 +1775,9 @@ function BankFileDetailPage() {
                                             style={{
                                               backgroundColor: "#b19552",
                                             }}
-                                            // className="mx-3"
                                             onClick={() =>
                                               history.push(
-                                                `/superadmin/editfile?id=${id}`
+                                                `/savajcapitaluser/edituserfile?id=${id}`
                                               )
                                             }
                                           >
@@ -1814,9 +1788,195 @@ function BankFileDetailPage() {
                                     )}
                                   {fileData?.documents && (
                                     <div className="mt-3">
-                                      <FileDisplay
-                                        groupedFiles={fileData?.documents}
-                                      />
+                                      <nav
+                                        aria-label="breadcrumb"
+                                        className="my-3"
+                                        style={{ overflow: "auto" }}
+                                      >
+                                        <h2
+                                          className="my-4"
+                                          style={{
+                                            fontSize: "18px",
+                                            fontWeight: 700,
+                                            color: "#333",
+                                          }}
+                                        >
+                                          Uploaded Documents
+                                        </h2>
+                                        <ul className="breadcrumb">
+                                          {Object.entries(
+                                            fileData?.documents
+                                          ).map(([title, files], index) => (
+                                            <li
+                                              key={title}
+                                              className="breadcrumb-item"
+                                            >
+                                              <a
+                                                href={`#${title}`}
+                                                onClick={() =>
+                                                  handleAccordionClickDocument(
+                                                    index
+                                                  )
+                                                }
+                                                style={{ color: "#414650" }}
+                                              >
+                                                {title} documents
+                                              </a>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </nav>
+
+                                      <div>
+                                        {Object.entries(
+                                          fileData?.documents
+                                        ).map(([title, files], index) => (
+                                          <div
+                                            className="accordion my-3"
+                                            id={`accordionPanelsStayOpenExample-${index}`}
+                                            key={index}
+                                          >
+                                            <div
+                                              className={`accordion-item ${
+                                                index === openPanelIndex
+                                                  ? "show"
+                                                  : ""
+                                              }`}
+                                              key={index}
+                                            >
+                                              <h2
+                                                className="accordion-header"
+                                                id={`panelsStayOpen-heading-${index}`}
+                                              >
+                                                <button
+                                                  className="accordion-button"
+                                                  type="button"
+                                                  onClick={() =>
+                                                    handleAccordionClickDocument(
+                                                      index
+                                                    )
+                                                  }
+                                                  aria-expanded={
+                                                    index === openPanelIndex
+                                                      ? "true"
+                                                      : "false"
+                                                  }
+                                                  style={{
+                                                    color: "white",
+                                                    fontWeight: 700,
+                                                    fontSize: "14px",
+                                                    backgroundColor: "#414650",
+                                                    justifyContent:
+                                                      "space-between",
+                                                  }}
+                                                  id={title}
+                                                >
+                                                  {title} documents
+                                                  <FontAwesomeIcon
+                                                    icon={
+                                                      index === openPanelIndex
+                                                        ? faChevronUp
+                                                        : faChevronDown
+                                                    }
+                                                  />
+                                                </button>
+                                              </h2>
+                                              <div
+                                                id={`panelsStayOpen-collapse-${index}`}
+                                                className={`accordion-collapse collapse ${
+                                                  index === openPanelIndex
+                                                    ? "show"
+                                                    : ""
+                                                }`}
+                                                aria-labelledby={`panelsStayOpen-heading-${index}`}
+                                              >
+                                                <div
+                                                  className="accordion-body"
+                                                  style={{
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                    gap: "15px",
+                                                  }}
+                                                >
+                                                  {files.map((file, idx) => (
+                                                    <div
+                                                      key={idx}
+                                                      className="image-responsive"
+                                                      style={{ width: "45%" }}
+                                                    >
+                                                      <p className="mb-3">
+                                                        {file.document_name}
+                                                      </p>
+                                                      {file.file_path.endsWith(
+                                                        ".pdf"
+                                                      ) ? (
+                                                        <div
+                                                          style={{
+                                                            position:
+                                                              "relative",
+                                                            width: "100%",
+                                                            height: "260px",
+                                                          }}
+                                                        >
+                                                          <iframe
+                                                            src={`${basePath}${file.file_path}`}
+                                                            type="application/pdf"
+                                                            className="pdf-viewer"
+                                                            height="100%"
+                                                            width="100%"
+                                                            title="PDF Viewer"
+                                                          />
+                                                          <div className="pdf-overlay">
+                                                            <FontAwesomeIcon
+                                                              icon={faMaximize}
+                                                              onClick={() =>
+                                                                handleFileClick(
+                                                                  file
+                                                                )
+                                                              }
+                                                              style={{
+                                                                position:
+                                                                  "absolute",
+                                                                bottom: "8px",
+                                                                right: "25px",
+                                                                color: "black",
+                                                                cursor:
+                                                                  "pointer",
+                                                              }}
+                                                            />
+                                                          </div>
+                                                        </div>
+                                                      ) : (
+                                                        <img
+                                                          src={`${basePath}${file.file_path}`}
+                                                          alt={
+                                                            file.loan_document_id
+                                                          }
+                                                          style={{
+                                                            width: "100%",
+                                                            height: "260px",
+                                                            borderRadius:
+                                                              "12px",
+                                                            boxShadow:
+                                                              "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                            cursor: "pointer",
+                                                          }}
+                                                          className="details-image"
+                                                          onClick={() =>
+                                                            handleFileClick(
+                                                              file
+                                                            )
+                                                          }
+                                                        />
+                                                      )}
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
                                   {!open.data?.pendingData ||
@@ -1832,7 +1992,7 @@ function BankFileDetailPage() {
                   </div>
                   {/* <div>
                     {fileData?.documents && (
-                      <FileDisplay groupedFiles={fileData?.documents} />
+                      <FileDisplay fileData?.documents={fileData?.documents} />
                     )}
                   </div> */}
                 </FormControl>
@@ -2060,8 +2220,8 @@ function BankFileDetailPage() {
               <Input
                 type="text"
                 value={rejectMessage}
-                onChange={(e) => setRejectMessage(e.target.value)} // Update state on change
-                required // Add the required attribute
+                onChange={(e) => setRejectMessage(e.target.value)}
+                required
               />
             </FormControl>
           </ModalBody>
@@ -2070,6 +2230,187 @@ function BankFileDetailPage() {
               Confirm
             </Button>
             <Button onClick={closeRejectModal}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {selectedFile && (
+        <Modal
+          isOpen={true}
+          onClose={handleCloseModal}
+          size={isMaximized ? "full" : "6xl"}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>Download or Share File</div>
+              <div
+                onClick={toggleMaximize}
+                style={{
+                  cursor: "pointer",
+                  marginRight: "30px",
+                  marginBottom: "40px",
+                }}
+              >
+                {isMaximized ? <TiArrowMinimise /> : <TiArrowMaximise />}
+              </div>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedFile.file_path.endsWith(".pdf") ? (
+                <iframe
+                  src={`${basePath}${selectedFile.file_path}`}
+                  type="application/pdf"
+                  className="pdf-viewer"
+                  height="500"
+                  style={{ border: "none", width: "100%" }}
+                  title="PDF Viewer"
+                />
+              ) : (
+                <img
+                  src={`${basePath}${selectedFile.file_path}`}
+                  alt={selectedFile.loan_document_id}
+                  style={{
+                    width: "100%",
+                    height: "500px",
+                    borderRadius: "12px",
+                    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                  }}
+                  className="details-image"
+                />
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
+                mr={3}
+                onClick={handleDownload}
+              >
+                Download
+              </Button>
+              {!selectedFile.file_path.endsWith(".pdf") && (
+                <Button
+                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552" }}
+                  mr={3}
+                  onClick={handleConvertToPdf}
+                >
+                  Convert to PDF
+                </Button>
+              )}
+              <Button
+                leftIcon={<FaWhatsapp />}
+                colorScheme="whatsapp"
+                mr={3}
+                onClick={handleShareWhatsApp}
+              />
+              <Button
+                leftIcon={<FaEnvelope />}
+                colorScheme="teal"
+                mr={3}
+                onClick={handleShareEmail}
+              />
+              <Button variant="ghost" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+      <Modal isOpen={isOpensLogs} onClose={onClosesLogs} size="xl">
+        <ModalOverlay />
+        <ModalContent borderRadius="xl">
+          <ModalHeader
+            textAlign="center"
+            bg="#b19552"
+            color="white"
+            borderTopRadius="xl"
+          >
+            Add Log
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Log Message</FormLabel>
+              <Input
+                value={logMessage}
+                onChange={(e) => setLogMessage(e.target.value)}
+                placeholder="Enter log message"
+              />
+            </FormControl>
+
+            <Box mt={4} maxHeight="400px" overflowY="scroll" overflowX="hidden">
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {logs.map((log, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginBottom: "10px",
+                      padding: "12px",
+                      border: "1px solid #ccc",
+                      borderRadius: "8px",
+                      backgroundColor: log.role.startsWith("bankuser")
+                        ? "#f0f5ff" // Light red background for bankuser logs
+                        : log.role === "superadmin" ||
+                          log.role.startsWith("savajuser")
+                        ? "#f0f5ff" // Light blue background for other roles
+                        : "#fff", // Default white background
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <div>
+                      <strong>
+                        {log.role === "superadmin"
+                          ? "Superadmin added this log:"
+                          : log.role.startsWith("savajuser")
+                          ? `${log.role} added this log:`
+                          : log.role.startsWith("bankuser")
+                          ? `${log.role} added this log:` // Display specific message for bankuser
+                          : ""}
+                      </strong>{" "}
+                      {log.message}
+                    </div>
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "0.85em",
+                        color: "#666",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {new Date(log.timestamp).toLocaleString()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              onClick={handleAddLog}
+              mr={3}
+              style={{
+                backgroundColor: "#b19552",
+                marginRight: "10px",
+              }}
+            >
+              Add Log
+            </Button>
+            <Button onClick={onClosesLogs}>Close</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

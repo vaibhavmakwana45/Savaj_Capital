@@ -18,297 +18,33 @@ import {
   ModalCloseButton,
   Checkbox,
   Select,
+  Box,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
+import { TiArrowMaximise, TiArrowMinimise } from "react-icons/ti";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import AxiosInstance from "config/AxiosInstance";
 import { useLocation } from "react-router-dom";
-import { ArrowBackIcon, CloseIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import { Form, FormGroup, Table } from "reactstrap";
-import { CheckBox } from "@mui/icons-material";
-import { AiOutlineClose } from "react-icons/ai"; // Import the cross icon
+import { Form, Table } from "reactstrap";
+import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
-import { FaUndo } from "react-icons/fa";
+import { FaUndo, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import {
   faChevronDown,
   faChevronUp,
   faEdit,
   faTrashAlt,
+  faMaximize,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
-import { Typography } from "@mui/material";
-
-const FileDisplay = ({ groupedFiles }) => {
-  const basePath = "https://cdn.savajcapital.com/cdn/files/";
-  if (!groupedFiles || Object.keys(groupedFiles).length === 0) {
-    return <div>No documents available</div>;
-  }
-
-  const handleDownload = async (filePath) => {
-    try {
-      const fileHandle = await window.showSaveFilePicker();
-      const writableStream = await fileHandle.createWritable();
-      const response = await fetch(filePath);
-      const blob = await response.blob();
-      await writableStream.write(blob);
-      await writableStream.close();
-    } catch (error) {
-      console.error("Error downloading file:", error);
-    }
-  };
-  // const [openPanelIndex, setOpenPanelIndex] = useState(null);
-
-  // const handleAccordionClick = (index) => {
-  //   setOpenPanelIndex(index === openPanelIndex ? null : index);
-  // };
-
-  const [openPanelIndex, setOpenPanelIndex] = useState(0);
-
-  const handleAccordionClick = (index) => {
-    setOpenPanelIndex(index === openPanelIndex ? -1 : index);
-  };
-
-  const [accordionStatus, setAccordionStatus] = useState();
-
-  return (
-    <>
-      <nav
-        aria-label="breadcrumb"
-        className="my-3"
-        style={{ overflow: "auto" }}
-      >
-        <ul className="breadcrumb">
-          {Object.entries(groupedFiles).map(([title, files], index) => (
-            <li key={title} className="breadcrumb-item">
-              <a
-                href={`#${title}`}
-                onClick={() => handleAccordionClick(index)}
-                style={{ color: "#414650" }}
-              >
-                {title} documents
-              </a>
-              {accordionStatus && accordionStatus[title] && (
-                <div className="accordion-content">
-                  {files.map((file, index) => (
-                    <div key={index}>{file.name}</div>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <h2
-        className="my-4"
-        style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
-      >
-        Uploaded Documents
-      </h2>
-      <div>
-        {Object.entries(groupedFiles).map(([title, files], index) => (
-          <div
-            className="accordion my-3"
-            id={`accordionPanelsStayOpenExample-${index}`}
-            key={index}
-          >
-            <div
-              className={`accordion-item ${index === openPanelIndex ? "show" : ""
-                }`}
-              key={index}
-            >
-              <h2
-                className="accordion-header"
-                id={`panelsStayOpen-heading-${index}`}
-              >
-                <button
-                  className="accordion-button"
-                  type="button"
-                  // name="butonnnns"
-                  onClick={() => handleAccordionClick(index)}
-                  aria-expanded={index === openPanelIndex ? "true" : "false"}
-                  style={{
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "14px",
-                    backgroundColor: "#414650",
-                    justifyContent: "space-between",
-                  }}
-                  id={title}
-                >
-                  {title} documents
-                  <FontAwesomeIcon
-                    icon={
-                      index === openPanelIndex ? faChevronUp : faChevronDown
-                    }
-                  />
-                </button>
-              </h2>
-              {/* <div
-                id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse  ${
-                  index === openPanelIndex ? "show" : ""
-                }`}
-                aria-labelledby={`panelsStayOpen-heading-${index}`}
-              >
-                {files.map((file, idx) => (
-                  <div className="accordion-body" key={idx}>
-                    <p className="mb-3">{file.document_name}</p>
-                    {file.file_path.endsWith(".pdf") ? (
-                      <iframe
-                        src={`${basePath}${file.file_path}`}
-                        type="application/pdf"
-                        className="col-xl-6 col-md-6 col-sm-12"
-                        height="260"
-                        style={{
-                          border: "none",
-                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          borderRadius: "12px",
-                          width: "40%",
-                        }}
-                        title="PDF Viewer"
-                      />
-                    ) : (
-                      <img
-                        src={`${basePath}${file.file_path}`}
-                        alt={file.loan_document_id}
-                        style={{
-                          width: "40%",
-                          height: "260px",
-                          borderRadius: "12px",
-                          boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                          cursor: "pointer",
-                        }}
-                        className="col-xl-6 col-md-6 col-sm-12 details-image"
-                        onClick={() =>
-                          handleDownload(
-                            `${basePath}${file.file_path}`,
-                            file.loan_document_id
-                          )
-                        }
-                      />
-                    )}
-                  </div>
-                ))}
-              </div> */}
-              <div
-                id={`panelsStayOpen-collapse-${index}`}
-                className={`accordion-collapse collapse ${index === openPanelIndex ? "show" : ""
-                  }`}
-                aria-labelledby={`panelsStayOpen-heading-${index}`}
-              >
-                <div
-                  className="accordion-body"
-                  style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}
-                >
-                  {files.map((file, idx) => (
-                    <div
-                      key={idx}
-                      className="image-responsive"
-                      style={{ width: "45%" }}
-                    >
-                      <p className="mb-3">{file.document_name}</p>
-                      {file.file_path.endsWith(".pdf") ? (
-                        <iframe
-                          src={`${basePath}${file.file_path}`}
-                          type="application/pdf"
-                          className="col-xl-6 col-md-6 col-sm-12"
-                          height="260"
-                          style={{
-                            border: "none",
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                            borderRadius: "12px",
-                            width: "100%",
-                          }}
-                          title="PDF Viewer"
-                        />
-                      ) : (
-                        <img
-                          src={`${basePath}${file.file_path}`}
-                          alt={file.loan_document_id}
-                          style={{
-                            width: "100%",
-                            height: "260px",
-                            borderRadius: "12px",
-                            boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                            cursor: "pointer",
-                          }}
-                          className="details-image"
-                          onClick={() =>
-                            handleDownload(
-                              `${basePath}${file.file_path}`,
-                              file.loan_document_id
-                            )
-                          }
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        {/* <div
-        className="d-flex flex-wrap justify-content-start image-responsive"
-        style={{ overflow: "auto" }}
-      >
-        {Object.entries(groupedFiles).map(([title, files], index) => (
-          <div key={index} className="mx-3 mb-4 " style={{ flexBasis: "30%" }}>
-            <h2
-              className="my-4"
-              style={{ fontSize: "18px", fontWeight: 700, color: "#333" }}
-            >
-              <u>{title} documents</u>
-            </h2>
-            {files.map((file, idx) => (
-              <div key={idx} className="mb-3">
-                <p className="mb-3">{file.document_name}</p>
-                {file.file_path.endsWith(".pdf") ? (
-                  <iframe
-                    src={`${basePath}${file.file_path}`}
-                    type="application/pdf"
-                    width="100%"
-                    height="260"
-                    style={{
-                      border: "none",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      borderRadius: "12px",
-                    }}
-                    title="PDF Viewer"
-                  />
-                ) : (
-                  <img
-                    src={`${basePath}${file.file_path}`}
-                    alt={file.loan_document_id}
-                    style={{
-                      width: "100%",
-                      height: "260px",
-                      borderRadius: "12px",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() =>
-                      handleDownload(
-                        `${basePath}${file.file_path}`,
-                        file.loan_document_id
-                      )
-                    }
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div> */}
-      </div>
-    </>
-  );
-};
+import { jsPDF } from "jspdf";
+import { jwtDecode } from "jwt-decode";
 
 function DetailScFilePage() {
   const location = useLocation();
@@ -323,7 +59,86 @@ function DetailScFilePage() {
     onOpen: onOpensGuarantor,
     onClose: onClosesGuarantor,
   } = useDisclosure();
+  const {
+    isOpen: isOpensLogs,
+    onOpen: onOpensLogs,
+    onClose: onClosesLogs,
+  } = useDisclosure();
+  const [logs, setLogs] = useState([]);
+  const [logMessage, setLogMessage] = useState("");
+  const basePath = "https://cdn.savajcapital.com/cdn/files/";
+  const [openPanelIndex, setOpenPanelIndex] = useState(0);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
 
+  const handleAccordionClickDocument = (index) => {
+    setOpenPanelIndex(index === openPanelIndex ? -1 : index);
+  };
+
+  const handleFileClick = (file) => {
+    setSelectedFile(file);
+    setIsMaximized(false);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFile(null);
+    setIsMaximized(false);
+  };
+
+  const handleDownload = async () => {
+    if (selectedFile) {
+      try {
+        const fileHandle = await window.showSaveFilePicker();
+        const writableStream = await fileHandle.createWritable();
+        const response = await fetch(`${basePath}${selectedFile.file_path}`);
+        const blob = await response.blob();
+        await writableStream.write(blob);
+        await writableStream.close();
+      } catch (error) {
+        console.error("Error downloading file:", error);
+      }
+    }
+  };
+  const handleConvertToPdf = () => {
+    if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
+      const pdf = new jsPDF();
+      pdf.addImage(
+        `https://cdn.savajcapital.com/api/upload/${selectedFile.file_path}`,
+        "JPEG",
+        15,
+        40,
+        180,
+        160
+      );
+      pdf.save(`${selectedFile.loan_document_id}.pdf`);
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    const url = `${basePath}${selectedFile.file_path}`;
+    const message = `Check out this document: ${url}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  const handleShareEmail = () => {
+    const url = `${basePath}${selectedFile.file_path}`;
+    const subject = "Check out this document";
+    const body = `Here is the link to the document: ${url}`;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, "_blank");
+  };
+
+  const toggleMaximize = () => {
+    setIsMaximized(!isMaximized);
+  };
   const {
     register,
     handleSubmit,
@@ -364,6 +179,7 @@ function DetailScFilePage() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentGuarantorId, setCurrentGuarantorId] = useState(null);
+
   const handleEditGuarantor = (guarantor) => {
     setIsEditMode(true);
     setCurrentGuarantorId(guarantor.guarantor_id);
@@ -372,7 +188,6 @@ function DetailScFilePage() {
     for (const key in guarantor) {
       setValue(key, guarantor[key]);
     }
-
     onOpen();
   };
 
@@ -421,13 +236,13 @@ function DetailScFilePage() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
     fetchStepsData();
@@ -495,7 +310,6 @@ function DetailScFilePage() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -568,26 +382,26 @@ function DetailScFilePage() {
       ...prevState,
       data: prevState?.data
         ? [
-          ...prevState.data,
-          {
-            ...newData,
-            is: false,
-            data: {
-              ...newData.data,
-              inputs: updatedInputs,
+            ...prevState.data,
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
             },
-          },
-        ]
+          ]
         : [
-          {
-            ...newData,
-            is: false,
-            data: {
-              ...newData.data,
-              inputs: updatedInputs,
+            {
+              ...newData,
+              is: false,
+              data: {
+                ...newData.data,
+                inputs: updatedInputs,
+              },
             },
-          },
-        ],
+          ],
     }));
   };
 
@@ -711,11 +525,9 @@ function DetailScFilePage() {
           cibil_score: cibilScore,
         };
 
-        // Update user data
         await AxiosInstance.put(`/addusers/edituser/${userId}`, formData);
       }
 
-      // Check if the current step is "Dispatch" to update the file status
       if (open.data.loan_step_id === "1715348798228") {
         await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
           status: "1718861579508",
@@ -963,22 +775,72 @@ function DetailScFilePage() {
         statusMessage: "",
       };
 
-      const response = await AxiosInstance.post(
+      const currentIndex = stepData.findIndex(
+        (step) => step.loan_step_id === open.data.loan_step_id
+      );
+
+      let isCompleteStepFound = false;
+      for (let i = currentIndex + 1; i < stepData.length; i++) {
+        if (stepData[i]?.status === "complete") {
+          isCompleteStepFound = true;
+          break;
+        }
+      }
+
+      if (isCompleteStepFound) {
+        updatedStepData.status = "complete";
+      } else {
+        updatedStepData.status = "active";
+      }
+
+      const stepUpdateResponse = await AxiosInstance.post(
         `/loan_step/steps/${id}`,
         updatedStepData
       );
 
-      await AxiosInstance.put(`/file_upload/updatestatus/${id}`, {
-        status: "1718861587262",
-      });
-      if (response.status === 200) {
+      if (updatedStepData.loan_step_id === "1715348651727") {
+        const fileStatusUpdateResponse = await AxiosInstance.put(
+          `/file_upload/updatestatus/${updatedStepData.file_id}`,
+          {
+            status:
+              updatedStepData.status === "complete"
+                ? "1718861579508"
+                : "1718861587262",
+          }
+        );
+      }
+
+      if (stepUpdateResponse.status === 200) {
         fetchStepsData();
         setOpen({ is: false, data: {}, index: "" });
       } else {
-        console.error("Failed to update status.");
+        console.error("Failed to update step status.");
       }
     } catch (error) {
       console.error("Error: ", error.message);
+    }
+  };
+
+  const handleAddLog = async () => {
+    if (logMessage.trim()) {
+      const newLog = {
+        message: logMessage,
+        timestamp: new Date().toISOString(),
+        role: `savajuser(${accessType.full_name})`,
+      };
+
+      try {
+        const response = await AxiosInstance.put(`/file_upload/${id}`, {
+          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+        });
+
+        setLogs(response.data.data.logs);
+        setLogMessage("");
+        toast.success("Log Added Successfully!");
+      } catch (error) {
+        console.error("Error adding log:", error);
+        toast.error("Please try again later!");
+      }
     }
   };
 
@@ -1015,13 +877,25 @@ function DetailScFilePage() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button
-                    colorScheme="blue"
-                    style={{ backgroundColor: "#b19552" }}
-                    onClick={handleAddGuarantor}
-                  >
-                    Add Guarantor
-                  </Button>
+                  <div>
+                    <Button
+                      colorScheme="blue"
+                      style={{
+                        backgroundColor: "#b19552",
+                        marginRight: "10PX",
+                      }}
+                      onClick={onOpensLogs}
+                    >
+                      Logs
+                    </Button>
+                    {/* <Button
+                      colorScheme="blue"
+                      style={{ backgroundColor: "#b19552" }}
+                      onClick={handleAddGuarantor}
+                    >
+                      Add Guarantor
+                    </Button> */}
+                  </div>
                 </Flex>
               </FormLabel>
 
@@ -1133,8 +1007,9 @@ function DetailScFilePage() {
 
                     <div className="accordion my-3 mx-3">
                       <div
-                        className={`accordion-item ${isOpenGuarantor ? "show" : ""
-                          }`}
+                        className={`accordion-item ${
+                          isOpenGuarantor ? "show" : ""
+                        }`}
                       >
                         <h2
                           className="accordion-header"
@@ -1164,8 +1039,9 @@ function DetailScFilePage() {
                         </h2>
                         <div
                           id="panelsStayOpen-collapse-0"
-                          className={`accordion-collapse collapse ${isOpenGuarantor ? "show" : ""
-                            }`}
+                          className={`accordion-collapse collapse ${
+                            isOpenGuarantor ? "show" : ""
+                          }`}
                           aria-labelledby="panelsStayOpen-heading-0"
                         >
                           <div
@@ -1355,38 +1231,108 @@ function DetailScFilePage() {
                                         ) : (
                                           input.type === "file" && (
                                             <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                type="file"
-                                                required={input.is_required}
-                                                onChange={(e) =>
-                                                  handleChange(e, index)
-                                                }
-                                              />
+                                              <label
+                                                style={{
+                                                  display: "block",
+                                                  marginBottom: "8px",
+                                                }}
+                                              >
+                                                {input.label}
+                                              </label>
+                                              <label
+                                                style={{
+                                                  display: "inline-block",
+                                                  padding: "5px 20px",
+                                                  backgroundColor:
+                                                    "rgb(65, 70, 80)",
+                                                  color: "white",
+                                                  borderRadius: "5px",
+                                                  cursor: "pointer",
+                                                }}
+                                              >
+                                                Choose File
+                                                <Input
+                                                  type="file"
+                                                  required={input.is_required}
+                                                  onChange={(e) =>
+                                                    handleChange(e, index)
+                                                  }
+                                                  style={{
+                                                    display: "none",
+                                                  }}
+                                                />
+                                              </label>
                                               {input.value && (
-                                                <div
-                                                  style={{ marginTop: "10px" }}
-                                                >
-                                                  {input.value
-                                                    .toLowerCase()
-                                                    .endsWith(".pdf") ? (
-                                                    <embed
-                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                      type="application/pdf"
-                                                      width="100%"
-                                                      height="200px"
-                                                    />
-                                                  ) : (
+                                                <>
+                                                  {input.value.endsWith(
+                                                    ".pdf"
+                                                  ) ? (
+                                                    <div
+                                                      style={{
+                                                        position: "relative",
+                                                        width: "100%",
+                                                        height: "260px",
+                                                        marginTop: "10px",
+                                                      }}
+                                                    >
+                                                      <iframe
+                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                        type="application/pdf"
+                                                        className="pdf-viewer"
+                                                        height="100%"
+                                                        width="100%"
+                                                        title="PDF Viewer"
+                                                      />
+                                                      <div className="pdf-overlay">
+                                                        <FontAwesomeIcon
+                                                          icon={faMaximize}
+                                                          onClick={() =>
+                                                            handleFileClick({
+                                                              file_path:
+                                                                input.value,
+                                                            })
+                                                          }
+                                                          style={{
+                                                            position:
+                                                              "absolute",
+                                                            bottom: "8px",
+                                                            right: "25px",
+                                                            color: "black",
+                                                            cursor: "pointer",
+                                                          }}
+                                                        />
+                                                      </div>
+                                                    </div>
+                                                  ) : input.value.match(
+                                                      /\.(jpeg|jpg|gif|png)$/
+                                                    ) ? (
                                                     <img
                                                       src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                       alt="Uploaded"
                                                       style={{
                                                         width: "100%",
-                                                        height: "200px",
+                                                        height: "260px",
+                                                        borderRadius: "12px",
+                                                        boxShadow:
+                                                          "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                        cursor: "pointer",
+                                                        marginTop: "10px",
                                                       }}
+                                                      className="details-image"
+                                                      onClick={() =>
+                                                        handleFileClick({
+                                                          file_path:
+                                                            input.value,
+                                                        })
+                                                      }
                                                     />
+                                                  ) : (
+                                                    <div>
+                                                      No preview available for
+                                                      this file type
+                                                    </div>
                                                   )}
-                                                </div>
+                                                </>
                                               )}
                                             </div>
                                           )
@@ -1441,8 +1387,8 @@ function DetailScFilePage() {
                                           </span>
                                         </p>
                                         <IconButton
-                                          icon={<Icon as={FaUndo} />} // Your desired icon
-                                          onClick={handleReverse} // Function to handle reversing the status
+                                          icon={<Icon as={FaUndo} />}
+                                          onClick={handleReverse}
                                           colorScheme="blue"
                                           className="buttonss mt-3"
                                           style={{ backgroundColor: "#007bff" }}
@@ -1533,44 +1479,112 @@ function DetailScFilePage() {
                                           ) : (
                                             input.type === "file" && (
                                               <div>
-                                                <label>{input.label}</label>
-                                                <Input
-                                                  type="file"
-                                                  required={input.is_required}
-                                                  onChange={(e) =>
-                                                    handleChange(
-                                                      e,
-                                                      inputIndex,
-                                                      dataIndex
-                                                    )
-                                                  }
-                                                />
-                                                {input.value && (
-                                                  <div
+                                                <label
+                                                  style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                  }}
+                                                >
+                                                  {input.label}
+                                                </label>
+                                                <label
+                                                  style={{
+                                                    display: "inline-block",
+                                                    padding: "5px 20px",
+                                                    backgroundColor:
+                                                      "rgb(65, 70, 80)",
+                                                    color: "white",
+                                                    borderRadius: "5px",
+                                                    cursor: "pointer",
+                                                  }}
+                                                >
+                                                  Choose File
+                                                  <Input
+                                                    type="file"
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
                                                     style={{
-                                                      marginTop: "10px",
+                                                      display: "none",
                                                     }}
-                                                  >
-                                                    {input.value
-                                                      .toLowerCase()
-                                                      .endsWith(".pdf") ? (
-                                                      <embed
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                        type="application/pdf"
-                                                        width="100%"
-                                                        height="200px"
-                                                      />
-                                                    ) : (
+                                                  />
+                                                </label>
+                                                {input.value && (
+                                                  <>
+                                                    {input.value.endsWith(
+                                                      ".pdf"
+                                                    ) ? (
+                                                      <div
+                                                        style={{
+                                                          position: "relative",
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          marginTop: "10px",
+                                                        }}
+                                                      >
+                                                        <iframe
+                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                          type="application/pdf"
+                                                          className="pdf-viewer"
+                                                          height="100%"
+                                                          width="100%"
+                                                          title="PDF Viewer"
+                                                        />
+                                                        <div className="pdf-overlay">
+                                                          <FontAwesomeIcon
+                                                            icon={faMaximize}
+                                                            onClick={() =>
+                                                              handleFileClick({
+                                                                file_path:
+                                                                  input.value,
+                                                              })
+                                                            }
+                                                            style={{
+                                                              position:
+                                                                "absolute",
+                                                              bottom: "8px",
+                                                              right: "25px",
+                                                              color: "black",
+                                                              cursor: "pointer",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    ) : input.value.match(
+                                                        /\.(jpeg|jpg|gif|png)$/
+                                                      ) ? (
                                                       <img
                                                         src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
                                                         alt="Uploaded"
                                                         style={{
                                                           width: "100%",
-                                                          height: "200px",
+                                                          height: "260px",
+                                                          borderRadius: "12px",
+                                                          boxShadow:
+                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                          cursor: "pointer",
+                                                          marginTop: "10px",
                                                         }}
+                                                        className="details-image"
+                                                        onClick={() =>
+                                                          handleFileClick({
+                                                            file_path:
+                                                              input.value,
+                                                          })
+                                                        }
                                                       />
+                                                    ) : (
+                                                      <div>
+                                                        No preview available for
+                                                        this file type
+                                                      </div>
                                                     )}
-                                                  </div>
+                                                  </>
                                                 )}
                                               </div>
                                             )
@@ -1586,15 +1600,15 @@ function DetailScFilePage() {
                                     </div>
                                     {dataIndex ===
                                       open.data.guarantorSteps.length - 1 && (
-                                        <Button
-                                          colorScheme="blue"
-                                          className="mt-3"
-                                          type="submit"
-                                          style={{ backgroundColor: "#b19552" }}
-                                        >
-                                          Submit
-                                        </Button>
-                                      )}
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
                                   </Form>
                                 )
                               )}
@@ -1602,7 +1616,7 @@ function DetailScFilePage() {
                             {modalOpen &&
                               modalOpen.data?.map((item, dataIndex) =>
                                 item.is &&
-                                  item.data.loan_step_id !== "1715348523661" ? (
+                                item.data.loan_step_id !== "1715348523661" ? (
                                   <Form
                                     onSubmit={(e) => {
                                       e.preventDefault();
@@ -1687,80 +1701,288 @@ function DetailScFilePage() {
                                     )}
                                     {dataIndex ===
                                       modalOpen.data.length - 1 && (
-                                        <Button
-                                          colorScheme="blue"
-                                          className="mt-3"
-                                          type="submit"
-                                          mr={3}
-                                          style={{ backgroundColor: "#b19552" }}
-                                        >
-                                          Submit
-                                        </Button>
-                                      )}
+                                      <Button
+                                        colorScheme="blue"
+                                        className="mt-3"
+                                        type="submit"
+                                        mr={3}
+                                        style={{ backgroundColor: "#b19552" }}
+                                      >
+                                        Submit
+                                      </Button>
+                                    )}
                                   </Form>
                                 ) : null
                               )}
                           </div>
                           {open.is &&
-                            open.data.loan_step_id === "1715348523661" &&
-                            open.data.pendingData.length !== 0 && (
+                            open.data.loan_step_id === "1715348523661" && (
                               <div className="row">
-                                <div className="col px-5 pt-3 d-flex justify-content-start align-items-top">
-                                  <Table
-                                    size="sm"
-                                    aria-label="documents"
-                                    className="mx-4"
-                                  >
-                                    <thead>
-                                      <tr className="py-2">
-                                        <th
-                                          className="font-weight-bold"
-                                          style={{ fontSize: "1rem" }}
+                                <div className="col px-5 pt-3">
+                                  {open.data?.pendingData &&
+                                    open.data.pendingData.length > 0 && (
+                                      <React.Fragment>
+                                        <h2
+                                          className="my-4"
+                                          style={{
+                                            fontSize: "18px",
+                                            fontWeight: 700,
+                                            color: "#333",
+                                          }}
                                         >
-                                          Document
-                                        </th>
-                                        <th
-                                          className="status font-weight-bold"
-                                          style={{ fontSize: "1rem" }}
-                                        >
-                                          Status
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {open.data?.pendingData?.map(
-                                        (documentRow, index) => (
-                                          <tr key={index}>
-                                            <td>{documentRow?.name}</td>
-                                            <td>
-                                              <span
-                                                style={{
-                                                  color: "#FFB302",
-                                                  fontWeight: "bold",
-                                                }}
+                                          Pending Documents
+                                        </h2>
+                                        <Table size="sm" aria-label="documents">
+                                          <thead>
+                                            <tr className="py-2">
+                                              <th
+                                                className="font-weight-bold"
+                                                style={{ fontSize: "1rem" }}
                                               >
-                                                Pending
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        )
-                                      )}
-                                    </tbody>
-                                  </Table>
-                                  {open.data.status !== "complete" && (
-                                    <Button
-                                      colorScheme="blue"
-                                      style={{ backgroundColor: "#b19552" }}
-                                      className="mx-3"
-                                      onClick={() =>
-                                        history.push(
-                                          `/savajcapitaluser/edituserfile?id=${id}`
-                                        )
-                                      }
-                                    >
-                                      Upload
-                                    </Button>
+                                                Document
+                                              </th>
+                                              <th
+                                                className="status font-weight-bold"
+                                                style={{ fontSize: "1rem" }}
+                                              >
+                                                Status
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {open.data.pendingData.map(
+                                              (documentRow, index) => (
+                                                <tr key={index}>
+                                                  <td>{documentRow?.name}</td>
+                                                  <td>
+                                                    <span
+                                                      style={{
+                                                        color: "#FFB302",
+                                                        fontWeight: "bold",
+                                                      }}
+                                                    >
+                                                      Pending
+                                                    </span>
+                                                  </td>
+                                                </tr>
+                                              )
+                                            )}
+                                          </tbody>
+                                        </Table>
+                                        {open.data.status !== "complete" && (
+                                          <Button
+                                            colorScheme="blue"
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                            onClick={() =>
+                                              history.push(
+                                                `/savajcapitaluser/edituserfile?id=${id}`
+                                              )
+                                            }
+                                          >
+                                            Upload
+                                          </Button>
+                                        )}
+                                      </React.Fragment>
+                                    )}
+                                  {fileData?.documents && (
+                                    <div className="mt-3">
+                                      <nav
+                                        aria-label="breadcrumb"
+                                        className="my-3"
+                                        style={{ overflow: "auto" }}
+                                      >
+                                        <h2
+                                          className="my-4"
+                                          style={{
+                                            fontSize: "18px",
+                                            fontWeight: 700,
+                                            color: "#333",
+                                          }}
+                                        >
+                                          Uploaded Documents
+                                        </h2>
+                                        <ul className="breadcrumb">
+                                          {Object.entries(
+                                            fileData?.documents
+                                          ).map(([title, files], index) => (
+                                            <li
+                                              key={title}
+                                              className="breadcrumb-item"
+                                            >
+                                              <a
+                                                href={`#${title}`}
+                                                onClick={() =>
+                                                  handleAccordionClickDocument(
+                                                    index
+                                                  )
+                                                }
+                                                style={{ color: "#414650" }}
+                                              >
+                                                {title} documents
+                                              </a>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </nav>
+
+                                      <div>
+                                        {Object.entries(
+                                          fileData?.documents
+                                        ).map(([title, files], index) => (
+                                          <div
+                                            className="accordion my-3"
+                                            id={`accordionPanelsStayOpenExample-${index}`}
+                                            key={index}
+                                          >
+                                            <div
+                                              className={`accordion-item ${
+                                                index === openPanelIndex
+                                                  ? "show"
+                                                  : ""
+                                              }`}
+                                              key={index}
+                                            >
+                                              <h2
+                                                className="accordion-header"
+                                                id={`panelsStayOpen-heading-${index}`}
+                                              >
+                                                <button
+                                                  className="accordion-button"
+                                                  type="button"
+                                                  onClick={() =>
+                                                    handleAccordionClickDocument(
+                                                      index
+                                                    )
+                                                  }
+                                                  aria-expanded={
+                                                    index === openPanelIndex
+                                                      ? "true"
+                                                      : "false"
+                                                  }
+                                                  style={{
+                                                    color: "white",
+                                                    fontWeight: 700,
+                                                    fontSize: "14px",
+                                                    backgroundColor: "#414650",
+                                                    justifyContent:
+                                                      "space-between",
+                                                  }}
+                                                  id={title}
+                                                >
+                                                  {title} documents
+                                                  <FontAwesomeIcon
+                                                    icon={
+                                                      index === openPanelIndex
+                                                        ? faChevronUp
+                                                        : faChevronDown
+                                                    }
+                                                  />
+                                                </button>
+                                              </h2>
+                                              <div
+                                                id={`panelsStayOpen-collapse-${index}`}
+                                                className={`accordion-collapse collapse ${
+                                                  index === openPanelIndex
+                                                    ? "show"
+                                                    : ""
+                                                }`}
+                                                aria-labelledby={`panelsStayOpen-heading-${index}`}
+                                              >
+                                                <div
+                                                  className="accordion-body"
+                                                  style={{
+                                                    display: "flex",
+                                                    flexWrap: "wrap",
+                                                    gap: "15px",
+                                                  }}
+                                                >
+                                                  {files.map((file, idx) => (
+                                                    <div
+                                                      key={idx}
+                                                      className="image-responsive"
+                                                      style={{ width: "45%" }}
+                                                    >
+                                                      <p className="mb-3">
+                                                        {file.document_name}
+                                                      </p>
+                                                      {file.file_path.endsWith(
+                                                        ".pdf"
+                                                      ) ? (
+                                                        <div
+                                                          style={{
+                                                            position:
+                                                              "relative",
+                                                            width: "100%",
+                                                            height: "260px",
+                                                          }}
+                                                        >
+                                                          <iframe
+                                                            src={`${basePath}${file.file_path}`}
+                                                            type="application/pdf"
+                                                            className="pdf-viewer"
+                                                            height="100%"
+                                                            width="100%"
+                                                            title="PDF Viewer"
+                                                          />
+                                                          <div className="pdf-overlay">
+                                                            <FontAwesomeIcon
+                                                              icon={faMaximize}
+                                                              onClick={() =>
+                                                                handleFileClick(
+                                                                  file
+                                                                )
+                                                              }
+                                                              style={{
+                                                                position:
+                                                                  "absolute",
+                                                                bottom: "8px",
+                                                                right: "25px",
+                                                                color: "black",
+                                                                cursor:
+                                                                  "pointer",
+                                                              }}
+                                                            />
+                                                          </div>
+                                                        </div>
+                                                      ) : (
+                                                        <img
+                                                          src={`${basePath}${file.file_path}`}
+                                                          alt={
+                                                            file.loan_document_id
+                                                          }
+                                                          style={{
+                                                            width: "100%",
+                                                            height: "260px",
+                                                            borderRadius:
+                                                              "12px",
+                                                            boxShadow:
+                                                              "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                            cursor: "pointer",
+                                                          }}
+                                                          className="details-image"
+                                                          onClick={() =>
+                                                            handleFileClick(
+                                                              file
+                                                            )
+                                                          }
+                                                        />
+                                                      )}
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
                                   )}
+                                  {!open.data?.pendingData ||
+                                    (open.data.pendingData.length === 0 && (
+                                      <p>No pending documents available.</p>
+                                    ))}
                                 </div>
                               </div>
                             )}
@@ -1768,11 +1990,11 @@ function DetailScFilePage() {
                       </div>
                     )}
                   </div>
-                  <div>
+                  {/* <div>
                     {fileData?.documents && (
-                      <FileDisplay groupedFiles={fileData?.documents} />
+                      <FileDisplay fileData?.documents={fileData?.documents} />
                     )}
-                  </div>
+                  </div> */}
                 </FormControl>
               </div>
             </CardBody>
@@ -1998,8 +2220,8 @@ function DetailScFilePage() {
               <Input
                 type="text"
                 value={rejectMessage}
-                onChange={(e) => setRejectMessage(e.target.value)} // Update state on change
-                required // Add the required attribute
+                onChange={(e) => setRejectMessage(e.target.value)}
+                required
               />
             </FormControl>
           </ModalBody>
@@ -2008,6 +2230,184 @@ function DetailScFilePage() {
               Confirm
             </Button>
             <Button onClick={closeRejectModal}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {selectedFile && (
+        <Modal
+          isOpen={true}
+          onClose={handleCloseModal}
+          size={isMaximized ? "full" : "6xl"}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>Download or Share File</div>
+              <div
+                onClick={toggleMaximize}
+                style={{
+                  cursor: "pointer",
+                  marginRight: "30px",
+                  marginBottom: "40px",
+                }}
+              >
+                {isMaximized ? <TiArrowMinimise /> : <TiArrowMaximise />}
+              </div>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedFile.file_path.endsWith(".pdf") ? (
+                <iframe
+                  src={`${basePath}${selectedFile.file_path}`}
+                  type="application/pdf"
+                  className="pdf-viewer"
+                  height="500"
+                  style={{ border: "none", width: "100%" }}
+                  title="PDF Viewer"
+                />
+              ) : (
+                <img
+                  src={`${basePath}${selectedFile.file_path}`}
+                  alt={selectedFile.loan_document_id}
+                  style={{
+                    width: "100%",
+                    height: "500px",
+                    borderRadius: "12px",
+                    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                  }}
+                  className="details-image"
+                />
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
+                mr={3}
+                onClick={handleDownload}
+              >
+                Download
+              </Button>
+              {!selectedFile.file_path.endsWith(".pdf") && (
+                <Button
+                  colorScheme="blue"
+                  style={{ backgroundColor: "#b19552" }}
+                  mr={3}
+                  onClick={handleConvertToPdf}
+                >
+                  Convert to PDF
+                </Button>
+              )}
+              <Button
+                leftIcon={<FaWhatsapp />}
+                colorScheme="whatsapp"
+                mr={3}
+                onClick={handleShareWhatsApp}
+              />
+              <Button
+                leftIcon={<FaEnvelope />}
+                colorScheme="teal"
+                mr={3}
+                onClick={handleShareEmail}
+              />
+              <Button variant="ghost" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+      <Modal isOpen={isOpensLogs} onClose={onClosesLogs} size="xl">
+        <ModalOverlay />
+        <ModalContent borderRadius="xl">
+          <ModalHeader
+            textAlign="center"
+            bg="#b19552"
+            color="white"
+            borderTopRadius="xl"
+          >
+            Add Log
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Log Message</FormLabel>
+              <Input
+                value={logMessage}
+                onChange={(e) => setLogMessage(e.target.value)}
+                placeholder="Enter log message"
+              />
+            </FormControl>
+
+            <Box mt={4} maxHeight="400px" overflowY="scroll" overflowX="hidden">
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {logs.map((log, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginBottom: "10px",
+                      padding: "12px",
+                      border: "1px solid #ccc",
+                      borderRadius: "8px",
+                      backgroundColor:
+                        log.role === "superadmin" ||
+                        log.role.startsWith("savajuser")
+                          ? "#f0f5ff"
+                          : "#fff",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <div>
+                      <strong>
+                        {log.role === "superadmin"
+                          ? "Superadmin added this log:"
+                          : log.role.startsWith("savajuser")
+                          ? `${log.role} added this log:`
+                          : ""}
+                      </strong>{" "}
+                      {log.message}
+                    </div>
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "0.85em",
+                        color: "#666",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {new Date(log.timestamp).toLocaleString()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              onClick={handleAddLog}
+              mr={3}
+              style={{
+                backgroundColor: "#b19552",
+                marginRight: "10PX",
+              }}
+            >
+              Add Log
+            </Button>
+            <Button onClick={onClosesLogs}>Close</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

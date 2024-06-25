@@ -11,7 +11,12 @@ import {
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import IconBox from "components/Icons/IconBox";
-import { DocumentIcon, GlobeIcon, WalletIcon, PersonIcon } from "components/Icons/Icons.js";
+import {
+  DocumentIcon,
+  GlobeIcon,
+  WalletIcon,
+  PersonIcon,
+} from "components/Icons/Icons.js";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
@@ -25,8 +30,8 @@ export default function Dashboard() {
   const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const textTableColor = useColorModeValue("gray.500", "white");
-
   const { colorMode } = useColorMode();
+
   const [apiData, setApiData] = useState({
     banks: 0,
     users: 0,
@@ -35,7 +40,7 @@ export default function Dashboard() {
     loans: [],
   });
   const [totalAmounts, setTotalAmounts] = useState({});
-  const [loading, setLoading] = useState(true); // State to track loading status
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +56,6 @@ export default function Dashboard() {
           loans: responses[1].data,
         }));
 
-        // Fetch total amounts for each loan and loan type
         const totalAmountPromises = responses[1].data.map(async (loan) => {
           const { loan_id, loantype_id } = loan;
 
@@ -81,7 +85,7 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false);
       }
     };
 
@@ -91,13 +95,13 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Flex justify="center" align="center" height="400px">
-      <Loader
-        type="spinner-circle"
-        bgColor={"#b19552"}
-        color={"black"}
-        size={50}
-      />
-    </Flex>
+        <Loader
+          type="spinner-circle"
+          bgColor={"#b19552"}
+          color={"black"}
+          size={50}
+        />
+      </Flex>
     );
   }
 
@@ -386,7 +390,11 @@ export default function Dashboard() {
             style={{ cursor: "pointer", border: "1px solid black" }}
             onClick={() =>
               history.push(`/superadmin/filetable`, {
-                state: { loan: loan.loan, loan_id: loan.loan_id ,loantype_id : loan.loantype_id  },
+                state: {
+                  loan: loan.loan,
+                  loan_id: loan.loan_id,
+                  loantype_id: loan.loantype_id,
+                },
               })
             }
           >

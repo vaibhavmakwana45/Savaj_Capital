@@ -18,6 +18,7 @@ import {
   ModalCloseButton,
   Checkbox,
   Select,
+  Box
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import { TiArrowMaximise, TiArrowMinimise } from "react-icons/ti";
@@ -57,7 +58,13 @@ function ViewFile() {
     onOpen: onOpensGuarantor,
     onClose: onClosesGuarantor,
   } = useDisclosure();
-
+  const {
+    isOpen: isOpensLogs,
+    onOpen: onOpensLogs,
+    onClose: onClosesLogs,
+  } = useDisclosure();
+  const [logs, setLogs] = useState([]);
+  const [logMessage, setLogMessage] = useState("");
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
   const [openPanelIndex, setOpenPanelIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -223,13 +230,13 @@ function ViewFile() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
     fetchStepsData();
@@ -808,6 +815,29 @@ function ViewFile() {
     }
   };
 
+  const handleAddLog = async () => {
+    if (logMessage.trim()) {
+      const newLog = {
+        message: logMessage,
+        timestamp: new Date().toISOString(),
+        role: "superadmin", // Add role attribute here
+      };
+
+      try {
+        const response = await AxiosInstance.put(`/file_upload/${id}`, {
+          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+        });
+
+        setLogs(response.data.data.logs);
+        setLogMessage("");
+        toast.success("Log Added Successfully!");
+      } catch (error) {
+        console.error("Error adding log:", error);
+        toast.error("Please try again later!");
+      }
+    }
+  };
+
   return (
     <div>
       {loading ? (
@@ -841,13 +871,25 @@ function ViewFile() {
                     />
                     <b>{fileData?.loan} File Details</b>
                   </div>
-                  <Button
-                    colorScheme="blue"
-                    style={{ backgroundColor: "#b19552" }}
-                    onClick={handleAddGuarantor}
-                  >
-                    Add Guarantor
-                  </Button>
+                  <div>
+                    <Button
+                      colorScheme="blue"
+                      style={{
+                        backgroundColor: "#b19552",
+                        marginRight: "10PX",
+                      }}
+                      onClick={onOpensLogs}
+                    >
+                      Logs
+                    </Button>
+                    <Button
+                      colorScheme="blue"
+                      style={{ backgroundColor: "#b19552" }}
+                      onClick={handleAddGuarantor}
+                    >
+                      Add Guarantor
+                    </Button>
+                  </div>
                 </Flex>
               </FormLabel>
 
@@ -2275,6 +2317,94 @@ function ViewFile() {
           </ModalContent>
         </Modal>
       )}
+      <Modal isOpen={isOpensLogs} onClose={onClosesLogs} size="xl">
+        <ModalOverlay />
+        <ModalContent borderRadius="xl">
+          <ModalHeader
+            textAlign="center"
+            bg="#b19552"
+            color="white"
+            borderTopRadius="xl"
+          >
+            Add Log
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Log Message</FormLabel>
+              <Input
+                value={logMessage}
+                onChange={(e) => setLogMessage(e.target.value)}
+                placeholder="Enter log message"
+              />
+            </FormControl>
+
+            <Box mt={4} maxHeight="400px" overflowY="scroll" overflowX="hidden">
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {logs.map((log, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginBottom: "10px",
+                      padding: "12px",
+                      border: "1px solid #ccc",
+                      borderRadius: "8px",
+                      backgroundColor:
+                        log.role === "superadmin" ||
+                        log.role.startsWith("savajuser")
+                          ? "#f0f5ff"
+                          : "#fff",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.02)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <div>
+                      <strong>
+                        {log.role === "superadmin"
+                          ? "Superadmin added this log:"
+                          : log.role.startsWith("savajuser")
+                          ? `${log.role} added this log:`
+                          : ""}
+                      </strong>{" "}
+                      {log.message}
+                    </div>
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "0.85em",
+                        color: "#666",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {new Date(log.timestamp).toLocaleString()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              onClick={handleAddLog}
+              mr={3}
+              style={{
+                backgroundColor: "#b19552",
+                marginRight: "10PX",
+              }}
+            >
+              Add Log
+            </Button>
+            <Button onClick={onClosesLogs}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <Toaster />
     </div>
   );

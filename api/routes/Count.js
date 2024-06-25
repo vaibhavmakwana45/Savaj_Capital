@@ -152,7 +152,6 @@ router.get(
     try {
       const { state, city, branchuser_id } = req.params;
 
-      // Find all branch assignments for the given branchuser_id
       const branchAssignments = await Branch_Assign.find({
         branchuser_id,
       }).lean();
@@ -160,23 +159,19 @@ router.get(
       const enhancedLoans = [];
 
       for (const assignment of branchAssignments) {
-        // Find the corresponding loan for each branch assignment
         const loan = await Loan.findOne({ loan_id: assignment.loan_id }).lean();
 
-        // Find the loan types corresponding to the current loan and loantype_id from the assignment
         const loanTypes = await Loan_Type.find({
           loan_id: loan.loan_id,
           loantype_id: assignment.loantype_id,
         }).lean();
 
-        // Fetch all files for the current loan
         const allFiles = await File_Uplode.find({
           loan_id: loan.loan_id,
         }).lean();
 
         let branchAssignmentFileCount = 0;
 
-        // If no specific loan type is found, add a default one
         if (loanTypes.length === 0) {
           loanTypes.push({
             loan_type: "Unknown",
@@ -186,7 +181,6 @@ router.get(
         }
 
         for (const loanType of loanTypes) {
-          // Filter files based on loantype_id
           const filteredFiles = allFiles.filter(
             (file) => file.loantype_id === loanType.loantype_id
           );
@@ -202,7 +196,6 @@ router.get(
                 typename: file.typename,
               });
 
-              // Check if the file_id matches the file_id in the assignment
               if (assignment.file_id.includes(file.file_id)) {
                 branchAssignmentFileCount++;
               }
@@ -222,7 +215,6 @@ router.get(
         }
       }
 
-      // Consolidate loans with the same loan_id and empty loantype_id
       const consolidatedLoans = [];
       const loanMap = new Map();
 
@@ -244,7 +236,6 @@ router.get(
         consolidatedLoans.push(loan);
       }
 
-      // Filter loans that have files meeting the criteria
       const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
       );
@@ -263,16 +254,13 @@ router.get(
     try {
       const { state, city, bankuser_id } = req.params;
 
-      // Find all bank approvals for the given bankuser_id
       const bankApprovals = await BankApproval.find({ bankuser_id }).lean();
 
       const enhancedLoans = [];
 
       for (const approval of bankApprovals) {
-        // Find the corresponding loan for each bank approval
         const loan = await Loan.findOne({ loan_id: approval.loan_id }).lean();
 
-        // Find the loan types corresponding to the current loan and loantype_id from the approval
         const loanTypes = await Loan_Type.find({
           loan_id: loan.loan_id,
           loantype_id: approval.loantype_id,
@@ -280,7 +268,6 @@ router.get(
 
         const stateCityFiles = [];
 
-        // Fetch files for the current bank approval entry
         const files = await File_Uplode.find({
           loan_id: loan.loan_id,
           loantype_id: approval.loantype_id,
@@ -293,21 +280,18 @@ router.get(
             user_id: file.user_id,
           }).lean();
 
-          // Check if the user matches the state and city criteria
           if (user && user.state === state && user.city === city) {
             stateCityFiles.push({
               filename: file.filename,
               typename: file.typename,
             });
 
-            // Check if the file_id matches the file_id in the approval
             if (approval.file_id.includes(file.file_id)) {
               bankApprovalFileCount++;
             }
           }
         }
 
-        // If no specific loan type is found, add a default one
         if (loanTypes.length === 0) {
           loanTypes.push({
             loan_type: "Unknown",
@@ -330,7 +314,6 @@ router.get(
         }
       }
 
-      // Consolidate loans with the same loan_id and empty loantype_id
       const consolidatedLoans = [];
       const loanMap = new Map();
 
@@ -352,7 +335,6 @@ router.get(
         consolidatedLoans.push(loan);
       }
 
-      // Filter loans that have files meeting the criteria
       const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
       );
