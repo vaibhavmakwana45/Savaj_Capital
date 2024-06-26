@@ -2355,11 +2355,12 @@ function DetailScFilePage() {
                       padding: "12px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
-                      backgroundColor:
-                        log.role === "superadmin" ||
-                        log.role.startsWith("savajuser")
-                          ? "#f0f5ff"
-                          : "#fff",
+                      backgroundColor: log.role.startsWith("bankuser")
+                        ? "#f0f5ff" // Light red background for bankuser logs
+                        : log.role === "superadmin" ||
+                          log.role.startsWith("savajuser")
+                        ? "#f0f5ff" // Light blue background for other roles
+                        : "#fff", // Default white background
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                       transition: "transform 0.2s",
                     }}
@@ -2376,6 +2377,8 @@ function DetailScFilePage() {
                           ? "Superadmin added this log:"
                           : log.role.startsWith("savajuser")
                           ? `${log.role} added this log:`
+                          : log.role.startsWith("bankuser")
+                          ? `${log.role} added this log:` // Display specific message for bankuser
                           : ""}
                       </strong>{" "}
                       {log.message}
