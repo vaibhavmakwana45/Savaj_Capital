@@ -1,11 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
-import {
-  Flex,
-  Text,
-  useColorModeValue,
-  Button,
-  Input,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button, Input } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -90,20 +84,20 @@ function BankUsers() {
     "Index",
     "email",
     "mobile",
-    "aadhar",
-    "address",
+    "state",
+    "city",
     "create",
     "update",
     "Action",
   ];
 
-  const formattedData = filteredUsers.map((bank,index) => [
+  const formattedData = filteredUsers.map((bank, index) => [
     bank.bankuser_id,
     index + 1,
     bank.email,
     bank.mobile,
-    bank.adhar,
-    bank.adress,
+    bank.state,
+    bank.city,
     bank.createdAt,
     bank.updatedAt,
   ]);
@@ -182,7 +176,11 @@ function BankUsers() {
 
                 <Menu>
                   <MenuButton>
-                    <Button onClick={navigateToAnotherPage} colorScheme="blue" style={{backgroundColor:"#b19552"}}>
+                    <Button
+                      onClick={navigateToAnotherPage}
+                      colorScheme="blue"
+                      style={{ backgroundColor: "#b19552" }}
+                    >
                       ...
                     </Button>
                   </MenuButton>

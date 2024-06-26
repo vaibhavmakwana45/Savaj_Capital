@@ -415,7 +415,7 @@ function AddBankUser() {
                 />
               </FormControl>
 
-              <FormControl id="adress" mt={4}>
+              {/* <FormControl id="adress" mt={4}>
                 <FormLabel>Address</FormLabel>
                 <Input
                   name="adress"
@@ -433,7 +433,7 @@ function AddBankUser() {
                   onChange={handleChange}
                   value={formData.dob}
                 />
-              </FormControl>
+              </FormControl> */}
               <FormControl id="mobile" mt={4} isRequired>
                 <FormLabel>Mobile Number</FormLabel>
                 <Input
@@ -444,7 +444,7 @@ function AddBankUser() {
                   placeholder="Enter your Number"
                 />
               </FormControl>
-              <FormControl id="adhar" mt={4} isRequired>
+              {/* <FormControl id="adhar" mt={4} isRequired>
                 <FormLabel>Aadhar Card</FormLabel>
                 <Input
                   name="adhar"
@@ -463,7 +463,7 @@ function AddBankUser() {
                   value={formData.emergancy_contact}
                   placeholder="Enter your Number"
                 />
-              </FormControl>
+              </FormControl> */}
               <FormControl id="password" mt={4} isRequired>
                 <FormLabel>Password</FormLabel>
                 <Input
