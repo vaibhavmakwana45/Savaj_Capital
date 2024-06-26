@@ -225,6 +225,10 @@ function UserTable() {
     }
   };
 
+  const rowBackgroundColor = "#FFFFFF"; // Your desired row background color
+  // const rowTextColor = "#212529"; // Your desired row text color
+  const hoverBackgroundColor = "#b19552"; // Your desired hover background color
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -336,6 +340,11 @@ function UserTable() {
                       <Tr
                         onClick={() => toggleRowExpansion(index)}
                         cursor="pointer"
+                        _hover={{
+                          background: "#b19552",
+                          cursor: "pointer",
+                          textColor: "white",
+                        }}
                       >
                         <Td>{index + 1}</Td>
                         <Td>{user.username || "N/A"}</Td>
@@ -391,6 +400,7 @@ function UserTable() {
                                 handleEdit(user.user_id);
                               }}
                               mr={2}
+                              color="black"
                             />
                             <IconButton
                               aria-label="Delete"
@@ -400,6 +410,7 @@ function UserTable() {
                                 handleDelete(user.user_id);
                               }}
                               mr={2}
+                              color="black"
                             />
 
                             <IconButton
@@ -417,6 +428,7 @@ function UserTable() {
                                 e.stopPropagation();
                                 toggleRowExpansion(index);
                               }}
+                              color="black"
                             />
                           </Flex>
                         </Td>

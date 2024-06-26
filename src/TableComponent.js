@@ -511,12 +511,20 @@ const TableComponent = ({
           ) : (
             currentData.map((rowData, rowIndex) => (
               <React.Fragment key={rowIndex}>
-                <Tr pl="0px">
+                <Tr
+                  pl="0px"
+                  _hover={{
+                    background: "#b19552",
+                    cursor: "pointer",
+                    textColor: "white",
+                  }}
+                >
                   {rowData.slice(1).map((cellData, cellIndex) => (
                     <Td
                       key={cellIndex}
                       pl="10px"
                       onClick={() => handleRow(rowData[0])}
+                      _hover={{ background: "#b19552", cursor: "pointer" }}
                       style={{ cursor: handleRow ? "pointer" : "auto" }}
                       display={
                         cellIndex === removeIndex || cellIndex === removeIndex2
@@ -535,6 +543,7 @@ const TableComponent = ({
                           icon={<DeleteIcon />}
                           onClick={() => handleDelete(rowData[0])}
                           mr={2}
+                          color="black"
                         />
                       )}
                       {showEditButton && (
@@ -542,6 +551,7 @@ const TableComponent = ({
                           aria-label="Edit"
                           icon={<EditIcon />}
                           onClick={() => handleEdit(rowData[0])}
+                          color="black"
                         />
                       )}
                       {collapse && (
@@ -556,6 +566,7 @@ const TableComponent = ({
                           }
                           onClick={() => toggleRow(rowIndex)}
                           ml={2}
+                          color="black"
                         />
                       )}
                       {showTitleButton && (

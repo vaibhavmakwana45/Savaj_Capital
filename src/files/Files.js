@@ -895,6 +895,11 @@ function Files() {
                           handleRowClick(file.file_id);
                         }}
                         cursor="pointer"
+                        _hover={{
+                          background: "#b19552",
+                          cursor: "pointer",
+                          textColor: "white",
+                        }}
                       >
                         <Td>{index + 1}</Td>
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
@@ -1048,6 +1053,7 @@ function Files() {
                                     file.user_id
                                   );
                                 }}
+                                color="black"
                               >
                                 <MoreVertIcon />
                               </IconButton>
@@ -1138,6 +1144,7 @@ function Files() {
                                   e.stopPropagation();
                                   toggleRowExpansion(file.file_id);
                                 }}
+                                color="black"
                               >
                                 {expandedRow === file.file_id ? (
                                   <ChevronUpIcon />
