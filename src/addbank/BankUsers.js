@@ -69,7 +69,6 @@ function BankUsers() {
       history.push("/superadmin/addbank?id=" + id);
       return;
     }
-    history.push("/superadmin/addbank");
   };
 
   const navigateToAnotherPageUser = (id) => {
@@ -77,6 +76,11 @@ function BankUsers() {
       history.push("/superadmin/addbankuser?id=" + id);
       return;
     }
+  };
+  const navigateToAddBank = () => {
+    history.push("/superadmin/addbank");
+  };
+  const navigateToAddBankUser = () => {
     history.push("/superadmin/addbankuser");
   };
 
@@ -162,54 +166,61 @@ function BankUsers() {
                   aria-label="Back"
                   mr="4"
                 />
-                {bank?.bank_name || "..."}{" "}
-                {bank?.state && " - " + bank?.state + "," + bank?.city}
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext d-flex"
+                >
+                  {" "}
+                  {bank?.bank_name || "..."}{" "}
+                  {bank?.state && " - " + bank?.state + "," + bank?.city}
+                </Text>
               </Text>
-              <div className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
+            </Flex>
+            <Flex className="thead" justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "12px", // Padding for comfortable input
+                  fontSize: "16px", // Font size
+                  borderRadius: "8px", // Rounded corners
+                  border: "2px solid #b19552", // Solid border with custom color
+                  backgroundColor: "#ffffff", // White background
+                  color: "#333333", // Text color
+                  outline: "none", // Remove default outline
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle box shadow
+                  transition: "all 0.3s ease-in-out", // Smooth transitions
+                  fontFamily: "inherit", // Inherit default font family
+                }}
+              />
 
-                <Menu>
-                  <MenuButton>
-                    <Button
-                      onClick={navigateToAnotherPage}
-                      colorScheme="blue"
-                      style={{ backgroundColor: "#b19552" }}
-                    >
-                      ...
-                    </Button>
-                  </MenuButton>
-                  <MenuList p="16px 8px" bg={menuBg} mt="10px">
-                    <Flex flexDirection="column" style={{ gap: 10 }}>
-                      <MenuItem
-                        borderRadius="8px"
-                        onClick={() => {
-                          navigateToAnotherPage();
-                        }}
-                      >
-                        <Flex align="center" justifyContent="flex-start">
-                          Add Bank
-                        </Flex>
-                      </MenuItem>
-                      <MenuItem
-                        borderRadius="8px"
-                        onClick={() => {
-                          navigateToAnotherPageUser();
-                        }}
-                      >
-                        <Flex align="center" justifyContent="flex-start">
-                          Add Bank User
-                        </Flex>
-                      </MenuItem>
-                    </Flex>
-                  </MenuList>
-                </Menu>
-              </div>
+              <Button
+                onClick={navigateToAddBank}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginRight: "10px",
+                }}
+              >
+                Add Bank
+              </Button>
+              <Button
+                onClick={navigateToAddBankUser}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
+                Add Bank User
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

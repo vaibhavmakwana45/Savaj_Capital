@@ -1,9 +1,4 @@
-import {
-  Flex,
-  Text,
-  useColorModeValue,
-  Button,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -13,6 +8,7 @@ import {
   AlertDialogOverlay,
   Input,
   Select,
+  Box,
 } from "@chakra-ui/react";
 import toast, { Toaster } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
@@ -285,59 +281,105 @@ function Customer() {
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="mainnnn">
-              <Text
-                fontSize="xl"
-                color={textColor}
-                fontWeight="bold"
-                className="ttext"
+              <Box textAlign="center" pb="4">
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext"
+                >
+                  All Customers{" "}
+                </Text>
+              </Box>
+            </Flex>
+            <Flex className="thead" justifyContent="end" alignItems="center">
+              <Select
+                value={selectedState}
+                onChange={handleStateChange}
+                placeholder="Select State"
+                width="250px"
+                marginRight="10px"
+                className="mb-0 drop"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
               >
-                All Customers
-              </Text>
-              <Flex className="thead" justifyContent="space-between">
-                <Select
-                  value={selectedState}
-                  onChange={handleStateChange}
-                  placeholder="Select State"
-                  width="250px"
-                  marginRight="10px"
-                  className="mb-2 drop"
-                >
-                  {states.map((state) => (
-                    <option key={state.isoCode} value={state.name}>
-                      {state.name}
-                    </option>
-                  ))}
-                </Select>
-                <Select
-                  value={selectedCity}
-                  onChange={handleCityChange}
-                  placeholder="Select City"
-                  disabled={!selectedState}
-                  width="250px"
-                  marginRight="10px"
-                  className="mb-2 drop"
-                >
-                  {cities.map((city) => (
-                    <option key={city.name} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
-                </Select>
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  onClick={() => history.push("/savajcapitaluser/addcustomer")}
-                  colorScheme="blue"
-                  style={{ background: "#b19552" }}
-                >
-                  Add Customer
-                </Button>
-              </Flex>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </Select>
+
+              <Select
+                value={selectedCity}
+                onChange={handleCityChange}
+                placeholder="Select City"
+                disabled={!selectedState}
+                width="250px"
+                marginRight="10px"
+                className="mb-0 drop"
+                style={{
+                  padding: "5px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              >
+                {cities.map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </Select>
+
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "5px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              />
+
+              <Button
+                onClick={() => history.push("/savajcapitaluser/addcustomer")}
+                colorScheme="blue"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  backgroundColor: "#b19552",
+                  color: "white",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              >
+                Add Customer
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

@@ -31,16 +31,20 @@ function LoanTypes() {
   const [selectedLoan, setSelectedLoan] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [isEditLoan, setisEditLoan] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const cancelRef = React.useRef();
 
   const fetchLoans = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
       setLoans(response.data.data);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
-
       console.error("Error fetching loans:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,23 +83,23 @@ function LoanTypes() {
     setSelectedUserId(id);
     setIsDeleteDialogOpen(true);
   };
-  const [steps, setSteps] = useState([]);
-  const [selectedLoanStepIds, setSelectedLoanStepIds] = useState([]);
 
   const getStepData = async () => {
+    setLoading(true);
     try {
       const response = await AxiosInstance.get("/loan_step");
       if (response.data.success) {
         setSteps(response.data.data);
-        setLoading(false);
       } else {
         alert("Please try again later...!");
       }
     } catch (error) {
-      setLoading(false);
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     getStepData();
   }, []);
@@ -141,9 +145,6 @@ function LoanTypes() {
     }
   };
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const cancelRef = React.useRef();
   const deletebranch = async (loanId) => {
     try {
       const response = await AxiosInstance.delete(`/loan/${loanId}`);
@@ -244,44 +245,56 @@ function LoanTypes() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
                 className="ttext"
               >
                 All Loan
               </Text>
-              <Flex className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <div className="add-doc-btn">
-                  <Button
-                    onClick={() => history.push("/superadmin/addloantype")}
-                    colorScheme="blue"
-                    className="adduser-btn mb-1"
-                    style={{ backgroundColor: "#b19552", color: "#fff" }}
-                  >
-                    Add Loan
-                  </Button>
-                  <Button
-                    className="loanuser-btn mb-1"
-                    onClick={() => history.push("/superadmin/addloandocs")}
-                    colorScheme="blue"
-                    style={{
-                      backgroundColor: "#b19552",
-                      color: "#fff",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    Add Documents
-                  </Button>
-                </div>
-              </Flex>
+            </Flex>
+            <Flex className="thead" justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              />
+              <div className="add-doc-btn">
+                <Button
+                  onClick={() => history.push("/superadmin/addloantype")}
+                  colorScheme="blue"
+                  className="adduser-btn mb-1"
+                  style={{ backgroundColor: "#b19552", color: "#fff" }}
+                >
+                  Add Loan
+                </Button>
+                <Button
+                  className="loanuser-btn mb-1"
+                  onClick={() => history.push("/superadmin/addloandocs")}
+                  colorScheme="blue"
+                  style={{
+                    backgroundColor: "#b19552",
+                    color: "#fff",
+                    marginLeft: "10px",
+                  }}
+                >
+                  Add Documents
+                </Button>
+              </div>
             </Flex>
           </CardHeader>
           <CardBody>

@@ -64,11 +64,11 @@ function LoanSubTypes() {
     searchTerm.length === 0
       ? users
       : users.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.number.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        (user) =>
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.number.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
   const allHeaders = ["Index", "Loan", "Created At", "Updated At", "Action"];
   const formattedData = filteredUsers.map((item, index) => [
@@ -129,7 +129,7 @@ function LoanSubTypes() {
       } else {
         toast.error(
           response.data.message ||
-            "An unexpected error occurred while deleting the loan."
+          "An unexpected error occurred while deleting the loan."
         );
       }
     } catch (error) {
@@ -221,32 +221,52 @@ function LoanSubTypes() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontSize="xl" color={textColor} fontWeight="bold">
-                <IconButton
-                  icon={<ArrowBackIcon />}
-                  onClick={() => history.goBack()}
-                  aria-label="Back"
-                  mr="4"
-                />
+            <Flex alignItems="center">
+              <IconButton
+                icon={<ArrowBackIcon />}
+                onClick={() => history.goBack()}
+                aria-label="Back"
+                mr="4"
+              />
+              <Text
+                fontSize="2xl"
+                fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
+                className="ttext"
+              >
                 {loan?.loan || "..."}
               </Text>
-              <Flex>
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  onClick={() => setisEditLoan(true)}
-                  colorScheme="blue"
-                  style={{ backgroundColor: "#b19552" }}
-                >
-                  Add Loan
-                </Button>
-              </Flex>
+            </Flex>
+
+            <Flex justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "10px", // Padding for comfortable input
+                  fontSize: "16px", // Font size
+                  borderRadius: "8px", // Rounded corners
+                  border: "2px solid #b19552", // Solid border with custom color
+                  backgroundColor: "#ffffff", // White background
+                  color: "#333333", // Text color
+                  outline: "none", // Remove default outline
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle box shadow
+                  transition: "all 0.3s ease-in-out", // Smooth transitions
+                  fontFamily: "inherit", // Inherit default font family
+                }}
+              />
+
+              <Button
+                onClick={() => setisEditLoan(true)}
+                colorScheme="blue"
+                style={{ backgroundColor: "#b19552" }}
+              >
+                Add Loan
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

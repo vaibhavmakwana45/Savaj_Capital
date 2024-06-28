@@ -16,6 +16,7 @@ import {
   Collapse,
   FormControl,
   FormLabel,
+  Box,
 } from "@chakra-ui/react";
 import $ from "jquery";
 import { MoreVert as MoreVertIcon } from "@material-ui/icons";
@@ -698,38 +699,63 @@ function Files() {
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
-          <CardHeader style={{ padding: "10px" }} className="card-main">
-            <Flex justifyContent="space-between" p="4" className="mainnnn">
+          <CardHeader pb="4">
+            <Flex justifyContent="space-between" pb="4" className="mainnnn">
               <Text fontSize="xl">
                 {loan ? (
                   <>
-                    {loan}
-                    {selectedStatusSearch !== "1718861587262" &&
-                    selectedStatusSearch !== "1718861593296" ? (
+                    <Box p="2">
                       <Text
-                        as="span"
-                        color="green.400"
+                        fontSize="2xl"
                         fontWeight="bold"
-                        pl="1"
+                        bgGradient="linear(to-r, #b19552, #212529)"
+                        bgClip="text"
+                        className="ttext"
                       >
-                        <span style={{ color: "black" }}>-</span> ₹{" "}
-                        {totalAmount !== null ? totalAmount : "-"}{" "}
-                        <span style={{ color: "black" }}>-</span> {totalFiles}{" "}
-                        files
+                        {" "}
+                        {loan}
+                        {selectedStatusSearch !== "1718861587262" &&
+                        selectedStatusSearch !== "1718861593296" ? (
+                          <>
+                            <span
+                              style={{ color: "black", paddingLeft: "10px" }}
+                            >
+                              ₹{" "}
+                            </span>
+                            <Text
+                              as="span"
+                              color="green.500"
+                              fontWeight="semibold"
+                            >
+                              {totalAmount !== null ? totalAmount : "-"}
+                            </Text>{" "}
+                            <span style={{ color: "gray.700" }}>-</span>{" "}
+                            {totalFiles} files
+                          </>
+                        ) : null}
                       </Text>
-                    ) : null}
+                    </Box>
                   </>
                 ) : (
-                  <Text
-                    fontSize="xl"
-                    color="green.400"
-                    fontWeight="bold"
-                    className="ttext"
-                  >
-                    <span style={{ color: "black" }}> All Files -</span> ₹{" "}
-                    {totalAmount !== null ? totalAmount : "-"}{" "}
-                    <span style={{ color: "black" }}>-</span> {totalFiles} files
-                  </Text>
+                  <Box p="2">
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      bgGradient="linear(to-r, #b19552, #212529)"
+                      bgClip="text"
+                      className="ttext"
+                    >
+                      All Files
+                      <span style={{ color: "black", paddingLeft: "10px" }}>
+                        ₹{" "}
+                      </span>
+                      <Text as="span" color="green.500" fontWeight="semibold">
+                        {totalAmount !== null ? totalAmount : "-"}
+                      </Text>{" "}
+                      <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
+                      files
+                    </Text>
+                  </Box>
                 )}
               </Text>
             </Flex>
@@ -742,10 +768,36 @@ function Files() {
                       aria-label="Default select example"
                       value={selectedLoan}
                       onChange={(e) => setSelectedLoan(e.target.value)}
+                      style={{
+                        padding: "5px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        border: "2px solid #b19552",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        width: "100%",
+                        maxWidth: "300px",
+                        appearance: "none",
+                        color: "#333333",
+                        outline: "none",
+                        transition: "all 0.3s ease-in-out",
+                      }}
                     >
-                      <option value="All Loan Types">Select loan type</option>
+                      <option value="All Loan Types" disabled>
+                        Select loan type
+                      </option>
                       {loans.map((loan) => (
-                        <option key={loan.loan_id} value={loan.loan_id}>
+                        <option
+                          key={loan.loan_id}
+                          value={loan.loan_id}
+                          style={{
+                            backgroundColor: "#ffffff",
+                            color: "#333333",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        >
                           {loan.loan}
                         </option>
                       ))}
@@ -753,12 +805,28 @@ function Files() {
                   )}
 
                   <select
-                    class="form-select loan-type-dropdown"
+                    className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     value={selectedState}
                     onChange={handleStateChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
-                    <option selected>Select State</option>
+                    <option value="" disabled>
+                      Select State
+                    </option>
                     {states.map((state) => (
                       <option key={state.isoCode} value={state.name}>
                         {state.name}
@@ -767,13 +835,29 @@ function Files() {
                   </select>
 
                   <select
-                    class="form-select loan-type-dropdown"
+                    className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     disabled={!selectedState}
                     value={selectedCity}
                     onChange={handleCityChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
-                    <option selected>Select City</option>
+                    <option value="" disabled>
+                      Select City
+                    </option>
                     {cities.map((city) => (
                       <option key={city.name} value={city.name}>
                         {city.name}
@@ -783,28 +867,28 @@ function Files() {
                 </div>
 
                 <div
-                  className="d-flex second-drop-section gap-2 "
+                  className="d-flex second-drop-section gap-2"
                   style={{ marginLeft: "10px" }}
                 >
-                  {/* <select
-                    class="form-select loan-type-dropdown "
-                    aria-label="Default select example"
-                    value={selectedStatusSearch}
-                    onChange={(e) => setSelectedStatusSearch(e.target.value)}
-                    width="200px"
-                  >
-                    <option selected>Select Status</option>
-                    <option value="running">Running</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select> */}
-
                   <select
                     className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     value={selectedStatusSearch}
                     onChange={(e) => setSelectedStatusSearch(e.target.value)}
-                    width="200px"
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
                     <option value="" disabled selected>
                       Select Status
@@ -822,18 +906,36 @@ function Files() {
                   <Input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search by name"
+                    placeholder="Search"
                     width="250px"
-                    mr="10px"
+                    // marginRight="10px"
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   />
+
                   <Button
                     onClick={() => history.push("/superadmin/addfile")}
                     className="dynamicImportantStyle"
                     colorScheme="blue"
                     style={{
+                      paddingX: "20px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
                       backgroundColor: "#b19552",
                       color: "white",
                       width: "150px",
+                      transition: "all 0.3s ease-in-out",
                     }}
                   >
                     Add File
@@ -1292,6 +1394,54 @@ function Files() {
                 )}
               </Tbody>
             </Table>
+            <Flex
+              justifyContent="flex-end"
+              alignItems="center"
+              p="4"
+              // borderBottom="1px solid #ccc"
+            >
+              <Text mr="4" fontSize="sm">
+                Total Records: {totalRecords}
+              </Text>
+              <Text mr="2" fontSize="sm">
+                Rows per page:
+              </Text>
+              <Select
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                mr="2"
+                width="100px"
+                fontSize="sm"
+              >
+                {[10, 20, 50].map((perPage) => (
+                  <option key={perPage} value={perPage}>
+                    {perPage}
+                  </option>
+                ))}
+              </Select>
+              <Text mr="4" fontSize="sm">
+                Page {currentPage} of {totalPages}
+              </Text>
+              <IconButton
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                aria-label="Previous Page"
+                icon={<KeyboardArrowUpIcon />}
+                mr="2"
+                variant="outline"
+                colorScheme="gray"
+                size="sm"
+              />
+              <IconButton
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                aria-label="Next Page"
+                icon={<KeyboardArrowDownIcon />}
+                variant="outline"
+                colorScheme="gray"
+                size="sm"
+              />
+            </Flex>
           </CardBody>
         </Card>
         <AlertDialog
@@ -1671,54 +1821,7 @@ function Files() {
           </AlertDialogOverlay>
         </AlertDialog>
       </Flex>
-      <Flex
-        justifyContent="flex-end"
-        alignItems="center"
-        p="4"
-        borderBottom="1px solid #ccc"
-      >
-        <Text mr="4" fontSize="sm">
-          Total Records: {totalRecords}
-        </Text>
-        <Text mr="2" fontSize="sm">
-          Rows per page:
-        </Text>
-        <Select
-          value={itemsPerPage}
-          onChange={(e) => setItemsPerPage(Number(e.target.value))}
-          mr="2"
-          width="100px"
-          fontSize="sm"
-        >
-          {[10, 20, 50].map((perPage) => (
-            <option key={perPage} value={perPage}>
-              {perPage}
-            </option>
-          ))}
-        </Select>
-        <Text mr="4" fontSize="sm">
-          Page {currentPage} of {totalPages}
-        </Text>
-        <IconButton
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          aria-label="Previous Page"
-          icon={<KeyboardArrowUpIcon />}
-          mr="2"
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-        />
-        <IconButton
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          aria-label="Next Page"
-          icon={<KeyboardArrowDownIcon />}
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-        />
-      </Flex>
+
       <Toaster />
     </>
   );

@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Flex,
-  Text,
-  useColorModeValue,
-  Button,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -308,24 +303,49 @@ function Document() {
                   aria-label="Back"
                   mr="4"
                 />
-                Documents
-              </Text>
-              <div className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  className="add-doc-button"
-                  onClick={() => history.push("/superadmin/addloandocs")}
-                  style={{ backgroundColor: "red" }}
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext"
                 >
-                  Add Document
-                </Button>
-              </div>
+                  {" "}
+                  Documents
+                </Text>
+              </Text>
+            </Flex>
+            <Flex className="thead" justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              />
+
+              <Button
+                className="add-doc-button"
+                onClick={() => history.push("/superadmin/addloandocs")}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
+                Add Document
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

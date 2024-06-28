@@ -44,6 +44,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { jsPDF } from "jspdf";
+import { jwtDecode } from "jwt-decode";
 
 function ViewFile() {
   const location = useLocation();
@@ -52,6 +53,11 @@ function ViewFile() {
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [accessType, setAccessType] = useState("");
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isOpensGuarantor,
@@ -820,12 +826,13 @@ function ViewFile() {
       const newLog = {
         message: logMessage,
         timestamp: new Date().toISOString(),
-        role: "superadmin", // Add role attribute here
+        role: "superadmin",
+        superadmin_id: accessType.superadmin_id,
       };
 
       try {
-        const response = await AxiosInstance.put(`/file_upload/${id}`, {
-          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+        const response = await AxiosInstance.put(`/file_upload/logs/${id}`, {
+          logs: [newLog, ...logs],
         });
 
         setLogs(response.data.data.logs);
@@ -835,6 +842,24 @@ function ViewFile() {
         console.error("Error adding log:", error);
         toast.error("Please try again later!");
       }
+    }
+  };
+
+  const handleDeleteLog = async (logId) => {
+    try {
+      const response = await AxiosInstance.delete(
+        `/file_upload/logs/${id}/${logId}`
+      );
+
+      if (response.data.success) {
+        console.log("Log deleted successfully:", response.data.updatedFile);
+        const updatedLogs = logs.filter((log) => log.log_id !== logId);
+        setLogs(updatedLogs);
+      } else {
+        console.error("Failed to delete log:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting log:", error);
     }
   };
 
@@ -2350,11 +2375,11 @@ function ViewFile() {
                       border: "1px solid #ccc",
                       borderRadius: "8px",
                       backgroundColor: log.role.startsWith("bankuser")
-                        ? "#f0f5ff" // Light red background for bankuser logs
+                        ? "#f0f5ff"
                         : log.role === "superadmin" ||
                           log.role.startsWith("savajuser")
-                        ? "#f0f5ff" // Light blue background for other roles
-                        : "#fff", // Default white background
+                        ? "#f0f5ff"
+                        : "#fff",
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                       transition: "transform 0.2s",
                     }}
@@ -2372,7 +2397,7 @@ function ViewFile() {
                           : log.role.startsWith("savajuser")
                           ? `${log.role} added this log:`
                           : log.role.startsWith("bankuser")
-                          ? `${log.role} added this log:` // Display specific message for bankuser
+                          ? `${log.role} added this log:`
                           : ""}
                       </strong>{" "}
                       {log.message}
@@ -2387,6 +2412,20 @@ function ViewFile() {
                     >
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
+                    {((log.role === "superadmin" && accessType.superadmin_id) ||
+                      (log.role.startsWith("bankuser") &&
+                        log.bankuser_id === accessType.bankuser_id) ||
+                      (log.role.startsWith("savajuser") &&
+                        log.branchuser_id === accessType.branchuser_id)) && (
+                      <Button
+                        colorScheme="red"
+                        size="xs"
+                        onClick={() => handleDeleteLog(log.log_id)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -2408,6 +2447,7 @@ function ViewFile() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
       <Toaster />
     </div>
   );

@@ -141,43 +141,58 @@ function Tables() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
                 className="ttext"
               >
                 Banks
               </Text>
-              <div className="thead">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  onClick={navigateToAddBank}
-                  colorScheme="blue"
-                  style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
-                    marginRight: "10px",
-                  }}
-                >
-                  Add Bank
-                </Button>
-                <Button
-                  onClick={navigateToAddBankUser}
-                  colorScheme="blue"
-                  style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
-                  }}
-                >
-                  Add Bank User
-                </Button>
-                {/* <Menu>
+            </Flex>
+            <Flex className="thead" justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "10px", // Padding for comfortable input
+                  fontSize: "16px", // Font size
+                  borderRadius: "8px", // Rounded corners
+                  border: "2px solid #b19552", // Solid border with custom color
+                  backgroundColor: "#ffffff", // White background
+                  color: "#333333", // Text color
+                  outline: "none", // Remove default outline
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle box shadow
+                  transition: "all 0.3s ease-in-out", // Smooth transitions
+                  fontFamily: "inherit", // Inherit default font family
+                }}
+              />
+
+              <Button
+                onClick={navigateToAddBank}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                  marginRight: "10px",
+                }}
+              >
+                Add Bank
+              </Button>
+              <Button
+                onClick={navigateToAddBankUser}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
+                Add Bank User
+              </Button>
+              {/* <Menu>
                   <MenuButton>
                     <Button
                       onClick={navigateToAnotherPage}
@@ -216,7 +231,6 @@ function Tables() {
                     </Flex>
                   </MenuList>
                 </Menu> */}
-              </div>
             </Flex>
           </CardHeader>
           <CardBody>

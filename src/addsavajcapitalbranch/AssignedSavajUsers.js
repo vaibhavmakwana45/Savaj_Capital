@@ -34,7 +34,7 @@ function AssignedSavajUsers() {
           `/savaj_user/assigned_file/${id}`
         );
         setSavajUserAssignedFile(response.data.data);
-        setSavajUserName(response?.data?.savajUserData?.full_name);
+        setSavajUserName(response?.data?.branchUserData?.full_name);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -120,9 +120,10 @@ function AssignedSavajUsers() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
                 className="ttext"
               >
                 {savajUserName ? savajUserName + "'s -" : ""} Assigned File

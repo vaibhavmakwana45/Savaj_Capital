@@ -14,6 +14,7 @@ import {
   Input,
   Select,
   Collapse,
+  Box,
 } from "@chakra-ui/react";
 import Loader from "react-js-loader";
 import {
@@ -60,9 +61,9 @@ function UserTable() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-        "IN",
-        states.find((state) => state.name === selectedState)?.isoCode
-      )
+      "IN",
+      states.find((state) => state.name === selectedState)?.isoCode
+    )
     : [];
 
   const handleStateChange = (event) => {
@@ -135,8 +136,7 @@ function UserTable() {
 
       if (response.data.success) {
         toast.success(
-          `User has been ${
-            activate ? "activated" : "deactivated"
+          `User has been ${activate ? "activated" : "deactivated"
           } successfully!`
         );
         setUsers(
@@ -235,60 +235,112 @@ function UserTable() {
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="mainnnn">
-              <Text
-                fontSize="xl"
-                color={textColor}
-                fontWeight="bold"
-                className="ttext"
+              <Box textAlign="center" pb="4">
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext"
+                >
+                  All Customers{" "}
+                  <Text as="span" color="gray.700" fontWeight="normal">
+                    - {totalRecords}
+                  </Text>
+                </Text>
+              </Box>
+            </Flex>
+            <Flex
+              className="thead"
+              justifyContent="end"
+              alignItems="center"
+            >
+              <Select
+                value={selectedState}
+                onChange={handleStateChange}
+                placeholder="Select State"
+                width="250px"
+                marginRight="10px"
+                className="mb-0 drop"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
               >
-                All Customers - {totalRecords}
-              </Text>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </Select>
 
-              <Flex className="thead" justifyContent="space-between">
-                <Select
-                  value={selectedState}
-                  onChange={handleStateChange}
-                  placeholder="Select State"
-                  width="250px"
-                  marginRight="10px"
-                  className="mb-2 drop"
-                >
-                  {states.map((state) => (
-                    <option key={state.isoCode} value={state.name}>
-                      {state.name}
-                    </option>
-                  ))}
-                </Select>
-                <Select
-                  value={selectedCity}
-                  onChange={handleCityChange}
-                  placeholder="Select City"
-                  disabled={!selectedState}
-                  width="250px"
-                  marginRight="10px"
-                  className="mb-2 drop"
-                >
-                  {cities.map((city) => (
-                    <option key={city.name} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
-                </Select>
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  onClick={() => history.push("/superadmin/adduser")}
-                  colorScheme="blue"
-                  style={{ background: "#b19552" }}
-                >
-                  Add Customer
-                </Button>
-              </Flex>
+              <Select
+                value={selectedCity}
+                onChange={handleCityChange}
+                placeholder="Select City"
+                disabled={!selectedState}
+                width="250px"
+                marginRight="10px"
+                className="mb-0 drop"
+                style={{
+                  padding: "5px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              >
+                {cities.map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </Select>
+
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "5px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              />
+
+              <Button
+                onClick={() => history.push("/superadmin/adduser")}
+                colorScheme="blue"
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  backgroundColor: "#b19552",
+                  color: "white",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              >
+                Add Customer
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -488,6 +540,54 @@ function UserTable() {
                 )}
               </Tbody>
             </Table>
+            <Flex
+              justifyContent="flex-end"
+              alignItems="center"
+              p="4"
+            // borderBottom="1px solid #ccc"
+            >
+              <Text mr="4" fontSize="sm">
+                Total Records: {totalRecords}
+              </Text>
+              <Text mr="2" fontSize="sm">
+                Rows per page:
+              </Text>
+              <Select
+                value={itemsPerPage}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                mr="2"
+                width="100px"
+                fontSize="sm"
+              >
+                {[10, 20, 50].map((perPage) => (
+                  <option key={perPage} value={perPage}>
+                    {perPage}
+                  </option>
+                ))}
+              </Select>
+              <Text mr="4" fontSize="sm">
+                Page {currentPage} of {totalPages}
+              </Text>
+              <IconButton
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                aria-label="Previous Page"
+                icon={<KeyboardArrowUpIcon />}
+                mr="2"
+                variant="outline"
+                colorScheme="gray"
+                size="sm"
+              />
+              <IconButton
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                aria-label="Next Page"
+                icon={<KeyboardArrowDownIcon />}
+                variant="outline"
+                colorScheme="gray"
+                size="sm"
+              />
+            </Flex>
           </CardBody>
         </Card>
         <AlertDialog
@@ -555,54 +655,7 @@ function UserTable() {
           </AlertDialogOverlay>
         </AlertDialog>
       </Flex>
-      <Flex
-        justifyContent="flex-end"
-        alignItems="center"
-        p="4"
-        borderBottom="1px solid #ccc"
-      >
-        <Text mr="4" fontSize="sm">
-          Total Records: {totalRecords}
-        </Text>
-        <Text mr="2" fontSize="sm">
-          Rows per page:
-        </Text>
-        <Select
-          value={itemsPerPage}
-          onChange={(e) => setItemsPerPage(Number(e.target.value))}
-          mr="2"
-          width="100px"
-          fontSize="sm"
-        >
-          {[10, 20, 50].map((perPage) => (
-            <option key={perPage} value={perPage}>
-              {perPage}
-            </option>
-          ))}
-        </Select>
-        <Text mr="4" fontSize="sm">
-          Page {currentPage} of {totalPages}
-        </Text>
-        <IconButton
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          aria-label="Previous Page"
-          icon={<KeyboardArrowUpIcon />}
-          mr="2"
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-        />
-        <IconButton
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          aria-label="Next Page"
-          icon={<KeyboardArrowDownIcon />}
-          variant="outline"
-          colorScheme="gray"
-          size="sm"
-        />
-      </Flex>
+
       <Toaster />
     </>
   );

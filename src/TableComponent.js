@@ -366,7 +366,10 @@ import {
   ChevronRightIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-
+import {
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+} from "@mui/icons-material";
 const Pagination = ({
   currentPage,
   totalPages,
@@ -463,270 +466,258 @@ const TableComponent = ({
   };
 
   return (
-    <div
-      style={{
-        boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-        padding: 0,
-        overflow: "auto",
-      }}
-    >
-      <Table variant="simple" color={"black"}>
-        <Thead>
-          <Tr my=".8rem" pl="0px" color="gray.400">
-            {allHeaders.map((header, index) => (
-              <Th
-                key={index}
-                pl="10px"
-                borderColor={"gray.600"}
-                display={
-                  index === removeIndex || index === removeIndex2
-                    ? "none"
-                    : "table-cell"
-                }
-              >
-                {header}
-              </Th>
-            ))}
-            <Th></Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {loading ? (
-            <Tr>
-              <Td colSpan={allHeaders.length + 1} textAlign="center">
-                <Loader
-                  type="spinner-circle"
-                  bgColor={"#b19552"}
-                  color={"black"}
-                  size={50}
-                />
-              </Td>
-            </Tr>
-          ) : currentData.length === 0 ? (
-            <Tr>
-              <Td colSpan={allHeaders.length + 1} textAlign="center">
-                No Data found
-              </Td>
-            </Tr>
-          ) : (
-            currentData.map((rowData, rowIndex) => (
-              <React.Fragment key={rowIndex}>
-                <Tr
-                  pl="0px"
-                  _hover={{
-                    background: "#b19552",
-                    cursor: "pointer",
-                    textColor: "white",
-                  }}
+    <>
+      <div
+        style={{
+          boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+          padding: 0,
+          overflow: "auto",
+        }}
+      >
+        <Table variant="simple" color={"black"}>
+          <Thead>
+            <Tr my=".8rem" pl="0px" color="gray.400">
+              {allHeaders.map((header, index) => (
+                <Th
+                  key={index}
+                  pl="10px"
+                  borderColor={"gray.600"}
+                  display={
+                    index === removeIndex || index === removeIndex2
+                      ? "none"
+                      : "table-cell"
+                  }
                 >
-                  {rowData.slice(1).map((cellData, cellIndex) => (
-                    <Td
-                      key={cellIndex}
-                      pl="10px"
-                      onClick={() => handleRow(rowData[0])}
-                      _hover={{ background: "#b19552", cursor: "pointer" }}
-                      style={{ cursor: handleRow ? "pointer" : "auto" }}
-                      display={
-                        cellIndex === removeIndex || cellIndex === removeIndex2
-                          ? "none"
-                          : "table-cell"
-                      }
-                    >
-                      {cellData || "-"}
-                    </Td>
-                  ))}
-                  <Td pl="0px">
-                    <Flex alignItems="center">
-                      {showDeleteButton && (
-                        <IconButton
-                          aria-label="Delete"
-                          icon={<DeleteIcon />}
-                          onClick={() => handleDelete(rowData[0])}
-                          mr={2}
-                          color="black"
-                        />
-                      )}
-                      {showEditButton && (
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<EditIcon />}
-                          onClick={() => handleEdit(rowData[0])}
-                          color="black"
-                        />
-                      )}
-                      {collapse && (
-                        <IconButton
-                          aria-label="Toggle"
-                          icon={
-                            expandedRows.includes(rowIndex) ? (
-                              <ChevronUpIcon />
-                            ) : (
-                              <ChevronDownIcon />
-                            )
-                          }
-                          onClick={() => toggleRow(rowIndex)}
-                          ml={2}
-                          color="black"
-                        />
-                      )}
-                      {showTitleButton && (
-                        <IconButton
-                          aria-label="Title"
-                          icon={<AddIcon />}
-                          ml={2}
-                          onClick={() => handleTitle(rowData[0])}
-                        />
-                      )}
-                      {showActivationButtons && (
-                        <>
-                          <Button
-                            colorScheme="green"
-                            onClick={() => handleActivate(rowData[0])}
-                            ml={2}
-                          >
-                            Activate
-                          </Button>
-                          <Button
-                            colorScheme="red"
-                            onClick={() => handleDeactivate(rowData[0])}
-                            ml={2}
-                          >
-                            Deactivate
-                          </Button>
-                        </>
-                      )}
-                    </Flex>
-                  </Td>
-                </Tr>
-                {myData && collapse && expandedRows.includes(rowIndex) && (
-                  <Tr>
-                    <Td colSpan={allHeaders.length + 1}>
-                      <Table variant="simple" color={"black"} width="100%">
-                        <Thead>
-                          <Tr>
-                            {Object.entries(myData[rowIndex][0]).map(
-                              ([key, value]) => (
-                                <Th style={{ fontSize: "12px" }}>{key}</Th>
+                  {header}
+                </Th>
+              ))}
+              <Th></Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {loading ? (
+              <Tr>
+                <Td colSpan={allHeaders.length + 1} textAlign="center">
+                  <Loader
+                    type="spinner-circle"
+                    bgColor={"#b19552"}
+                    color={"black"}
+                    size={50}
+                  />
+                </Td>
+              </Tr>
+            ) : currentData.length === 0 ? (
+              <Tr>
+                <Td colSpan={allHeaders.length + 1} textAlign="center">
+                  No Data found
+                </Td>
+              </Tr>
+            ) : (
+              currentData.map((rowData, rowIndex) => (
+                <React.Fragment key={rowIndex}>
+                  <Tr
+                    pl="0px"
+                    _hover={{
+                      background: "#b19552",
+                      cursor: "pointer",
+                      textColor: "white",
+                    }}
+                  >
+                    {rowData.slice(1).map((cellData, cellIndex) => (
+                      <Td
+                        key={cellIndex}
+                        pl="10px"
+                        onClick={() => handleRow(rowData[0])}
+                        _hover={{ background: "#b19552", cursor: "pointer" }}
+                        style={{ cursor: handleRow ? "pointer" : "auto" }}
+                        display={
+                          cellIndex === removeIndex ||
+                          cellIndex === removeIndex2
+                            ? "none"
+                            : "table-cell"
+                        }
+                      >
+                        {cellData || "-"}
+                      </Td>
+                    ))}
+                    <Td pl="0px">
+                      <Flex alignItems="center">
+                        {showDeleteButton && (
+                          <IconButton
+                            aria-label="Delete"
+                            icon={<DeleteIcon />}
+                            onClick={() => handleDelete(rowData[0])}
+                            mr={2}
+                            color="black"
+                          />
+                        )}
+                        {showEditButton && (
+                          <IconButton
+                            aria-label="Edit"
+                            icon={<EditIcon />}
+                            onClick={() => handleEdit(rowData[0])}
+                            color="black"
+                          />
+                        )}
+                        {collapse && (
+                          <IconButton
+                            aria-label="Toggle"
+                            icon={
+                              expandedRows.includes(rowIndex) ? (
+                                <ChevronUpIcon />
+                              ) : (
+                                <ChevronDownIcon />
                               )
-                            )}
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          <Tr>
-                            {Object.entries(myData[rowIndex][0]).map(
-                              ([key, value]) => (
-                                <Td style={{ fontSize: "12px" }}>{value}</Td>
-                              )
-                            )}
-                          </Tr>
-                        </Tbody>
-                      </Table>
+                            }
+                            onClick={() => toggleRow(rowIndex)}
+                            ml={2}
+                            color="black"
+                          />
+                        )}
+                        {showTitleButton && (
+                          <IconButton
+                            aria-label="Title"
+                            icon={<AddIcon />}
+                            ml={2}
+                            onClick={() => handleTitle(rowData[0])}
+                          />
+                        )}
+                        {showActivationButtons && (
+                          <>
+                            <Button
+                              colorScheme="green"
+                              onClick={() => handleActivate(rowData[0])}
+                              ml={2}
+                            >
+                              Activate
+                            </Button>
+                            <Button
+                              colorScheme="red"
+                              onClick={() => handleDeactivate(rowData[0])}
+                              ml={2}
+                            >
+                              Deactivate
+                            </Button>
+                          </>
+                        )}
+                      </Flex>
                     </Td>
                   </Tr>
-                )}
-                {name && collapse && expandedRows.includes(rowIndex) && (
-                  <>
+                  {myData && collapse && expandedRows.includes(rowIndex) && (
                     <Tr>
                       <Td colSpan={allHeaders.length + 1}>
-                        <Text fontWeight="bold">{name}</Text>
-                        <ul>
-                          {rowData[documentIndex]
-                            .split(",")
-                            .map((name, index) => (
-                              <li key={index}>{name}</li>
-                            ))}
-                        </ul>
+                        <Table variant="simple" color={"black"} width="100%">
+                          <Thead>
+                            <Tr>
+                              {Object.entries(myData[rowIndex][0]).map(
+                                ([key, value]) => (
+                                  <Th style={{ fontSize: "12px" }}>{key}</Th>
+                                )
+                              )}
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            <Tr>
+                              {Object.entries(myData[rowIndex][0]).map(
+                                ([key, value]) => (
+                                  <Td style={{ fontSize: "12px" }}>{value}</Td>
+                                )
+                              )}
+                            </Tr>
+                          </Tbody>
+                        </Table>
                       </Td>
                     </Tr>
-                  </>
-                )}
-                {name2 && collapse && expandedRows.includes(rowIndex) && (
-                  <>
-                    <Tr>
-                      <Td colSpan={allHeaders.length + 1}>
-                        <Text fontWeight="bold">{name2}</Text>
-                        <ul>
-                          {rowData[documentIndex2]
-                            .split(", ")
-                            .map((name2, index) => (
-                              <li key={index}>{name2}</li>
-                            ))}
-                        </ul>
-                      </Td>
-                    </Tr>
-                  </>
-                )}
-              </React.Fragment>
-            ))
-          )}
-        </Tbody>
-      </Table>
-
+                  )}
+                  {name && collapse && expandedRows.includes(rowIndex) && (
+                    <>
+                      <Tr>
+                        <Td colSpan={allHeaders.length + 1}>
+                          <Text fontWeight="bold">{name}</Text>
+                          <ul>
+                            {rowData[documentIndex]
+                              .split(",")
+                              .map((name, index) => (
+                                <li key={index}>{name}</li>
+                              ))}
+                          </ul>
+                        </Td>
+                      </Tr>
+                    </>
+                  )}
+                  {name2 && collapse && expandedRows.includes(rowIndex) && (
+                    <>
+                      <Tr>
+                        <Td colSpan={allHeaders.length + 1}>
+                          <Text fontWeight="bold">{name2}</Text>
+                          <ul>
+                            {rowData[documentIndex2]
+                              .split(", ")
+                              .map((name2, index) => (
+                                <li key={index}>{name2}</li>
+                              ))}
+                          </ul>
+                        </Td>
+                      </Tr>
+                    </>
+                  )}
+                </React.Fragment>
+              ))
+            )}
+          </Tbody>
+        </Table>
+      </div>
       {showPagination && (
-        <div
-          className="text-end"
-          style={{ display: "flex", justifyContent: "end" }}
+        <Flex
+          justifyContent="flex-end"
+          alignItems="center"
+          p="4"
+          // borderBottom="1px solid #ccc"
         >
-          <div
-            className="card text-center page-main"
-            style={{
-              width: "40%",
-              display: "flex",
-              justifyContent: "center",
-              padding: "10px",
-              borderRadius: "10px",
-              boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
-              marginBottom: "40px",
-              marginTop: "20px",
-              marginRight: "20px",
-            }}
+          <Text mr="4" fontSize="sm">
+            Total Records: {data.length}
+          </Text>
+          <Text mr="2" fontSize="sm">
+            Rows per page:
+          </Text>
+          <Select
+            value={itemsPerPage}
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            mr="2"
+            width="100px"
+            fontSize="sm"
           >
-            <Flex
-              justify="space-between"
-              align="center"
-              p="0.5rem"
-              style={{ gap: "20px" }}
-              className="pagination-main"
-            >
-              <Text>
-                {startIndex + 1}-{endIndex} of {data.length}
-              </Text>
-              <Flex align="center" className="drop-arrow">
-                <Select
-                  value={itemsPerPage}
-                  onChange={(e) =>
-                    handleItemsPerPageChange(parseInt(e.target.value))
-                  }
-                  variant="filled"
-                  mr="1rem"
-                >
-                  {itemsPerPageOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-                <div className="d-flex">
-                  <IconButton
-                    aria-label="Previous Page"
-                    icon={<ChevronLeftIcon />}
-                    onClick={previousPage}
-                    disabled={currentPage === 1}
-                    mr={2}
-                  />
-                  <IconButton
-                    aria-label="Next Page"
-                    icon={<ChevronRightIcon />}
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                  />
-                </div>
-              </Flex>
-            </Flex>
-          </div>
-        </div>
+            {[10, 20, 50].map((perPage) => (
+              <option key={perPage} value={perPage}>
+                {perPage}
+              </option>
+            ))}
+          </Select>
+          <Text mr="4" fontSize="sm">
+            Page {currentPage} of {totalPages}
+          </Text>
+          <IconButton
+            onClick={previousPage}
+            disabled={currentPage === 1}
+            aria-label="Previous Page"
+            icon={<KeyboardArrowUpIcon />}
+            mr="2"
+            variant="outline"
+            colorScheme="gray"
+            size="sm"
+          />
+          <IconButton
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            aria-label="Next Page"
+            icon={<KeyboardArrowDownIcon />}
+            variant="outline"
+            colorScheme="gray"
+            size="sm"
+          />
+        </Flex>
       )}
-    </div>
+    </>
   );
 };
 

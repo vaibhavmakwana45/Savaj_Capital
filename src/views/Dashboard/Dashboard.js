@@ -23,6 +23,7 @@ import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
 
 export default function Dashboard() {
+  const [selectedRegion, setSelectedRegion] = useState(null);
   const history = useHistory();
   const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");

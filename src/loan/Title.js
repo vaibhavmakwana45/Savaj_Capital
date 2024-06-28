@@ -168,10 +168,11 @@ function Title() {
               className="thead"
             >
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
-                className="ttext d-flex"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
+                className="ttext"
               >
                 All Title
               </Text>

@@ -16,6 +16,7 @@ import {
   Collapse,
   FormControl,
   FormLabel,
+  Box,
 } from "@chakra-ui/react";
 import $ from "jquery";
 import { MoreVert as MoreVertIcon } from "@material-ui/icons";
@@ -72,9 +73,9 @@ function AllBankFiles() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-        "IN",
-        states.find((state) => state.name === selectedState)?.isoCode
-      )
+      "IN",
+      states.find((state) => state.name === selectedState)?.isoCode
+    )
     : [];
 
   const handleStateChange = (event) => {
@@ -153,8 +154,8 @@ function AllBankFiles() {
                   ? ""
                   : loan_id
                 : selectedLoan === "All Loan Types"
-                ? ""
-                : selectedLoan,
+                  ? ""
+                  : selectedLoan,
               selectedStatus: selectedStatusSearch,
               selectedState,
               selectedCity,
@@ -718,39 +719,55 @@ function AllBankFiles() {
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
-          <CardHeader style={{ padding: "10px" }} className="card-main">
-            <Flex justifyContent="space-between" p="4" className="mainnnn">
+          <CardHeader pb="4">
+            <Flex justifyContent="space-between" pb="4" className="mainnnn">
               <Text fontSize="xl">
                 {loan ? (
                   <>
-                    {loan}
-                    {selectedStatusSearch !== "1718861587262" &&
-                    selectedStatusSearch !== "1718861593296" ? (
+                    <Box p="2">
                       <Text
-                        as="span"
-                        color="green.400"
+                        fontSize="2xl"
                         fontWeight="bold"
-                        pl="1"
+                        bgGradient="linear(to-r, #b19552, #212529)"
+                        bgClip="text"
+                        className="ttext"
                       >
-                        <span style={{ color: "black" }}>-</span> ₹{" "}
-                        {totalAmount !== null ? totalAmount : "-"}{" "}
-                        <span style={{ color: "black" }}>-</span> {totalFiles}{" "}
-                        files
+                        {" "}
+                        {loan}
+                        {selectedStatusSearch !== "1718861587262" &&
+                          selectedStatusSearch !== "1718861593296" ? (
+                          <>
+                            <span
+                              style={{ color: "black", paddingLeft: "10px" }}
+                            >
+                              ₹{" "}
+                            </span>
+                            <Text
+                              as="span"
+                              color="green.500"
+                              fontWeight="semibold"
+                            >
+                              {totalAmount !== null ? totalAmount : "-"}
+                            </Text>{" "}
+                            <span style={{ color: "gray.700" }}>-</span>{" "}
+                            {totalFiles} files
+                          </>
+                        ) : null}
                       </Text>
-                    ) : null}
+                    </Box>
                   </>
                 ) : (
-                  <Text
-                    fontSize="xl"
-                    // color="green.400"
-                    fontWeight="bold"
-                    className="ttext"
-                  >
-                    {/* <span style={{ color: "black" }}> All Files -</span> ₹{" "}
-                    {totalAmount !== null ? totalAmount : "-"}{" "}
-                    <span style={{ color: "black" }}>-</span> {totalFiles} files */}
-                    All Files
-                  </Text>
+                  <Box p="2">
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      bgGradient="linear(to-r, #b19552, #212529)"
+                      bgClip="text"
+                      className="ttext"
+                    >
+                      All Files
+                    </Text>
+                  </Box>
                 )}
               </Text>
             </Flex>
@@ -763,24 +780,65 @@ function AllBankFiles() {
                       aria-label="Default select example"
                       value={selectedLoan}
                       onChange={(e) => setSelectedLoan(e.target.value)}
-                      width="200px"
+                      style={{
+                        padding: "5px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        border: "2px solid #b19552",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        width: "100%",
+                        maxWidth: "300px",
+                        appearance: "none",
+                        color: "#333333",
+                        outline: "none",
+                        transition: "all 0.3s ease-in-out",
+                      }}
                     >
-                      <option value="All Loan Types">Select loan type</option>
+                      <option value="All Loan Types" disabled>
+                        Select loan type
+                      </option>
                       {loans.map((loan) => (
-                        <option key={loan.loan_id} value={loan.loan_id}>
+                        <option
+                          key={loan.loan_id}
+                          value={loan.loan_id}
+                          style={{
+                            backgroundColor: "#ffffff",
+                            color: "#333333",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        >
                           {loan.loan}
                         </option>
                       ))}
                     </select>
                   )}
-
-                  {/* <select
-                    class="form-select loan-type-dropdown"
+                  {/* 
+                  <select
+                    className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     value={selectedState}
                     onChange={handleStateChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
-                    <option selected>Select State</option>
+                    <option value="" disabled>
+                      Select State
+                    </option>
                     {states.map((state) => (
                       <option key={state.isoCode} value={state.name}>
                         {state.name}
@@ -789,13 +847,29 @@ function AllBankFiles() {
                   </select>
 
                   <select
-                    class="form-select loan-type-dropdown"
+                    className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     disabled={!selectedState}
                     value={selectedCity}
                     onChange={handleCityChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
-                    <option selected>Select City</option>
+                    <option value="" disabled>
+                      Select City
+                    </option>
                     {cities.map((city) => (
                       <option key={city.name} value={city.name}>
                         {city.name}
@@ -805,28 +879,28 @@ function AllBankFiles() {
                 </div>
 
                 <div
-                  className="d-flex second-drop-section gap-2 "
+                  className="d-flex second-drop-section gap-2"
                   style={{ marginLeft: "10px" }}
                 >
-                  {/* <select
-                    class="form-select loan-type-dropdown "
-                    aria-label="Default select example"
-                    value={selectedStatusSearch}
-                    onChange={(e) => setSelectedStatusSearch(e.target.value)}
-                    width="200px"
-                  >
-                    <option selected>Select Status</option>
-                    <option value="running">Running</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select> */}
-
                   <select
                     className="form-select loan-type-dropdown"
                     aria-label="Default select example"
                     value={selectedStatusSearch}
                     onChange={(e) => setSelectedStatusSearch(e.target.value)}
-                    width="200px"
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   >
                     <option value="" disabled selected>
                       Select Status
@@ -845,19 +919,35 @@ function AllBankFiles() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search"
-                    width="200px"
-                    mr="10px"
+                    width="250px"
+                    // marginRight="10px"
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
                   />
+
                   {/* <Button
-                    onClick={() =>
-                      history.push("/savajcapitaluser/adduserfile")
-                    }
+                    onClick={() => history.push("/superadmin/addfile")}
                     className="dynamicImportantStyle"
                     colorScheme="blue"
                     style={{
+                      paddingX: "20px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
                       backgroundColor: "#b19552",
                       color: "white",
                       width: "150px",
+                      transition: "all 0.3s ease-in-out",
                     }}
                   >
                     Add File
@@ -912,7 +1002,7 @@ function AllBankFiles() {
                   </Tr>
                 ) : (
                   files.map((file, index) => (
-                    <React.Fragment key={file.file_id}>                   
+                    <React.Fragment key={file.file_id}>
                       <Tr
                         onClick={(e) => {
                           e.stopPropagation();
@@ -931,9 +1021,8 @@ function AllBankFiles() {
                         <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
                         <Td style={{ fontSize: "14px" }}>
                           {" "}
-                          {`${file.loan}${
-                            file.loan_type ? ` (${file.loan_type})` : ""
-                          }`}
+                          {`${file.loan}${file.loan_type ? ` (${file.loan_type})` : ""
+                            }`}
                         </Td>
 
                         <Td>
@@ -987,7 +1076,7 @@ function AllBankFiles() {
                         </Td>
                         <Td>
                           {file.document_percentage != null &&
-                          !isNaN(file.document_percentage) ? (
+                            !isNaN(file.document_percentage) ? (
                             <div
                               className="progress"
                               data-value={Number(file.document_percentage)}
@@ -1229,7 +1318,7 @@ function AllBankFiles() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                            "Uploaded" ? (
+                                              "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1264,7 +1353,7 @@ function AllBankFiles() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                            "Uploaded" ? (
+                                              "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",

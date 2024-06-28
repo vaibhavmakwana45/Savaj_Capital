@@ -237,34 +237,48 @@ function AllStep() {
               className="thead"
             >
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
                 className="ttext d-flex"
               >
                 All Steps
               </Text>
-              <div>
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  colorScheme="blue"
-                  onClick={() => {
-                    setIsStep(true);
-                  }}
-                  style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
-                  }}
-                >
-                  Add Step
-                </Button>
-              </div>
+            </Flex>
+            <Flex justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "12px",
+                  fontSize: "16px",
+                  borderRadius: "8px",
+                  border: "2px solid #b19552",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  color: "#333333",
+                  outline: "none",
+                  transition: "all 0.3s ease-in-out",
+                  fontFamily: "inherit",
+                }}
+              />
+
+              <Button
+                colorScheme="blue"
+                onClick={() => {
+                  setIsStep(true);
+                }}
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
+                Add Step
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

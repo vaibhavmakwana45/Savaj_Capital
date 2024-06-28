@@ -171,34 +171,48 @@ function AddAllDocuments() {
               className="thead"
             >
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
-                className="ttext d-flex"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
+                className="ttext"
               >
                 All Documents
               </Text>
-              <div>
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name"
-                  width="250px"
-                  marginRight="10px"
-                />
-                <Button
-                  onClick={() => {
-                    setIsDocument(true);
-                  }}
-                  colorScheme="blue"
-                  style={{
-                    backgroundColor: "#b19552",
-                    color: "#fff",
-                  }}
-                >
-                  Add Documents
-                </Button>
-              </div>
+            </Flex>
+            <Flex justifyContent="end">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name"
+                width="250px"
+                marginRight="10px"
+                style={{
+                  padding: "12px", // Increased padding for comfort
+                  fontSize: "16px", // Font size
+                  borderRadius: "8px", // Rounded corners
+                  border: "2px solid #b19552", // Solid border with custom color
+                  backgroundColor: "#ffffff", // White background
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Subtle box shadow
+                  color: "#333333", // Text color
+                  outline: "none", // Remove default outline
+                  transition: "all 0.3s ease-in-out", // Smooth transitions
+                  fontFamily: "inherit", // Inherit default font family
+                }}
+              />
+
+              <Button
+                onClick={() => {
+                  setIsDocument(true);
+                }}
+                colorScheme="blue"
+                style={{
+                  backgroundColor: "#b19552",
+                  color: "#fff",
+                }}
+              >
+                Add Documents
+              </Button>
             </Flex>
           </CardHeader>
           <CardBody>

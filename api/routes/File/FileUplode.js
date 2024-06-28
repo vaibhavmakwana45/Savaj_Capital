@@ -19,6 +19,7 @@ const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 const BranchAssign = require("../../models/Savaj_Capital/Branch_Assign");
 const axios = require("axios");
 const LoanStatus = require("../../models/AddDocuments/LoanStatus");
+const emailService = require("../emailService");
 
 router.post("/", async (req, res) => {
   try {
@@ -1683,6 +1684,85 @@ router.put("/:file_id", async (req, res) => {
     });
   }
 });
+
+router.put("/logs/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const updateData = req.body;
+
+    // Automatically generate log_id for each log entry
+    if (updateData.logs && updateData.logs.length > 0) {
+      updateData.logs.forEach((log, index) => {
+        log.log_id = `${moment().unix()}_${Math.floor(
+          Math.random() * 1000
+        )}_${index}`;
+      });
+    }
+
+    updateData.updatedAt = moment()
+      .utcOffset(330)
+      .format("YYYY-MM-DD HH:mm:ss");
+
+    const updatedFile = await File_Uplode.findOneAndUpdate(
+      { file_id: file_id },
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedFile) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "File not found",
+      });
+    }
+
+    res.json({
+      statusCode: 200,
+      success: true,
+      message: "File updated successfully",
+      data: updatedFile,
+    });
+  } catch (error) {
+    console.error(`Error when trying to update file: ${error}`);
+    res.status(500).json({
+      statusCode: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
+router.delete("/logs/:file_id/:log_id", async (req, res) => {
+  try {
+    const { file_id, log_id } = req.params;
+
+    // Find the file by file_id and update the logs array to remove the log with log_id
+    const updatedFile = await File_Uplode.findOneAndUpdate(
+      { file_id },
+      { $pull: { logs: { log_id } } },
+      { new: true }
+    );
+
+    if (!updatedFile) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Log deleted successfully",
+      updatedFile,
+    });
+  } catch (error) {
+    console.error(`Error deleting log: ${error}`);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
 router.get("/get/:branchuser_id", async (req, res) => {
   try {
     const branchuser_id = req.params.branchuser_id;
@@ -2137,6 +2217,41 @@ router.get(
   }
 );
 
+// router.put("/updatestatus/:fileId", async (req, res) => {
+//   try {
+//     const { status } = req.body;
+//     const { fileId } = req.params;
+
+//     const updatedFile = await File_Uplode.findOneAndUpdate(
+//       { file_id: fileId },
+//       {
+//         $set: {
+//           status: status,
+//           updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     if (!updatedFile) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "File not found.",
+//       });
+//     }
+
+//     res.json({
+//       success: true,
+//       data: updatedFile,
+//       message: "File status updated successfully.",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.put("/updatestatus/:fileId", async (req, res) => {
   try {
     const { status } = req.body;
@@ -2154,18 +2269,74 @@ router.put("/updatestatus/:fileId", async (req, res) => {
     );
 
     if (!updatedFile) {
+      console.error("File not found for fileId:", fileId);
       return res.status(404).json({
         success: false,
         message: "File not found.",
       });
     }
 
+    const user = await AddUser.findOne({ user_id: updatedFile.user_id });
+    if (!user) {
+      console.error("User not found for user_id:", updatedFile.user_id);
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const loan = await Loan.findOne({ loan_id: updatedFile.loan_id });
+    if (!loan) {
+      return res.status(404).json({
+        success: false,
+        message: "Loan not found.",
+      });
+    }
+
+    const loanStatus = await LoanStatus.findOne({ loanstatus_id: status });
+    if (!loanStatus) {
+      console.error("Loan status not found for loanstatus_id:", status);
+      return res.status(404).json({
+        success: false,
+        message: "Loan status not found.",
+      });
+    }
+
+    const emailSubject = "File Status Updated";
+    const emailContent = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <div style="background: #f5f5f5; padding: 20px; text-align: center;">
+        <img src="https://cdn.dohost.in/upload/629imgpsh_fullsize_anim.jpg" alt="Company Logo" style="width: 100px; height: auto;"/>
+      </div>
+      <div style="padding: 20px;">
+        <h1 style="color: #b19552;">File Status Updated</h1>
+        <p>Hello ${user.username},</p>
+        <p>We wanted to inform you that the status of your file has been updated. Here are the details:</p>
+        <ul style="list-style-type: none; padding: 0;">
+          <li><strong>Loan:</strong> ${loan.loan}</li>
+          <li><strong>New Status:</strong> ${loanStatus.loanstatus}</li>
+          <li><strong>Updated On:</strong> ${moment(
+            updatedFile.updatedAt
+          ).format("YYYY-MM-DD HH:mm:ss")}</li>
+        </ul>
+        <p>If you have any questions or need further assistance, please do not hesitate to contact us.</p>
+        <p>Thank you,<br>Savaj Capital</p>
+      </div>
+      <div style="background: #f5f5f5; padding: 10px; text-align: center; font-size: 12px; color: #888;">
+        <p>© ${new Date().getFullYear()} Savaj Capital. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+    await emailService.sendWelcomeEmail(user.email, emailSubject, emailContent);
+
     res.json({
       success: true,
       data: updatedFile,
-      message: "File status updated successfully.",
+      message: "File status updated successfully and email sent.",
     });
   } catch (error) {
+    console.error("Error updating file status:", error);
     res.status(500).json({
       message: error.message,
     });

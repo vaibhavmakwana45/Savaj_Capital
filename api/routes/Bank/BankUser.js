@@ -300,13 +300,7 @@ router.get("/assigned_file/:bankuser_id", async (req, res) => {
       bankuser_id: bankuser_id,
     }).sort({ updatedAt: -1 });
 
-    if (!bankApprovals || bankApprovals.length === 0) {
-      return res.json({
-        success: false,
-        message: "No bank approvals found for the specified bank user.",
-        data: [],
-      });
-    }
+
     const bankUserData = await BankUser.findOne({ bankuser_id: bankuser_id });
 
     const fileIds = bankApprovals.map((approval) => approval.file_id);

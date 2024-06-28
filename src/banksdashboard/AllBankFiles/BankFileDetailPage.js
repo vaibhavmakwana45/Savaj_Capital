@@ -52,6 +52,7 @@ function BankFileDetailPage() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
+  console.log(fileData, "fileData");
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -71,6 +72,7 @@ function BankFileDetailPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isMaximized, setIsMaximized] = useState(false);
   const [accessType, setAccessType] = useState("");
+  console.log(accessType, "accessType");
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
@@ -820,27 +822,59 @@ function BankFileDetailPage() {
       console.error("Error: ", error.message);
     }
   };
-  console.log(accessType, "accessType");
+
   const handleAddLog = async () => {
     if (logMessage.trim()) {
       const newLog = {
         message: logMessage,
         timestamp: new Date().toISOString(),
         role: `bankuser(${accessType.bankuser_name})`,
+        bankuser_id: `${accessType.bankuser_id}`,
       };
 
       try {
         const response = await AxiosInstance.put(`/file_upload/${id}`, {
-          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+          logs: [newLog, ...logs],
         });
 
         setLogs(response.data.data.logs);
         setLogMessage("");
         toast.success("Log Added Successfully!");
+
+        const notificationData = {
+          superadmin_id: "1712317428783fk383j64491738916",
+          file_id: fileData.file_id,
+          message: `A new log was added by ${
+            accessType.bankuser_name
+          } (bank user) at ${new Date().toLocaleString()} for loan ${
+            fileData.loan
+          } of ${fileData?.user?.username}: ${logMessage}`,
+          isUnRead: true,
+        };
+
+        await AxiosInstance.post(`/notifications`, notificationData);
+        toast.success("Notification Sent Successfully!");
       } catch (error) {
-        console.error("Error adding log:", error);
+        console.error("Error adding log or sending notification:", error);
         toast.error("Please try again later!");
       }
+    }
+  };
+  const handleDeleteLog = async (logId) => {
+    try {
+      const response = await AxiosInstance.delete(
+        `/file_upload/logs/${id}/${logId}`
+      );
+
+      if (response.data.success) {
+        console.log("Log deleted successfully:", response.data.updatedFile);
+        const updatedLogs = logs.filter((log) => log.log_id !== logId);
+        setLogs(updatedLogs);
+      } else {
+        console.error("Failed to delete log:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting log:", error);
     }
   };
 
@@ -2393,6 +2427,20 @@ function BankFileDetailPage() {
                     >
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
+                    {((log.role === "superadmin" && accessType.superadmin_id) ||
+                      (log.role.startsWith("bankuser") &&
+                        log.bankuser_id === accessType.bankuser_id) ||
+                      (log.role.startsWith("savajuser") &&
+                        log.branchuser_id === accessType.branchuser_id)) && (
+                      <Button
+                        colorScheme="red"
+                        size="xs"
+                        onClick={() => handleDeleteLog(log.log_id)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>

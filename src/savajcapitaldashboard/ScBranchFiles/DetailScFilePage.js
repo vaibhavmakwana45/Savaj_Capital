@@ -827,6 +827,7 @@ function DetailScFilePage() {
         message: logMessage,
         timestamp: new Date().toISOString(),
         role: `savajuser(${accessType.full_name})`,
+        branchuser_id: `${accessType.branchuser_id}`,
       };
 
       try {
@@ -841,6 +842,23 @@ function DetailScFilePage() {
         console.error("Error adding log:", error);
         toast.error("Please try again later!");
       }
+    }
+  };
+  const handleDeleteLog = async (logId) => {
+    try {
+      const response = await AxiosInstance.delete(
+        `/file_upload/logs/${id}/${logId}`
+      );
+
+      if (response.data.success) {
+        console.log("Log deleted successfully:", response.data.updatedFile);
+        const updatedLogs = logs.filter((log) => log.log_id !== logId);
+        setLogs(updatedLogs);
+      } else {
+        console.error("Failed to delete log:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting log:", error);
     }
   };
 
@@ -2393,6 +2411,20 @@ function DetailScFilePage() {
                     >
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
+                    {((log.role === "superadmin" && accessType.superadmin_id) ||
+                      (log.role.startsWith("bankuser") &&
+                        log.bankuser_id === accessType.bankuser_id) ||
+                      (log.role.startsWith("savajuser") &&
+                        log.branchuser_id === accessType.branchuser_id)) && (
+                      <Button
+                        colorScheme="red"
+                        size="xs"
+                        onClick={() => handleDeleteLog(log.log_id)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>

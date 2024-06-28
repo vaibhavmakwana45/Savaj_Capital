@@ -1,9 +1,4 @@
-import {
-  Flex,
-  Text,
-  useColorModeValue,
-  Button,
-} from "@chakra-ui/react";
+import { Flex, Text, useColorModeValue, Button } from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -22,8 +17,8 @@ import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
 function AssignedBankUsers() {
-  const [savajUserAssignedFile, setSavajUserAssignedFile] = useState([]);
-  const [savajUserName, setSavajUserName] = useState("");
+  const [bankUserAssignedFile, setBankUserAssignedFile] = useState([]);
+  const [bankUserName, setBankUserName] = useState("");
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const history = useHistory();
@@ -38,13 +33,13 @@ function AssignedBankUsers() {
         const response = await AxiosInstance.get(
           `/bank_user/assigned_file/${id}`
         );
-        setSavajUserAssignedFile(response.data.data);
-        setSavajUserName(response?.data?.bankUserData?.bankuser_name);
+        setBankUserAssignedFile(response.data.data);
+        setBankUserName(response?.data?.bankUserData?.bankuser_name);
         setLoading(false);
       } catch (error) {
         setLoading(false);
 
-        console.error("Error fetching savajUserAssignedFile:", error);
+        console.error("Error fetching bankUserAssignedFile:", error);
       }
     };
 
@@ -57,8 +52,8 @@ function AssignedBankUsers() {
 
   const filteredUsers =
     searchTerm.length === 0
-      ? savajUserAssignedFile
-      : savajUserAssignedFile.filter(
+      ? bankUserAssignedFile
+      : bankUserAssignedFile.filter(
           (user) =>
             user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +70,7 @@ function AssignedBankUsers() {
     "UpdatedAt",
     "Action",
   ];
-  const formattedData = filteredUsers?.map((item,index) => [
+  const formattedData = filteredUsers?.map((item, index) => [
     item?.file_id,
     index + 1,
     item?.file_id,
@@ -101,8 +96,8 @@ function AssignedBankUsers() {
       if (response.data.success) {
         setIsDeleteDialogOpen(false);
         toast.success("Bank deleted successfully!");
-        setSavajUserAssignedFile(
-          savajUserAssignedFile.filter(
+        setBankUserAssignedFile(
+          bankUserAssignedFile.filter(
             (savajUserFileAssign) => savajUserFileAssign.file_id !== file_id
           )
         );
@@ -125,12 +120,13 @@ function AssignedBankUsers() {
           <CardHeader p="6px 0px 22px 0px">
             <Flex justifyContent="space-between" className="thead">
               <Text
-                fontSize="xl"
-                color={textColor}
+                fontSize="2xl"
                 fontWeight="bold"
+                bgGradient="linear(to-r, #b19552, #212529)"
+                bgClip="text"
                 className="ttext"
               >
-                {savajUserName ? savajUserName + "'s -" : ""} Assigned File
+                {bankUserName ? bankUserName + "'s -" : ""} Assigned File
               </Text>
             </Flex>
           </CardHeader>

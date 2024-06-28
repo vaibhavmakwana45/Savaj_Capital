@@ -53,7 +53,7 @@ export default function HeaderLinks(props) {
   const [notifications, setNotifications] = useState([]);
   const [accessType, setAccessType] = useState("");
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false); // State to manage notification menu open/close
-
+  console.log(accessType, "accessType");
   useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
@@ -66,6 +66,7 @@ export default function HeaderLinks(props) {
         params: {
           branchuser_id: accessType.branchuser_id,
           bankuser_id: accessType.bankuser_id,
+          superadmin_id: accessType.superadmin_id,
         },
       });
       setNotifications(response.data.data);
@@ -141,6 +142,8 @@ export default function HeaderLinks(props) {
           history.push(`/savajcapitaluser/viewuserfile?id=${fileId}`);
         } else if (accessType.bankuser_id) {
           history.push(`/bankuser/viewbankfile?id=${fileId}`);
+        } else {
+          history.push(`/superadmin/viewfile?id=${fileId}`);
         }
         fetchNotifications();
         setNotificationMenuOpen(false);

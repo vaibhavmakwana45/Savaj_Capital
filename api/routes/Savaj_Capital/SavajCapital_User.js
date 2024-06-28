@@ -422,13 +422,6 @@ router.get("/assigned_file/:branchuser_id", async (req, res) => {
       branchuser_id: branchuser_id,
     }).sort({ updatedAt: -1 });
 
-    if (!branchAssign || branchAssign.length === 0) {
-      return res.json({
-        success: false,
-        message: "No branch assign found for the specified branch user.",
-        data: [],
-      });
-    }
     const branchUserData = await SavajCapital_User.findOne({
       branchuser_id: branchuser_id,
     });
