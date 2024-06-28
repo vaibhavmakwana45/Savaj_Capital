@@ -61,6 +61,11 @@ function AddBank() {
     "HSBC India",
     "Standard Chartered Bank India",
     "Citibank India",
+    "COSMOS Bank",
+    "CITIZEN CO-OP Bank",
+    "Bhavnagar Nagrik Bank",
+    "Rajkot Nagrik Bank",
+    "Sihor Nagrik Bank",
   ];
 
   const [formData, setFormData] = useState({
