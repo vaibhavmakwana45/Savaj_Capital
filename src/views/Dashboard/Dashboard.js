@@ -116,6 +116,96 @@ export default function Dashboard() {
         <Card
           minH="125px"
           style={{ cursor: "pointer", border: "1px solid black" }}
+          onClick={() => history.push("/superadmin/savajcapitalbranch")}
+        >
+          <Flex direction="column">
+            <Flex
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
+                <StatLabel
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
+                  Total Branch (Savaj Capital)
+                </StatLabel>
+                <Flex>
+                  <StatNumber
+                    fontSize="lg"
+                    color={textColor}
+                    fontWeight="bold"
+                    style={{ paddingTop: "10px" }}
+                  >
+                    {apiData.savajcapitalbrnach}
+                  </StatNumber>
+                </Flex>
+              </Stat>
+              <IconBox
+                borderRadius="50%"
+                as="box"
+                h={"45px"}
+                w={"45px"}
+                bg={"#b19552"}
+              >
+                <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+              </IconBox>
+            </Flex>
+          </Flex>
+        </Card>
+        <Card
+          minH="125px"
+          style={{ cursor: "pointer", border: "1px solid black" }}
+          onClick={() => history.push("/superadmin/savajcapitalbranch")}
+        >
+          <Flex direction="column">
+            <Flex
+              flexDirection="row"
+              align="center"
+              justify="center"
+              w="100%"
+              mb="25px"
+            >
+              <Stat me="auto">
+                <StatLabel
+                  fontSize="xs"
+                  color="gray.400"
+                  fontWeight="bold"
+                  textTransform="uppercase"
+                >
+                  Total Savaj User
+                </StatLabel>
+                <Flex>
+                  <StatNumber
+                    fontSize="lg"
+                    color={textColor}
+                    fontWeight="bold"
+                    style={{ paddingTop: "10px" }}
+                  >
+                    {apiData.savajuser}
+                  </StatNumber>
+                </Flex>
+              </Stat>
+              <IconBox
+                borderRadius="50%"
+                as="box"
+                h={"45px"}
+                w={"45px"}
+                bg={"#b19552"}
+              >
+                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+              </IconBox>
+            </Flex>
+          </Flex>
+        </Card>
+        <Card
+          minH="125px"
+          style={{ cursor: "pointer", border: "1px solid black" }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -161,7 +251,7 @@ export default function Dashboard() {
         <Card
           minH="125px"
           style={{ cursor: "pointer", border: "1px solid black" }}
-          onClick={() => history.push("/superadmin/savajcapitalbranch")}
+          onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
             <Flex
@@ -178,7 +268,7 @@ export default function Dashboard() {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Total Branch (Savaj Capital)
+                  Total Bank User
                 </StatLabel>
                 <Flex>
                   <StatNumber
@@ -187,7 +277,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.savajcapitalbrnach}
+                    {apiData.bankuser}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -198,7 +288,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </Flex>
@@ -251,6 +341,7 @@ export default function Dashboard() {
         <Card
           minH="125px"
           style={{ cursor: "pointer", border: "1px solid black" }}
+          onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
             <Flex
@@ -267,7 +358,7 @@ export default function Dashboard() {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Total SuperAdmin
+                  Total Savaj User Assign File
                 </StatLabel>
                 <Flex>
                   <StatNumber
@@ -276,7 +367,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.superadmin}
+                    {apiData.savajuserassignfile}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -287,7 +378,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </Flex>
@@ -296,7 +387,7 @@ export default function Dashboard() {
         <Card
           minH="125px"
           style={{ cursor: "pointer", border: "1px solid black" }}
-          onClick={() => history.push("/superadmin/savajuserroles")}
+          onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
             <Flex
@@ -313,7 +404,7 @@ export default function Dashboard() {
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
-                  Total Role
+                  Total Bank User Assign File
                 </StatLabel>
                 <Flex>
                   <StatNumber
@@ -322,7 +413,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.role}
+                    {apiData.bankuserassignfile}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -333,7 +424,7 @@ export default function Dashboard() {
                 w={"45px"}
                 bg={"#b19552"}
               >
-                <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </Flex>

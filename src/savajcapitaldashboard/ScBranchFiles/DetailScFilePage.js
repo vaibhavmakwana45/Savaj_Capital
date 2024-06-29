@@ -831,7 +831,7 @@ function DetailScFilePage() {
       };
 
       try {
-        const response = await AxiosInstance.put(`/file_upload/${id}`, {
+        const response = await AxiosInstance.put(`/file_upload/logs/${id}`, {
           logs: [newLog, ...logs], // Prepend the new log to the existing logs
         });
 

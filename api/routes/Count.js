@@ -11,6 +11,9 @@ const Loan = require("../models/Loan/Loan");
 const Loan_Type = require("../models/Loan/Loan_Type");
 const BankApproval = require("../models/Bank/BankApproval");
 const Branch_Assign = require("../models/Savaj_Capital/Branch_Assign");
+const BankUser = require("../models/Bank/BankUserSchema");
+const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
+const BranchAssign = require("../models/Savaj_Capital/Branch_Assign");
 
 router.get("/data-count", async (req, res) => {
   try {
@@ -20,6 +23,10 @@ router.get("/data-count", async (req, res) => {
     const superAdmin = await SuperAdmin.countDocuments();
     const role = await SavajCapital_Role.countDocuments();
     const files = await File_Uplode.countDocuments();
+    const savajuser = await SavajCapital_User.countDocuments();
+    const bankuser = await BankUser.countDocuments();
+    const savajuserassignfile = await BranchAssign.countDocuments();
+    const bankuserassignfile = await BankApproval.countDocuments();
 
     res.json({
       banks: bank,
@@ -28,6 +35,10 @@ router.get("/data-count", async (req, res) => {
       superadmin: superAdmin,
       role: role,
       files: files,
+      savajuser: savajuser,
+      bankuser: bankuser,
+      savajuserassignfile: savajuserassignfile,
+      bankuserassignfile: bankuserassignfile,
     });
   } catch (error) {
     console.error("Error fetching counts:", error);

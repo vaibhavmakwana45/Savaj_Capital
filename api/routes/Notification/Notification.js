@@ -103,7 +103,7 @@ router.post("/", async (req, res) => {
     }
     const timestamp = Date.now();
     const uniqueId = `${timestamp}`;
-    
+
     const newNotification = new Notification({
       notification_id: uniqueId,
       branchuser_id,

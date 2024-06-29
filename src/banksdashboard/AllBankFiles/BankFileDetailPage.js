@@ -833,7 +833,7 @@ function BankFileDetailPage() {
       };
 
       try {
-        const response = await AxiosInstance.put(`/file_upload/${id}`, {
+        const response = await AxiosInstance.put(`/file_upload/logs/${id}`, {
           logs: [newLog, ...logs],
         });
 
