@@ -168,6 +168,7 @@
 //     </Flex>
 //   );
 // }
+
 import {
   Flex,
   SimpleGrid,
@@ -189,14 +190,12 @@ import { jwtDecode } from "jwt-decode";
 
 export default function SavajCapitalDashboard() {
   const history = useHistory();
-  // Chakra Color Mode
   const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
   const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const textTableColor = useColorModeValue("gray.500", "white");
-
   const { colorMode } = useColorMode();
   const [apiData, setApiData] = useState({});
   const [totalAmounts, setTotalAmounts] = useState({});
@@ -289,7 +288,6 @@ export default function SavajCapitalDashboard() {
                       fontWeight="bold"
                       textTransform="uppercase"
                     >
-                      {/* Check if loanType is not 'Unknown' to determine subtype */}
                       {loan.loanType !== "Unknown"
                         ? `${loan.loan} (${loan.loanType})`
                         : loan.loan}
@@ -301,7 +299,7 @@ export default function SavajCapitalDashboard() {
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
-                        {loan.fileCount}
+                        {loan.fileCount || 0}
                       </StatNumber>
                     </Flex>
                     <Text as="span" color="green.400" fontWeight="bold">

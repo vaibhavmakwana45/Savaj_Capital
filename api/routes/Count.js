@@ -14,6 +14,7 @@ const Branch_Assign = require("../models/Savaj_Capital/Branch_Assign");
 const BankUser = require("../models/Bank/BankUserSchema");
 const SavajCapital_User = require("../models/Savaj_Capital/SavajCapital_User");
 const BranchAssign = require("../models/Savaj_Capital/Branch_Assign");
+const LoanStatus = require("../models/AddDocuments/LoanStatus");
 
 router.get("/data-count", async (req, res) => {
   try {
@@ -67,16 +68,35 @@ router.get("/loan-files", async (req, res) => {
             loanType.loantype_id === "" ||
             file.loantype_id === loanType.loantype_id
         );
+
+        // Counting statuses
+        const statusCounts = { Approved: 0, Running: 0, Rejected: 0 };
+        for (const file of filteredFiles) {
+          const loanStatus = await LoanStatus.findOne({
+            loanstatus_id: file.status,
+          }).lean();
+          if (loanStatus) {
+            if (loanStatus.loanstatus === "Approved") {
+              statusCounts.Approved++;
+            } else if (loanStatus.loanstatus === "Running") {
+              statusCounts.Running++;
+            } else if (loanStatus.loanstatus === "Rejected") {
+              statusCounts.Rejected++;
+            }
+          }
+        }
+
         enhancedLoans.push({
           ...loan,
           loanType: loanType.loan_type,
           subtype: loanType.subtype || "Main",
           files: filteredFiles.map((file) => ({
-            filename: file.filename,
-            typename: file.typename,
+            file_id: file.file_id,
+            status: file.status,
           })),
           fileCount: filteredFiles.length,
           loantype_id: loanType.loantype_id,
+          statusCounts: statusCounts, // Add status counts to the loan data
         });
       }
     }
@@ -90,6 +110,51 @@ router.get("/loan-files", async (req, res) => {
     res.status(500).send("Error in fetching loan and file data");
   }
 });
+
+// router.get("/loan-files", async (req, res) => {
+//   try {
+//     const loans = await Loan.find().lean();
+//     const enhancedLoans = [];
+
+//     for (const loan of loans) {
+//       let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
+//       const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
+
+//       if (loanTypes.length === 0) {
+//         loanTypes = [
+//           { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
+//         ];
+//       }
+
+//       for (const loanType of loanTypes) {
+//         const filteredFiles = allFiles.filter(
+//           (file) =>
+//             loanType.loantype_id === "" ||
+//             file.loantype_id === loanType.loantype_id
+//         );
+//         enhancedLoans.push({
+//           ...loan,
+//           loanType: loanType.loan_type,
+//           subtype: loanType.subtype || "Main",
+//           files: filteredFiles.map((file) => ({
+//             filename: file.filename,
+//             typename: file.typename,
+//           })),
+//           fileCount: filteredFiles.length,
+//           loantype_id: loanType.loantype_id,
+//         });
+//       }
+//     }
+
+//     const flattenedLoans = enhancedLoans.filter(
+//       (loan) => loan.files.length > 0
+//     );
+//     res.json(flattenedLoans);
+//   } catch (error) {
+//     console.error("Error fetching loan and file data:", error);
+//     res.status(500).send("Error in fetching loan and file data");
+//   }
+// });
 
 // router.get("/loan-files-scbranch/:state/:city/:loan_ids?", async (req, res) => {
 //   try {

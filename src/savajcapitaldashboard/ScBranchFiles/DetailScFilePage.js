@@ -851,7 +851,6 @@ function DetailScFilePage() {
       );
 
       if (response.data.success) {
-        console.log("Log deleted successfully:", response.data.updatedFile);
         const updatedLogs = logs.filter((log) => log.log_id !== logId);
         setLogs(updatedLogs);
       } else {

@@ -25,41 +25,41 @@ import Loader from "react-js-loader";
 export default function Dashboard() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const history = useHistory();
-  const iconBlue = useColorModeValue("#b19552", "#b19552");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
-  const tableRowColor = useColorModeValue("#F7FAFC", "navy.900");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const textTableColor = useColorModeValue("gray.500", "white");
   const { colorMode } = useColorMode();
 
-  const [apiData, setApiData] = useState({
+  const [dataCount, setDataCount] = useState({
     banks: 0,
     users: 0,
     savajcapitalbrnach: 0,
     superadmin: 0,
-    loans: [],
   });
+  const [loans, setLoans] = useState([]);
   const [totalAmounts, setTotalAmounts] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loadingLoans, setLoadingLoans] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataCount = async () => {
       try {
-        const responses = await Promise.all([
-          AxiosInstance.get("/allcount/data-count"),
-          AxiosInstance.get("/allcount/loan-files"),
-        ]);
+        const response = await AxiosInstance.get("/allcount/data-count");
+        setDataCount(response.data);
+      } catch (error) {
+        console.error("Failed to fetch data count:", error);
+      }
+    };
 
-        setApiData((prev) => ({
-          ...prev,
-          ...responses[0].data,
-          loans: responses[1].data,
-        }));
+    fetchDataCount();
+  }, []);
 
-        const totalAmountPromises = responses[1].data.map(async (loan) => {
+  useEffect(() => {
+    const fetchLoans = async () => {
+      try {
+        const response = await AxiosInstance.get("/allcount/loan-files");
+        setLoans(response.data);
+
+        const totalAmountPromises = response.data.map(async (loan) => {
           const { loan_id, loantype_id } = loan;
-
           const response = await AxiosInstance.get(
             `/file_upload/amounts/${loan_id}/${loantype_id || ""}`
           );
@@ -84,27 +84,14 @@ export default function Dashboard() {
         );
         setTotalAmounts(totalAmountsMap);
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch loans:", error);
       } finally {
-        setLoading(false);
+        setLoadingLoans(false);
       }
     };
 
-    fetchData();
+    fetchLoans();
   }, []);
-
-  if (loading) {
-    return (
-      <Flex justify="center" align="center" height="400px">
-        <Loader
-          type="spinner-circle"
-          bgColor={"#b19552"}
-          color={"black"}
-          size={50}
-        />
-      </Flex>
-    );
-  }
 
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
@@ -115,7 +102,11 @@ export default function Dashboard() {
       >
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #f8f8f8)`,
+          }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
@@ -129,7 +120,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -142,7 +133,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.savajcapitalbrnach}
+                    {dataCount.savajcapitalbrnach}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -151,16 +142,21 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </Flex>
         </Card>
+
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
@@ -174,7 +170,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -187,7 +183,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.savajuser}
+                    {dataCount.savajuser}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -196,7 +192,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -205,7 +201,11 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -219,7 +219,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -232,7 +232,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.banks}
+                    {dataCount.banks}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -241,7 +241,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -250,7 +250,11 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -264,7 +268,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -277,7 +281,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.bankuser}
+                    {dataCount.bankuser}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -286,7 +290,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -295,7 +299,11 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/alluser")}
         >
           <Flex direction="column">
@@ -309,7 +317,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -322,7 +330,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.users}
+                    {dataCount.users}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -331,7 +339,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -340,7 +348,11 @@ export default function Dashboard() {
         </Card>
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
           <Flex direction="column">
@@ -354,7 +366,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -367,7 +379,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.savajuserassignfile}
+                    {dataCount.savajuserassignfile}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -376,7 +388,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -386,7 +398,11 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/bank")}
         >
           <Flex direction="column">
@@ -400,7 +416,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -413,7 +429,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.bankuserassignfile}
+                    {dataCount.bankuserassignfile}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -422,7 +438,7 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
@@ -432,7 +448,11 @@ export default function Dashboard() {
 
         <Card
           minH="125px"
-          style={{ cursor: "pointer", border: "1px solid black" }}
+          style={{
+            cursor: "pointer",
+            border: "1px solid #212529",
+            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+          }}
           onClick={() => history.push("/superadmin/filetable")}
         >
           <Flex direction="column">
@@ -446,7 +466,7 @@ export default function Dashboard() {
               <Stat me="auto">
                 <StatLabel
                   fontSize="xs"
-                  color="gray.400"
+                  color="#212529"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
@@ -459,7 +479,7 @@ export default function Dashboard() {
                     fontWeight="bold"
                     style={{ paddingTop: "10px" }}
                   >
-                    {apiData.files}
+                    {dataCount.files}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -468,76 +488,133 @@ export default function Dashboard() {
                 as="box"
                 h={"45px"}
                 w={"45px"}
-                bg={"#b19552"}
+                bg={"#212529"}
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </Flex>
         </Card>
-        {apiData.loans.map((loan) => (
-          <Card
-            key={loan.loan_id}
-            minH="125px"
-            style={{ cursor: "pointer", border: "1px solid black" }}
-            onClick={() =>
-              history.push(`/superadmin/filetable`, {
-                state: {
-                  loan: loan.loan,
-                  loan_id: loan.loan_id,
-                  loantype_id: loan.loantype_id,
-                },
-              })
-            }
+      </SimpleGrid>
+      <SimpleGrid
+        columns={{ base: 1, sm: 1, md: 2, xl: 4 }}
+        spacing="24px"
+        mb="20px"
+        justifyItems="center" // Ensure items are centered horizontally
+      >
+        {loadingLoans ? (
+          <Flex
+            justify="center"
+            align="center"
+            height="100vh" // Ensure full viewport height
+            width="100%" // Ensure full viewport width
+            position="fixed" // Ensures it overlays everything
+            top="0"
+            left="0"
           >
-            <Flex direction="column">
-              <Flex
-                flexDirection="row"
-                align="center"
-                justify="center"
-                w="100%"
-                mb="25px"
-              >
-                <Stat me="auto">
-                  <StatLabel
-                    fontSize="xs"
-                    color="gray.400"
-                    fontWeight="bold"
-                    textTransform="uppercase"
-                  >
-                    {loan.loanType !== "Unknown"
-                      ? `${loan.loan} (${loan.loanType})`
-                      : loan.loan}
-                  </StatLabel>
-                  <Flex>
-                    <StatNumber
-                      fontSize="lg"
-                      color={textColor}
-                      fontWeight="bold"
-                      style={{ paddingTop: "10px", paddingBottom: "10px" }}
-                    >
-                      {loan.fileCount}
-                    </StatNumber>
-                  </Flex>
-                  <Text as="span" color="green.400" fontWeight="bold">
-                    ₹
-                    {totalAmounts[loan.loan_id]?.[loan.loantype_id || "none"] ||
-                      0}
-                  </Text>
-                </Stat>
-                <IconBox
-                  borderRadius="50%"
-                  as="box"
-                  h={"45px"}
-                  w={"45px"}
-                  bg={iconBlue}
+            <Loader
+              type="spinner-circle"
+              bgColor={"#b19552"}
+              color={"black"}
+              size={50}
+            />
+          </Flex>
+        ) : (
+          loans.map((loan) => (
+            <Card
+              key={loan.loan_id}
+              minH="125px"
+              style={{
+                cursor: "pointer",
+                border: "1px solid #b19552",
+                background: `linear-gradient(80deg, #bfe6ff, #4d94db)`,
+              }}
+              onClick={() =>
+                history.push(`/superadmin/filetable`, {
+                  state: {
+                    loan: loan.loan,
+                    loan_id: loan.loan_id,
+                    loantype_id: loan.loantype_id,
+                  },
+                })
+              }
+            >
+              <Flex direction="column">
+                <Flex
+                  flexDirection="row"
+                  align="center"
+                  justify="center"
+                  w="100%"
+                  mb="25px"
                 >
-                  <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
-                </IconBox>
+                  <Stat me="auto">
+                    <StatLabel
+                      fontSize="xs"
+                      color="#212529"
+                      fontWeight="bold"
+                      textTransform="uppercase"
+                    >
+                      {loan.loanType !== "Unknown"
+                        ? `${loan.loan} (${loan.loanType})`
+                        : loan.loan}
+                    </StatLabel>
+                    <Flex>
+                      <StatNumber
+                        fontSize="lg"
+                        color={textColor}
+                        fontWeight="bold"
+                        style={{ paddingTop: "10px", paddingBottom: "10px" }}
+                      >
+                        {loan.fileCount}
+                      </StatNumber>
+                    </Flex>
+                    <Text as="span" color="green.400" fontWeight="bold">
+                      ₹
+                      {totalAmounts[loan.loan_id]?.[
+                        loan.loantype_id || "none"
+                      ] || 0}
+                    </Text>
+                  </Stat>
+                  <IconBox
+                    borderRadius="50%"
+                    as="box"
+                    h={"45px"}
+                    w={"45px"}
+                    bg={"#212529"}
+                  >
+                    <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
+                  </IconBox>
+                </Flex>
+
+                {/* Display counts for Approved, Running, Rejected */}
+                <Flex justify="space-between" mt="10px">
+                  <Flex direction="column" align="center">
+                    <Text fontSize="sm" fontWeight="bold" color="#4caf50">
+                      Approved
+                    </Text>
+                    <Text fontSize="md">
+                      {loan.statusCounts?.Approved || 0}
+                    </Text>
+                  </Flex>
+                  <Flex direction="column" align="center">
+                    <Text fontSize="sm" fontWeight="bold" color="#ff9c00">
+                      Running
+                    </Text>
+                    <Text fontSize="md">{loan.statusCounts?.Running || 0}</Text>
+                  </Flex>
+                  <Flex direction="column" align="center">
+                    <Text fontSize="sm" fontWeight="bold" color="#f44336">
+                      Rejected
+                    </Text>
+                    <Text fontSize="md">
+                      {loan.statusCounts?.Rejected || 0}
+                    </Text>
+                  </Flex>
+                </Flex>
               </Flex>
-            </Flex>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </SimpleGrid>
     </Flex>
   );

@@ -306,11 +306,25 @@ function ViewFile() {
   const [selectedGuarantor, setSelectedGuarantor] = useState();
   const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
 
+  const processStepsData = (data) => {
+    let rejected = false;
+    return data.map((item) => {
+      if (rejected) {
+        return { ...item, status: "reject" };
+      }
+      if (item.status === "reject") {
+        rejected = true;
+      }
+      return item;
+    });
+  };
+
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      setStepData(response.data.data);
+      const processedData = processStepsData(response.data.data);
+      setStepData(processedData);
       setStepLoader(false);
     } catch (error) {
       console.error("Error: ", error.message);
@@ -753,6 +767,7 @@ function ViewFile() {
       });
     }
   };
+
   const isGuarantorAlreadyAdded = (guarantorId) => {
     const alreadyAddedInGuarantorSteps =
       open.data.guarantorSteps &&
@@ -852,7 +867,6 @@ function ViewFile() {
       );
 
       if (response.data.success) {
-        console.log("Log deleted successfully:", response.data.updatedFile);
         const updatedLogs = logs.filter((log) => log.log_id !== logId);
         setLogs(updatedLogs);
       } else {
@@ -1442,20 +1456,22 @@ function ViewFile() {
                                     style={{ marginTop: "20px" }}
                                     key={dataIndex}
                                   >
-                                    <p>
-                                      {guarantor.username} {guarantor.loan_step}
-                                    </p>
-                                    <AiOutlineClose
-                                      onClick={() =>
-                                        removeGuarantorStep(dataIndex, "open")
-                                      }
-                                      style={{
-                                        cursor: "pointer",
-                                        color: "red",
-                                        marginLeft: "10px",
-                                      }}
-                                    />
-
+                                    <Flex alignItems="center">
+                                      <p>
+                                        {guarantor.username}{" "}
+                                        {guarantor.loan_step}
+                                      </p>
+                                      <AiOutlineClose
+                                        onClick={() =>
+                                          removeGuarantorStep(dataIndex, "open")
+                                        }
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "red",
+                                          marginLeft: "10px",
+                                        }}
+                                      />
+                                    </Flex>
                                     {guarantor.inputs?.map(
                                       (input, inputIndex) => (
                                         <FormControl

@@ -52,19 +52,21 @@ function BankFileDetailPage() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
-  console.log(fileData, "fileData");
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const {
     isOpen: isOpensGuarantor,
     onOpen: onOpensGuarantor,
     onClose: onClosesGuarantor,
   } = useDisclosure();
+
   const {
     isOpen: isOpensLogs,
     onOpen: onOpensLogs,
     onClose: onClosesLogs,
   } = useDisclosure();
+
   const [logs, setLogs] = useState([]);
   const [logMessage, setLogMessage] = useState("");
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
@@ -72,7 +74,7 @@ function BankFileDetailPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isMaximized, setIsMaximized] = useState(false);
   const [accessType, setAccessType] = useState("");
-  console.log(accessType, "accessType");
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
@@ -141,6 +143,7 @@ function BankFileDetailPage() {
   const toggleMaximize = () => {
     setIsMaximized(!isMaximized);
   };
+
   const {
     register,
     handleSubmit,
@@ -867,7 +870,6 @@ function BankFileDetailPage() {
       );
 
       if (response.data.success) {
-        console.log("Log deleted successfully:", response.data.updatedFile);
         const updatedLogs = logs.filter((log) => log.log_id !== logId);
         setLogs(updatedLogs);
       } else {

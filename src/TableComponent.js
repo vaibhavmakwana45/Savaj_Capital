@@ -580,6 +580,7 @@ const TableComponent = ({
                             icon={<AddIcon />}
                             ml={2}
                             onClick={() => handleTitle(rowData[0])}
+                            color="black"
                           />
                         )}
                         {showActivationButtons && (

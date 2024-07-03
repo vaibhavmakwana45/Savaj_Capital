@@ -1,3 +1,16 @@
+<!--
+/*!
+=========================================================
+* Argon Dashboard Chakra - v1.0.0
+=========================================================
+* Product Page: https://www.creative-tim.com/product/argon-dashboard-chakra
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-chakra/blob/master/LICENSE.md)
+* Design and Coded by Simmmple & Creative Tim
+=========================================================
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*/
+-->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -7,6 +20,11 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
     <meta name="theme-color" content="#000000" />
+    <!--
+          manifest.json provides metadata used when your web app is added to the
+          homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
+        -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="shortcut icon" href="%PUBLIC_URL%/small logo.svg" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -20,9 +38,16 @@
       crossorigin="anonymous"
     ></script>
     <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="%PUBLIC_URL%/small logo.svg"
+    />
+    <link
       rel="stylesheet"
       href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css"
     />
+    <link rel="style.css" />
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/jvectormap/2.0.4/jquery-jvectormap.css"
@@ -42,6 +67,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <!--     Fonts and icons     -->
     <link
       href="https://use.fontawesome.com/releases/v5.0.7/css/all.css"
       rel="stylesheet"
@@ -49,84 +75,44 @@
     <link
       rel="stylesheet"
       type="text/css"
-      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
     />
     <link rel="stylesheet" href="./style.css" />
+
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.png" />
+    <!--
+          Notice the use of %PUBLIC_URL% in the tags above.
+          It will be replaced with the URL of the `public` folder during the build.
+          Only files inside the `public` folder can be referenced from the HTML.
+
+          Unlike "/favicon.png" or "favicon.ico", "%PUBLIC_URL%/favicon.png" will
+          work correctly both with client-side routing and a non-root public URL.
+          Learn how to configure a non-root public URL by running `npm run build`.
+        -->
     <title>Savaj Capital</title>
-    <style>
-      #cursor {
-        width: 8px;
-        height: 8px;
-        background-color: #b19552;
-        border-radius: 50%;
-        position: fixed;
-        z-index: 1000;
-        pointer-events: none;
-        transition: transform 0.3s ease-out;
-      }
-
-      #cursor-follower {
-        width: 30px;
-        height: 30px;
-        border: 2px solid #212529;
-        border-radius: 50%;
-        position: fixed;
-        z-index: 900;
-        pointer-events: none;
-        transition: transform 0.1s ease-out;
-      }
-
-      @keyframes click-animation {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(2);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      .click-animation {
-        animation: click-animation 0.3s ease-in-out;
-      }
-
-      body {
-        font-family: "Roboto", sans-serif;
-      }
-    </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
+    <!--
+          This HTML file is a template.
+          If you open it directly in the browser, you will see an empty page.
 
-    <div id="cursor"></div>
-    <div id="cursor-follower"></div>
+          You can add webfonts, meta tags, or analytics to this file.
+          The build step will place the bundled scripts into the <body> tag.
 
-    <script>
-      const cursor = document.getElementById("cursor");
-      const follower = document.getElementById("cursor-follower");
-
-      document.addEventListener("mousemove", (e) => {
-        cursor.style.transform = `translate3d(${e.clientX + 10}px, ${
-          e.clientY + 10
-        }px, 0)`;
-        follower.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      });
-
-      document.addEventListener("mousedown", () => {
-        cursor.classList.add("click-animation");
-      });
-
-      document.addEventListener("mouseup", () => {
-        cursor.classList.remove("click-animation");
-      });
-    </script>
+          To begin the development, run `npm start` or `yarn start`.
+          To create a production bundle, use `npm run build` or `yarn build`.
+        -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

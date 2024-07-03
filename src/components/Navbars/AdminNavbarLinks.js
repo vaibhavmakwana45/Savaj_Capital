@@ -52,8 +52,8 @@ import AxiosInstance from "config/AxiosInstance";
 export default function HeaderLinks(props) {
   const [notifications, setNotifications] = useState([]);
   const [accessType, setAccessType] = useState("");
-  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false); // State to manage notification menu open/close
-  console.log(accessType, "accessType");
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+
   useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);

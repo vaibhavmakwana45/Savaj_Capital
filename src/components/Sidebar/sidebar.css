@@ -148,3 +148,6 @@ body {
     margin-left: 1.2rem;
   }
 }
+.css-1usr4k4:focus, .css-1usr4k4[data-focus] {
+  box-shadow: none !important;
+}

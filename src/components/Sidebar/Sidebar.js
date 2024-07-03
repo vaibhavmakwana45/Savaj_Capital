@@ -52,7 +52,7 @@ import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
 } from "@mui/icons-material";
-
+import "./sidebar.css";
 // FUNCTIONS
 
 function Sidebar(props) {
@@ -126,8 +126,11 @@ function Sidebar(props) {
           style={{
             background: "none",
             border: "none",
-            marginTop: "20px",
+            marginTop: "40px",
             outline: "none",
+            paddingTop: "30px",
+            paddingBottom: "30px",
+            padding: "10px",
           }}
         >
           {activeRoute(prop.layout + prop.path) === "active" ? (
@@ -148,14 +151,26 @@ function Sidebar(props) {
                 borderRadius="15px"
                 _hover="none"
                 w="100%"
-                style={{ backgroundColor: "#FFF" }}
+                style={{
+                  // backgroundColor: "#FFF",
+
+                  background: "none",
+                  border: "none",
+                  outline: "none",
+                }}
               >
                 <Dropdown
                   style={{
                     background: "none",
                     border: "none",
                     outline: "none",
-                    boxShadow: "rgba(0, 0, 0, 0) 0px 1px 2px 0px",
+                    boxShadow:
+                      "0px 7px 11px rgba(0, 0, 0, 0.14), 0 0 0 3px #b19552",
+                    padding: "10px",
+                    borderRadius: "10px", // Add border radius here
+                    background: "none",
+                    border: "none",
+                    outline: "none",
                   }}
                   isOpen={dropdownStates[prop.name]} // Use the state for this dropdown
                   toggle={() => toggleDropdown(prop.name)} // Pass the key to toggle function
@@ -233,8 +248,15 @@ function Sidebar(props) {
                   transform: "none",
                   borderColor: "transparent",
                 }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  outline: "none",
+                  boxShadow:
+                    "0px 7px 11px rgba(0, 0, 0, 0.14), 0 0 0 3px #b19552",
+                }}
                 _focus={{
-                  boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
+                  boxShadow: "none",
                 }}
               >
                 <Flex>
@@ -288,14 +310,15 @@ function Sidebar(props) {
                 transform: "none",
                 borderColor: "transparent",
               }}
+              style={{ background: "none", border: "none", outline: "none" }}
               _focus={{
-                boxShadow: "0px 7px 11px rgba(0, 0, 0, 0.04)",
+                boxShadow: "none",
               }}
             >
               <Dropdown
+                isOpen={dropdownStates[prop.name]}
+                toggle={() => toggleDropdown(prop.name)}
                 style={{ background: "none", border: "none", outline: "none" }}
-                isOpen={dropdownStates[prop.name]} 
-                toggle={() => toggleDropdown(prop.name)} 
               >
                 <DropdownToggle
                   style={{
@@ -372,6 +395,7 @@ function Sidebar(props) {
               _focus={{
                 boxShadow: "none",
               }}
+              style={{ background: "none", border: "none", outline: "none" }}
             >
               <Flex>
                 {typeof prop.icon === "string" ? (
@@ -463,7 +487,7 @@ function Sidebar(props) {
             marginLeft: isOpen ? "95%" : "89%",
             zIndex: "99",
             cursor: "pointer",
-            backgroundColor: "#b19552",
+            // backgroundColor: "#b19552",
             fontSize: "20px",
             color: "white",
             padding: 0,
@@ -526,6 +550,7 @@ function Sidebar(props) {
     </Box>
   );
 }
+export default Sidebar;
 
 // FUNCTIONS
 
@@ -1002,5 +1027,3 @@ export function SidebarResponsive(props) {
     </Flex>
   );
 }
-
-export default Sidebar;
