@@ -527,7 +527,7 @@ export default function Dashboard() {
               style={{
                 cursor: "pointer",
                 border: "1px solid #b19552",
-                background: `linear-gradient(80deg, #bfe6ff, #4d94db)`,
+                background: `linear-gradient(-130deg, #646868, #ffffff)`,
               }}
               onClick={() =>
                 history.push(`/superadmin/filetable`, {
@@ -565,7 +565,7 @@ export default function Dashboard() {
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
-                        {loan.fileCount}
+                        {loan.fileCount} files
                       </StatNumber>
                     </Flex>
                     <Text as="span" color="green.400" fontWeight="bold">
