@@ -52,7 +52,7 @@ import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
 } from "@mui/icons-material";
-import "./sidebar.css";
+// import "./sidebar.css";
 // FUNCTIONS
 
 function Sidebar(props) {
@@ -473,7 +473,9 @@ function Sidebar(props) {
 
   // SIDEBAR
   return (
-    <Box ref={mainPanel}>
+ 
+    <div className="sidebar-main">
+   <Box ref={mainPanel}>
       <Box
         display={{ sm: "none", xl: "block" }}
         position="fixed"
@@ -548,7 +550,9 @@ function Sidebar(props) {
         </Box>
       </Box>
     </Box>
+    </div>
   );
+
 }
 export default Sidebar;
 
