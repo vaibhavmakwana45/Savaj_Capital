@@ -323,8 +323,9 @@ function ViewFile() {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
-      const processedData = processStepsData(response.data.data);
-      setStepData(processedData);
+      // const processedData = processStepsData(response.data.data);
+      // setStepData(processedData);
+      setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
       console.error("Error: ", error.message);
