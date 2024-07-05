@@ -487,7 +487,7 @@ function Sidebar(props) {
             marginLeft: isOpen ? "95%" : "89%",
             zIndex: "99",
             cursor: "pointer",
-            // backgroundColor: "#b19552",
+            backgroundColor: "#b19552",
             fontSize: "20px",
             color: "white",
             padding: 0,

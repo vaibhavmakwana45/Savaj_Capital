@@ -50,11 +50,11 @@ body {
   margin: 0.8rem;
 }
 
-.active {
+/* .active {
   background-color: red;
-}
+} */
 
-.active::before {
+/* .active::before {
   content: "";
   position: absolute;
   width: 100%;
@@ -67,7 +67,7 @@ body {
   left: -0.25rem;
   border-top-right-radius: 0.8rem;
   border-bottom-right-radius: 0.8rem;
-}
+} */
 
 .boxicon::after {
   content: "";

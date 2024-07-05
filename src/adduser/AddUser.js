@@ -390,7 +390,7 @@ function AddUser(props) {
                       placeholder="Enter extra mobile number"
                     />
                   </FormControl>
-                  <FormControl id="gst_number" mt={4} isRequired>
+                  <FormControl id="gst_number" mt={4}>
                     <FormLabel>GST Number</FormLabel>
                     <Input
                       name="gst_number"
@@ -467,7 +467,19 @@ function AddUser(props) {
                 />
               </FormControl>
 
-              <FormControl id="country" mt={4} isRequired>
+              <FormControl
+                id="country"
+                mt={4}
+                isRequired
+                style={{
+                  visibility: "hidden",
+                  height: 0,
+                  overflow: "hidden",
+                  position: "absolute",
+                  width: 0,
+                  opacity: 0,
+                }}
+              >
                 <FormLabel>Country</FormLabel>
                 <Select
                   name="country"

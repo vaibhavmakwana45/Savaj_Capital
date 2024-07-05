@@ -586,30 +586,23 @@ export default function Dashboard() {
                   </IconBox>
                 </Flex>
 
-                {/* Display counts for Approved, Running, Rejected */}
-                <Flex justify="space-between" mt="10px">
-                  <Flex direction="column" align="center">
-                    <Text fontSize="sm" fontWeight="bold" color="#4caf50">
-                      Approved
-                    </Text>
-                    <Text fontSize="md">
-                      {loan.statusCounts?.Approved || 0}
-                    </Text>
-                  </Flex>
-                  <Flex direction="column" align="center">
-                    <Text fontSize="sm" fontWeight="bold" color="#ff9c00">
-                      Running
-                    </Text>
-                    <Text fontSize="md">{loan.statusCounts?.Running || 0}</Text>
-                  </Flex>
-                  <Flex direction="column" align="center">
-                    <Text fontSize="sm" fontWeight="bold" color="#f44336">
-                      Rejected
-                    </Text>
-                    <Text fontSize="md">
-                      {loan.statusCounts?.Rejected || 0}
-                    </Text>
-                  </Flex>
+                {/* Display counts for all statuses */}
+                <Flex mt="5px" wrap="wrap">
+                  {Object.entries(loan.statusCounts)
+                    .filter(([_, { count }]) => count > 0)
+                    .map(([status, { count, color }]) => (
+                      <Flex
+                        key={status}
+                        direction="column"
+                        align="center"
+                        mx="2px" // Adjust horizontal margin as needed
+                      >
+                        <Text fontSize="sm" fontWeight="bold" color={color}>
+                          {status}
+                        </Text>
+                        <Text fontSize="md">{count}</Text>
+                      </Flex>
+                    ))}
                 </Flex>
               </Flex>
             </Card>

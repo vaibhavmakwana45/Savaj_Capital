@@ -58,10 +58,12 @@ function Files() {
   const [files, setFiles] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
   const location = useLocation();
-  const { loan, loan_id } = location?.state?.state || {};
+  const { loan, loan_id, loantype_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
+  console.log(loans, "loans");
+  const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
+  console.log(selectedLoan, "selectedLoan");
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -111,13 +113,44 @@ function Files() {
   }, []);
 
   useEffect(() => {
-    if (loan_id) {
-      const timeout = setTimeout(() => {
-        setSelectedLoan(loan_id);
-      }, 100);
-      return () => clearTimeout(timeout);
+    if (location?.state?.state) {
+      const { loan_id, loantype_id } = location.state.state;
+      setSelectedLoan(loan_id || "All Loan Types");
+
+      if (loantype_id) {
+        setSelectedLoanSubType(loantype_id);
+      }
     }
-  }, [loan_id, loans, loan]);
+  }, [location?.state?.state]);
+
+  const [loanSubtypes, setLoanSubtypes] = useState([]);
+  const [selectedLoanSubType, setSelectedLoanSubType] = useState("");
+
+  useEffect(() => {
+    if (selectedLoan) {
+      const selectedLoanObj = loans.find(
+        (loan) => loan.loan_id === selectedLoan
+      );
+      if (selectedLoanObj && selectedLoanObj.is_subtype) {
+        const fetchSubtypes = async () => {
+          try {
+            const subtypeResponse = await AxiosInstance.get(
+              `/loan_type/loan_type/${selectedLoan}`
+            );
+            setLoanSubtypes(subtypeResponse.data.data);
+          } catch (error) {
+            console.error("Error fetching subtypes:", error);
+          }
+        };
+
+        fetchSubtypes();
+      } else {
+        setLoanSubtypes([]);
+      }
+    } else {
+      setLoanSubtypes([]);
+    }
+  }, [selectedLoan, loans]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -125,48 +158,63 @@ function Files() {
   const [totalRecords, setTotalRecorrds] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    try {
-      const response = await AxiosInstance.get("/file_upload", {
-        params: {
-          page: currentPage,
-          limit: itemsPerPage,
-          searchTerm,
-          selectedLoan: loan_id
-            ? loan_id === "All Loan Types"
-              ? ""
-              : loan_id
-            : selectedLoan === "All Loan Types"
-            ? ""
-            : selectedLoan,
-          selectedStatus: selectedStatusSearch,
-          selectedState,
-          selectedCity,
-        },
-      });
-      setFiles(response.data.data);
-      setTotalPages(response.data.totalPages);
-      setTotalRecorrds(response.data.totalCount);
-      setCurrentPage(response.data.currentPage);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    const fetchData = async () => {
+      setLoading(true); // Set loading to true when fetching data
+
+      try {
+        const response = await AxiosInstance.get("/file_upload", {
+          params: {
+            page: currentPage,
+            limit: itemsPerPage,
+            searchTerm,
+            selectedLoan: loan_id
+              ? loan_id === "All Loan Types"
+                ? ""
+                : loan_id
+              : selectedLoan === "All Loan Types"
+              ? ""
+              : selectedLoan,
+            selectedStatus: selectedStatusSearch,
+            selectedSubtype: loantype_id
+              ? loantype_id === "All Loan Subtypes"
+                ? ""
+                : loantype_id
+              : selectedLoanSubType === "All Loan Subtypes"
+              ? ""
+              : selectedLoanSubType,
+            selectedState,
+            selectedCity,
+          },
+        });
+
+        setFiles(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setTotalRecorrds(response.data.totalCount);
+        setCurrentPage(response.data.currentPage);
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false); // Ensure loading is set to false even if there's an error
+      }
+    };
+
+    fetchData(); // Initial fetch when component mounts
   }, [
     currentPage,
     itemsPerPage,
     searchTerm,
     selectedLoan,
     selectedStatusSearch,
+    selectedLoanSubType,
     selectedState,
     selectedCity,
     loan_id,
+    loantype_id,
   ]);
+  useEffect(() => {
+    setSelectedLoanSubType("");
+  }, [selectedLoan]);
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -250,36 +298,64 @@ function Files() {
     });
   }, [files, fetchFileData]);
 
-  //total loan amount
+  // total loan amount
   const [totalAmount, setTotalAmount] = useState(null);
   const [totalFiles, setTotalFiles] = useState(null);
-
-  const fetchTotalAmount = async () => {
-    try {
-      let url = `/file_upload/amounts`;
-      if (loan_id) {
-        url += `/${loan_id}`;
-      }
-
-      const response = await AxiosInstance.get(url, {
-        params: {
-          state: selectedState,
-          city: selectedCity,
-        },
-      });
-
-      const { totalAmount } = response.data;
-      const { fileCount } = response.data;
-      setTotalAmount(totalAmount);
-      setTotalFiles(fileCount);
-    } catch (error) {
-      console.error("Error fetching total amount:", error);
-    }
-  };
+  const [statusCounts, setStatusCounts] = useState(null);
 
   useEffect(() => {
+    const fetchTotalAmount = async () => {
+      try {
+        let url = "/file_upload/amounts";
+
+        // Append selectedLoan or loan_id to URL if it's not "All Loan Types"
+        if (selectedLoan && selectedLoan !== "All Loan Types") {
+          url += `/${selectedLoan}`;
+        } else if (loan_id && loan_id !== "All Loan Types") {
+          url += `/${loan_id}`;
+        }
+
+        // Append selectedLoanSubType or loantype_id to URL if it's not "All Loan Subtypes"
+        if (
+          selectedLoanSubType &&
+          selectedLoanSubType !== "All Loan Subtypes"
+        ) {
+          url += `/${selectedLoanSubType}`;
+        } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
+          url += `/${loantype_id}`;
+        }
+        console.log("Frontend Query Params:", {
+          state: selectedState,
+          city: selectedCity,
+          selectedStatusSearch: selectedStatusSearch,
+        });
+        const response = await AxiosInstance.get(url, {
+          params: {
+            state: selectedState,
+            city: selectedCity,
+            selectedStatusSearch: selectedStatusSearch,
+          },
+        });
+
+        const { totalAmount, fileCount, statusCounts } = response.data;
+        setTotalAmount(totalAmount);
+        setTotalFiles(fileCount);
+        setStatusCounts(statusCounts);
+      } catch (error) {
+        console.error("Error fetching total amount:", error);
+      }
+    };
+
     fetchTotalAmount();
-  }, [loan_id, selectedState, selectedCity]);
+  }, [
+    selectedLoan,
+    selectedLoanSubType,
+    selectedState,
+    selectedCity,
+    selectedStatusSearch,
+    loantype_id,
+    loan_id,
+  ]);
 
   //model open edit delete update assign
   const [anchorEl, setAnchorEl] = useState(null);
@@ -694,6 +770,10 @@ function Files() {
       setLoading(false);
     }
   };
+  const getLoanName = (loanId) => {
+    const loan = loans.find((loan) => loan.loan_id === loanId);
+    return loan ? loan.loan : "All Files";
+  };
 
   return (
     <>
@@ -712,8 +792,7 @@ function Files() {
                         bgClip="text"
                         className="ttext"
                       >
-                        {" "}
-                        {loan}
+                        {getLoanName(selectedLoan)}
                         {selectedStatusSearch !== "1718861587262" &&
                         selectedStatusSearch !== "1718861593296" ? (
                           <>
@@ -731,6 +810,20 @@ function Files() {
                             </Text>{" "}
                             <span style={{ color: "gray.700" }}>-</span>{" "}
                             {totalFiles} files
+                            {/* Dynamic Status Counts */}
+                            {statusCounts &&
+                              Object.keys(statusCounts).map((status) => (
+                                <span
+                                  key={status}
+                                  style={{
+                                    color:
+                                      statusCounts[status]?.color || "inherit",
+                                    paddingLeft: "10px",
+                                  }}
+                                >
+                                  {statusCounts[status]?.count} {status}
+                                </span>
+                              ))}
                           </>
                         ) : null}
                       </Text>
@@ -745,7 +838,7 @@ function Files() {
                       bgClip="text"
                       className="ttext"
                     >
-                      All Files
+                      {getLoanName(selectedLoan)}
                       <span style={{ color: "black", paddingLeft: "10px" }}>
                         ₹{" "}
                       </span>
@@ -754,11 +847,25 @@ function Files() {
                       </Text>{" "}
                       <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
                       files
+                      {/* Dynamic Status Counts */}
+                      {statusCounts &&
+                        Object.keys(statusCounts).map((status) => (
+                          <span
+                            key={status}
+                            style={{
+                              color: statusCounts[status]?.color || "inherit",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {statusCounts[status]?.count} {status}
+                          </span>
+                        ))}
                     </Text>
                   </Box>
                 )}
               </Text>
             </Flex>
+
             <Flex justifyContent="end" py="1" className="mainnnn">
               <Flex className="theaddd p-2">
                 <div className="d-flex first-drop-section gap-2">
@@ -799,6 +906,47 @@ function Files() {
                           }}
                         >
                           {loan.loan}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {!loan && loanSubtypes.length > 0 && (
+                    <select
+                      className="form-select loan-subtype-dropdown"
+                      value={selectedLoanSubType}
+                      disabled={!selectedLoan}
+                      onChange={(e) => setSelectedLoanSubType(e.target.value)}
+                      style={{
+                        padding: "5px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        border: "2px solid #b19552",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        width: "100%",
+                        maxWidth: "300px",
+                        appearance: "none",
+                        color: "#333333",
+                        outline: "none",
+                        transition: "all 0.3s ease-in-out",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select loan subtype
+                      </option>
+                      {loanSubtypes.map((subtype) => (
+                        <option
+                          key={subtype.loantype_id}
+                          value={subtype.loantype_id}
+                          style={{
+                            backgroundColor: "#ffffff",
+                            color: "#333333",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        >
+                          {subtype.loan_type}
                         </option>
                       ))}
                     </select>
