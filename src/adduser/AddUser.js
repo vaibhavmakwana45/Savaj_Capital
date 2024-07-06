@@ -390,7 +390,7 @@ function AddUser(props) {
                       placeholder="Enter extra mobile number"
                     />
                   </FormControl>
-                  <FormControl id="gst_number" mt={4} isRequired>
+                  <FormControl id="gst_number" mt={4}>
                     <FormLabel>GST Number</FormLabel>
                     <Input
                       name="gst_number"
