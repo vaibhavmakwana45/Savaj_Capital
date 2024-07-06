@@ -1,4 +1,11 @@
-import { Flex, Text, useColorModeValue, Button, Input } from "@chakra-ui/react";
+import {
+  Flex,
+  Text,
+  useColorModeValue,
+  Button,
+  Input,
+  Box,
+} from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -16,7 +23,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import AxiosInstance from "config/AxiosInstance";
 import TableComponent from "TableComponent";
 
-function Tables() {
+function BankTable() {
   const [banks, setBanks] = useState([]);
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -24,6 +31,8 @@ function Tables() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   let menuBg = useColorModeValue("white", "navy.800");
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [selectedBankUsers, setSelectedBankUsers] = useState([]);
 
   const filteredUsers =
     searchTerm.length === 0
@@ -132,6 +141,21 @@ function Tables() {
 
   const handleRow = (id) => {
     history.push("/superadmin/bankusers?id=" + id);
+  };
+
+  const handleTitle = (rowData) => {
+    const bank = banks.find((bank) => bank.bank_id === rowData);
+    if (bank && bank.users) {
+      setSelectedBankUsers(bank.users);
+      setShowUserDetails(true);
+    } else {
+      console.error("Bank or users not found:", bank);
+    }
+  };
+
+  const handleCloseUserDetails = () => {
+    setShowUserDetails(false);
+    setSelectedBankUsers([]);
   };
 
   return (
@@ -264,6 +288,8 @@ function Tables() {
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
+              // handleTitle={handleTitle}
+              // showTitleButton={true}
             />
           </CardBody>
         </Card>
@@ -300,10 +326,67 @@ function Tables() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        {showUserDetails && (
+          <Flex
+            position="fixed"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            alignItems="center"
+            justifyContent="center"
+            bg="rgba(0,0,0,0.5)"
+            zIndex="999"
+          >
+            <Card maxW="50%" maxH="50%" overflowY="auto">
+              <CardHeader>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Text fontSize="xl" fontWeight="bold">
+                    Bank Users
+                  </Text>
+                  <Button onClick={handleCloseUserDetails} colorScheme="blue">
+                    Close
+                  </Button>
+                </Flex>
+              </CardHeader>
+              <CardBody>
+                {selectedBankUsers.map((user) => (
+                  <Box
+                    key={user._id}
+                    p={4}
+                    mb={4}
+                    borderWidth="1px"
+                    borderRadius="lg"
+                  >
+                    <Text fontWeight="bold">{user.bankuser_name}</Text>
+                    <Text>Email: {user.email}</Text>
+                    <Text>City: {user.city}</Text>
+                    <Text>State: {user.state}</Text>
+                    <Text>Mobile: {user.mobile}</Text>
+                    {user.files && user.files.length > 0 && (
+                      <>
+                        <Text fontWeight="bold" mt={2}>
+                          Assigned Files:
+                        </Text>
+                        <Flex flexDirection="column">
+                          {user.files.map((file) => (
+                            <Box key={file._id} mt={2}>
+                              <Text>File ID: {file.file_id}</Text>
+                            </Box>
+                          ))}
+                        </Flex>
+                      </>
+                    )}
+                  </Box>
+                ))}
+              </CardBody>
+            </Card>
+          </Flex>
+        )}
       </Flex>
       <Toaster />
     </>
   );
 }
 
-export default Tables;
+export default BankTable;

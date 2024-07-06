@@ -5,6 +5,9 @@ const Bank = require("../../models/Bank/BankSchema");
 const BankUser = require("../../models/Bank/BankUserSchema");
 const { createToken } = require("../../utils/authhelper");
 const crypto = require("crypto");
+const BankApproval = require("../../models/Bank/BankApproval");
+const File_Uplode = require("../../models/File/File_Uplode");
+const LoanStatus = require("../../models/AddDocuments/LoanStatus");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -60,29 +63,69 @@ router.post("/addbankuser", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    var data = await Bank.aggregate([
+    const banks = await Bank.aggregate([
       {
         $sort: { updatedAt: -1 },
       },
     ]);
 
-    for (let i = 0; i < data.length; i++) {
-      const bank_id = data[i].bank_id;
-
-      data[i].user_count = 0;
+    for (let i = 0; i < banks.length; i++) {
+      const bank_id = banks[i].bank_id;
 
       const bankUserCount = await BankUser.countDocuments({ bank_id });
+      banks[i].user_count = bankUserCount;
 
-      if (bankUserCount) {
-        data[i].user_count = bankUserCount;
+      const bankUsers = await BankUser.find({ bank_id });
+
+      for (let j = 0; j < bankUsers.length; j++) {
+        const bankuser_id = bankUsers[j].bankuser_id;
+
+        const assignedFiles = await BankApproval.find({ bankuser_id });
+
+        console.log(
+          `Bank User ID: ${bankuser_id}, Assigned Files:`,
+          assignedFiles
+        );
+
+        for (let k = 0; k < assignedFiles.length; k++) {
+          const file_id = assignedFiles[k].file_id;
+          let fileDetails = await File_Uplode.findOne({
+            file_id: file_id,
+          }).lean();
+
+          if (fileDetails && fileDetails.status) {
+            const loanStatusDetails = await LoanStatus.findOne({
+              loanstatus_id: fileDetails.status,
+            }).lean();
+
+            console.log(
+              `File ID: ${file_id}, Loan Status Details:`,
+              loanStatusDetails
+            );
+
+            if (loanStatusDetails) {
+              fileDetails.status = loanStatusDetails.loanstatus;
+            }
+          }
+
+          assignedFiles[k] = {
+            ...assignedFiles[k].toObject(),
+            file_details: fileDetails,
+          };
+        }
+
+        bankUsers[j] = bankUsers[j].toObject();
+        bankUsers[j].files = assignedFiles;
       }
+
+      banks[i].users = bankUsers;
     }
 
-    const count = data.length;
+    const count = banks.length;
 
     res.json({
       success: true,
-      data: data,
+      data: banks,
       count: count,
       message: "Read All Request",
     });

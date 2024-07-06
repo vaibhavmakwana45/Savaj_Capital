@@ -52,6 +52,7 @@ function ViewFile() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
+  const [fileBankAssignData, setFileBankAssignData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accessType, setAccessType] = useState("");
   React.useEffect(() => {
@@ -236,6 +237,8 @@ function ViewFile() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setFileBankAssignData(response.data.data.bankApproval);
+      console.log(response.data.data.file, "vaibhav");
       setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
@@ -962,78 +965,128 @@ function ViewFile() {
                       style={{ fontSize: "14px", paddingLeft: "20px" }}
                     >
                       <div className="row">
-                        <div className="col-md-6">
-                          <div>
-                            <strong>Loan User :</strong>{" "}
-                            <span> {fileData?.user?.username || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Email :</strong>{" "}
-                            <span> {fileData?.user?.email || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Phone Number :</strong>{" "}
-                            <span> {fileData?.user?.number || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Cibil Score :</strong>{" "}
-                            <span> {fileData?.user?.cibil_score || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong id="gstNumber">Gst Number :</strong>{" "}
-                            <span
-                              id="gstNumberText"
-                              onClick={() => copyText("gstNumberText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.gst_number || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "5px" }}
-                              ></i>
-                            </span>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <div className="mb-3">
+                                <strong>Loan User:</strong>{" "}
+                                <span>{fileData?.user?.username || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Email:</strong>{" "}
+                                <span>{fileData?.user?.email || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Phone Number:</strong>{" "}
+                                <span>{fileData?.user?.number || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>City:</strong>{" "}
+                                {fileData?.user?.city || "N/A"}
+                              </div>
+                              <div className="mb-3">
+                                <strong>State:</strong>{" "}
+                                {fileData?.user?.state || "N/A"}
+                              </div>
+                              {/* <div>
+                                <strong>Country:</strong>{" "}
+                                {fileData?.user?.country || "N/A"}
+                              </div> */}
+                            </div>
                           </div>
                         </div>
-                        <div className="col-md-6">
-                          <div>
-                            <strong id="panCard">PAN Card :</strong>{" "}
-                            <span
-                              id="panCardText"
-                              onClick={() => copyText("panCardText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.pan_card || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "10px" }}
-                              ></i>
-                            </span>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <div className="mb-3">
+                                <strong>File Id:</strong>{" "}
+                                <span>
+                                  {fileData?.file_id || "N/A"}
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Cibil Score:</strong>{" "}
+                                <span>
+                                  {fileData?.user?.cibil_score || "N/A"}
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>GST Number:</strong>{" "}
+                                <span
+                                  id="gstNumberText"
+                                  onClick={() => copyText("gstNumberText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.gst_number || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "5px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>PAN Card:</strong>{" "}
+                                <span
+                                  id="panCardText"
+                                  onClick={() => copyText("panCardText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.pan_card || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "10px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Aadhar Card:</strong>{" "}
+                                <span
+                                  id="aadharCardText"
+                                  onClick={() => copyText("aadharCardText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.aadhar_card || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "10px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <strong id="aadharCard">Aadhar Card :</strong>{" "}
-                            <span
-                              id="aadharCardText"
-                              onClick={() => copyText("aadharCardText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.aadhar_card || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "10px" }}
-                              ></i>
-                            </span>
-                          </div>
-                          <div>
-                            <strong>City :</strong>{" "}
-                            {fileData?.user?.city || "N/A"}
-                          </div>
-                          <div>
-                            <strong>State :</strong>{" "}
-                            {fileData?.user?.state || "N/A"}
-                          </div>
-                          <div>
-                            <strong>Country :</strong>{" "}
-                            {fileData?.user?.country || "N/A"}
+                        </div>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <h5 className="card-title mb-3">
+                                Bank Assign Detail
+                              </h5>
+                              <div className="mb-3">
+                                <strong>Bank Name:</strong>{" "}
+                                <span>
+                                  {fileBankAssignData?.bank_name || "N/A"}{" "}
+                                  {fileBankAssignData?.bankbranch_name
+                                    ? `(${fileBankAssignData.bankbranch_name})`
+                                    : ""}
+                                </span>
+                              </div>
+                              <div>
+                                <strong>Bank User:</strong>{" "}
+                                <span>
+                                  {fileBankAssignData?.bank_user
+                                    ?.bankuser_name || "N/A"}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

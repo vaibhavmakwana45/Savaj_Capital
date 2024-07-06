@@ -312,12 +312,19 @@ function AddBankUser() {
                 </Select>
               </FormControl>
               <FormControl id="country" mt={4} isRequired>
-                <FormLabel>Country</FormLabel>
-
+                {/* <FormLabel>Country</FormLabel> */}
                 <Select
                   name="country"
                   value={selectedCountry}
                   onChange={handleCountryChange}
+                  style={{
+                    visibility: "hidden",
+                    height: 0,
+                    overflow: "hidden",
+                    position: "absolute",
+                    width: 0,
+                    opacity: 0,
+                  }}
                 >
                   {countries.map((country) => (
                     <option key={country.isoCode} value={country.isoCode}>

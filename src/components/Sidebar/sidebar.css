@@ -35,9 +35,9 @@
 
 /* .active {
   background-color: red;
-}
+} */
 
-.active::before {
+/* .active::before {
   content: "";
   position: absolute;
   width: 100%;

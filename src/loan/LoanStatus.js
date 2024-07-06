@@ -76,7 +76,15 @@ function LoanStatus() {
     loanstatus.loanstatus_id,
     index + 1,
     loanstatus.loanstatus,
-    loanstatus.color,
+    <div
+      key={loanstatus.loanstatus_id}
+      style={{
+        width: "20px",
+        height: "20px",
+        backgroundColor: loanstatus.color,
+        borderRadius: "50%",
+      }}
+    />,
     loanstatus.createdAt,
     loanstatus.updatedAt,
   ]);

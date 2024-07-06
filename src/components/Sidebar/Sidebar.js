@@ -473,83 +473,81 @@ function Sidebar(props) {
 
   // SIDEBAR
   return (
-    <div className="sidebar-main">
-      <Box ref={mainPanel}>
-        <Box
-          display={{ sm: "none", xl: "block" }}
-          position="fixed"
-          width={isOpen ? "260px" : "100px"}
+    <Box ref={mainPanel}>
+      <Box
+        display={{ sm: "none", xl: "block" }}
+        position="fixed"
+        width={isOpen ? "260px" : "100px"}
+      >
+        <div
+          onClick={toggleSidebar}
+          style={{
+            position: "absolute",
+            marginTop: "20px",
+            marginLeft: isOpen ? "95%" : "89%",
+            zIndex: "99",
+            cursor: "pointer",
+            backgroundColor: "#b19552",
+            fontSize: "20px",
+            color: "white",
+            padding: 0,
+            borderRadius: "50%",
+            height: "25px",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
-          <div
-            onClick={toggleSidebar}
-            style={{
-              position: "absolute",
-              marginTop: "20px",
-              marginLeft: isOpen ? "95%" : "89%",
-              zIndex: "99",
-              cursor: "pointer",
-              backgroundColor: "#b19552",
-              fontSize: "20px",
-              color: "white",
-              padding: 0,
-              borderRadius: "50%",
-              height: "25px",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            {isOpen ? (
-              <KeyboardArrowLeft fontSize="20px" />
-            ) : (
-              <KeyboardArrowRight fontSize="20px" />
+          {isOpen ? (
+            <KeyboardArrowLeft fontSize="20px" />
+          ) : (
+            <KeyboardArrowRight fontSize="20px" />
+          )}
+        </div>
+        <Box
+          bg={sidebarBg}
+          transition={variantChange}
+          // w="260px"
+          // maxW="260px"
+          ms={{
+            sm: "16px",
+          }}
+          my={{
+            sm: "16px",
+          }}
+          h="calc(100vh - 32px)"
+          ps={isOpen && "20px"}
+          pe={isOpen && "20px"}
+          m={sidebarMargins}
+          filter="drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
+          borderRadius={sidebarRadius}
+        >
+          <Scrollbars
+            autoHide
+            renderTrackVertical={
+              document.documentElement.dir === "rtl"
+                ? renderTrackRTL
+                : renderTrack
+            }
+            renderThumbVertical={useColorModeValue(
+              renderThumbLight,
+              renderThumbDark
             )}
-          </div>
-          <Box
-            bg={sidebarBg}
-            transition={variantChange}
-            // w="260px"
-            // maxW="260px"
-            ms={{
-              sm: "16px",
-            }}
-            my={{
-              sm: "16px",
-            }}
-            h="calc(100vh - 32px)"
-            ps={isOpen && "20px"}
-            pe={isOpen && "20px"}
-            m={sidebarMargins}
-            filter="drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
-            borderRadius={sidebarRadius}
+            renderView={
+              document.documentElement.dir === "rtl"
+                ? renderViewRTL
+                : renderView
+            }
           >
-            <Scrollbars
-              autoHide
-              renderTrackVertical={
-                document.documentElement.dir === "rtl"
-                  ? renderTrackRTL
-                  : renderTrack
-              }
-              renderThumbVertical={useColorModeValue(
-                renderThumbLight,
-                renderThumbDark
-              )}
-              renderView={
-                document.documentElement.dir === "rtl"
-                  ? renderViewRTL
-                  : renderView
-              }
-            >
-              <Box>
-                <Brand />
-              </Box>
-              <Stack direction="column" mb="40px">
-                <Box>{links}</Box>
-              </Stack>
-            </Scrollbars>
-          </Box>
+            <Box>
+              <Brand />
+            </Box>
+            <Stack direction="column" mb="40px">
+              <Box>{links}</Box>
+            </Stack>
+          </Scrollbars>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 }
 export default Sidebar;
