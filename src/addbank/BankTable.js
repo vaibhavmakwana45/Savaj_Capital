@@ -5,6 +5,19 @@ import {
   Button,
   Input,
   Box,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import {
   AlertDialog,
@@ -153,7 +166,7 @@ function BankTable() {
     }
   };
 
-  const handleCloseUserDetails = () => {
+  const handleCloseTitle = () => {
     setShowUserDetails(false);
     setSelectedBankUsers([]);
   };
@@ -288,8 +301,8 @@ function BankTable() {
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
-              // handleTitle={handleTitle}
-              // showTitleButton={true}
+              handleTitle={handleTitle}
+              showTitleButton={true}
             />
           </CardBody>
         </Card>
@@ -325,31 +338,47 @@ function BankTable() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialogOverlay>
-        </AlertDialog>
-        {showUserDetails && (
-          <Flex
-            position="fixed"
-            top="0"
-            left="0"
-            right="0"
-            bottom="0"
-            alignItems="center"
-            justifyContent="center"
-            bg="rgba(0,0,0,0.5)"
-            zIndex="999"
+          <AlertDialog
+            isOpen={isDeleteDialogOpen}
+            leastDestructiveRef={cancelRef}
+            onClose={() => setIsDeleteDialogOpen(false)}
           >
-            <Card maxW="50%" maxH="50%" overflowY="auto">
-              <CardHeader>
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Text fontSize="xl" fontWeight="bold">
-                    Bank Users
-                  </Text>
-                  <Button onClick={handleCloseUserDetails} colorScheme="blue">
-                    Close
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Delete Bank
+                </AlertDialogHeader>
+
+                <AlertDialogBody>
+                  Are you sure? You can't undo this action afterwards.
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button
+                    ref={cancelRef}
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                  >
+                    Cancel
                   </Button>
-                </Flex>
-              </CardHeader>
-              <CardBody>
+                  <Button
+                    colorScheme="red"
+                    onClick={() => deleteBankUser(selectedBankUserId)}
+                    ml={3}
+                  >
+                    Delete
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
+        </AlertDialog>
+        <Flex direction="column" alignItems="center" p={4}>
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="xl">
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Bank Users</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
                 {selectedBankUsers.map((user) => (
                   <Box
                     key={user._id}
@@ -368,21 +397,35 @@ function BankTable() {
                         <Text fontWeight="bold" mt={2}>
                           Assigned Files:
                         </Text>
-                        <Flex flexDirection="column">
-                          {user.files.map((file) => (
-                            <Box key={file._id} mt={2}>
-                              <Text>File ID: {file.file_id}</Text>
-                            </Box>
-                          ))}
-                        </Flex>
+                        <Table variant="simple">
+                          <Thead>
+                            <Tr>
+                              <Th>File ID</Th>
+                              <Th>Status</Th>
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {user.files.map((file) => (
+                              <Tr key={file.file_id}>
+                                <Td>{file.file_id}</Td>
+                                <Td>{file.file_details.status}</Td>
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
                       </>
                     )}
                   </Box>
                 ))}
-              </CardBody>
-            </Card>
-          </Flex>
-        )}
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={handleCloseTitle} colorScheme="blue">
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </Flex>
       </Flex>
       <Toaster />
     </>
