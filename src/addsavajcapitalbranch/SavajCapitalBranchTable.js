@@ -1,4 +1,24 @@
-import { Flex, Text, useColorModeValue, Button, Input } from "@chakra-ui/react";
+import {
+  Flex,
+  Text,
+  useColorModeValue,
+  Button,
+  Input,
+  Box,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -39,6 +59,8 @@ function SavajCapitalBranchTable() {
     "Savaj Capital Branch",
     "City",
     "State",
+    "users",
+
     "",
     "State",
     "Action",
@@ -53,6 +75,7 @@ function SavajCapitalBranchTable() {
     item.branch_name,
     item.city,
     item.state,
+    item?.user_count,
     item.createdAt,
     item.updatedAt,
   ]);
@@ -124,7 +147,22 @@ function SavajCapitalBranchTable() {
   const navigateToEditPage = (branchId) => {
     history.push(`/superadmin/editsavajcapitalbranch/${branchId}`);
   };
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [selectedBankUsers, setSelectedBankUsers] = useState([]);
+  const handleTitle = (rowData) => {
+    const bank = savajcapitalbranch.find((bank) => bank.branch_id === rowData);
+    if (bank && bank.users) {
+      setSelectedBankUsers(bank.users);
+      setShowUserDetails(true);
+    } else {
+      console.error("Bank or users not found:", bank);
+    }
+  };
 
+  const handleCloseTitle = () => {
+    setShowUserDetails(false);
+    setSelectedBankUsers([]);
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -247,13 +285,15 @@ function SavajCapitalBranchTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={4}
-              removeIndex2={5}
-              documentIndex={5}
-              documentIndex2={6}
+              removeIndex={5}
+              removeIndex2={6}
+              documentIndex={6}
+              documentIndex2={7}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
+              handleTitle={handleTitle}
+              showTitleButton={true}
             />
           </CardBody>
         </Card>
@@ -290,6 +330,78 @@ function SavajCapitalBranchTable() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        <Flex direction="column" alignItems="center" p={4}>
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="3xl">
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Branch Users</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Box maxHeight="600px" overflowY="auto">
+                  {selectedBankUsers.map((user) => (
+                    <Box
+                      key={user._id}
+                      p={4}
+                      mb={4}
+                      borderWidth="1px"
+                      borderRadius="lg"
+                      boxShadow="md"
+                      bg="gray.50"
+                    >
+                      <Text fontWeight="bold" fontSize="lg" mb={2}>
+                        {user.bankuser_name}
+                      </Text>
+                      <Text mb={1}>Email: {user.email}</Text>
+                      <Text mb={1}>City: {user.city}</Text>
+                      <Text mb={1}>State: {user.state}</Text>
+                      <Text mb={1}>Mobile: {user.mobile}</Text>
+                      {user.files && user.files.length > 0 && (
+                        <>
+                          <Text fontWeight="bold" mt={4} mb={2}>
+                            Assigned Files:
+                          </Text>
+                          <Table variant="simple">
+                            <Thead bg="gray.200">
+                              <Tr>
+                                <Th>File ID</Th>
+                                <Th>Loan</Th>
+                                <Th>Username</Th>
+                                <Th>Status</Th>
+                              </Tr>
+                            </Thead>
+                            <Tbody>
+                              {user.files.map((file) => (
+                                <Tr key={file.file_id}>
+                                  <Td>{file.file_id}</Td>
+                                  <Td>
+                                    {file.file_details.user_details.username}
+                                  </Td>
+                                  <Td>{file.file_details.loan_details.loan}</Td>
+                                  <Td>
+                                    <Text
+                                      color={file.file_details.status_color}
+                                    >
+                                      {file.file_details.status}
+                                    </Text>
+                                  </Td>
+                                </Tr>
+                              ))}
+                            </Tbody>
+                          </Table>
+                        </>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={handleCloseTitle} colorScheme="blue">
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </Flex>
       </Flex>
       <Toaster />
     </>

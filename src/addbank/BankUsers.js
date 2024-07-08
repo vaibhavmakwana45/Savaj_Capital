@@ -8,6 +8,20 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   IconButton,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Box,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import toast, { Toaster } from "react-hot-toast";
@@ -36,18 +50,18 @@ function BankUsers() {
     searchTerm.length === 0
       ? bankUsers
       : bankUsers.filter(
-          (bank) =>
-            bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-            bank?.mobile
-              ?.toString()
-              ?.toLowerCase()
-              ?.includes(searchTerm?.toLowerCase()) ||
-            bank?.adhar
-              ?.toString()
-              ?.toLowerCase()
-              ?.includes(searchTerm?.toLowerCase()) ||
-            bank?.adress?.toLowerCase()?.includes(searchTerm?.toLowerCase())
-        );
+        (bank) =>
+          bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+          bank?.mobile
+            ?.toString()
+            ?.toLowerCase()
+            ?.includes(searchTerm?.toLowerCase()) ||
+          bank?.adhar
+            ?.toString()
+            ?.toLowerCase()
+            ?.includes(searchTerm?.toLowerCase()) ||
+          bank?.adress?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+      );
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -90,6 +104,7 @@ function BankUsers() {
     "mobile",
     "state",
     "city",
+    "Assign File",
     "create",
     "update",
     "Action",
@@ -102,6 +117,7 @@ function BankUsers() {
     bank.mobile,
     bank.state,
     bank.city,
+    bank.assigned_file_count,
     bank.createdAt,
     bank.updatedAt,
   ]);
@@ -143,7 +159,30 @@ function BankUsers() {
   const handleRow = (id) => {
     history.push("/superadmin/bank-assigned-file?id=" + id);
   };
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [selectedBankUsers, setSelectedBankUsers] = useState([]);
 
+  const handleTitle = (bankuserId) => {
+    const bankUser = bankUsers.find((bank) => bank.bankuser_id === bankuserId);
+    if (bankUser && bankUser.files) {
+      const assignedFiles = bankUser.files.map((file) => ({
+        file_id: file.file_id,
+        username: file.file_details.user_details.username,
+        status: file.file_details.status,
+        status_color: file.file_details.status_color,
+        loan: file.file_details.loan_details.loan,
+      }));
+      setSelectedBankUsers(assignedFiles);
+      setShowUserDetails(true);
+    } else {
+      console.error("Bank user or files not found:", bankUser);
+    }
+  };
+
+  const handleCloseTitle = () => {
+    setShowUserDetails(false);
+    setSelectedBankUsers([]);
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -247,13 +286,16 @@ function BankUsers() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={5}
-              removeIndex2={6}
-              documentIndex={6}
-              documentIndex2={7}
+              removeIndex={6}
+              removeIndex2={7}
+              documentIndex={7}
+              documentIndex2={8}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
+              handleTitle={handleTitle}
+              showTitleButton={true}
+              
             />
           </CardBody>
         </Card>
@@ -290,6 +332,52 @@ function BankUsers() {
             </AlertDialogContent>
           </AlertDialogOverlay>
         </AlertDialog>
+        <Flex direction="column" alignItems="center" p={4}>
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="2xl">
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Assigned Files</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Box maxHeight="600px" overflowY="auto">
+                  {selectedBankUsers.length > 0 ? (
+                    <Table variant="simple">
+                      <Thead>
+                        <Tr>
+                          <Th>File ID</Th>
+                          <Th>Loan</Th>
+                          <Th>Username</Th>
+                          <Th>Status</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {selectedBankUsers.map((file, index) => (
+                          <Tr key={index}>
+                            <Td>{file.file_id}</Td>
+                            <Td>{file.loan}</Td>
+                            <Td>{file.username || "N/A"}</Td>
+                            <Td>
+                              <Text color={file.status_color || "black"}>
+                                {file.status || "N/A"}
+                              </Text>
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  ) : (
+                    <Text>No files assigned to this user.</Text>
+                  )}
+                </Box>
+              </ModalBody>
+              <ModalFooter>
+                <Button onClick={handleCloseTitle} colorScheme="blue">
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </Flex>
       </Flex>
       <Toaster />
     </>

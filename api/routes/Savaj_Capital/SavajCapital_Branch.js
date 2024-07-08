@@ -5,6 +5,10 @@ const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Bra
 const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
 const Branch_Assign = require("../../models/Savaj_Capital/Branch_Assign");
 const crypto = require("crypto");
+const File_Uplode = require("../../models/File/File_Uplode");
+const LoanStatus = require("../../models/AddDocuments/LoanStatus");
+const AddUser = require("../../models/AddUser");
+const Loan = require("../../models/Loan/Loan");
 
 const generateToken = () => {
   return crypto.randomBytes(18).toString("hex");
@@ -66,18 +70,103 @@ router.post("/", async (req, res) => {
 });
 
 // Get All Branch
+// router.get("/", async (req, res) => {
+//   try {
+//     const data = await SavajCapital_Branch.find({}).sort({ updatedAt: -1 });
+//     res.json({
+//       success: true,
+//       data,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
 router.get("/", async (req, res) => {
   try {
-    const data = await SavajCapital_Branch.find({}).sort({ updatedAt: -1 });
+    const branch = await SavajCapital_Branch.aggregate([
+      {
+        $sort: { updatedAt: -1 },
+      },
+    ]);
+
+    for (let i = 0; i < branch.length; i++) {
+      const branch_id = branch[i].branch_id;
+
+      const branchUserCount = await SavajCapital_User.countDocuments({ branch_id });
+      branch[i].user_count = branchUserCount;
+
+      const branchUsers = await SavajCapital_User.find({ branch_id });
+
+      for (let j = 0; j < branchUsers.length; j++) {
+        const branchuser_id = branchUsers[j].branchuser_id;
+
+        const assignedFiles = await Branch_Assign.find({ branchuser_id });
+
+   
+        for (let k = 0; k < assignedFiles.length; k++) {
+          const file_id = assignedFiles[k].file_id;
+          let fileDetails = await File_Uplode.findOne({
+            file_id: file_id,
+          }).lean();
+
+          if (fileDetails) {
+            const loanStatusDetails = await LoanStatus.findOne({
+              loanstatus_id: fileDetails.status,
+            }).lean();
+
+   
+
+            if (loanStatusDetails) {
+              fileDetails.status = loanStatusDetails.loanstatus;
+              fileDetails.status_color = loanStatusDetails.color;
+            }
+
+            const userDetails = await AddUser.findOne({
+              user_id: fileDetails.user_id,
+            }).lean();
+
+            if (userDetails) {
+              fileDetails.user_details = userDetails;
+            }
+            // Fetch loan details using loan_id
+            const loanDetails = await Loan.findOne({
+              loan_id: fileDetails.loan_id,
+            }).lean();
+
+            if (loanDetails) {
+              fileDetails.loan_details = loanDetails;
+            }
+          }
+
+          assignedFiles[k] = {
+            ...assignedFiles[k].toObject(),
+            file_details: fileDetails,
+          };
+        }
+
+        branchUsers[j] = branchUsers[j].toObject();
+        branchUsers[j].files = assignedFiles;
+      }
+
+      branch[i].users = branchUsers;
+    }
+
+    const count = branch.length;
+
     res.json({
       success: true,
-      data,
+      data: branch,
+      count: count,
+      message: "Read All Request",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
+    res.json({
+      statusCode: 500,
+      message: error.message,
     });
   }
 });

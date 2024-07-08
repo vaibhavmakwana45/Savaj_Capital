@@ -365,7 +365,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   AddIcon,
-  ViewIcon
+  ViewIcon,
 } from "@chakra-ui/icons";
 import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
@@ -552,7 +552,7 @@ const TableComponent = ({
                             color="black"
                           />
                         )}
-                        
+
                         {showEditButton && (
                           <IconButton
                             aria-label="Edit"

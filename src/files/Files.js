@@ -61,9 +61,7 @@ function Files() {
   const location = useLocation();
   const { loan, loan_id, loantype_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
-  console.log(loans, "loans");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
-  console.log(selectedLoan, "selectedLoan");
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -324,11 +322,7 @@ function Files() {
         } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
           url += `/${loantype_id}`;
         }
-        console.log("Frontend Query Params:", {
-          state: selectedState,
-          city: selectedCity,
-          selectedStatusSearch: selectedStatusSearch,
-        });
+  
         const response = await AxiosInstance.get(url, {
           params: {
             state: selectedState,
