@@ -373,50 +373,68 @@ function BankTable() {
           </AlertDialog>
         </AlertDialog>
         <Flex direction="column" alignItems="center" p={4}>
-          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="xl">
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="3xl">
             <ModalOverlay />
             <ModalContent>
               <ModalHeader>Bank Users</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                {selectedBankUsers.map((user) => (
-                  <Box
-                    key={user._id}
-                    p={4}
-                    mb={4}
-                    borderWidth="1px"
-                    borderRadius="lg"
-                  >
-                    <Text fontWeight="bold">{user.bankuser_name}</Text>
-                    <Text>Email: {user.email}</Text>
-                    <Text>City: {user.city}</Text>
-                    <Text>State: {user.state}</Text>
-                    <Text>Mobile: {user.mobile}</Text>
-                    {user.files && user.files.length > 0 && (
-                      <>
-                        <Text fontWeight="bold" mt={2}>
-                          Assigned Files:
-                        </Text>
-                        <Table variant="simple">
-                          <Thead>
-                            <Tr>
-                              <Th>File ID</Th>
-                              <Th>Status</Th>
-                            </Tr>
-                          </Thead>
-                          <Tbody>
-                            {user.files.map((file) => (
-                              <Tr key={file.file_id}>
-                                <Td>{file.file_id}</Td>
-                                <Td>{file.file_details.status}</Td>
+                <Box maxHeight="600px" overflowY="auto">
+                  {selectedBankUsers.map((user) => (
+                    <Box
+                      key={user._id}
+                      p={4}
+                      mb={4}
+                      borderWidth="1px"
+                      borderRadius="lg"
+                      boxShadow="md"
+                      bg="gray.50"
+                    >
+                      <Text fontWeight="bold" fontSize="lg" mb={2}>
+                        {user.bankuser_name}
+                      </Text>
+                      <Text mb={1}>Email: {user.email}</Text>
+                      <Text mb={1}>City: {user.city}</Text>
+                      <Text mb={1}>State: {user.state}</Text>
+                      <Text mb={1}>Mobile: {user.mobile}</Text>
+                      {user.files && user.files.length > 0 && (
+                        <>
+                          <Text fontWeight="bold" mt={4} mb={2}>
+                            Assigned Files:
+                          </Text>
+                          <Table variant="simple">
+                            <Thead bg="gray.200">
+                              <Tr>
+                                <Th>File ID</Th>
+                                <Th>Loan</Th>
+                                <Th>Username</Th>
+                                <Th>Status</Th>
                               </Tr>
-                            ))}
-                          </Tbody>
-                        </Table>
-                      </>
-                    )}
-                  </Box>
-                ))}
+                            </Thead>
+                            <Tbody>
+                              {user.files.map((file) => (
+                                <Tr key={file.file_id}>
+                                  <Td>{file.file_id}</Td>
+                                  <Td>
+                                    {file.file_details.user_details.username}
+                                  </Td>
+                                  <Td>{file.file_details.loan_details.loan}</Td>
+                                  <Td>
+                                    <Text
+                                      color={file.file_details.status_color}
+                                    >
+                                      {file.file_details.status}
+                                    </Text>
+                                  </Td>
+                                </Tr>
+                              ))}
+                            </Tbody>
+                          </Table>
+                        </>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
               </ModalBody>
               <ModalFooter>
                 <Button onClick={handleCloseTitle} colorScheme="blue">

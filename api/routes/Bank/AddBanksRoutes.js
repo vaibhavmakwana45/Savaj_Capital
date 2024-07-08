@@ -8,6 +8,8 @@ const crypto = require("crypto");
 const BankApproval = require("../../models/Bank/BankApproval");
 const File_Uplode = require("../../models/File/File_Uplode");
 const LoanStatus = require("../../models/AddDocuments/LoanStatus");
+const AddUser = require("../../models/AddUser");
+const Loan = require("../../models/Loan/Loan");
 
 const encrypt = (text) => {
   const cipher = crypto.createCipher("aes-256-cbc", "vaibhav");
@@ -82,29 +84,36 @@ router.get("/", async (req, res) => {
 
         const assignedFiles = await BankApproval.find({ bankuser_id });
 
-        console.log(
-          `Bank User ID: ${bankuser_id}, Assigned Files:`,
-          assignedFiles
-        );
-
         for (let k = 0; k < assignedFiles.length; k++) {
           const file_id = assignedFiles[k].file_id;
           let fileDetails = await File_Uplode.findOne({
             file_id: file_id,
           }).lean();
 
-          if (fileDetails && fileDetails.status) {
+          if (fileDetails) {
             const loanStatusDetails = await LoanStatus.findOne({
               loanstatus_id: fileDetails.status,
             }).lean();
 
-            console.log(
-              `File ID: ${file_id}, Loan Status Details:`,
-              loanStatusDetails
-            );
-
             if (loanStatusDetails) {
               fileDetails.status = loanStatusDetails.loanstatus;
+              fileDetails.status_color = loanStatusDetails.color;
+            }
+
+            const userDetails = await AddUser.findOne({
+              user_id: fileDetails.user_id,
+            }).lean();
+
+            if (userDetails) {
+              fileDetails.user_details = userDetails;
+            }
+            // Fetch loan details using loan_id
+            const loanDetails = await Loan.findOne({
+              loan_id: fileDetails.loan_id,
+            }).lean();
+
+            if (loanDetails) {
+              fileDetails.loan_details = loanDetails;
             }
           }
 

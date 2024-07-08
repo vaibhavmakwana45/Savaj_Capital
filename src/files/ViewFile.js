@@ -52,6 +52,7 @@ function ViewFile() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
+  const [loanStatus, setLoanStatus] = useState(null);
   const [fileBankAssignData, setFileBankAssignData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accessType, setAccessType] = useState("");
@@ -237,8 +238,8 @@ function ViewFile() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setLoanStatus(response.data.data.loanStatus);
       setFileBankAssignData(response.data.data.bankApproval);
-      console.log(response.data.data.file, "vaibhav");
       setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
@@ -902,24 +903,42 @@ function ViewFile() {
               >
                 <Flex
                   justifyContent="space-between"
-                  width="100%"
+                  alignItems="center"
                   className="thead"
                 >
-                  <div className="theadd">
+                  {/* Left Section */}
+                  <Flex alignItems="center">
                     <IconButton
                       icon={<ArrowBackIcon />}
                       onClick={() => history.goBack()}
                       aria-label="Back"
                       mr="4"
                     />
-                    <b>{fileData?.loan} File Details</b>
-                  </div>
-                  <div>
+                    <div>
+                      <b>{fileData?.loan} File Details</b>
+                      <b
+                        style={{
+                          backgroundColor: loanStatus?.color,
+                          padding: "5px",
+                          borderRadius: "5px",
+                          color: "#fff",
+                          marginTop: "5px", // Adjust as needed
+                          marginLeft: "5px",
+                        }}
+                      >
+                        {" "}
+                        {loanStatus?.loanstatus}
+                      </b>
+                    </div>
+                  </Flex>
+
+                  {/* Right Section */}
+                  <Flex>
                     <Button
                       colorScheme="blue"
                       style={{
                         backgroundColor: "#b19552",
-                        marginRight: "10PX",
+                        marginRight: "10px",
                       }}
                       onClick={onOpensLogs}
                     >
@@ -932,7 +951,7 @@ function ViewFile() {
                     >
                       Add Guarantor
                     </Button>
-                  </div>
+                  </Flex>
                 </Flex>
               </FormLabel>
 
@@ -1000,9 +1019,7 @@ function ViewFile() {
                             <div className="card-body">
                               <div className="mb-3">
                                 <strong>File Id:</strong>{" "}
-                                <span>
-                                  {fileData?.file_id || "N/A"}
-                                </span>
+                                <span>{fileData?.file_id || "N/A"}</span>
                               </div>
                               <div className="mb-3">
                                 <strong>Cibil Score:</strong>{" "}
