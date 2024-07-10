@@ -486,4 +486,39 @@ router.get(
   }
 );
 
+router.get("/files-within-date-range", async (req, res) => {
+  try {
+    const currentDate = moment().format("YYYY-MM-DD");
+
+    const files = await File_Uplode.find({
+      start_date: { $lte: currentDate },
+      end_date: { $gte: currentDate },
+    }).lean();
+
+    if (files.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No files found within the date range." });
+    }
+
+    const enhancedFiles = await Promise.all(files.map(async (file) => {
+      const loan = await Loan.findOne({ loan_id: file.loan_id }).lean();
+      const user = await AddUser.findOne({ user_id: file.user_id }).lean();
+      const loantype = file.loantype_id ? await Loan_Type.findOne({loantype_id: file.loantype_id }).lean() : null;
+
+      return {
+        ...file,
+        loan,
+        user,
+        loantype,
+      };
+    }));
+
+    res.json(enhancedFiles);
+  } catch (error) {
+    console.error("Error fetching files within date range:", error);
+    res.status(500).send("Error fetching files within date range");
+  }
+});
+
 module.exports = router;

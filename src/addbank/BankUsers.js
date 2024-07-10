@@ -333,7 +333,7 @@ function BankUsers() {
           </AlertDialogOverlay>
         </AlertDialog>
         <Flex direction="column" alignItems="center" p={4}>
-          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="2xl">
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="3xl">
             <ModalOverlay />
             <ModalContent>
               <ModalHeader>Assigned Files</ModalHeader>

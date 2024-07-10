@@ -22,6 +22,22 @@ const LoanStatus = require("../../models/AddDocuments/LoanStatus");
 const emailService = require("../emailService");
 const BankUser = require("../../models/Bank/BankUserSchema");
 const Bank = require("../../models/Bank/BankSchema");
+const crypto = require("crypto");
+
+const decrypt = (text) => {
+  // Check if the text contains hexadecimal characters (indicative of encryption)
+  const isEncrypted = /[0-9A-Fa-f]{6}/.test(text);
+
+  // If the text is encrypted, decrypt it
+  if (isEncrypted) {
+    const decipher = crypto.createDecipher("aes-256-cbc", "vaibhav");
+    let decrypted = decipher.update(text, "hex", "utf-8");
+    decrypted += decipher.final("utf-8");
+    return decrypted;
+  } else {
+    return text;
+  }
+};
 
 router.post("/", async (req, res) => {
   try {
@@ -1412,6 +1428,10 @@ router.get("/file_upload/:file_id", async (req, res) => {
       loantype_id: fileData?.loantype_id,
     });
 
+    if (user && user.password) {
+      user.password = decrypt(user.password);
+    }
+
     // Fetch document details
     const documentDetails = await Promise.all(
       fileData.documents.map(async (doc) => {
@@ -1552,7 +1572,6 @@ router.get("/file_upload/:file_id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 router.get("/edit_file_upload/:file_id", async (req, res) => {
   try {

@@ -60,6 +60,8 @@ import DetailCustomerFilePage from "userdashboard/CustomerFiles/DetailCustomerFi
 import AddCustomer from "savajcapitaldashboard/AddCustomer/AddCustomer";
 import Customer from "savajcapitaldashboard/AddCustomer/Customer";
 import LoanStatus from "loan/LoanStatus";
+import FilePending from "views/Dashboard/FilePending";
+import ViewFileLink from "files/ViewFileLink";
 
 var dashRoutes = [
   //superadmin
@@ -70,6 +72,27 @@ var dashRoutes = [
     component: Dashboard,
     layout: "/superadmin",
     hideInSResponsive: true,
+    isDropdown: true,
+    // parent: "dashboard",
+    key: "superadmindashboard",
+    childern: [
+      {
+        layout: "/superadmin",
+        path: "/filespending",
+        name: "Pending File",
+      },
+    ],
+  },
+  {
+    path: "/filespending",
+    name: "Files Pending",
+    icon: <PersonIcon color="inherit" />,
+    component: FilePending,
+    layout: "/superadmin",
+    parent: "superadmindashboard",
+    key: "filespending",
+    hideInSResponsive: true,
+    hideInSidebar: true,
   },
   {
     path: "/alluser",
@@ -121,6 +144,15 @@ var dashRoutes = [
     hideInSidebar: true,
     parent: "filetable",
     key: "editfile",
+  },
+  {
+    path: "/viewuserfile",
+    name: "View user file",
+    component: ViewFileLink,
+    layout: "/viewfile",
+    hideInSidebar: true,
+    parent: "viewuserfile",
+    key: "viewuserfile",
   },
   //users
 
@@ -655,6 +687,7 @@ var dashRoutes = [
     parent: "adduserfile",
     key: "viewuserfile",
   },
+
   // Title
   {
     path: "/title",

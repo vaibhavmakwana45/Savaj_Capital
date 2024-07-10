@@ -31,13 +31,19 @@ const UserSchema = new mongoose.Schema({
   note: {
     type: String,
   },
+  start_date: {
+    type: String,
+  },
+  end_date: {
+    type: String,
+  },
   createdAt: {
     type: String,
   },
   updatedAt: {
     type: String,
   },
-  logs: { type: Array }, // Add logs field
+  logs: { type: Array },
   status: {
     type: String,
     // enum: ["running", "approved", "rejected"],

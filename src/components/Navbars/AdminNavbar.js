@@ -104,7 +104,11 @@ export default function AdminNavbar(props) {
   const findRouteByKey = (key) =>
     filteredRoutes.find((route) => route.key === key);
 
-  const generateBreadcrumbItems = (currentRoute, items = [], visited = new Set()) => {
+  const generateBreadcrumbItems = (
+    currentRoute,
+    items = [],
+    visited = new Set()
+  ) => {
     if (!currentRoute || visited.has(currentRoute.key)) return items;
     visited.add(currentRoute.key);
 

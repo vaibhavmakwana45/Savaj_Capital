@@ -10,6 +10,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/theme";
 import AuthLayout from "./layouts/Auth";
 import AdminLayout from "./layouts/Superadmin";
+import ViewFileLink from "files/ViewFileLink";
 
 const AuthGuard = ({ children }) => {
   const authToken = localStorage.getItem("authToken");
@@ -53,6 +54,7 @@ ReactDOM.render(
             </AuthGuard>
           )}
         />
+        <Route path="/viewfile" component={ViewFileLink} />
         <Redirect from="/" to="/auth/signin" />
       </Switch>
     </Router>
