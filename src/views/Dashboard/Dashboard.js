@@ -587,7 +587,7 @@ export default function Dashboard() {
                 </Flex>
 
                 {/* Display counts for all statuses */}
-                <Flex mt="5px" wrap="wrap">
+                <Flex mt="1px" wrap="wrap">
                   {Object.entries(loan.statusCounts)
                     .filter(([_, { count }]) => count > 0)
                     .map(([status, { count, color }]) => (
@@ -595,7 +595,7 @@ export default function Dashboard() {
                         key={status}
                         direction="column"
                         align="center"
-                        mx="2px" // Adjust horizontal margin as needed
+                        mr="2px" // Adjust horizontal margin as needed
                       >
                         <Text fontSize="sm" fontWeight="bold" color={color}>
                           {status}

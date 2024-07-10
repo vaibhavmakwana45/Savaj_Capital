@@ -152,7 +152,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 
 //           steps.push({ ...res.data.data, user_id: file.user_id });
@@ -207,7 +207,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -364,7 +364,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -463,7 +463,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const response = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...response.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -562,7 +562,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const response = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...response.data.data, user_id: file.user_id });
         } catch (error) {
@@ -679,12 +679,12 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `https://admin.savajcapital.com/api/file_upload/get_all_documents/${file_id}`
+              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
-            const documentStatus = response.data.status;
-
+            const documentStatus = response.data.data.status;
+            console.log(documentStatus);
             return { loan_step: stepData.loan_step, status: documentStatus };
           } catch (error) {
             console.error("Error fetching documents: ", error.message);

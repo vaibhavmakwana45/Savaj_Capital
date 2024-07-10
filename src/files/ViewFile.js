@@ -307,6 +307,7 @@ function ViewFile() {
     index: "",
     guarantors: [],
   });
+
   const [selectedGuarantor, setSelectedGuarantor] = useState();
   const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
 

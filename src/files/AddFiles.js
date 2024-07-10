@@ -668,7 +668,24 @@ function AddFiles() {
                 Loan Dispatch
               </Checkbox>
             </FormControl> */}
-
+            <FormControl id="start_date" mt={4} isRequired>
+              <FormLabel>Start Date</FormLabel>
+              <Input
+                name="start_date"
+                type="date"
+                onChange={handleChange}
+                value={formData.start_date}
+              />
+            </FormControl>
+            <FormControl id="end_date" mt={4} isRequired>
+              <FormLabel>End Date</FormLabel>
+              <Input
+                name="end_date"
+                type="date"
+                onChange={handleChange}
+                value={formData.end_date}
+              />
+            </FormControl>
             <div>
               <Button
                 mt={4}

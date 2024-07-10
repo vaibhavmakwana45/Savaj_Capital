@@ -235,7 +235,7 @@ router.post("/", async (req, res) => {
 //     const stepsPromises = data.map(async (item) => {
 //       try {
 //         const stepsResponse = await axios.get(
-//           `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+//           `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
 //         );
 //         const stepsData = stepsResponse.data.data;
 
@@ -477,9 +477,10 @@ router.get("/", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
+        console.log(stepsData)
 
         const rejectedStep = stepsData.find((step) => step.status === "reject");
         const activeStep = stepsData.find((step) => step.status === "active");
@@ -544,71 +545,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/get_all_documents/:file_id", async (req, res) => {
-  try {
-    const { file_id } = req.params;
-    const data = await File_Uplode.findOne({ file_id });
-    const loanIds = data.documents.map((item) => ({
-      loan_document_id: item.loan_document_id,
-      title_id: item.title_id,
-    }));
 
-    const { loan_id, loantype_id } = data;
-    const data2 = await Loan_Documents.find({ loan_id, loantype_id });
-    const loanDocumentIds = data2.flatMap((item) =>
-      item.document_ids.map((loan_document_id) => ({
-        loan_document_id,
-        title_id: item.title_id,
-      }))
-    );
-
-    const commonIds = loanIds.filter((id) =>
-      loanDocumentIds.some(
-        (docId) =>
-          docId.loan_document_id === id.loan_document_id &&
-          docId.title_id === id.title_id
-      )
-    );
-
-    const differentIds = loanDocumentIds.filter(
-      (id) =>
-        !loanIds.some(
-          (docId) =>
-            docId.loan_document_id === id.loan_document_id &&
-            docId.title_id === id.title_id
-        )
-    );
-
-    const pendingObject = [];
-
-    for (const item of differentIds) {
-      const document = await AddDocuments.findOne({
-        document_id: item.loan_document_id,
-      });
-      pendingObject.push({
-        name: document.document,
-      });
-    }
-
-    const status =
-      pendingObject.length > 0
-        ? "active"
-        : commonIds.length === loanIds.length
-        ? "complete"
-        : "active";
-
-    res.json({
-      statusCode: 200,
-      status,
-      message: "Read All Request",
-    });
-  } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: error.message,
-    });
-  }
-});
 
 // router.get("/savajusers/:state/:city/:loan_ids?", async (req, res) => {
 //   try {
@@ -1042,7 +979,7 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
@@ -1322,7 +1259,7 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
+          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
@@ -2028,6 +1965,72 @@ router.get("/file-count/:file_id", async (req, res) => {
     });
   } catch (error) {
     res.json({
+      statusCode: 500,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/get_all_documents/:file_id", async (req, res) => {
+  try {
+    const { file_id } = req.params;
+    const data = await File_Uplode.findOne({ file_id });
+    const loanIds = data.documents.map((item) => ({
+      loan_document_id: item.loan_document_id,
+      title_id: item.title_id,
+    }));
+
+    const { loan_id, loantype_id } = data;
+    const data2 = await Loan_Documents.find({ loan_id, loantype_id });
+    const loanDocumentIds = data2.flatMap((item) =>
+      item.document_ids.map((loan_document_id) => ({
+        loan_document_id,
+        title_id: item.title_id,
+      }))
+    );
+
+    const commonIds = loanIds.filter((id) =>
+      loanDocumentIds.some(
+        (docId) =>
+          docId.loan_document_id === id.loan_document_id &&
+          docId.title_id === id.title_id
+      )
+    );
+
+    const differentIds = loanDocumentIds.filter(
+      (id) =>
+        !loanIds.some(
+          (docId) =>
+            docId.loan_document_id === id.loan_document_id &&
+            docId.title_id === id.title_id
+        )
+    );
+
+    const pendingObject = [];
+
+    for (const item of differentIds) {
+      const document = await AddDocuments.findOne({
+        document_id: item.loan_document_id,
+      });
+      pendingObject.push({
+        name: document.document,
+      });
+    }
+
+    const status =
+      pendingObject.length > 0
+        ? "active"
+        : commonIds.length === loanIds.length
+        ? "complete"
+        : "active";
+
+    res.json({
+      statusCode: 200,
+      status,
+      message: "Read All Request",
+    });
+  } catch (error) {
+    res.status(500).json({
       statusCode: 500,
       message: error.message,
     });
