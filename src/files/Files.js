@@ -37,6 +37,7 @@ import {
   EditIcon,
   AddIcon,
   ExternalLinkIcon,
+  CopyIcon,
 } from "@chakra-ui/icons";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
@@ -322,7 +323,7 @@ function Files() {
         } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
           url += `/${loantype_id}`;
         }
-  
+
         const response = await AxiosInstance.get(url, {
           params: {
             state: selectedState,
@@ -764,9 +765,21 @@ function Files() {
       setLoading(false);
     }
   };
+
   const getLoanName = (loanId) => {
     const loan = loans.find((loan) => loan.loan_id === loanId);
     return loan ? loan.loan : "All Files";
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast.success("Copied to clipboard successfully!");
+      },
+      (err) => {
+        toast.error("Failed to copy text: ", err);
+      }
+    );
   };
 
   return (
@@ -1374,6 +1387,18 @@ function Files() {
                                     style={{ marginRight: "5px" }}
                                   />
                                   Bank Assign
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleClose();
+                                    copyToClipboard(
+                                      `https://admin.savajcapital.com/viewfile/viewfile?id=${selectedFileId}`
+                                    );
+                                  }}
+                                >
+                                  <CopyIcon style={{ marginRight: "5px" }} />
+                                  Copy File Link
                                 </MenuItem>
                               </Menu>
                             </Flex>

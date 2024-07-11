@@ -308,25 +308,20 @@ function AssignedBankUsers() {
   useEffect(() => {
     const fetchTotalAmount = async () => {
       try {
-        let url = "/file_upload/amounts";
-
-        // Append selectedLoan or loan_id to URL if it's not "All Loan Types"
+        let url = "/file_upload/bankamounts";
+        if (id) {
+          url += `/${id}`;
+        }
         if (selectedLoan && selectedLoan !== "All Loan Types") {
           url += `/${selectedLoan}`;
-        } else if (loan_id && loan_id !== "All Loan Types") {
-          url += `/${loan_id}`;
         }
-
-        // Append selectedLoanSubType or loantype_id to URL if it's not "All Loan Subtypes"
         if (
           selectedLoanSubType &&
           selectedLoanSubType !== "All Loan Subtypes"
         ) {
           url += `/${selectedLoanSubType}`;
-        } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
-          url += `/${loantype_id}`;
         }
- 
+
         const response = await AxiosInstance.get(url, {
           params: {
             state: selectedState,
@@ -351,8 +346,7 @@ function AssignedBankUsers() {
     selectedState,
     selectedCity,
     selectedStatusSearch,
-    loantype_id,
-    loan_id,
+    id,
   ]);
 
   //model open edit delete update assign
@@ -789,6 +783,7 @@ function AssignedBankUsers() {
       setLoading(false);
     }
   };
+
   const getLoanName = (loanId) => {
     const loan = loans.find((loan) => loan.loan_id === loanId);
     return loan ? loan.loan : "All Files";
@@ -799,7 +794,7 @@ function AssignedBankUsers() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" className="thead">
+            <Flex justifyContent="space-between" className="thead" p="2">
               <Text
                 fontSize="2xl"
                 fontWeight="bold"
@@ -809,6 +804,42 @@ function AssignedBankUsers() {
               >
                 {bankUserName ? bankUserName + "'s -" : ""} Assigned File
               </Text>
+              <Box p="0">
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext"
+                >
+                  {getLoanName(selectedLoan)}
+                  {selectedStatusSearch !== "1718861587262" &&
+                  selectedStatusSearch !== "1718861593296" ? (
+                    <>
+                      <span style={{ color: "black", paddingLeft: "10px" }}>
+                        ₹{" "}
+                      </span>
+                      <Text as="span" color="green.500" fontWeight="semibold">
+                        {totalAmount !== null ? totalAmount : "-"}
+                      </Text>{" "}
+                      <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
+                      files
+                      {statusCounts &&
+                        Object.keys(statusCounts).map((status) => (
+                          <span
+                            key={status}
+                            style={{
+                              color: statusCounts[status]?.color || "inherit",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {statusCounts[status]?.count} {status}
+                          </span>
+                        ))}
+                    </>
+                  ) : null}
+                </Text>
+              </Box>
             </Flex>
             <Flex justifyContent="end" py="1" className="mainnnn">
               <Flex className="theaddd p-2">

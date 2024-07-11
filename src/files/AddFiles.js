@@ -63,7 +63,10 @@ function AddFiles() {
     gst_number: "",
     reference: "",
   });
-
+  const [dateData, setdateData] = useState({
+    start_date: "",
+    end_date: "",
+  });
   const {
     register,
     handleSubmit,
@@ -398,13 +401,15 @@ function AddFiles() {
       const payload = {
         user_id: selectedUser.value,
         loan_id: selectedLoanId.value,
-        loantype_id: selectedLoanSubtypeId, // Include selectedLoanSubtypeId directly
+        loantype_id: selectedLoanSubtypeId,
         documents: uploadedFiles.map((file) => ({
           file_path: file.path,
           loan_document_id: file.documentId,
           title_id: file.title_id,
           key: file.key,
         })),
+        start_date: dateData.start_date,
+        end_date: dateData.end_date,
       };
       const responce = await AxiosInstance.post("/file_upload", payload);
       history.push("/superadmin/filetable");
@@ -423,6 +428,14 @@ function AddFiles() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handledateChange = (e) => {
+    const { name, value } = e.target;
+    setdateData((prevDateData) => ({
+      ...prevDateData,
+      [name]: value,
+    }));
   };
 
   return (
@@ -464,7 +477,6 @@ function AddFiles() {
                 </p>
               )}
             </FormControl>
-
             <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
               <Select
@@ -478,7 +490,6 @@ function AddFiles() {
                 styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }} // Ensure dropdown appears above other content
               />
             </FormControl>
-
             {selectedLoanType.is_subtype && loanSubType.length > 0 && (
               <FormControl
                 id="loantype_id"
@@ -648,7 +659,6 @@ function AddFiles() {
                 )
               )}
             </div> */}
-
             {/* <FormControl id="stemp_paper_print" mt={4}>
               <Checkbox
                 name="stemp_paper_print"
@@ -673,17 +683,17 @@ function AddFiles() {
               <Input
                 name="start_date"
                 type="date"
-                onChange={handleChange}
-                value={formData.start_date}
+                onChange={handledateChange}
+                value={dateData.start_date}
               />
-            </FormControl>
+            </FormControl>{" "}
             <FormControl id="end_date" mt={4} isRequired>
               <FormLabel>End Date</FormLabel>
               <Input
                 name="end_date"
                 type="date"
-                onChange={handleChange}
-                value={formData.end_date}
+                onChange={handledateChange}
+                value={dateData.end_date}
               />
             </FormControl>
             <div>

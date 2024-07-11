@@ -56,21 +56,26 @@ function ViewFile() {
   const [fileBankAssignData, setFileBankAssignData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accessType, setAccessType] = useState("");
+
   React.useEffect(() => {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const {
     isOpen: isOpensGuarantor,
     onOpen: onOpensGuarantor,
     onClose: onClosesGuarantor,
   } = useDisclosure();
+
   const {
     isOpen: isOpensLogs,
     onOpen: onOpensLogs,
     onClose: onClosesLogs,
   } = useDisclosure();
+
   const [logs, setLogs] = useState([]);
   const [logMessage, setLogMessage] = useState("");
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
@@ -106,6 +111,7 @@ function ViewFile() {
       }
     }
   };
+
   const handleConvertToPdf = () => {
     if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
       const pdf = new jsPDF();

@@ -74,9 +74,9 @@ function AssignedSavajUsers() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-      "IN",
-      states.find((state) => state.name === selectedState)?.isoCode
-    )
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
     : [];
 
   const handleStateChange = (event) => {
@@ -175,16 +175,16 @@ function AssignedSavajUsers() {
                   ? ""
                   : loan_id
                 : selectedLoan === "All Loan Types"
-                  ? ""
-                  : selectedLoan,
+                ? ""
+                : selectedLoan,
               selectedStatus: selectedStatusSearch,
               selectedSubtype: loantype_id
                 ? loantype_id === "All Loan Subtypes"
                   ? ""
                   : loantype_id
                 : selectedLoanSubType === "All Loan Subtypes"
-                  ? ""
-                  : selectedLoanSubType,
+                ? ""
+                : selectedLoanSubType,
               selectedState,
               selectedCity,
             },
@@ -309,13 +309,13 @@ function AssignedSavajUsers() {
   useEffect(() => {
     const fetchTotalAmount = async () => {
       try {
-        let url = "/file_upload/amounts";
-
+        let url = "/file_upload/branchamounts";
+        if (id) {
+          url += `/${id}`;
+        }
         // Append selectedLoan or loan_id to URL if it's not "All Loan Types"
         if (selectedLoan && selectedLoan !== "All Loan Types") {
           url += `/${selectedLoan}`;
-        } else if (loan_id && loan_id !== "All Loan Types") {
-          url += `/${loan_id}`;
         }
 
         // Append selectedLoanSubType or loantype_id to URL if it's not "All Loan Subtypes"
@@ -324,10 +324,8 @@ function AssignedSavajUsers() {
           selectedLoanSubType !== "All Loan Subtypes"
         ) {
           url += `/${selectedLoanSubType}`;
-        } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
-          url += `/${loantype_id}`;
         }
-    
+
         const response = await AxiosInstance.get(url, {
           params: {
             state: selectedState,
@@ -352,8 +350,7 @@ function AssignedSavajUsers() {
     selectedState,
     selectedCity,
     selectedStatusSearch,
-    loantype_id,
-    loan_id,
+    id,
   ]);
 
   //model open edit delete update assign
@@ -800,7 +797,7 @@ function AssignedSavajUsers() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader p="6px 0px 22px 0px">
-            <Flex justifyContent="space-between" className="thead">
+            <Flex justifyContent="space-between" className="thead" p="2">
               <Text
                 fontSize="2xl"
                 fontWeight="bold"
@@ -810,6 +807,42 @@ function AssignedSavajUsers() {
               >
                 {bankUserName ? bankUserName + "'s -" : ""} Assigned File
               </Text>
+              <Box p="0">
+                <Text
+                  fontSize="2xl"
+                  fontWeight="bold"
+                  bgGradient="linear(to-r, #b19552, #212529)"
+                  bgClip="text"
+                  className="ttext"
+                >
+                  {getLoanName(selectedLoan)}
+                  {selectedStatusSearch !== "1718861587262" &&
+                  selectedStatusSearch !== "1718861593296" ? (
+                    <>
+                      <span style={{ color: "black", paddingLeft: "10px" }}>
+                        ₹{" "}
+                      </span>
+                      <Text as="span" color="green.500" fontWeight="semibold">
+                        {totalAmount !== null ? totalAmount : "-"}
+                      </Text>{" "}
+                      <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
+                      files
+                      {statusCounts &&
+                        Object.keys(statusCounts).map((status) => (
+                          <span
+                            key={status}
+                            style={{
+                              color: statusCounts[status]?.color || "inherit",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {statusCounts[status]?.count} {status}
+                          </span>
+                        ))}
+                    </>
+                  ) : null}
+                </Text>
+              </Box>
             </Flex>
             <Flex justifyContent="end" py="1" className="mainnnn">
               <Flex className="theaddd p-2">
@@ -1107,8 +1140,9 @@ function AssignedSavajUsers() {
                         {/* <Td style={{ fontSize: "14px" }}>{file?.city}</Td> */}
                         <Td style={{ fontSize: "14px" }}>
                           {" "}
-                          {`${file.loan}${file.loan_type ? ` (${file.loan_type})` : ""
-                            }`}
+                          {`${file.loan}${
+                            file.loan_type ? ` (${file.loan_type})` : ""
+                          }`}
                         </Td>
 
                         <Td>
@@ -1163,7 +1197,7 @@ function AssignedSavajUsers() {
                         </Td>
                         <Td>
                           {file.document_percentage != null &&
-                            !isNaN(file.document_percentage) ? (
+                          !isNaN(file.document_percentage) ? (
                             <div
                               className="progress"
                               data-value={Number(file.document_percentage)}
@@ -1407,7 +1441,7 @@ function AssignedSavajUsers() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1442,7 +1476,7 @@ function AssignedSavajUsers() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1490,7 +1524,7 @@ function AssignedSavajUsers() {
               justifyContent="flex-end"
               alignItems="center"
               p="4"
-            // borderBottom="1px solid #ccc"
+              // borderBottom="1px solid #ccc"
             >
               <Text mr="4" fontSize="sm">
                 Total Records: {totalRecords}
