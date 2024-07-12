@@ -105,7 +105,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #f8f8f8)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
@@ -155,7 +155,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
@@ -204,7 +204,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/bank")}
         >
@@ -253,7 +253,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/bank")}
         >
@@ -302,7 +302,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/alluser")}
         >
@@ -351,7 +351,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
@@ -401,7 +401,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/bank")}
         >
@@ -451,7 +451,7 @@ export default function Dashboard() {
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: `linear-gradient(-130deg, #b19552, #ffffff)`,
+            background: "#d4c6a5",
           }}
           onClick={() => history.push("/superadmin/filetable")}
         >
@@ -527,7 +527,7 @@ export default function Dashboard() {
               style={{
                 cursor: "pointer",
                 border: "1px solid #b19552",
-                background: `linear-gradient(-130deg, #646868, #ffffff)`,
+                background: "#7e7f81",
               }}
               onClick={() =>
                 history.push(`/superadmin/filetable`, {
@@ -550,7 +550,7 @@ export default function Dashboard() {
                   <Stat me="auto">
                     <StatLabel
                       fontSize="xs"
-                      color="#212529"
+                      color="white"
                       fontWeight="bold"
                       textTransform="uppercase"
                     >
@@ -561,7 +561,7 @@ export default function Dashboard() {
                     <Flex>
                       <StatNumber
                         fontSize="lg"
-                        color={textColor}
+                        color="white"
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
@@ -595,12 +595,14 @@ export default function Dashboard() {
                         key={status}
                         direction="column"
                         align="center"
-                        mr="2px" // Adjust horizontal margin as needed
+                        mr="5px"
                       >
                         <Text fontSize="sm" fontWeight="bold" color={color}>
                           {status}
                         </Text>
-                        <Text fontSize="md">{count}</Text>
+                        <Text fontSize="md" color={"white"}>
+                          {count}
+                        </Text>
                       </Flex>
                     ))}
                 </Flex>
