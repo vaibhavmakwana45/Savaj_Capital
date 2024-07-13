@@ -157,47 +157,46 @@ function Files() {
   const [totalRecords, setTotalRecorrds] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    setLoading(true); // Set loading to true when fetching data
+
+    try {
+      const response = await AxiosInstance.get("/file_upload", {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          searchTerm,
+          selectedLoan: loan_id
+            ? loan_id === "All Loan Types"
+              ? ""
+              : loan_id
+            : selectedLoan === "All Loan Types"
+            ? ""
+            : selectedLoan,
+          selectedStatus: selectedStatusSearch,
+          selectedSubtype: loantype_id
+            ? loantype_id === "All Loan Subtypes"
+              ? ""
+              : loantype_id
+            : selectedLoanSubType === "All Loan Subtypes"
+            ? ""
+            : selectedLoanSubType,
+          selectedState,
+          selectedCity,
+        },
+      });
+
+      setFiles(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setTotalRecorrds(response.data.totalCount);
+      setCurrentPage(response.data.currentPage);
+      setLoading(false); // Set loading to false after data is fetched
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false); // Ensure loading is set to false even if there's an error
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true); // Set loading to true when fetching data
-
-      try {
-        const response = await AxiosInstance.get("/file_upload", {
-          params: {
-            page: currentPage,
-            limit: itemsPerPage,
-            searchTerm,
-            selectedLoan: loan_id
-              ? loan_id === "All Loan Types"
-                ? ""
-                : loan_id
-              : selectedLoan === "All Loan Types"
-              ? ""
-              : selectedLoan,
-            selectedStatus: selectedStatusSearch,
-            selectedSubtype: loantype_id
-              ? loantype_id === "All Loan Subtypes"
-                ? ""
-                : loantype_id
-              : selectedLoanSubType === "All Loan Subtypes"
-              ? ""
-              : selectedLoanSubType,
-            selectedState,
-            selectedCity,
-          },
-        });
-
-        setFiles(response.data.data);
-        setTotalPages(response.data.totalPages);
-        setTotalRecorrds(response.data.totalCount);
-        setCurrentPage(response.data.currentPage);
-        setLoading(false); // Set loading to false after data is fetched
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false); // Ensure loading is set to false even if there's an error
-      }
-    };
-
     fetchData(); // Initial fetch when component mounts
   }, [
     currentPage,
