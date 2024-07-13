@@ -60,7 +60,7 @@ function SavajCapitalBranchTable() {
     "City",
     "State",
     "users",
-
+    "files",
     "",
     "State",
     "Action",
@@ -76,6 +76,7 @@ function SavajCapitalBranchTable() {
     item.city,
     item.state,
     item?.user_count,
+    item?.file_count,
     item.createdAt,
     item.updatedAt,
   ]);
@@ -285,10 +286,10 @@ function SavajCapitalBranchTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={5}
-              removeIndex2={6}
-              documentIndex={6}
-              documentIndex2={7}
+              removeIndex={6}
+              removeIndex2={7}
+              documentIndex={7}
+              documentIndex2={8}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
@@ -331,41 +332,58 @@ function SavajCapitalBranchTable() {
           </AlertDialogOverlay>
         </AlertDialog>
         <Flex direction="column" alignItems="center" p={4}>
-          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="3xl">
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="5xl">
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader>Branch Users</ModalHeader>
+              <ModalHeader bg="#b19552" color="white" py={4} textAlign="center">
+                Branch Users
+              </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Box maxHeight="600px" overflowY="auto">
+                <Box maxHeight="400px" overflowY="auto">
                   {selectedBankUsers.map((user) => (
                     <Box
                       key={user._id}
-                      p={4}
+                      p={6}
                       mb={4}
                       borderWidth="1px"
                       borderRadius="lg"
                       boxShadow="md"
-                      bg="gray.50"
+                      bg="white"
+                      transition="transform 0.2s"
+                      // _hover={{ transform: "scale(1.02)", boxShadow: "lg" }}
                     >
-                      <Text fontWeight="bold" fontSize="lg" mb={2}>
-                        {user.bankuser_name}
+                      <Text
+                        fontWeight="bold"
+                        fontSize="xl"
+                        mb={2}
+                        color="#b19552"
+                      >
+                        {user.full_name}
                       </Text>
-                      <Text mb={1}>Email: {user.email}</Text>
-                      <Text mb={1}>City: {user.city}</Text>
-                      <Text mb={1}>State: {user.state}</Text>
-                      <Text mb={1}>Mobile: {user.mobile}</Text>
+                      <Text mb={1}>
+                        <strong>Email:</strong> {user.email}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>City:</strong> {user.city}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>State:</strong> {user.state}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>Mobile:</strong> {user.mobile}
+                      </Text>
                       {user.files && user.files.length > 0 && (
                         <>
-                          <Text fontWeight="bold" mt={4} mb={2}>
+                          <Text fontWeight="bold" mt={4} mb={2} color="#b19552">
                             Assigned Files:
                           </Text>
-                          <Table variant="simple">
+                          <Table variant="simple" size="sm">
                             <Thead bg="gray.200">
                               <Tr>
                                 <Th>File ID</Th>
-                                <Th>Loan</Th>
                                 <Th>Username</Th>
+                                <Th>Loan</Th>
                                 <Th>Status</Th>
                               </Tr>
                             </Thead>
@@ -395,7 +413,12 @@ function SavajCapitalBranchTable() {
                 </Box>
               </ModalBody>
               <ModalFooter>
-                <Button onClick={handleCloseTitle} colorScheme="blue">
+                <Button
+                  onClick={handleCloseTitle}
+                  bg="#b19552"
+                  color="white"
+                  _hover={{ bg: "#a58447" }}
+                >
                   Close
                 </Button>
               </ModalFooter>

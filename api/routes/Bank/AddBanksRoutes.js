@@ -77,12 +77,16 @@ router.get("/", async (req, res) => {
       const bankUserCount = await BankUser.countDocuments({ bank_id });
       banks[i].user_count = bankUserCount;
 
+      let totalFileCount = 0; // Initialize file count for each bank
+
       const bankUsers = await BankUser.find({ bank_id });
 
       for (let j = 0; j < bankUsers.length; j++) {
         const bankuser_id = bankUsers[j].bankuser_id;
 
         const assignedFiles = await BankApproval.find({ bankuser_id });
+
+        totalFileCount += assignedFiles.length; // Increment the file count
 
         for (let k = 0; k < assignedFiles.length; k++) {
           const file_id = assignedFiles[k].file_id;
@@ -128,6 +132,7 @@ router.get("/", async (req, res) => {
       }
 
       banks[i].users = bankUsers;
+      banks[i].file_count = totalFileCount; // Assign the file count to the bank
     }
 
     const count = banks.length;
@@ -145,6 +150,7 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
 
 router.delete("/deletebanks/:bank_id", async (req, res) => {
   try {

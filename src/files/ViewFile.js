@@ -995,7 +995,7 @@ function ViewFile() {
                           <div className="card shadow-sm mb-4">
                             <div className="card-body">
                               <div className="mb-3">
-                                <strong>Loan User:</strong>{" "}
+                                <strong>Loan User:</strong>
                                 <span>{fileData?.user?.username || "N/A"}</span>
                               </div>
                               <div className="mb-3">
@@ -1298,227 +1298,261 @@ function ViewFile() {
                                 ))}
                             </ul>
                           </div>
-                          <div className="d-flex gap-3">
+
+                          <div
+                            className="d-flex gap-3"
+                            style={{ marginTop: "30px", marginLeft: "40px" }}
+                          >
                             {open.is &&
                               open.data.loan_step_id !== "1715348523661" && (
-                                <Form
-                                  onSubmit={(e) => {
-                                    e.preventDefault();
-                                    submitStep();
-                                  }}
-                                >
-                                  {open.data.status !== "reject" &&
-                                    open.data.inputs.map((input, index) => (
-                                      <FormControl
-                                        key={index}
-                                        id="step"
-                                        className="d-flex justify-content-between align-items-center mt-4"
-                                      >
-                                        {input.type === "input" ? (
-                                          <div className="col-8">
-                                            <label>{input.label}</label>
-                                            <Input
-                                              name="step"
-                                              required={input.is_required}
-                                              value={input.value}
-                                              placeholder={`Enter ${input.value}`}
-                                              onChange={(e) =>
-                                                handleChange(e, index)
-                                              }
-                                            />
-                                          </div>
-                                        ) : input.type === "checkbox" ? (
-                                          <div className="col-4">
-                                            <input
-                                              type="checkbox"
-                                              checked={input.value}
-                                              required={input.is_required}
-                                              onChange={(e) =>
-                                                handleChange(e, index)
-                                              }
-                                            />{" "}
-                                            {input.label}
-                                          </div>
-                                        ) : (
-                                          input.type === "file" && (
-                                            <div>
-                                              <label
-                                                style={{
-                                                  display: "block",
-                                                  marginBottom: "8px",
-                                                }}
-                                              >
-                                                {input.label}
-                                              </label>
-                                              <label
-                                                style={{
-                                                  display: "inline-block",
-                                                  padding: "5px 20px",
-                                                  backgroundColor:
-                                                    "rgb(65, 70, 80)",
-                                                  color: "white",
-                                                  borderRadius: "5px",
-                                                  cursor: "pointer",
-                                                }}
-                                              >
-                                                Choose File
-                                                <Input
-                                                  type="file"
-                                                  required={input.is_required}
-                                                  onChange={(e) =>
-                                                    handleChange(e, index)
-                                                  }
-                                                  style={{
-                                                    display: "none",
-                                                  }}
-                                                />
-                                              </label>
-                                              {input.value && (
-                                                <>
-                                                  {input.value.endsWith(
-                                                    ".pdf"
-                                                  ) ? (
-                                                    <div
+                                <div className="card shadow-sm mb-4">
+                                  <div className="card-body">
+                                    <Form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitStep();
+                                      }}
+                                    >
+                                      <Flex alignItems="center">
+                                        <p>
+                                          {fileData?.user?.username}{" "}
+                                          {open.data.loan_step}
+                                        </p>
+                                      </Flex>
+                                      {open.data.status !== "reject" &&
+                                        open.data.inputs.map((input, index) => (
+                                          <>
+                                            {console.log(open, "open")}
+
+                                            <FormControl
+                                              key={index}
+                                              id="step"
+                                              className="d-flex justify-content-between align-items-center mt-4"
+                                            >
+                                              {input.type === "input" ? (
+                                                <div className="col-8">
+                                                  <label>{input.label}</label>
+                                                  <Input
+                                                    name="step"
+                                                    required={input.is_required}
+                                                    value={input.value}
+                                                    placeholder={`Enter ${input.value}`}
+                                                    onChange={(e) =>
+                                                      handleChange(e, index)
+                                                    }
+                                                  />
+                                                </div>
+                                              ) : input.type === "checkbox" ? (
+                                                <div className="col-4">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={input.value}
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(e, index)
+                                                    }
+                                                  />{" "}
+                                                  {input.label}
+                                                </div>
+                                              ) : (
+                                                input.type === "file" && (
+                                                  <div>
+                                                    <label
                                                       style={{
-                                                        position: "relative",
-                                                        width: "100%",
-                                                        height: "260px",
-                                                        marginTop: "10px",
+                                                        display: "block",
+                                                        marginBottom: "8px",
                                                       }}
                                                     >
-                                                      <iframe
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                        type="application/pdf"
-                                                        className="pdf-viewer"
-                                                        height="100%"
-                                                        width="100%"
-                                                        title="PDF Viewer"
-                                                      />
-                                                      <div className="pdf-overlay">
-                                                        <FontAwesomeIcon
-                                                          icon={faMaximize}
-                                                          onClick={() =>
-                                                            handleFileClick({
-                                                              file_path:
-                                                                input.value,
-                                                            })
-                                                          }
-                                                          style={{
-                                                            position:
-                                                              "absolute",
-                                                            bottom: "8px",
-                                                            right: "25px",
-                                                            color: "black",
-                                                            cursor: "pointer",
-                                                          }}
-                                                        />
-                                                      </div>
-                                                    </div>
-                                                  ) : input.value.match(
-                                                      /\.(jpeg|jpg|gif|png)$/
-                                                    ) ? (
-                                                    <img
-                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                      alt="Uploaded"
+                                                      {input.label}
+                                                    </label>
+                                                    <label
                                                       style={{
-                                                        width: "100%",
-                                                        height: "260px",
-                                                        borderRadius: "12px",
-                                                        boxShadow:
-                                                          "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                        display: "inline-block",
+                                                        padding: "5px 20px",
+                                                        backgroundColor:
+                                                          "rgb(65, 70, 80)",
+                                                        color: "white",
+                                                        borderRadius: "5px",
                                                         cursor: "pointer",
-                                                        marginTop: "10px",
                                                       }}
-                                                      className="details-image"
-                                                      onClick={() =>
-                                                        handleFileClick({
-                                                          file_path:
-                                                            input.value,
-                                                        })
-                                                      }
-                                                    />
-                                                  ) : (
-                                                    <div>
-                                                      No preview available for
-                                                      this file type
-                                                    </div>
-                                                  )}
-                                                </>
+                                                    >
+                                                      Choose File
+                                                      <Input
+                                                        type="file"
+                                                        required={
+                                                          input.is_required
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChange(e, index)
+                                                        }
+                                                        style={{
+                                                          display: "none",
+                                                        }}
+                                                      />
+                                                    </label>
+                                                    {input.value && (
+                                                      <>
+                                                        {input.value.endsWith(
+                                                          ".pdf"
+                                                        ) ? (
+                                                          <div
+                                                            style={{
+                                                              position:
+                                                                "relative",
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              marginTop: "10px",
+                                                            }}
+                                                          >
+                                                            <iframe
+                                                              src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                              type="application/pdf"
+                                                              className="pdf-viewer"
+                                                              height="100%"
+                                                              width="100%"
+                                                              title="PDF Viewer"
+                                                            />
+                                                            <div className="pdf-overlay">
+                                                              <FontAwesomeIcon
+                                                                icon={
+                                                                  faMaximize
+                                                                }
+                                                                onClick={() =>
+                                                                  handleFileClick(
+                                                                    {
+                                                                      file_path:
+                                                                        input.value,
+                                                                    }
+                                                                  )
+                                                                }
+                                                                style={{
+                                                                  position:
+                                                                    "absolute",
+                                                                  bottom: "8px",
+                                                                  right: "25px",
+                                                                  color:
+                                                                    "black",
+                                                                  cursor:
+                                                                    "pointer",
+                                                                }}
+                                                              />
+                                                            </div>
+                                                          </div>
+                                                        ) : input.value.match(
+                                                            /\.(jpeg|jpg|gif|png)$/
+                                                          ) ? (
+                                                          <img
+                                                            src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                            alt="Uploaded"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              borderRadius:
+                                                                "12px",
+                                                              boxShadow:
+                                                                "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                              cursor: "pointer",
+                                                              marginTop: "10px",
+                                                            }}
+                                                            className="details-image"
+                                                            onClick={() =>
+                                                              handleFileClick({
+                                                                file_path:
+                                                                  input.value,
+                                                              })
+                                                            }
+                                                          />
+                                                        ) : (
+                                                          <div>
+                                                            No preview available
+                                                            for this file type
+                                                          </div>
+                                                        )}
+                                                      </>
+                                                    )}
+                                                  </div>
+                                                )
                                               )}
-                                            </div>
-                                          )
-                                        )}
-                                      </FormControl>
-                                    ))}
-                                  <div className="mt-4">
-                                    <strong>Date:</strong>{" "}
-                                    {new Date(
-                                      open.data.updatedAt
-                                    ).toLocaleString()}
-                                  </div>
-                                  {open.data.status !== "reject" && (
-                                    <>
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        mr={3}
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                      <Button
-                                        colorScheme="blue"
-                                        className="buttonss mt-3"
-                                        mr={3}
-                                        style={{ backgroundColor: "#b19552" }}
-                                        onClick={() => {
-                                          onOpensGuarantor();
-                                          handleClick(open);
-                                        }}
-                                      >
-                                        Add
-                                      </Button>
-                                    </>
-                                  )}
-
-                                  {open.data.status === "reject" &&
-                                    open.data.statusMessage && (
-                                      <div
-                                        className="status-message mt-3"
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        <p style={{ marginRight: "10px" }}>
-                                          Reject Message:{" "}
-                                          <span style={{ color: "red" }}>
-                                            {open.data.statusMessage}
-                                          </span>
-                                        </p>
-                                        <IconButton
-                                          icon={<Icon as={FaUndo} />}
-                                          onClick={handleReverse}
-                                          colorScheme="blue"
-                                          className="buttonss mt-3"
-                                          style={{ backgroundColor: "#007bff" }}
-                                          aria-label="Reverse"
-                                        />
+                                            </FormControl>
+                                          </>
+                                        ))}
+                                      <div className="mt-4">
+                                        <strong>Date:</strong>{" "}
+                                        {new Date(
+                                          open.data.updatedAt
+                                        ).toLocaleString()}
                                       </div>
-                                    )}
+                                      {open.data.status !== "reject" && (
+                                        <>
+                                          <Button
+                                            colorScheme="blue"
+                                            className="mt-3"
+                                            type="submit"
+                                            mr={3}
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                          >
+                                            Submit
+                                          </Button>
+                                          <Button
+                                            colorScheme="blue"
+                                            className="buttonss mt-3"
+                                            mr={3}
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                            onClick={() => {
+                                              onOpensGuarantor();
+                                              handleClick(open);
+                                            }}
+                                          >
+                                            Add
+                                          </Button>
+                                        </>
+                                      )}
 
-                                  {open.data.status !== "reject" && (
-                                    <Button
-                                      colorScheme="red"
-                                      className="buttonss mt-3"
-                                      style={{ backgroundColor: "#FF0000" }}
-                                      onClick={handleReject}
-                                    >
-                                      Reject
-                                    </Button>
-                                  )}
-                                </Form>
+                                      {open.data.status === "reject" &&
+                                        open.data.statusMessage && (
+                                          <div
+                                            className="status-message mt-3"
+                                            style={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <p style={{ marginRight: "10px" }}>
+                                              Reject Message:{" "}
+                                              <span style={{ color: "red" }}>
+                                                {open.data.statusMessage}
+                                              </span>
+                                            </p>
+                                            <IconButton
+                                              icon={<Icon as={FaUndo} />}
+                                              onClick={handleReverse}
+                                              colorScheme="blue"
+                                              className="buttonss mt-3"
+                                              style={{
+                                                backgroundColor: "#007bff",
+                                              }}
+                                              aria-label="Reverse"
+                                            />
+                                          </div>
+                                        )}
+
+                                      {open.data.status !== "reject" && (
+                                        <Button
+                                          colorScheme="red"
+                                          className="buttonss mt-3"
+                                          style={{ backgroundColor: "#FF0000" }}
+                                          onClick={handleReject}
+                                        >
+                                          Reject
+                                        </Button>
+                                      )}
+                                    </Form>
+                                  </div>
+                                </div>
                               )}
 
                             {open.is &&
@@ -1526,94 +1560,63 @@ function ViewFile() {
                               open.data.guarantorSteps &&
                               open.data.guarantorSteps.map(
                                 (guarantor, dataIndex) => (
-                                  <Form
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      submitGuarantorStep();
-                                    }}
-                                    style={{ marginTop: "20px" }}
-                                    key={dataIndex}
-                                  >
-                                    <Flex alignItems="center">
-                                      <p>
-                                        {guarantor.username}{" "}
-                                        {guarantor.loan_step}
-                                      </p>
-                                      <AiOutlineClose
-                                        onClick={() =>
-                                          removeGuarantorStep(dataIndex, "open")
-                                        }
-                                        style={{
-                                          cursor: "pointer",
-                                          color: "red",
-                                          marginLeft: "10px",
+                                  <div className="card shadow-sm mb-4">
+                                    <div className="card-body">
+                                      <Form
+                                        onSubmit={(e) => {
+                                          e.preventDefault();
+                                          submitGuarantorStep();
                                         }}
-                                      />
-                                    </Flex>
-                                    {guarantor.inputs?.map(
-                                      (input, inputIndex) => (
-                                        <FormControl
-                                          key={`${dataIndex}-${inputIndex}`}
-                                          id="step"
-                                          className="d-flex justify-content-between align-items-center mt-4"
-                                        >
-                                          {input.type === "input" ? (
-                                            <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                name="step"
-                                                value={input.value}
-                                                placeholder={`Enter ${input.label}`}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    e,
-                                                    inputIndex,
-                                                    dataIndex
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          ) : input.type === "checkbox" ? (
-                                            <div>
-                                              <input
-                                                type="checkbox"
-                                                checked={input.value}
-                                                required={input.is_required}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    e,
-                                                    inputIndex,
-                                                    dataIndex
-                                                  )
-                                                }
-                                              />{" "}
-                                              {input.label}
-                                            </div>
-                                          ) : (
-                                            input.type === "file" && (
-                                              <div>
-                                                <label
-                                                  style={{
-                                                    display: "block",
-                                                    marginBottom: "8px",
-                                                  }}
-                                                >
-                                                  {input.label}
-                                                </label>
-                                                <label
-                                                  style={{
-                                                    display: "inline-block",
-                                                    padding: "5px 20px",
-                                                    backgroundColor:
-                                                      "rgb(65, 70, 80)",
-                                                    color: "white",
-                                                    borderRadius: "5px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                >
-                                                  Choose File
+                                        // style={{ marginTop: "20px" }}
+                                        key={dataIndex}
+                                      >
+                                        <Flex alignItems="center">
+                                          <p>
+                                            {guarantor.username}{" "}
+                                            {guarantor.loan_step}
+                                          </p>
+                                          <AiOutlineClose
+                                            onClick={() =>
+                                              removeGuarantorStep(
+                                                dataIndex,
+                                                "open"
+                                              )
+                                            }
+                                            style={{
+                                              cursor: "pointer",
+                                              color: "red",
+                                              marginLeft: "10px",
+                                            }}
+                                          />
+                                        </Flex>
+                                        {guarantor.inputs?.map(
+                                          (input, inputIndex) => (
+                                            <FormControl
+                                              key={`${dataIndex}-${inputIndex}`}
+                                              id="step"
+                                              className="d-flex justify-content-between align-items-center mt-4"
+                                            >
+                                              {input.type === "input" ? (
+                                                <div>
+                                                  <label>{input.label}</label>
                                                   <Input
-                                                    type="file"
+                                                    name="step"
+                                                    value={input.value}
+                                                    placeholder={`Enter ${input.label}`}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              ) : input.type === "checkbox" ? (
+                                                <div>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={input.value}
                                                     required={input.is_required}
                                                     onChange={(e) =>
                                                       handleChange(
@@ -1622,107 +1625,158 @@ function ViewFile() {
                                                         dataIndex
                                                       )
                                                     }
-                                                    style={{
-                                                      display: "none",
-                                                    }}
-                                                  />
-                                                </label>
-                                                {input.value && (
-                                                  <>
-                                                    {input.value.endsWith(
-                                                      ".pdf"
-                                                    ) ? (
-                                                      <div
+                                                  />{" "}
+                                                  {input.label}
+                                                </div>
+                                              ) : (
+                                                input.type === "file" && (
+                                                  <div>
+                                                    <label
+                                                      style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                      }}
+                                                    >
+                                                      {input.label}
+                                                    </label>
+                                                    <label
+                                                      style={{
+                                                        display: "inline-block",
+                                                        padding: "5px 20px",
+                                                        backgroundColor:
+                                                          "rgb(65, 70, 80)",
+                                                        color: "white",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                      }}
+                                                    >
+                                                      Choose File
+                                                      <Input
+                                                        type="file"
+                                                        required={
+                                                          input.is_required
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            e,
+                                                            inputIndex,
+                                                            dataIndex
+                                                          )
+                                                        }
                                                         style={{
-                                                          position: "relative",
-                                                          width: "100%",
-                                                          height: "260px",
-                                                          marginTop: "10px",
+                                                          display: "none",
                                                         }}
-                                                      >
-                                                        <iframe
-                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                          type="application/pdf"
-                                                          className="pdf-viewer"
-                                                          height="100%"
-                                                          width="100%"
-                                                          title="PDF Viewer"
-                                                        />
-                                                        <div className="pdf-overlay">
-                                                          <FontAwesomeIcon
-                                                            icon={faMaximize}
+                                                      />
+                                                    </label>
+                                                    {input.value && (
+                                                      <>
+                                                        {input.value.endsWith(
+                                                          ".pdf"
+                                                        ) ? (
+                                                          <div
+                                                            style={{
+                                                              position:
+                                                                "relative",
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              marginTop: "10px",
+                                                            }}
+                                                          >
+                                                            <iframe
+                                                              src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                              type="application/pdf"
+                                                              className="pdf-viewer"
+                                                              height="100%"
+                                                              width="100%"
+                                                              title="PDF Viewer"
+                                                            />
+                                                            <div className="pdf-overlay">
+                                                              <FontAwesomeIcon
+                                                                icon={
+                                                                  faMaximize
+                                                                }
+                                                                onClick={() =>
+                                                                  handleFileClick(
+                                                                    {
+                                                                      file_path:
+                                                                        input.value,
+                                                                    }
+                                                                  )
+                                                                }
+                                                                style={{
+                                                                  position:
+                                                                    "absolute",
+                                                                  bottom: "8px",
+                                                                  right: "25px",
+                                                                  color:
+                                                                    "black",
+                                                                  cursor:
+                                                                    "pointer",
+                                                                }}
+                                                              />
+                                                            </div>
+                                                          </div>
+                                                        ) : input.value.match(
+                                                            /\.(jpeg|jpg|gif|png)$/
+                                                          ) ? (
+                                                          <img
+                                                            src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                            alt="Uploaded"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              borderRadius:
+                                                                "12px",
+                                                              boxShadow:
+                                                                "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                              cursor: "pointer",
+                                                              marginTop: "10px",
+                                                            }}
+                                                            className="details-image"
                                                             onClick={() =>
                                                               handleFileClick({
                                                                 file_path:
                                                                   input.value,
                                                               })
                                                             }
-                                                            style={{
-                                                              position:
-                                                                "absolute",
-                                                              bottom: "8px",
-                                                              right: "25px",
-                                                              color: "black",
-                                                              cursor: "pointer",
-                                                            }}
                                                           />
-                                                        </div>
-                                                      </div>
-                                                    ) : input.value.match(
-                                                        /\.(jpeg|jpg|gif|png)$/
-                                                      ) ? (
-                                                      <img
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                        alt="Uploaded"
-                                                        style={{
-                                                          width: "100%",
-                                                          height: "260px",
-                                                          borderRadius: "12px",
-                                                          boxShadow:
-                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                          cursor: "pointer",
-                                                          marginTop: "10px",
-                                                        }}
-                                                        className="details-image"
-                                                        onClick={() =>
-                                                          handleFileClick({
-                                                            file_path:
-                                                              input.value,
-                                                          })
-                                                        }
-                                                      />
-                                                    ) : (
-                                                      <div>
-                                                        No preview available for
-                                                        this file type
-                                                      </div>
+                                                        ) : (
+                                                          <div>
+                                                            No preview available
+                                                            for this file type
+                                                          </div>
+                                                        )}
+                                                      </>
                                                     )}
-                                                  </>
-                                                )}
-                                              </div>
-                                            )
-                                          )}
-                                        </FormControl>
-                                      )
-                                    )}
-                                    <div className="mt-4">
-                                      <strong>Date:</strong>{" "}
-                                      {new Date(
-                                        guarantor.updatedAt
-                                      ).toLocaleString()}
+                                                  </div>
+                                                )
+                                              )}
+                                            </FormControl>
+                                          )
+                                        )}
+                                        <div className="mt-4">
+                                          <strong>Date:</strong>{" "}
+                                          {new Date(
+                                            guarantor.updatedAt
+                                          ).toLocaleString()}
+                                        </div>
+                                        {dataIndex ===
+                                          open.data.guarantorSteps.length -
+                                            1 && (
+                                          <Button
+                                            colorScheme="blue"
+                                            className="mt-3"
+                                            type="submit"
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                          >
+                                            Submit
+                                          </Button>
+                                        )}
+                                      </Form>
                                     </div>
-                                    {dataIndex ===
-                                      open.data.guarantorSteps.length - 1 && (
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                    )}
-                                  </Form>
+                                  </div>
                                 )
                               )}
 

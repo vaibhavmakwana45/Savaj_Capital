@@ -102,6 +102,7 @@ function BankTable() {
     "City",
     "State",
     "users",
+    "files",
     "create",
     "update",
     "Action",
@@ -115,6 +116,7 @@ function BankTable() {
     bank.city,
     bank.state,
     bank?.user_count,
+    bank?.file_count,
     bank.createdAt,
     bank.updatedAt,
   ]);
@@ -294,10 +296,10 @@ function BankTable() {
               handleDelete={handleDelete}
               handleEdit={handleEdit}
               collapse={true}
-              removeIndex={6}
-              removeIndex2={7}
-              documentIndex={7}
-              documentIndex2={8}
+              removeIndex={7}
+              removeIndex2={8}
+              documentIndex={8}
+              documentIndex2={9}
               name={"Created At:"}
               name2={"Updated At:"}
               showPagination={true}
@@ -373,41 +375,58 @@ function BankTable() {
           </AlertDialog>
         </AlertDialog>
         <Flex direction="column" alignItems="center" p={4}>
-          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="3xl">
+          <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="5xl">
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader>Bank Users</ModalHeader>
+              <ModalHeader bg="#b19552" color="white" py={4} textAlign="center">
+                Bank Users
+              </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Box maxHeight="600px" overflowY="auto">
+                <Box maxHeight="500px" overflowY="auto">
                   {selectedBankUsers.map((user) => (
                     <Box
                       key={user._id}
-                      p={4}
+                      p={6}
                       mb={4}
                       borderWidth="1px"
                       borderRadius="lg"
                       boxShadow="md"
-                      bg="gray.50"
+                      bg="white"
+                      transition="transform 0.2s"
+                      // _hover={{ transform: "scale(1.02)" }}
                     >
-                      <Text fontWeight="bold" fontSize="lg" mb={2}>
+                      <Text
+                        fontWeight="bold"
+                        fontSize="xl"
+                        mb={2}
+                        color="#b19552"
+                      >
                         {user.bankuser_name}
                       </Text>
-                      <Text mb={1}>Email: {user.email}</Text>
-                      <Text mb={1}>City: {user.city}</Text>
-                      <Text mb={1}>State: {user.state}</Text>
-                      <Text mb={1}>Mobile: {user.mobile}</Text>
+                      <Text mb={1}>
+                        <strong>Email:</strong> {user.email}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>City:</strong> {user.city}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>State:</strong> {user.state}
+                      </Text>
+                      <Text mb={1}>
+                        <strong>Mobile:</strong> {user.mobile}
+                      </Text>
                       {user.files && user.files.length > 0 && (
                         <>
-                          <Text fontWeight="bold" mt={4} mb={2}>
+                          <Text fontWeight="bold" mt={4} mb={2} color="#b19552">
                             Assigned Files:
                           </Text>
-                          <Table variant="simple">
+                          <Table variant="simple" size="sm">
                             <Thead bg="gray.200">
                               <Tr>
                                 <Th>File ID</Th>
-                                <Th>Loan</Th>
                                 <Th>Username</Th>
+                                <Th>Loan</Th>
                                 <Th>Status</Th>
                               </Tr>
                             </Thead>
@@ -437,7 +456,7 @@ function BankTable() {
                 </Box>
               </ModalBody>
               <ModalFooter>
-                <Button onClick={handleCloseTitle} colorScheme="blue">
+                <Button onClick={handleCloseTitle} color="#b19552">
                   Close
                 </Button>
               </ModalFooter>

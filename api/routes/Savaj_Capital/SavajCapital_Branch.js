@@ -98,6 +98,7 @@ router.get("/", async (req, res) => {
 
       const branchUserCount = await SavajCapital_User.countDocuments({ branch_id });
       branch[i].user_count = branchUserCount;
+      let totalFileCount = 0; // Initialize file count for each bank
 
       const branchUsers = await SavajCapital_User.find({ branch_id });
 
@@ -105,6 +106,7 @@ router.get("/", async (req, res) => {
         const branchuser_id = branchUsers[j].branchuser_id;
 
         const assignedFiles = await Branch_Assign.find({ branchuser_id });
+        totalFileCount += assignedFiles.length; // Increment the file count
 
    
         for (let k = 0; k < assignedFiles.length; k++) {
@@ -153,6 +155,8 @@ router.get("/", async (req, res) => {
       }
 
       branch[i].users = branchUsers;
+      branch[i].file_count = totalFileCount; // Assign the file count to the bank
+
     }
 
     const count = branch.length;
