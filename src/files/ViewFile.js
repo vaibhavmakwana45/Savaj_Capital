@@ -347,6 +347,7 @@ function ViewFile() {
   useEffect(() => {
     fetchStepsData();
   }, []);
+
   const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -1322,8 +1323,6 @@ function ViewFile() {
                                       {open.data.status !== "reject" &&
                                         open.data.inputs.map((input, index) => (
                                           <>
-                                            {console.log(open, "open")}
-
                                             <FormControl
                                               key={index}
                                               id="step"

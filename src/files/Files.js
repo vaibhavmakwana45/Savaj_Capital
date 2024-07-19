@@ -187,17 +187,18 @@ function Files() {
       });
 
       setFiles(response.data.data);
+      console.log(response.data.data, "response.data.data");
       setTotalPages(response.data.totalPages);
       setTotalRecorrds(response.data.totalCount);
       setCurrentPage(response.data.currentPage);
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setLoading(false); // Ensure loading is set to false even if there's an error
+      setLoading(false);
     }
   };
   useEffect(() => {
-    fetchData(); // Initial fetch when component mounts
+    fetchData();
   }, [
     currentPage,
     itemsPerPage,
