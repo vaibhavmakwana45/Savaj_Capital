@@ -251,7 +251,7 @@ router.post("/", async (req, res) => {
 //     const stepsPromises = data.map(async (item) => {
 //       try {
 //         const stepsResponse = await axios.get(
-//           `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+//           `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
 //         );
 //         const stepsData = stepsResponse.data.data;
 
@@ -493,7 +493,7 @@ router.get("/", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `http://localhost:5882/api/file_upload/get_all_steps/${item.file_id}`
+          `https://admin.savajcapital.com/api/file_upload/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
@@ -746,7 +746,7 @@ router.get("/", async (req, res) => {
 //         group.files.map(async (item) => {
 //           try {
 //             const stepsResponse = await axios.get(
-//               `http://localhost:5882/api/file_upload/get_all_steps/${item.file_id}`
+//               `https://admin.savajcapital.com/api/file_upload/get_all_steps/${item.file_id}`
 //             );
 //             const stepsData = stepsResponse.data.data;
 
@@ -848,7 +848,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
@@ -1409,7 +1409,7 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
@@ -1689,7 +1689,7 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
