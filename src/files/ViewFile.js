@@ -19,6 +19,8 @@ import {
   Checkbox,
   Select,
   Box,
+  Tooltip,
+  Text,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import { TiArrowMaximise, TiArrowMinimise } from "react-icons/ti";
@@ -34,13 +36,20 @@ import { Form, Table } from "reactstrap";
 import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
-import { FaUndo, FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import {
+  FaUndo,
+  FaWhatsapp,
+  FaEnvelope,
+  FaFolder,
+  FaInfoCircle,
+} from "react-icons/fa";
 import {
   faChevronDown,
   faChevronUp,
   faEdit,
   faTrashAlt,
   faMaximize,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { jsPDF } from "jspdf";
@@ -85,6 +94,14 @@ function ViewFile() {
 
   const handleAccordionClickDocument = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
+  };
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const handleFolderClick = (folder) => {
+    setSelectedFolder(folder);
+  };
+
+  const handleBackClick = () => {
+    setSelectedFolder(null);
   };
 
   const handleFileClick = (file) => {
@@ -347,6 +364,7 @@ function ViewFile() {
   useEffect(() => {
     fetchStepsData();
   }, []);
+
   const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -929,7 +947,7 @@ function ViewFile() {
                           padding: "5px",
                           borderRadius: "5px",
                           color: "#fff",
-                          marginTop: "5px", // Adjust as needed
+                          marginTop: "5px",
                           marginLeft: "5px",
                         }}
                       >
@@ -939,7 +957,6 @@ function ViewFile() {
                     </div>
                   </Flex>
 
-                  {/* Right Section */}
                   <Flex>
                     <Button
                       colorScheme="blue"
@@ -1299,13 +1316,16 @@ function ViewFile() {
                             </ul>
                           </div>
 
-                          <div
-                            className="d-flex gap-3"
-                            style={{ marginTop: "30px", marginLeft: "40px" }}
-                          >
+                          <div className="d-flex gap-3">
                             {open.is &&
                               open.data.loan_step_id !== "1715348523661" && (
-                                <div className="card shadow-sm mb-4">
+                                <div
+                                  className="card shadow-sm mb-4"
+                                  style={{
+                                    marginTop: "30px",
+                                    marginLeft: "40px",
+                                  }}
+                                >
                                   <div className="card-body">
                                     <Form
                                       onSubmit={(e) => {
@@ -1322,8 +1342,6 @@ function ViewFile() {
                                       {open.data.status !== "reject" &&
                                         open.data.inputs.map((input, index) => (
                                           <>
-                                            {console.log(open, "open")}
-
                                             <FormControl
                                               key={index}
                                               id="step"
@@ -1885,7 +1903,7 @@ function ViewFile() {
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" && (
                               <div className="row">
-                                <div className="col px-5 pt-3">
+                                <div className="col px-5">
                                   {open.data?.pendingData &&
                                     open.data.pendingData.length > 0 && (
                                       <React.Fragment>
@@ -1953,203 +1971,239 @@ function ViewFile() {
                                         )}
                                       </React.Fragment>
                                     )}
-                                  {fileData?.documents && (
-                                    <div className="mt-3">
-                                      <nav
-                                        aria-label="breadcrumb"
-                                        className="my-3"
-                                        style={{ overflow: "auto" }}
-                                      >
-                                        <h2
-                                          className="my-4"
-                                          style={{
-                                            fontSize: "18px",
-                                            fontWeight: 700,
-                                            color: "#333",
-                                          }}
+                                  <div>
+                                    {fileData?.documents && (
+                                      <div className="mt-3">
+                                        <nav
+                                          aria-label="breadcrumb"
+                                          className="my-3"
+                                          style={{ overflow: "auto" }}
                                         >
-                                          Uploaded Documents
-                                        </h2>
-                                        <ul className="breadcrumb">
-                                          {Object.entries(
-                                            fileData?.documents
-                                          ).map(([title, files], index) => (
-                                            <li
-                                              key={title}
-                                              className="breadcrumb-item"
-                                            >
-                                              <a
-                                                href={`#${title}`}
-                                                onClick={() =>
-                                                  handleAccordionClickDocument(
-                                                    index
-                                                  )
-                                                }
-                                                style={{ color: "#414650" }}
-                                              >
-                                                {title} documents
-                                              </a>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </nav>
-
-                                      <div>
-                                        {Object.entries(
-                                          fileData?.documents
-                                        ).map(([title, files], index) => (
-                                          <div
-                                            className="accordion my-3"
-                                            id={`accordionPanelsStayOpenExample-${index}`}
-                                            key={index}
+                                          <h2
+                                            className="my-4"
+                                            style={{
+                                              fontSize: "18px",
+                                              fontWeight: 700,
+                                              color: "#333",
+                                            }}
                                           >
-                                            <div
-                                              className={`accordion-item ${
-                                                index === openPanelIndex
-                                                  ? "show"
-                                                  : ""
-                                              }`}
-                                              key={index}
-                                            >
-                                              <h2
-                                                className="accordion-header"
-                                                id={`panelsStayOpen-heading-${index}`}
+                                            Uploaded Documents
+                                          </h2>
+                                          <ul className="breadcrumb">
+                                            {Object.entries(
+                                              fileData.documents
+                                            ).map(([title, files], index) => (
+                                              <li
+                                                key={title}
+                                                className="breadcrumb-item"
                                               >
-                                                <button
-                                                  className="accordion-button"
-                                                  type="button"
+                                                <a
+                                                  href={`#${title}`}
                                                   onClick={() =>
-                                                    handleAccordionClickDocument(
-                                                      index
-                                                    )
+                                                    handleFolderClick({
+                                                      title,
+                                                      files,
+                                                    })
                                                   }
-                                                  aria-expanded={
-                                                    index === openPanelIndex
-                                                      ? "true"
-                                                      : "false"
-                                                  }
-                                                  style={{
-                                                    color: "white",
-                                                    fontWeight: 700,
-                                                    fontSize: "14px",
-                                                    backgroundColor: "#414650",
-                                                    justifyContent:
-                                                      "space-between",
-                                                  }}
-                                                  id={title}
+                                                  style={{ color: "#414650" }}
                                                 >
                                                   {title} documents
-                                                  <FontAwesomeIcon
-                                                    icon={
-                                                      index === openPanelIndex
-                                                        ? faChevronUp
-                                                        : faChevronDown
-                                                    }
-                                                  />
-                                                </button>
-                                              </h2>
-                                              <div
-                                                id={`panelsStayOpen-collapse-${index}`}
-                                                className={`accordion-collapse collapse ${
-                                                  index === openPanelIndex
-                                                    ? "show"
-                                                    : ""
-                                                }`}
-                                                aria-labelledby={`panelsStayOpen-heading-${index}`}
-                                              >
-                                                <div
-                                                  className="accordion-body"
-                                                  style={{
-                                                    display: "flex",
-                                                    flexWrap: "wrap",
-                                                    gap: "15px",
-                                                  }}
+                                                </a>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </nav>
+
+                                        {selectedFolder ? (
+                                          <div>
+                                            <Box>
+                                              <Flex alignItems="center" mb={4}>
+                                                <IconButton
+                                                  icon={<ArrowBackIcon />}
+                                                  aria-label="Back"
+                                                  // colorScheme="teal"
+                                                  onClick={handleBackClick}
+                                                  mr={4}
+                                                />
+                                                <Text
+                                                  fontSize="24px"
+                                                  fontWeight="bold"
+                                                  color="#333"
                                                 >
-                                                  {files.map((file, idx) => (
-                                                    <div
-                                                      key={idx}
-                                                      className="image-responsive"
-                                                      style={{ width: "45%" }}
-                                                    >
-                                                      <p className="mb-3">
-                                                        {file.document_name}
-                                                      </p>
-                                                      {file.file_path.endsWith(
-                                                        ".pdf"
-                                                      ) ? (
-                                                        <div
-                                                          style={{
-                                                            position:
-                                                              "relative",
-                                                            width: "100%",
-                                                            height: "260px",
-                                                          }}
-                                                        >
-                                                          <iframe
-                                                            src={`${basePath}${file.file_path}`}
-                                                            type="application/pdf"
-                                                            className="pdf-viewer"
-                                                            height="100%"
-                                                            width="100%"
-                                                            title="PDF Viewer"
-                                                          />
-                                                          <div className="pdf-overlay">
-                                                            <FontAwesomeIcon
-                                                              icon={faMaximize}
-                                                              onClick={() =>
-                                                                handleFileClick(
-                                                                  file
-                                                                )
-                                                              }
-                                                              style={{
-                                                                position:
-                                                                  "absolute",
-                                                                bottom: "8px",
-                                                                right: "25px",
-                                                                color: "black",
-                                                                cursor:
-                                                                  "pointer",
-                                                              }}
-                                                            />
-                                                          </div>
-                                                        </div>
-                                                      ) : (
-                                                        <img
+                                                  {selectedFolder.title}{" "}
+                                                  documents
+                                                </Text>
+                                              </Flex>
+                                            </Box>
+                                            <div
+                                              className="accordion-body"
+                                              style={{
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                                gap: "15px",
+                                              }}
+                                            >
+                                              {selectedFolder.files.map(
+                                                (file, idx) => (
+                                                  <div
+                                                    key={idx}
+                                                    className="image-responsive"
+                                                    style={{ width: "45%" }}
+                                                  >
+                                                    <p className="mb-3">
+                                                      {file.document_name}
+                                                    </p>
+                                                    {file.file_path.endsWith(
+                                                      ".pdf"
+                                                    ) ? (
+                                                      <div
+                                                        style={{
+                                                          position: "relative",
+                                                          width: "100%",
+                                                          height: "260px",
+                                                        }}
+                                                      >
+                                                        <iframe
                                                           src={`${basePath}${file.file_path}`}
-                                                          alt={
-                                                            file.loan_document_id
-                                                          }
+                                                          type="application/pdf"
+                                                          className="pdf-viewer"
+                                                          height="100%"
+                                                          width="100%"
+                                                          title="PDF Viewer"
                                                           style={{
-                                                            width: "100%",
-                                                            height: "260px",
                                                             borderRadius:
                                                               "12px",
                                                             boxShadow:
                                                               "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                            cursor: "pointer",
                                                           }}
-                                                          className="details-image"
-                                                          onClick={() =>
-                                                            handleFileClick(
-                                                              file
-                                                            )
-                                                          }
                                                         />
-                                                      )}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
+                                                        <div className="pdf-overlay">
+                                                          <FontAwesomeIcon
+                                                            icon={faMaximize}
+                                                            onClick={() =>
+                                                              handleFileClick(
+                                                                file
+                                                              )
+                                                            }
+                                                            style={{
+                                                              position:
+                                                                "absolute",
+                                                              bottom: "8px",
+                                                              right: "25px",
+                                                              color: "black",
+                                                              cursor: "pointer",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    ) : (
+                                                      <img
+                                                        src={`${basePath}${file.file_path}`}
+                                                        alt={
+                                                          file.loan_document_id
+                                                        }
+                                                        style={{
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          borderRadius: "12px",
+                                                          boxShadow:
+                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                          cursor: "pointer",
+                                                        }}
+                                                        className="details-image"
+                                                        onClick={() =>
+                                                          handleFileClick(file)
+                                                        }
+                                                      />
+                                                    )}
+                                                  </div>
+                                                )
+                                              )}
                                             </div>
                                           </div>
-                                        ))}
+                                        ) : (
+                                          <div
+                                            className="folder-view"
+                                            style={{
+                                              display: "flex",
+                                              flexWrap: "wrap",
+                                              gap: "20px",
+                                            }}
+                                          >
+                                            {Object.entries(
+                                              fileData.documents
+                                            ).map(([title, files], index) => (
+                                              <Box
+                                                key={index}
+                                                borderWidth="1px"
+                                                borderRadius="lg"
+                                                overflow="hidden"
+                                                p="6"
+                                                textAlign="center"
+                                                boxShadow="md"
+                                                transition="transform 0.2s"
+                                                _hover={{
+                                                  transform: "scale(1.05)",
+                                                  backgroundColor: "#f0f4f7",
+                                                }}
+                                                position="relative"
+                                                width="200px"
+                                                m="10px"
+                                                onClick={() =>
+                                                  handleFolderClick({
+                                                    title,
+                                                    files,
+                                                  })
+                                                }
+                                                cursor="pointer"
+                                              >
+                                                <Icon
+                                                  as={FaFolder}
+                                                  w={12}
+                                                  h={12}
+                                                  color="gray.400"
+                                                  mb={4}
+                                                />
+                                                <Text
+                                                  fontSize="xl"
+                                                  fontWeight="bold"
+                                                >
+                                                  {title}
+                                                </Text>
+                                                <Text
+                                                  fontSize="sm"
+                                                  color="gray.500"
+                                                >
+                                                  {files.length} files
+                                                </Text>
+                                                <Tooltip
+                                                  label="Info"
+                                                  aria-label="Info Tooltip"
+                                                >
+                                                  <Box
+                                                    position="absolute"
+                                                    top="2"
+                                                    right="2"
+                                                  >
+                                                    <Icon
+                                                      as={FaInfoCircle}
+                                                      w={5}
+                                                      h={5}
+                                                      color="gray.400"
+                                                    />
+                                                  </Box>
+                                                </Tooltip>
+                                              </Box>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  )}
-                                  {!open.data?.pendingData ||
+                                    )}
+                                  </div>
+                                  {/* {!open.data?.pendingData ||
                                     (open.data.pendingData.length === 0 && (
                                       <p>No pending documents available.</p>
-                                    ))}
+                                    ))} */}
                                 </div>
                               </div>
                             )}
