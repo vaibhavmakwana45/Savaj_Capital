@@ -50,18 +50,18 @@ function BankUsers() {
     searchTerm.length === 0
       ? bankUsers
       : bankUsers.filter(
-        (bank) =>
-          bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-          bank?.mobile
-            ?.toString()
-            ?.toLowerCase()
-            ?.includes(searchTerm?.toLowerCase()) ||
-          bank?.adhar
-            ?.toString()
-            ?.toLowerCase()
-            ?.includes(searchTerm?.toLowerCase()) ||
-          bank?.adress?.toLowerCase()?.includes(searchTerm?.toLowerCase())
-      );
+          (bank) =>
+            bank?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+            bank?.mobile
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(searchTerm?.toLowerCase()) ||
+            bank?.adhar
+              ?.toString()
+              ?.toLowerCase()
+              ?.includes(searchTerm?.toLowerCase()) ||
+            bank?.adress?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+        );
 
   useEffect(() => {
     const fetchBanks = async () => {
@@ -295,7 +295,6 @@ function BankUsers() {
               showPagination={true}
               handleTitle={handleTitle}
               showTitleButton={true}
-              
             />
           </CardBody>
         </Card>
