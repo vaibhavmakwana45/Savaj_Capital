@@ -151,15 +151,28 @@ function ViewFile() {
     window.open(whatsappUrl, "_blank");
   };
 
+  // const handleShareEmail = () => {
+  //   const url = `${basePath}${selectedFile.file_path}`;
+  //   const subject = "Check out this document";
+  //   const body = `Here is the link to the document: ${url}`;
+  //   const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+  //     subject
+  //   )}&body=${encodeURIComponent(body)}`;
+  //   window.open(mailtoUrl, "_blank");
+  // };
+
   const handleShareEmail = () => {
-    const url = `${basePath}${selectedFile.file_path}`;
+    const documentUrl = 'https://cdn.savajcapital.com/cdn/files/20240622120000_1.PNG';
     const subject = "Check out this document";
-    const body = `Here is the link to the document: ${url}`;
-    const mailtoUrl = `mailto:?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+    const body = `
+      Here is the image:\n\n
+      [Shared Image](${documentUrl})\n\n
+      Click the link to view/download the image: ${documentUrl}
+    `;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl, "_blank");
   };
+  
 
   const toggleMaximize = () => {
     setIsMaximized(!isMaximized);
@@ -1578,7 +1591,13 @@ function ViewFile() {
                               open.data.guarantorSteps &&
                               open.data.guarantorSteps.map(
                                 (guarantor, dataIndex) => (
-                                  <div className="card shadow-sm mb-4">
+                                  <div
+                                    className="card shadow-sm mb-4"
+                                    style={{
+                                      marginTop: "30px",
+                                      marginLeft: "40px",
+                                    }}
+                                  >
                                     <div className="card-body">
                                       <Form
                                         onSubmit={(e) => {
