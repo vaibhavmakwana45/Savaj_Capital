@@ -169,6 +169,20 @@ router.post("/", async (req, res) => {
 
     // Save notification to database
     const savedNotification = await notification.save();
+    const logEntry = {
+      log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+      message: "Assigned to branch",
+      // bank_assign_id: uniqueId,
+      // bankuser_id,
+      // bank_id,
+      timestamp: currentDate,
+    };
+
+    // Update the file document with the new log entry
+    await File_Uplode.findOneAndUpdate(
+      { file_id },
+      { $push: { logs: logEntry }, updatedAt: currentDate }
+    );
 
     // Return success response
     res.json({

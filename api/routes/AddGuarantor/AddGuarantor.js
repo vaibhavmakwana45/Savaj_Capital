@@ -44,6 +44,21 @@ router.post("/add-guarantor", async (req, res) => {
 
     const savedGuarantor = await newGuarantor.save();
 
+    const logEntry = {
+      log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+      message: "Guarantor added",
+      // guarantor_id: guarantorId,
+      timestamp: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+    };
+
+    await File_Uplode.findOneAndUpdate(
+      { file_id },
+      {
+        $push: { logs: logEntry },
+        updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      }
+    );
+
     res.json({
       success: true,
       message: "Guarantor added successfully",
