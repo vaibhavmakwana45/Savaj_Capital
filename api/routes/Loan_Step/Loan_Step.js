@@ -27,6 +27,7 @@ router.post("/", async (req, res) => {
         .utcOffset(330)
         .format("YYYY-MM-DD HH:mm:ss");
       var data = await Loan_Step.create(req.body);
+
       res.json({
         success: true,
         data: data,
@@ -152,7 +153,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 
 //           steps.push({ ...res.data.data, user_id: file.user_id });
@@ -207,7 +208,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -364,7 +365,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -463,7 +464,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const response = await axios.get(
-//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...response.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -562,7 +563,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const response = await axios.get(
-            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...response.data.data, user_id: file.user_id });
         } catch (error) {
@@ -679,7 +680,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
@@ -790,6 +791,20 @@ router.post("/steps/:file_id", async (req, res) => {
       };
 
       await Compelete_Step.create(newStep);
+
+      const logEntry = {
+        log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+        message: `Loan step ${req.body.loan_step} added successfully`,
+        timestamp: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      };
+
+      await File_Uplode.findOneAndUpdate(
+        { file_id: file_id },
+        {
+          $push: { logs: logEntry },
+          updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        }
+      );
 
       res.status(200).json({
         statusCode: 200,

@@ -10,6 +10,8 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const Notification = require("../../models/Notification/Notification");
 const AddUser = require("../../models/AddUser");
+const BankUser = require("../../models/Bank/BankUserSchema");
+const Bank = require("../../models/Bank/BankSchema");
 
 // router.post("/", async (req, res) => {
 //   try {
@@ -91,9 +93,8 @@ router.post("/", async (req, res) => {
 
     const message = `You have a new file assigned on ${moment(
       currentDate
-    ).format("MMMM Do YYYY, h:mm:ss a")} for ${loanDetails.loan} of ${
-      userDetails.username
-    }.`;
+    ).format("MMMM Do YYYY, h:mm:ss a")} for ${loanDetails.loan} of ${userDetails.username
+      }.`;
 
     const notification = new Notification({
       notification_id: uniqueId,
@@ -108,22 +109,36 @@ router.post("/", async (req, res) => {
     });
 
     const savedNotification = await notification.save();
-    // Log entry for the assignment
+
+    const bank = await Bank.findOne({ bank_id: bank_id });
+    if (!bank) {
+      console.error("Bank not found for bank_id:", bank_id);
+      return res.status(404).json({
+        success: false,
+        message: "Bank not found.",
+      });
+    }
+
+    const bankUser = await BankUser.findOne({ bankuser_id: bankuser_id });
+    if (!bankUser) {
+      console.error("Bank User not found for bankuser_id:", bankuser_id);
+      return res.status(404).json({
+        success: false,
+        message: "Bank User not found.",
+      });
+    }
+
     const logEntry = {
       log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
-      message: "Assigned to bank",
-      // bank_assign_id: uniqueId,
-      // bankuser_id,
-      // bank_id,
+      message: `Assigned to ${bank.branch_name} of ${bank.bank_name} to ${bankUser.bankuser_name}`,
       timestamp: currentDate,
     };
 
-    // Update the file document with the new log entry
     await File_Uplode.findOneAndUpdate(
       { file_id },
       { $push: { logs: logEntry }, updatedAt: currentDate }
     );
-    
+
     res.json({
       success: true,
       data: {

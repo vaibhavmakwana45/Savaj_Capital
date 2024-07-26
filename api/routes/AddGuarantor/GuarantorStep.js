@@ -134,6 +134,20 @@ router.post("/guarantor-step/:file_id", async (req, res) => {
 
       await Guarantor_Step.create(newStep);
 
+      const logEntry = {
+        log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+        message: `Guarantor step ${req.body.loan_step} added successfully`,
+        timestamp: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      };
+
+      await File_Uplode.findOneAndUpdate(
+        { file_id: file_id },
+        {
+          $push: { logs: logEntry },
+          updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+        }
+      );
+
       res.status(200).json({
         statusCode: 200,
         message: "Step Created Successfully.",
@@ -164,7 +178,7 @@ router.get("/get_guarantor_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const res = await axios.get(
-            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...res.data.data, user_id: file.user_id });
         } catch (error) {

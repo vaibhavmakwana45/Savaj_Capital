@@ -3,6 +3,7 @@ const router = express.Router();
 const moment = require("moment");
 const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
+const File_Uplode = require("../../models/File/File_Uplode");
 
 router.post("/add-guarantor", async (req, res) => {
   const timestamp = Date.now();
@@ -46,7 +47,7 @@ router.post("/add-guarantor", async (req, res) => {
 
     const logEntry = {
       log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
-      message: "Guarantor added",
+      message: `New Guarantor added ${username}`,
       // guarantor_id: guarantorId,
       timestamp: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
     };

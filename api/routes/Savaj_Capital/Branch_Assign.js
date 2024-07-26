@@ -8,6 +8,8 @@ const Loan = require("../../models/Loan/Loan");
 const Loan_Type = require("../../models/Loan/Loan_Type");
 const AddUser = require("../../models/AddUser");
 const Notification = require("../../models/Notification/Notification");
+const SavajCapital_Branch = require("../../models/Savaj_Capital/SavajCapital_Branch");
+const SavajCapital_User = require("../../models/Savaj_Capital/SavajCapital_User");
 
 // router.post("/", async (req, res) => {
 //   try {
@@ -167,24 +169,43 @@ router.post("/", async (req, res) => {
       updatedAt: currentDate,
     });
 
-    // Save notification to database
     const savedNotification = await notification.save();
+
+    const branch = await SavajCapital_Branch.findOne({ branch_id: branch_id });
+    if (!branch) {
+      console.error("Savaj Branch not found for branch_id:", branch_id);
+      return res.status(404).json({
+        success: false,
+        message: "Savaj Branch not found.",
+      });
+    }
+
+    const branchUser = await SavajCapital_User.findOne({
+      branchuser_id: branchuser_id,
+    });
+
+    if (!branchUser) {
+      console.error(
+        "Savaj Barnch User not found for branchuser_id:",
+        branchuser_id
+      );
+      return res.status(404).json({
+        success: false,
+        message: "Savaj Barnch User User not found.",
+      });
+    }
+
     const logEntry = {
       log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
-      message: "Assigned to branch",
-      // bank_assign_id: uniqueId,
-      // bankuser_id,
-      // bank_id,
+      message: `Assigned to ${branch.branch_name} to ${branchUser.full_name}`,
       timestamp: currentDate,
     };
 
-    // Update the file document with the new log entry
     await File_Uplode.findOneAndUpdate(
       { file_id },
       { $push: { logs: logEntry }, updatedAt: currentDate }
     );
 
-    // Return success response
     res.json({
       success: true,
       data: {

@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
   IconButton,
+  Input,
 } from "@chakra-ui/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -43,6 +44,10 @@ function EditFile() {
   //   // loan_dispatch: false,
   //   // any other fields that need to be managed
   // });
+  const [dateData, setdateData] = useState({
+    start_date: "",
+    end_date: "",
+  });
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
@@ -60,6 +65,10 @@ function EditFile() {
           //   loan_dispatch: details.loan_dispatch,
           //   // set other necessary fields here
           // });
+          setdateData({
+            start_date: details.start_date || "",
+            end_date: details.end_date || "",
+          });
 
           const documentsWithCDN = details.documents.map((document) => ({
             ...document,
@@ -350,6 +359,8 @@ function EditFile() {
           loan_document_id: file.loan_document_id,
           key: file.key,
         })),
+        start_date: dateData.start_date,
+        end_date: dateData.end_date,
         // stemp_paper_print: formData.stemp_paper_print,
         // loan_dispatch: formData.loan_dispatch,
       };
@@ -372,6 +383,13 @@ function EditFile() {
   //     [name]: checked,
   //   }));
   // };
+  const handledateChange = (e) => {
+    const { name, value } = e.target;
+    setdateData((prevDateData) => ({
+      ...prevDateData,
+      [name]: value,
+    }));
+  };
 
   return (
     <>
@@ -400,7 +418,6 @@ function EditFile() {
                 ))}
               </Select>
             </FormControl>
-
             <FormControl id="loan_id" mt={4} isRequired>
               <FormLabel>Loan Type</FormLabel>
               <Select
@@ -416,7 +433,6 @@ function EditFile() {
                 ))}
               </Select>
             </FormControl>
-
             {/* Loan Subtype Select */}
             {selectedLoanType.is_subtype && (
               <FormControl id="loantype_id" mt={4}>
@@ -444,7 +460,24 @@ function EditFile() {
                 </Select>
               </FormControl>
             )}
-
+            <FormControl id="start_date" mt={4} isRequired>
+              <FormLabel>Start Date</FormLabel>
+              <Input
+                name="start_date"
+                type="date"
+                onChange={handledateChange}
+                value={dateData.start_date}
+              />
+            </FormControl>{" "}
+            <FormControl id="end_date" mt={4} isRequired>
+              <FormLabel>End Date</FormLabel>
+              <Input
+                name="end_date"
+                type="date"
+                onChange={handledateChange}
+                value={dateData.end_date}
+              />
+            </FormControl>
             <div>
               {Object.entries(groupedLoanDocuments).map(
                 ([title_id, documentGroups]) => (
