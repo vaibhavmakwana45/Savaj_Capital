@@ -1108,7 +1108,7 @@ function Files() {
                   {/* <Th>City</Th> */}
                   <Th>Loan</Th>
                   <Th>File Status</Th>
-                  {/* <Th>Current Step</Th> */}
+                  <Th>Current Step</Th>
                   <Th>Document Status</Th>
                   <Th></Th>
                   <Th>Action</Th>
@@ -1219,10 +1219,10 @@ function Files() {
                             </div> */}
                           </div>
                         </Td>
-                        {/* <Td style={{ fontSize: "14px" }}>
+                        <Td style={{ fontSize: "14px" }}>
                           {" "}
                           {file.running_step_name || "CIBIL"}
-                        </Td> */}
+                        </Td>
                         <Td>
                           {file.document_percentage != null &&
                           !isNaN(file.document_percentage) ? (
