@@ -2391,10 +2391,10 @@ function BankFileDetailPage() {
                       padding: "12px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
-                      backgroundColor: log.role.startsWith("bankuser")
+                      backgroundColor: log.role?.startsWith("bankuser")
                         ? "#f0f5ff" // Light red background for bankuser logs
                         : log.role === "superadmin" ||
-                          log.role.startsWith("savajuser")
+                          log.role?.startsWith("savajuser")
                         ? "#f0f5ff" // Light blue background for other roles
                         : "#fff", // Default white background
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
@@ -2411,9 +2411,9 @@ function BankFileDetailPage() {
                       <strong>
                         {log.role === "superadmin"
                           ? "Superadmin added this log:"
-                          : log.role.startsWith("savajuser")
+                          : log.role?.startsWith("savajuser")
                           ? `${log.role} added this log:`
-                          : log.role.startsWith("bankuser")
+                          : log.role?.startsWith("bankuser")
                           ? `${log.role} added this log:` // Display specific message for bankuser
                           : ""}
                       </strong>{" "}
@@ -2430,9 +2430,9 @@ function BankFileDetailPage() {
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
                     {((log.role === "superadmin" && accessType.superadmin_id) ||
-                      (log.role.startsWith("bankuser") &&
+                      (log.role?.startsWith("bankuser") &&
                         log.bankuser_id === accessType.bankuser_id) ||
-                      (log.role.startsWith("savajuser") &&
+                      (log.role?.startsWith("savajuser") &&
                         log.branchuser_id === accessType.branchuser_id)) && (
                       <Button
                         colorScheme="red"

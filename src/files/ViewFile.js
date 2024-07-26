@@ -2595,29 +2595,29 @@ function ViewFile() {
                       padding: "12px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
-                      backgroundColor: log.role.startsWith("bankuser")
+                      backgroundColor: log.role?.startsWith("bankuser")
                         ? "#f0f5ff"
                         : log.role === "superadmin" ||
-                          log.role.startsWith("savajuser")
+                          log.role?.startsWith("savajuser")
                         ? "#f0f5ff"
                         : "#fff",
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                      transition: "transform 0.2s",
+                      // transition: "transform 0.2s",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
+                    // onMouseEnter={(e) =>
+                    //   (e.currentTarget.style.transform = "scale(1.02)")
+                    // }
+                    // onMouseLeave={(e) =>
+                    //   (e.currentTarget.style.transform = "scale(1)")
+                    // }
                   >
                     <div>
                       <strong>
                         {log.role === "superadmin"
                           ? "Superadmin added this log:"
-                          : log.role.startsWith("savajuser")
+                          : log.role?.startsWith("savajuser")
                           ? `${log.role} added this log:`
-                          : log.role.startsWith("bankuser")
+                          : log.role?.startsWith("bankuser")
                           ? `${log.role} added this log:`
                           : ""}
                       </strong>{" "}
@@ -2634,9 +2634,9 @@ function ViewFile() {
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
                     {((log.role === "superadmin" && accessType.superadmin_id) ||
-                      (log.role.startsWith("bankuser") &&
+                      (log.role?.startsWith("bankuser") &&
                         log.bankuser_id === accessType.bankuser_id) ||
-                      (log.role.startsWith("savajuser") &&
+                      (log.role?.startsWith("savajuser") &&
                         log.branchuser_id === accessType.branchuser_id)) && (
                       <Button
                         colorScheme="red"
