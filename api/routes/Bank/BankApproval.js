@@ -49,6 +49,7 @@ const AddUser = require("../../models/AddUser");
 //     });
 //   }
 // });
+
 router.post("/", async (req, res) => {
   try {
     const { file_id, bank_id, bankuser_id, loan_id, user_id } = req.body;
@@ -107,7 +108,22 @@ router.post("/", async (req, res) => {
     });
 
     const savedNotification = await notification.save();
+    // Log entry for the assignment
+    const logEntry = {
+      log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+      message: "Assigned to bank",
+      // bank_assign_id: uniqueId,
+      // bankuser_id,
+      // bank_id,
+      timestamp: currentDate,
+    };
 
+    // Update the file document with the new log entry
+    await File_Uplode.findOneAndUpdate(
+      { file_id },
+      { $push: { logs: logEntry }, updatedAt: currentDate }
+    );
+    
     res.json({
       success: true,
       data: {
@@ -124,6 +140,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
 router.put("/:bank_assign_id", async (req, res) => {
   try {
     const { bank_assign_id } = req.params;

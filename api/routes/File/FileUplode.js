@@ -3395,7 +3395,20 @@ router.put("/updatestatus/:fileId", async (req, res) => {
         message: "Loan status not found.",
       });
     }
+    const logEntry = {
+      log_id: `${moment().unix()}_${Math.floor(Math.random() * 1000)}`,
+      message: "Status updated",
+      // status: status,
+      timestamp: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+    };
 
+    await File_Uplode.findOneAndUpdate(
+      { file_id: fileId },
+      {
+        $push: { logs: logEntry },
+        updatedAt: moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss"),
+      }
+    );
     const emailSubject = "File Status Updated";
     const emailContent = `
     <div style="font-family: Arial, sans-serif; color: #333;">
