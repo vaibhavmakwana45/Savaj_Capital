@@ -49,66 +49,69 @@ router.get("/data-count", async (req, res) => {
 
 router.get("/loan-files", async (req, res) => {
   try {
+
     const loans = await Loan.find().lean();
-    const enhancedLoans = [];
-    const allStatuses = await LoanStatus.find().lean();
+    
+    const [allStatuses, allLoanTypes, allFiles] = await Promise.all([
+      LoanStatus.find().lean(),
+      Loan_Type.find().lean(),
+      File_Uplode.find().lean()
+    ]);
 
-    for (const loan of loans) {
-      let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
-      const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
+    const loanTypeMap = allLoanTypes.reduce((map, loanType) => {
+      map[loanType.loan_id] = map[loanType.loan_id] || [];
+      map[loanType.loan_id].push(loanType);
+      return map;
+    }, {});
 
-      if (loanTypes.length === 0) {
-        loanTypes = [
-          { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
-        ];
-      }
+    const statusMap = allStatuses.reduce((map, status) => {
+      map[status.loanstatus_id] = status;
+      return map;
+    }, {});
 
-      for (const loanType of loanTypes) {
-        const filteredFiles = allFiles.filter(
-          (file) =>
-            loanType.loantype_id === "" ||
-            file.loantype_id === loanType.loantype_id
-        );
+    const enhancedLoans = loans.map(loan => {
+      const loanTypes = loanTypeMap[loan.loan_id] || [{ loan_type: "Unknown", subtype: "Main", loantype_id: "" }];
+      const allLoanFiles = allFiles.filter(file => file.loan_id === loan.loan_id);
+      
+      return loanTypes.map(loanType => {
+        const filteredFiles = allLoanFiles.filter(file => loanType.loantype_id === "" || file.loantype_id === loanType.loantype_id);
 
-        // Initialize statusCounts with all possible statuses and their colors
         const statusCounts = allStatuses.reduce((acc, status) => {
           acc[status.loanstatus] = { count: 0, color: status.color };
           return acc;
         }, {});
 
-        for (const file of filteredFiles) {
-          const loanStatus = allStatuses.find(
-            (status) => status.loanstatus_id === file.status
-          );
+        filteredFiles.forEach(file => {
+          const loanStatus = statusMap[file.status];
           if (loanStatus) {
             statusCounts[loanStatus.loanstatus].count++;
           }
-        }
+        });
 
-        enhancedLoans.push({
+        return {
           ...loan,
           loanType: loanType.loan_type,
           subtype: loanType.subtype || "Main",
-          files: filteredFiles.map((file) => ({
+          files: filteredFiles.map(file => ({
             file_id: file.file_id,
             status: file.status,
           })),
           fileCount: filteredFiles.length,
           loantype_id: loanType.loantype_id,
-          statusCounts: statusCounts, // Add status counts and colors to the loan data
-        });
-      }
-    }
+          statusCounts
+        };
+      });
+    }).flat();
 
-    const flattenedLoans = enhancedLoans.filter(
-      (loan) => loan.files.length > 0
-    );
+    // Filter loans with at least one file
+    const flattenedLoans = enhancedLoans.filter(loan => loan.files.length > 0);
     res.json(flattenedLoans);
   } catch (error) {
     console.error("Error fetching loan and file data:", error);
     res.status(500).send("Error in fetching loan and file data");
   }
 });
+
 
 // router.get("/loan-files", async (req, res) => {
 //   try {

@@ -259,7 +259,7 @@ router.post("/", async (req, res) => {
 //     const stepsPromises = data.map(async (item) => {
 //       try {
 //         const stepsResponse = await axios.get(
-//           `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+//           `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
 //         );
 //         const stepsData = stepsResponse.data.data;
 
@@ -501,7 +501,7 @@ router.post("/", async (req, res) => {
 //     const stepsPromises = data.map(async (item) => {
 //       try {
 //         const stepsResponse = await axios.get(
-//           `http://localhost:5882/api/file_upload/get_all_steps/${item.file_id}`
+//           `https://admin.savajcapital.com/api/file_upload/get_all_steps/${item.file_id}`
 //         );
 //         const stepsData = stepsResponse.data.data;
 
@@ -754,7 +754,7 @@ router.post("/", async (req, res) => {
 //         group.files.map(async (item) => {
 //           try {
 //             const stepsResponse = await axios.get(
-//               `http://localhost:5882/api/file_upload/get_all_steps/${item.file_id}`
+//               `https://admin.savajcapital.com/api/file_upload/get_all_steps/${item.file_id}`
 //             );
 //             const stepsData = stepsResponse.data.data;
 
@@ -1226,7 +1226,7 @@ router.get("/", async (req, res) => {
       },
       {
         $lookup: {
-          from: "compelete_steps",
+          from: "complete_steps",
           localField: "file_id",
           foreignField: "file_id",
           as: "complete_steps",
@@ -1238,6 +1238,25 @@ router.get("/", async (req, res) => {
           localField: "status",
           foreignField: "loanstatus_id",
           as: "loan_status_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loan_steps",
+          localField: "loan_step_id",
+          foreignField: "loan_step_id",
+          as: "loan_steps_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loan-documents",
+          let: { loan_id: "$loan_id", loantype_id: "$loantype_id" },
+          pipeline: [
+            { $match: { $expr: { $and: [ { $eq: ["$loan_id", "$$loan_id"] }, { $eq: ["$loantype_id", "$$loantype_id"] } ] } } },
+            { $unwind: "$document_ids" },
+          ],
+          as: "loan_documents_data",
         },
       },
     ];
@@ -1279,100 +1298,93 @@ router.get("/", async (req, res) => {
       });
     });
 
-    // Pre-fetch all loan steps data
     const loanSteps = await Loan_Step.find({}).lean();
     const loanStepsMap = new Map(loanSteps.map(step => [step.loan_step_id, step]));
 
-    // Pre-fetch document status
     const loanDocuments = await Loan_Documents.find({}).lean();
     const loanDocumentsMap = new Map(loanDocuments.map(doc => [doc.loan_document_id, doc]));
 
     const stepsPromises = data.map(async (item) => {
       const file = item;
-
       const loan = loanMap.get(file.loan_id);
 
       if (!file || !loan) return;
 
-      const steps = await Promise.all(
-        loan.loan_step_id.map(async (loan_step_id) => {
-          const stepData = loanStepsMap.get(loan_step_id);
-          if (!stepData) return null;
+      const steps = loan.loan_step_id.map((loan_step_id) => {
+        const stepData = loanStepsMap.get(loan_step_id);
+        if (!stepData) return null;
 
-          if (loan_step_id === "1715348523661") {
-            const loanIds = file.documents.map((item) => ({
-              loan_document_id: item.loan_document_id,
+        if (loan_step_id === "1715348523661") {
+          const loanIds = file.documents.map((item) => ({
+            loan_document_id: item.loan_document_id,
+            title_id: item.title_id,
+          }));
+
+          const { loan_id, loantype_id } = file;
+          const data2 = loanDocuments.filter(doc => doc.loan_id === loan_id && doc.loantype_id === loantype_id);
+
+          const loanDocumentIds = data2.flatMap((item) =>
+            item.document_ids.map((loan_document_id) => ({
+              loan_document_id,
               title_id: item.title_id,
-            }));
+            }))
+          );
 
-            const { loan_id, loantype_id } = file;
-            const data2 = loanDocuments.filter(doc => doc.loan_id === loan_id && doc.loantype_id === loantype_id);
+          const commonIds = loanIds.filter((id) =>
+            loanDocumentIds.some(
+              (docId) =>
+                docId.loan_document_id === id.loan_document_id &&
+                docId.title_id === id.title_id
+            )
+          );
 
-            const loanDocumentIds = data2.flatMap((item) =>
-              item.document_ids.map((loan_document_id) => ({
-                loan_document_id,
-                title_id: item.title_id,
-              }))
-            );
-
-            const commonIds = loanIds.filter((id) =>
-              loanDocumentIds.some(
+          const differentIds = loanDocumentIds.filter(
+            (id) =>
+              !loanIds.some(
                 (docId) =>
                   docId.loan_document_id === id.loan_document_id &&
                   docId.title_id === id.title_id
               )
-            );
+          );
 
-            const differentIds = loanDocumentIds.filter(
-              (id) =>
-                !loanIds.some(
-                  (docId) =>
-                    docId.loan_document_id === id.loan_document_id &&
-                    docId.title_id === id.title_id
-                )
-            );
+          const approvedObject = [];
+          const pendingObject = [];
 
-            const approvedObject = [];
-            const pendingObject = [];
-
-            for (const item of commonIds) {
-              const document = loanDocumentsMap.get(item.loan_document_id);
-              approvedObject.push({
-                name: document?.loan_document,
-              });
-            }
-
-            for (const item of differentIds) {
-              const document = loanDocumentsMap.get(item.loan_document_id);
-              pendingObject.push({
-                name: document?.loan_document,
-              });
-            }
-
-            const documentStatus =
-              pendingObject.length > 0
-                ? "active"
-                : approvedObject.length === 0
-                ? "active"
-                : "complete";
-
-            return { loan_step: stepData.loan_step, status: documentStatus };
-          } else {
-            const completedStep = await Compelete_Step.findOne({
-              loan_step_id,
-              file_id: file.file_id,
-              user_id: file.user_id,
-            }).lean();
-
-            let status = "active";
-            if (completedStep) {
-              status = completedStep.status;
-            }
-
-            return { loan_step: stepData.loan_step, status };
+          for (const item of commonIds) {
+            const document = loanDocumentsMap.get(item.loan_document_id);
+            approvedObject.push({
+              name: document?.loan_document,
+            });
           }
-        })
-      );
+
+          for (const item of differentIds) {
+            const document = loanDocumentsMap.get(item.loan_document_id);
+            pendingObject.push({
+              name: document?.loan_document,
+            });
+          }
+
+          const documentStatus =
+            pendingObject.length > 0
+              ? "active"
+              : approvedObject.length === 0
+              ? "active"
+              : "complete";
+
+          return { loan_step: stepData.loan_step, status: documentStatus };
+        } else {
+          const completedStep = file.complete_steps.find(
+            (step) => step.loan_step_id === loan_step_id
+          );
+
+          let status = "active";
+          if (completedStep) {
+            status = completedStep.status;
+          }
+
+          return { loan_step: stepData.loan_step, status };
+        }
+      });
 
       const filteredSteps = steps.filter((step) => step !== null);
 
@@ -1410,16 +1422,11 @@ router.get("/", async (req, res) => {
         item.color = loanStatus.color;
       }
 
-      const countInfo = await Loan_Documents.find({
-        loan_id: item.loan_id,
-        loantype_id: item.loantype_id,
-      }).lean();
-
-      const approvedCount = item.documents.filter(doc => countInfo.some(
-        c => c.document_ids.includes(doc.loan_document_id)
+      const approvedCount = item.documents.filter(doc => item.loan_documents_data.some(
+        c => c.document_ids === doc.loan_document_id
       )).length;
 
-      const totalCount = countInfo.flatMap(c => c.document_ids).length;
+      const totalCount = item.loan_documents_data.length;
       const documentPercentage = parseInt((approvedCount * 100) / totalCount);
       
       item.document_percentage = documentPercentage;
@@ -1456,6 +1463,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 router.get("/get_all_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
@@ -1483,7 +1491,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
@@ -2044,7 +2052,7 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
@@ -2324,7 +2332,7 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
     const stepsPromises = data.map(async (item) => {
       try {
         const stepsResponse = await axios.get(
-          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
+          `https://admin.savajcapital.com/api/loan_step/get_all_steps/${item.file_id}`
         );
         const stepsData = stepsResponse.data.data;
 
