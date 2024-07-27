@@ -217,7 +217,7 @@ export default function SavajCapitalDashboard() {
         `/allcount/loan-files-scbranch/${accessType.state}/${accessType.city}/${accessType.branchuser_id}`
       );
       setApiData(response.data);
-
+  
       const totalAmountPromises = response.data.map(async (loan) => {
         const { loan_id, loantype_id } = loan;
 
@@ -266,10 +266,18 @@ export default function SavajCapitalDashboard() {
             <Card
               key={loan.loan_id}
               minH="125px"
-              style={{ cursor: "pointer", border: "1px solid black" }}
+              style={{
+                cursor: "pointer",
+                border: "1px solid #b19552",
+                background: "#d4c6a5",
+              }}
               onClick={() =>
                 history.push(`/savajcapitaluser/userfile`, {
-                  state: { loan: loan.loan, loan_id: loan.loan_id },
+                  state: {
+                    loan: loan.loan,
+                    loan_id: loan.loan_id,
+                    loantype_id: loan.loantype_id,
+                  },
                 })
               }
             >
@@ -284,7 +292,7 @@ export default function SavajCapitalDashboard() {
                   <Stat me="auto">
                     <StatLabel
                       fontSize="xs"
-                      color="gray.400"
+                     
                       fontWeight="bold"
                       textTransform="uppercase"
                     >
@@ -295,11 +303,11 @@ export default function SavajCapitalDashboard() {
                     <Flex>
                       <StatNumber
                         fontSize="lg"
-                        color={textColor}
+                    
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
-                        {loan.fileCount || 0}
+                        {loan.fileCount} files
                       </StatNumber>
                     </Flex>
                     <Text as="span" color="green.400" fontWeight="bold">
@@ -314,10 +322,31 @@ export default function SavajCapitalDashboard() {
                     as="box"
                     h={"45px"}
                     w={"45px"}
-                    bg={iconBlue}
+                    bg={"#212529"}
                   >
                     <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
                   </IconBox>
+                </Flex>
+
+                {/* Display counts for all statuses */}
+                <Flex mt="1px" wrap="wrap">
+                  {Object.entries(loan.statusCounts)
+                    .filter(([_, { count }]) => count > 0)
+                    .map(([status, { count, color }]) => (
+                      <Flex
+                        key={status}
+                        direction="column"
+                        align="center"
+                        mr="5px"
+                      >
+                        <Text fontSize="sm" fontWeight="bold" color={color}>
+                          {status}
+                        </Text>
+                        <Text fontSize="md">
+                          {count}
+                        </Text>
+                      </Flex>
+                    ))}
                 </Flex>
               </Flex>
             </Card>

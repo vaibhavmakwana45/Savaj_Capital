@@ -49,13 +49,12 @@ router.get("/data-count", async (req, res) => {
 
 router.get("/loan-files", async (req, res) => {
   try {
-
     const loans = await Loan.find().lean();
-    
+
     const [allStatuses, allLoanTypes, allFiles] = await Promise.all([
       LoanStatus.find().lean(),
       Loan_Type.find().lean(),
-      File_Uplode.find().lean()
+      File_Uplode.find().lean(),
     ]);
 
     const loanTypeMap = allLoanTypes.reduce((map, loanType) => {
@@ -69,224 +68,59 @@ router.get("/loan-files", async (req, res) => {
       return map;
     }, {});
 
-    const enhancedLoans = loans.map(loan => {
-      const loanTypes = loanTypeMap[loan.loan_id] || [{ loan_type: "Unknown", subtype: "Main", loantype_id: "" }];
-      const allLoanFiles = allFiles.filter(file => file.loan_id === loan.loan_id);
-      
-      return loanTypes.map(loanType => {
-        const filteredFiles = allLoanFiles.filter(file => loanType.loantype_id === "" || file.loantype_id === loanType.loantype_id);
+    const enhancedLoans = loans
+      .map((loan) => {
+        const loanTypes = loanTypeMap[loan.loan_id] || [
+          { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
+        ];
+        const allLoanFiles = allFiles.filter(
+          (file) => file.loan_id === loan.loan_id
+        );
 
-        const statusCounts = allStatuses.reduce((acc, status) => {
-          acc[status.loanstatus] = { count: 0, color: status.color };
-          return acc;
-        }, {});
+        return loanTypes.map((loanType) => {
+          const filteredFiles = allLoanFiles.filter(
+            (file) =>
+              loanType.loantype_id === "" ||
+              file.loantype_id === loanType.loantype_id
+          );
 
-        filteredFiles.forEach(file => {
-          const loanStatus = statusMap[file.status];
-          if (loanStatus) {
-            statusCounts[loanStatus.loanstatus].count++;
-          }
+          const statusCounts = allStatuses.reduce((acc, status) => {
+            acc[status.loanstatus] = { count: 0, color: status.color };
+            return acc;
+          }, {});
+
+          filteredFiles.forEach((file) => {
+            const loanStatus = statusMap[file.status];
+            if (loanStatus) {
+              statusCounts[loanStatus.loanstatus].count++;
+            }
+          });
+
+          return {
+            ...loan,
+            loanType: loanType.loan_type,
+            subtype: loanType.subtype || "Main",
+            files: filteredFiles.map((file) => ({
+              file_id: file.file_id,
+              status: file.status,
+            })),
+            fileCount: filteredFiles.length,
+            loantype_id: loanType.loantype_id,
+            statusCounts,
+          };
         });
+      })
+      .flat();
 
-        return {
-          ...loan,
-          loanType: loanType.loan_type,
-          subtype: loanType.subtype || "Main",
-          files: filteredFiles.map(file => ({
-            file_id: file.file_id,
-            status: file.status,
-          })),
-          fileCount: filteredFiles.length,
-          loantype_id: loanType.loantype_id,
-          statusCounts
-        };
-      });
-    }).flat();
-
-    // Filter loans with at least one file
-    const flattenedLoans = enhancedLoans.filter(loan => loan.files.length > 0);
+    const flattenedLoans = enhancedLoans.filter(
+      (loan) => loan.files.length > 0
+    );
     res.json(flattenedLoans);
   } catch (error) {
     console.error("Error fetching loan and file data:", error);
     res.status(500).send("Error in fetching loan and file data");
   }
 });
-
-
-// router.get("/loan-files", async (req, res) => {
-//   try {
-//     const loans = await Loan.find().lean();
-//     const enhancedLoans = [];
-
-//     for (const loan of loans) {
-//       let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
-//       const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
-
-//       if (loanTypes.length === 0) {
-//         loanTypes = [
-//           { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
-//         ];
-//       }
-
-//       for (const loanType of loanTypes) {
-//         const filteredFiles = allFiles.filter(
-//           (file) =>
-//             loanType.loantype_id === "" ||
-//             file.loantype_id === loanType.loantype_id
-//         );
-
-//         // Counting statuses
-//         const statusCounts = { Approved: 0, Running: 0, Rejected: 0 };
-//         for (const file of filteredFiles) {
-//           const loanStatus = await LoanStatus.findOne({
-//             loanstatus_id: file.status,
-//           }).lean();
-//           if (loanStatus) {
-//             if (loanStatus.loanstatus === "Approved") {
-//               statusCounts.Approved++;
-//             } else if (loanStatus.loanstatus === "Running") {
-//               statusCounts.Running++;
-//             } else if (loanStatus.loanstatus === "Rejected") {
-//               statusCounts.Rejected++;
-//             }
-//           }
-//         }
-
-//         enhancedLoans.push({
-//           ...loan,
-//           loanType: loanType.loan_type,
-//           subtype: loanType.subtype || "Main",
-//           files: filteredFiles.map((file) => ({
-//             file_id: file.file_id,
-//             status: file.status,
-//           })),
-//           fileCount: filteredFiles.length,
-//           loantype_id: loanType.loantype_id,
-//           statusCounts: statusCounts, // Add status counts to the loan data
-//         });
-//       }
-//     }
-
-//     const flattenedLoans = enhancedLoans.filter(
-//       (loan) => loan.files.length > 0
-//     );
-//     res.json(flattenedLoans);
-//   } catch (error) {
-//     console.error("Error fetching loan and file data:", error);
-//     res.status(500).send("Error in fetching loan and file data");
-//   }
-// });
-
-// router.get("/loan-files", async (req, res) => {
-//   try {
-//     const loans = await Loan.find().lean();
-//     const enhancedLoans = [];
-
-//     for (const loan of loans) {
-//       let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
-//       const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
-
-//       if (loanTypes.length === 0) {
-//         loanTypes = [
-//           { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
-//         ];
-//       }
-
-//       for (const loanType of loanTypes) {
-//         const filteredFiles = allFiles.filter(
-//           (file) =>
-//             loanType.loantype_id === "" ||
-//             file.loantype_id === loanType.loantype_id
-//         );
-//         enhancedLoans.push({
-//           ...loan,
-//           loanType: loanType.loan_type,
-//           subtype: loanType.subtype || "Main",
-//           files: filteredFiles.map((file) => ({
-//             filename: file.filename,
-//             typename: file.typename,
-//           })),
-//           fileCount: filteredFiles.length,
-//           loantype_id: loanType.loantype_id,
-//         });
-//       }
-//     }
-
-//     const flattenedLoans = enhancedLoans.filter(
-//       (loan) => loan.files.length > 0
-//     );
-//     res.json(flattenedLoans);
-//   } catch (error) {
-//     console.error("Error fetching loan and file data:", error);
-//     res.status(500).send("Error in fetching loan and file data");
-//   }
-// });
-
-// router.get("/loan-files-scbranch/:state/:city/:loan_ids?", async (req, res) => {
-//   try {
-//     const { state, city, loan_ids } = req.params;
-
-//     const loanIdsArray = loan_ids ? loan_ids.split(",") : [];
-
-//     let loans;
-//     if (loanIdsArray.length > 0) {
-//       loans = await Loan.find({ loan_id: { $in: loanIdsArray } }).lean();
-//     } else {
-//       loans = await Loan.find().lean();
-//     }
-
-//     const enhancedLoans = [];
-
-//     for (const loan of loans) {
-//       let loanTypes = await Loan_Type.find({ loan_id: loan.loan_id }).lean();
-//       const allFiles = await File_Uplode.find({ loan_id: loan.loan_id }).lean();
-
-//       if (loanTypes.length === 0) {
-//         loanTypes = [
-//           { loan_type: "Unknown", subtype: "Main", loantype_id: "" },
-//         ];
-//       }
-
-//       for (const loanType of loanTypes) {
-//         const filteredFiles = allFiles.filter(
-//           (file) =>
-//             loanType.loantype_id === "" ||
-//             file.loantype_id === loanType.loantype_id
-//         );
-
-//         const stateCityFiles = [];
-//         for (const file of filteredFiles) {
-//           const user = await AddUser.findOne({ user_id: file.user_id }).lean();
-//           if (user && user.state === state && user.city === city) {
-//             stateCityFiles.push(file);
-//           }
-//         }
-
-//         enhancedLoans.push({
-//           ...loan,
-//           loanType: loanType.loan_type,
-//           subtype: loanType.subtype || "Main",
-//           state,
-//           city,
-//           files: stateCityFiles.map((file) => ({
-//             filename: file.filename,
-//             typename: file.typename,
-//           })),
-//           fileCount: stateCityFiles.length,
-//           loantype_id: loanType.loantype_id,
-//         });
-//       }
-//     }
-
-//     const flattenedLoans = enhancedLoans.filter(
-//       (loan) => loan.files.length > 0
-//     );
-//     res.json(flattenedLoans);
-//   } catch (error) {
-//     console.error("Error fetching loan and file data:", error);
-//     res.status(500).send("Error in fetching loan and file data");
-//   }
-// });
 
 router.get(
   "/loan-files-scbranch/:state/:city/:branchuser_id?",
@@ -297,86 +131,140 @@ router.get(
       const branchAssignments = await Branch_Assign.find({
         branchuser_id,
       }).lean();
+      const allStatuses = await LoanStatus.find().lean();
+
+      const statusMap = allStatuses.reduce((map, status) => {
+        map[status.loanstatus_id] = status;
+        return map;
+      }, {});
+
+      const loanIds = [...new Set(branchAssignments.map((a) => a.loan_id))];
+
+      const loans = await Loan.find({ loan_id: { $in: loanIds } }).lean();
+      const loanMap = loans.reduce((map, loan) => {
+        map[loan.loan_id] = loan;
+        return map;
+      }, {});
+
+      const loanTypeIds = [
+        ...new Set(branchAssignments.map((a) => a.loantype_id)),
+      ];
+
+      const loanTypes = await Loan_Type.find({
+        loantype_id: { $in: loanTypeIds },
+      }).lean();
+
+      const loanTypeMap = loanTypes.reduce((map, loanType) => {
+        map[loanType.loantype_id] = loanType;
+        return map;
+      }, {});
+
+      const allFiles = await File_Uplode.find({
+        loan_id: { $in: loanIds },
+      }).lean();
+
+      const users = await AddUser.find({
+        user_id: { $in: allFiles.map((file) => file.user_id) },
+      }).lean();
+      const userMap = users.reduce((map, user) => {
+        map[user.user_id] = user;
+        return map;
+      }, {});
 
       const enhancedLoans = [];
 
       for (const assignment of branchAssignments) {
-        const loan = await Loan.findOne({ loan_id: assignment.loan_id }).lean();
+        const loan = loanMap[assignment.loan_id];
+        if (!loan) continue;
 
-        const loanTypes = await Loan_Type.find({
-          loan_id: loan.loan_id,
-          loantype_id: assignment.loantype_id,
-        }).lean();
+        const loanType = loanTypeMap[assignment.loantype_id] || {
+          loan_type: "Unknown",
+          subtype: "Main",
+          loantype_id: "",
+        };
 
-        const allFiles = await File_Uplode.find({
-          loan_id: loan.loan_id,
-        }).lean();
+        const filteredFiles = allFiles.filter(
+          (file) =>
+            file.loan_id === loan.loan_id &&
+            file.loantype_id === assignment.loantype_id
+        );
 
+        const stateCityFiles = [];
+        const branchAssignmentFiles = [];
         let branchAssignmentFileCount = 0;
 
-        if (loanTypes.length === 0) {
-          loanTypes.push({
-            loan_type: "Unknown",
-            subtype: "Main",
-            loantype_id: "",
-          });
-        }
+        for (const file of filteredFiles) {
+          const user = userMap[file.user_id];
+          if (user && user.state === state && user.city === city) {
+            stateCityFiles.push({
+              file_id: file.file_id,
+              filename: file.filename,
+              typename: file.typename,
+              status: file.status,
+            });
 
-        for (const loanType of loanTypes) {
-          const filteredFiles = allFiles.filter(
-            (file) => file.loantype_id === loanType.loantype_id
-          );
-
-          const stateCityFiles = [];
-          for (const file of filteredFiles) {
-            const user = await AddUser.findOne({
-              user_id: file.user_id,
-            }).lean();
-            if (user && user.state === state && user.city === city) {
-              stateCityFiles.push({
-                filename: file.filename,
-                typename: file.typename,
-              });
-
-              if (assignment.file_id.includes(file.file_id)) {
-                branchAssignmentFileCount++;
-              }
+            if (assignment.file_id.includes(file.file_id)) {
+              branchAssignmentFiles.push(file);
+              branchAssignmentFileCount++;
             }
           }
-
-          enhancedLoans.push({
-            ...loan,
-            loanType: loanType.loan_type,
-            subtype: loanType.subtype || "Main",
-            state,
-            city,
-            files: stateCityFiles,
-            fileCount: branchAssignmentFileCount,
-            loantype_id: loanType.loantype_id,
-          });
         }
+
+        const statusCounts = branchAssignmentFiles.reduce((acc, file) => {
+          const loanStatus = statusMap[file.status];
+          if (loanStatus) {
+            if (!acc[loanStatus.loanstatus]) {
+              acc[loanStatus.loanstatus] = {
+                count: 0,
+                color: loanStatus.color,
+              };
+            }
+            acc[loanStatus.loanstatus].count++;
+          }
+          return acc;
+        }, {});
+
+        enhancedLoans.push({
+          ...loan,
+          loanType: loanType.loan_type,
+          subtype: loanType.subtype || "Main",
+          state,
+          city,
+          files: stateCityFiles,
+          fileCount: branchAssignmentFileCount,
+          loantype_id: loanType.loantype_id,
+          statusCounts,
+        });
       }
 
       const consolidatedLoans = [];
-      const loanMap = new Map();
+      const loanMapForConsolidation = new Map();
 
       for (const loan of enhancedLoans) {
         if (loan.loanType === "Unknown" && loan.loantype_id === "") {
-          if (loanMap.has(loan.loan_id)) {
-            const existingLoan = loanMap.get(loan.loan_id);
+          if (loanMapForConsolidation.has(loan.loan_id)) {
+            const existingLoan = loanMapForConsolidation.get(loan.loan_id);
             existingLoan.fileCount += loan.fileCount;
             existingLoan.files.push(...loan.files);
+            Object.keys(loan.statusCounts).forEach((status) => {
+              if (!existingLoan.statusCounts[status]) {
+                existingLoan.statusCounts[status] = {
+                  count: 0,
+                  color: loan.statusCounts[status].color,
+                };
+              }
+              existingLoan.statusCounts[status].count +=
+                loan.statusCounts[status].count;
+            });
           } else {
-            loanMap.set(loan.loan_id, { ...loan });
+            loanMapForConsolidation.set(loan.loan_id, { ...loan });
           }
         } else {
           consolidatedLoans.push(loan);
         }
       }
 
-      for (const loan of loanMap.values()) {
-        consolidatedLoans.push(loan);
-      }
+      consolidatedLoans.push(...loanMapForConsolidation.values());
 
       const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
@@ -504,18 +392,22 @@ router.get("/files-within-date-range", async (req, res) => {
         .json({ message: "No files found within the date range." });
     }
 
-    const enhancedFiles = await Promise.all(files.map(async (file) => {
-      const loan = await Loan.findOne({ loan_id: file.loan_id }).lean();
-      const user = await AddUser.findOne({ user_id: file.user_id }).lean();
-      const loantype = file.loantype_id ? await Loan_Type.findOne({loantype_id: file.loantype_id }).lean() : null;
+    const enhancedFiles = await Promise.all(
+      files.map(async (file) => {
+        const loan = await Loan.findOne({ loan_id: file.loan_id }).lean();
+        const user = await AddUser.findOne({ user_id: file.user_id }).lean();
+        const loantype = file.loantype_id
+          ? await Loan_Type.findOne({ loantype_id: file.loantype_id }).lean()
+          : null;
 
-      return {
-        ...file,
-        loan,
-        user,
-        loantype,
-      };
-    }));
+        return {
+          ...file,
+          loan,
+          user,
+          loantype,
+        };
+      })
+    );
 
     res.json(enhancedFiles);
   } catch (error) {

@@ -306,14 +306,12 @@ function Files() {
       try {
         let url = "/file_upload/amounts";
 
-        // Append selectedLoan or loan_id to URL if it's not "All Loan Types"
         if (selectedLoan && selectedLoan !== "All Loan Types") {
           url += `/${selectedLoan}`;
         } else if (loan_id && loan_id !== "All Loan Types") {
           url += `/${loan_id}`;
         }
 
-        // Append selectedLoanSubType or loantype_id to URL if it's not "All Loan Subtypes"
         if (
           selectedLoanSubType &&
           selectedLoanSubType !== "All Loan Subtypes"
