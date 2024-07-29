@@ -335,81 +335,92 @@ function SavajCapitalBranchTable() {
           <Modal isOpen={showUserDetails} onClose={handleCloseTitle} size="5xl">
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader bg="#b19552" color="white" py={4} textAlign="center">
+              <ModalHeader color="black" py={4}>
                 Branch Users
               </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Box maxHeight="400px" overflowY="auto">
-                  {selectedBankUsers.map((user) => (
-                    <Box
-                      key={user._id}
-                      p={6}
-                      mb={4}
-                      borderWidth="1px"
-                      borderRadius="lg"
-                      boxShadow="md"
-                      bg="white"
-                      transition="transform 0.2s"
-                      // _hover={{ transform: "scale(1.02)", boxShadow: "lg" }}
-                    >
-                      <Text
-                        fontWeight="bold"
-                        fontSize="xl"
-                        mb={2}
-                        color="#b19552"
+                <Box maxHeight="500px" overflowY="auto">
+                  {selectedBankUsers.length > 0 ? (
+                    selectedBankUsers.map((user) => (
+                      <Box
+                        key={user._id}
+                        p={6}
+                        mb={4}
+                        borderWidth="1px"
+                        borderRadius="lg"
+                        boxShadow="md"
+                        bg="white"
+                        transition="transform 0.2s"
+                        // _hover={{ transform: "scale(1.02)", boxShadow: "lg" }}
                       >
-                        {user.full_name}
-                      </Text>
-                      <Text mb={1}>
-                        <strong>Email:</strong> {user.email}
-                      </Text>
-                      <Text mb={1}>
-                        <strong>City:</strong> {user.city}
-                      </Text>
-                      <Text mb={1}>
-                        <strong>State:</strong> {user.state}
-                      </Text>
-                      <Text mb={1}>
-                        <strong>Mobile:</strong> {user.mobile}
-                      </Text>
-                      {user.files && user.files.length > 0 && (
-                        <>
-                          <Text fontWeight="bold" mt={4} mb={2} color="#b19552">
-                            Assigned Files:
-                          </Text>
-                          <Table variant="simple" size="sm">
-                            <Thead bg="gray.200">
-                              <Tr>
-                                <Th>File ID</Th>
-                                <Th>Username</Th>
-                                <Th>Loan</Th>
-                                <Th>Status</Th>
-                              </Tr>
-                            </Thead>
-                            <Tbody>
-                              {user.files.map((file) => (
-                                <Tr key={file.file_id}>
-                                  <Td>{file.file_id}</Td>
-                                  <Td>
-                                    {file.file_details.user_details.username}
-                                  </Td>
-                                  <Td>{file.file_details.loan_details.loan}</Td>
-                                  <Td>
-                                    <Text
-                                      color={file.file_details.status_color}
-                                    >
-                                      {file.file_details.status}
-                                    </Text>
-                                  </Td>
+                        <Text
+                          fontWeight="bold"
+                          fontSize="xl"
+                          mb={2}
+                          color="#b19552"
+                        >
+                          {user.full_name}
+                        </Text>
+                        <Text mb={1}>
+                          <strong>Email:</strong> {user.email}
+                        </Text>
+                        <Text mb={1}>
+                          <strong>City:</strong> {user.city}
+                        </Text>
+                        <Text mb={1}>
+                          <strong>State:</strong> {user.state}
+                        </Text>
+                        <Text mb={1}>
+                          <strong>Mobile:</strong> {user.mobile}
+                        </Text>
+                        {user.files && user.files.length > 0 && (
+                          <>
+                            <Text
+                              fontWeight="bold"
+                              mt={4}
+                              mb={2}
+                              color="#b19552"
+                            >
+                              Assigned Files:
+                            </Text>
+                            <Table variant="simple" size="sm">
+                              <Thead bg="gray.200">
+                                <Tr>
+                                  <Th>File ID</Th>
+                                  <Th>Username</Th>
+                                  <Th>Loan</Th>
+                                  <Th>Status</Th>
                                 </Tr>
-                              ))}
-                            </Tbody>
-                          </Table>
-                        </>
-                      )}
-                    </Box>
-                  ))}
+                              </Thead>
+                              <Tbody>
+                                {user.files.map((file) => (
+                                  <Tr key={file.file_id}>
+                                    <Td>{file.file_id}</Td>
+                                    <Td>
+                                      {file.file_details.user_details.username}
+                                    </Td>
+                                    <Td>
+                                      {file.file_details.loan_details.loan}
+                                    </Td>
+                                    <Td>
+                                      <Text
+                                        color={file.file_details.status_color}
+                                      >
+                                        {file.file_details.status}
+                                      </Text>
+                                    </Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
+                          </>
+                        )}
+                      </Box>
+                    ))
+                  ) : (
+                    <Text>No users available.</Text>
+                  )}
                 </Box>
               </ModalBody>
               <ModalFooter>

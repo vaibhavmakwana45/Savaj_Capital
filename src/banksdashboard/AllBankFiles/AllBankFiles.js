@@ -61,7 +61,7 @@ function AllBankFiles() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLoan, setSelectedLoan] = useState("All Loan Types");
   const location = useLocation();
-  const { loan, loan_id } = location?.state?.state || {};
+  const { loan, loan_id, loantype_id } = location?.state?.state || {};
   const [loans, setLoans] = useState([]);
   const [selectedStatusSearch, setSelectedStatusSearch] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -73,9 +73,9 @@ function AllBankFiles() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-      "IN",
-      states.find((state) => state.name === selectedState)?.isoCode
-    )
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
     : [];
 
   const handleStateChange = (event) => {
@@ -112,13 +112,44 @@ function AllBankFiles() {
   }, []);
 
   useEffect(() => {
-    if (loan_id) {
-      const timeout = setTimeout(() => {
-        setSelectedLoan(loan_id);
-      }, 100);
-      return () => clearTimeout(timeout);
+    if (location?.state?.state) {
+      const { loan_id, loantype_id } = location.state.state;
+      setSelectedLoan(loan_id || "All Loan Types");
+
+      if (loantype_id) {
+        setSelectedLoanSubType(loantype_id);
+      }
     }
-  }, [loan_id, loans, loan]);
+  }, [location?.state?.state]);
+
+  const [loanSubtypes, setLoanSubtypes] = useState([]);
+  const [selectedLoanSubType, setSelectedLoanSubType] = useState("");
+
+  useEffect(() => {
+    if (selectedLoan) {
+      const selectedLoanObj = loans.find(
+        (loan) => loan.loan_id === selectedLoan
+      );
+      if (selectedLoanObj && selectedLoanObj.is_subtype) {
+        const fetchSubtypes = async () => {
+          try {
+            const subtypeResponse = await AxiosInstance.get(
+              `/loan_type/loan_type/${selectedLoan}`
+            );
+            setLoanSubtypes(subtypeResponse.data.data);
+          } catch (error) {
+            console.error("Error fetching subtypes:", error);
+          }
+        };
+
+        fetchSubtypes();
+      } else {
+        setLoanSubtypes([]);
+      }
+    } else {
+      setLoanSubtypes([]);
+    }
+  }, [selectedLoan, loans]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -154,9 +185,16 @@ function AllBankFiles() {
                   ? ""
                   : loan_id
                 : selectedLoan === "All Loan Types"
-                  ? ""
-                  : selectedLoan,
+                ? ""
+                : selectedLoan,
               selectedStatus: selectedStatusSearch,
+              selectedSubtype: loantype_id
+                ? loantype_id === "All Loan Subtypes"
+                  ? ""
+                  : loantype_id
+                : selectedLoanSubType === "All Loan Subtypes"
+                ? ""
+                : selectedLoanSubType,
               selectedState,
               selectedCity,
             },
@@ -175,18 +213,24 @@ function AllBankFiles() {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(); // Initial fetch when component mounts
   }, [
     currentPage,
     itemsPerPage,
     searchTerm,
     selectedLoan,
     selectedStatusSearch,
+    selectedLoanSubType,
     selectedState,
     selectedCity,
     loan_id,
+    loantype_id,
     accessType,
   ]);
+
+  useEffect(() => {
+    setSelectedLoanSubType("");
+  }, [selectedLoan]);
 
   const handleNextPage = () => {
     const nextPage = currentPage + 1;
@@ -273,29 +317,56 @@ function AllBankFiles() {
   //total loan amount
   const [totalAmount, setTotalAmount] = useState(null);
   const [totalFiles, setTotalFiles] = useState(null);
+  const [statusCounts, setStatusCounts] = useState(null);
 
   const fetchTotalAmount = async () => {
     try {
-      let url = `/file_upload/amounts`;
-      if (loan_id) {
+      let url = "/file_upload/bankamounts";
+
+      if (accessType.bankuser_id) {
+        url += `/${accessType.bankuser_id}`;
+      }
+
+      if (selectedLoan && selectedLoan !== "All Loan Types") {
+        url += `/${selectedLoan}`;
+      } else if (loan_id && loan_id !== "All Loan Types") {
         url += `/${loan_id}`;
+      }
+
+      if (selectedLoanSubType && selectedLoanSubType !== "All Loan Subtypes") {
+        url += `/${selectedLoanSubType}`;
+      } else if (loantype_id && loantype_id !== "All Loan Subtypes") {
+        url += `/${loantype_id}`;
       }
 
       const response = await AxiosInstance.get(url, {
         params: {
           state: selectedState,
           city: selectedCity,
+          selectedStatusSearch: selectedStatusSearch,
         },
       });
 
-      const { totalAmount } = response.data;
-      const { fileCount } = response.data;
+      const { totalAmount, fileCount, statusCounts } = response.data;
       setTotalAmount(totalAmount);
       setTotalFiles(fileCount);
+      setStatusCounts(statusCounts);
     } catch (error) {
       console.error("Error fetching total amount:", error);
     }
   };
+  useEffect(() => {
+    fetchTotalAmount();
+  }, [
+    selectedLoan,
+    selectedLoanSubType,
+    selectedState,
+    selectedCity,
+    selectedStatusSearch,
+    loantype_id,
+    loan_id,
+    accessType,
+  ]);
 
   useEffect(() => {
     fetchTotalAmount();
@@ -418,7 +489,7 @@ function AllBankFiles() {
     setIsUpdateDialogOpen(true);
   };
 
-  const [allLoanStatus, setAllLoanStatus] = useState([]); // Initialize as an empty array
+  const [allLoanStatus, setAllLoanStatus] = useState([]);
   const [selecteLoanStatusId, setSelecteLoanStatusId] = useState("");
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [selecteUpdateFileId, setSelecteUpdateFileId] = useState(null);
@@ -575,7 +646,7 @@ function AllBankFiles() {
         loan_id: selectedLoanId,
         loantype_id: selectedLoanSubtypeId,
         branch_id: selectedBranchId,
-        branchuser_id: selectedBranchUserId,
+        bankuser_id: selectedBranchUserId,
         user_id: selectedUserId,
       };
 
@@ -658,7 +729,7 @@ function AllBankFiles() {
 
   useEffect(() => {
     fetchBanks();
-  }, []); // Fetch banks on component mount
+  }, []);
 
   useEffect(() => {
     const fetchBankUser = async () => {
@@ -715,6 +786,10 @@ function AllBankFiles() {
     }
   };
 
+  const getLoanName = (loanId) => {
+    const loan = loans.find((loan) => loan.loan_id === loanId);
+    return loan ? loan.loan : "All Files";
+  };
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -732,10 +807,9 @@ function AllBankFiles() {
                         bgClip="text"
                         className="ttext"
                       >
-                        {" "}
-                        {loan}
+                        {getLoanName(selectedLoan)}
                         {selectedStatusSearch !== "1718861587262" &&
-                          selectedStatusSearch !== "1718861593296" ? (
+                        selectedStatusSearch !== "1718861593296" ? (
                           <>
                             <span
                               style={{ color: "black", paddingLeft: "10px" }}
@@ -751,6 +825,20 @@ function AllBankFiles() {
                             </Text>{" "}
                             <span style={{ color: "gray.700" }}>-</span>{" "}
                             {totalFiles} files
+                            {/* Dynamic Status Counts */}
+                            {statusCounts &&
+                              Object.keys(statusCounts).map((status) => (
+                                <span
+                                  key={status}
+                                  style={{
+                                    color:
+                                      statusCounts[status]?.color || "inherit",
+                                    paddingLeft: "10px",
+                                  }}
+                                >
+                                  {statusCounts[status]?.count} {status}
+                                </span>
+                              ))}
                           </>
                         ) : null}
                       </Text>
@@ -765,7 +853,28 @@ function AllBankFiles() {
                       bgClip="text"
                       className="ttext"
                     >
-                      All Files
+                      {getLoanName(selectedLoan)}
+                      <span style={{ color: "black", paddingLeft: "10px" }}>
+                        ₹{" "}
+                      </span>
+                      <Text as="span" color="green.500" fontWeight="semibold">
+                        {totalAmount !== null ? totalAmount : "-"}
+                      </Text>{" "}
+                      <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
+                      files
+                      {/* Dynamic Status Counts */}
+                      {statusCounts &&
+                        Object.keys(statusCounts).map((status) => (
+                          <span
+                            key={status}
+                            style={{
+                              color: statusCounts[status]?.color || "inherit",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {statusCounts[status]?.count} {status}
+                          </span>
+                        ))}
                     </Text>
                   </Box>
                 )}
@@ -815,69 +924,48 @@ function AllBankFiles() {
                       ))}
                     </select>
                   )}
-                  {/* 
-                  <select
-                    className="form-select loan-type-dropdown"
-                    aria-label="Default select example"
-                    value={selectedState}
-                    onChange={handleStateChange}
-                    style={{
-                      padding: "5px",
-                      fontSize: "16px",
-                      borderRadius: "8px",
-                      border: "2px solid #b19552",
-                      backgroundColor: "#ffffff",
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                      width: "100%",
-                      maxWidth: "300px",
-                      appearance: "none",
-                      color: "#333333",
-                      outline: "none",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  >
-                    <option value="" disabled>
-                      Select State
-                    </option>
-                    {states.map((state) => (
-                      <option key={state.isoCode} value={state.name}>
-                        {state.name}
+                  {!loan && loanSubtypes.length > 0 && (
+                    <select
+                      className="form-select loan-subtype-dropdown"
+                      value={selectedLoanSubType}
+                      disabled={!selectedLoan}
+                      onChange={(e) => setSelectedLoanSubType(e.target.value)}
+                      style={{
+                        padding: "5px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        border: "2px solid #b19552",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        width: "100%",
+                        maxWidth: "300px",
+                        appearance: "none",
+                        color: "#333333",
+                        outline: "none",
+                        transition: "all 0.3s ease-in-out",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select loan subtype
                       </option>
-                    ))}
-                  </select>
-
-                  <select
-                    className="form-select loan-type-dropdown"
-                    aria-label="Default select example"
-                    disabled={!selectedState}
-                    value={selectedCity}
-                    onChange={handleCityChange}
-                    style={{
-                      padding: "5px",
-                      fontSize: "16px",
-                      borderRadius: "8px",
-                      border: "2px solid #b19552",
-                      backgroundColor: "#ffffff",
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                      width: "100%",
-                      maxWidth: "300px",
-                      appearance: "none",
-                      color: "#333333",
-                      outline: "none",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  >
-                    <option value="" disabled>
-                      Select City
-                    </option>
-                    {cities.map((city) => (
-                      <option key={city.name} value={city.name}>
-                        {city.name}
-                      </option>
-                    ))}
-                  </select> */}
+                      {loanSubtypes.map((subtype) => (
+                        <option
+                          key={subtype.loantype_id}
+                          value={subtype.loantype_id}
+                          style={{
+                            backgroundColor: "#ffffff",
+                            color: "#333333",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            transition: "all 0.3s ease-in-out",
+                          }}
+                        >
+                          {subtype.loan_type}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
-
                 <div
                   className="d-flex second-drop-section gap-2"
                   style={{ marginLeft: "10px" }}
@@ -963,7 +1051,7 @@ function AllBankFiles() {
                   <Th>#</Th>
                   <Th>File Id</Th>
                   <Th>Customer (Business)</Th>
-                  <Th>City</Th>
+                  {/* <Th>City</Th> */}
                   <Th>Loan</Th>
                   <Th>File Status</Th>
                   <Th>Current Step</Th>
@@ -1018,11 +1106,12 @@ function AllBankFiles() {
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
                           {file?.user_username} ({file?.businessname})
                         </Td>
-                        <Td style={{ fontSize: "14px" }}>{file?.city}</Td>
+                        {/* <Td style={{ fontSize: "14px" }}>{file?.city}</Td> */}
                         <Td style={{ fontSize: "14px" }}>
                           {" "}
-                          {`${file.loan}${file.loan_type ? ` (${file.loan_type})` : ""
-                            }`}
+                          {`${file.loan}${
+                            file.loan_type ? ` (${file.loan_type})` : ""
+                          }`}
                         </Td>
 
                         <Td>
@@ -1076,7 +1165,7 @@ function AllBankFiles() {
                         </Td>
                         <Td>
                           {file.document_percentage != null &&
-                            !isNaN(file.document_percentage) ? (
+                          !isNaN(file.document_percentage) ? (
                             <div
                               className="progress"
                               data-value={Number(file.document_percentage)}
@@ -1145,7 +1234,7 @@ function AllBankFiles() {
                             justifyContent="space-between"
                             alignItems="center"
                           >
-                            <Flex>
+                            {/* <Flex>
                               <IconButton
                                 aria-controls="menu"
                                 aria-haspopup="true"
@@ -1171,7 +1260,7 @@ function AllBankFiles() {
                                 open={Boolean(anchorEl)}
                                 onClose={handleClose}
                               >
-                                {/* <MenuItem
+                                <MenuItem
                                   onClick={(e) => {
                                     handleClose();
                                     handleDelete(selectedFileId);
@@ -1190,7 +1279,7 @@ function AllBankFiles() {
                                 >
                                   <EditIcon style={{ marginRight: "5px" }} />
                                   Edit
-                                </MenuItem> */}
+                                </MenuItem>
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
@@ -1201,7 +1290,7 @@ function AllBankFiles() {
                                   <AddIcon style={{ marginRight: "5px" }} />
                                   Update
                                 </MenuItem>
-                                {/* <MenuItem
+                                <MenuItem
                                   onClick={(e) => {
                                     handleClose();
                                     handleAssign(
@@ -1236,9 +1325,9 @@ function AllBankFiles() {
                                     style={{ marginRight: "5px" }}
                                   />
                                   Bank Assign
-                                </MenuItem> */}
+                                </MenuItem>
                               </Menu>
-                            </Flex>
+                            </Flex> */}
                             <Flex style={{ paddingLeft: "10px" }}>
                               <IconButton
                                 aria-label={
@@ -1318,7 +1407,7 @@ function AllBankFiles() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1353,7 +1442,7 @@ function AllBankFiles() {
                                           </Td>
                                           <Td>
                                             {documentRow?.status ===
-                                              "Uploaded" ? (
+                                            "Uploaded" ? (
                                               <span
                                                 style={{
                                                   color: "green",
@@ -1536,7 +1625,7 @@ function AllBankFiles() {
                   </Select>
                 </FormControl>
                 {selectedBranchId && (
-                  <FormControl id="branchuser_id" mt={4} isRequired>
+                  <FormControl id="bankuser_id" mt={4} isRequired>
                     <FormLabel>Branch User</FormLabel>
                     {filteredBranchUsers.length > 0 ? (
                       <>
@@ -1545,7 +1634,7 @@ function AllBankFiles() {
                           onChange={(e) => {
                             setSelectedBranchUserId(e.target.value);
                             const user = filteredBranchUsers.find(
-                              (u) => u.branchuser_id === e.target.value
+                              (u) => u.bankuser_id === e.target.value
                             );
                             if (user) {
                               setSelectedUserFileCount(
@@ -1556,8 +1645,8 @@ function AllBankFiles() {
                         >
                           {filteredBranchUsers.map((user) => (
                             <option
-                              key={user.branchuser_id}
-                              value={user.branchuser_id}
+                              key={user.bankuser_id}
+                              value={user.bankuser_id}
                             >
                               {`${user.full_name} (${getRoleName(
                                 user.role_id

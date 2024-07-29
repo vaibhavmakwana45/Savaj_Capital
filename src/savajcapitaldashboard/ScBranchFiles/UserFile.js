@@ -162,7 +162,6 @@ function UserFile() {
     const jwt = jwtDecode(localStorage.getItem("authToken"));
     setAccessType(jwt._id);
   }, []);
-
   const fetchData = async () => {
     if (accessType) {
       try {
@@ -317,7 +316,6 @@ function UserFile() {
   //total loan amount
   const [totalAmount, setTotalAmount] = useState(null);
   const [totalFiles, setTotalFiles] = useState(null);
-  console.log(totalFiles, "totalFiles");
   const [statusCounts, setStatusCounts] = useState(null);
 
   const fetchTotalAmount = async () => {
@@ -348,7 +346,7 @@ function UserFile() {
       });
 
       const { totalAmount, fileCount, statusCounts } = response.data;
-      console.log(response.data);
+
       setTotalAmount(totalAmount);
       setTotalFiles(fileCount);
       setStatusCounts(statusCounts);
@@ -792,6 +790,13 @@ function UserFile() {
     const loan = loans.find((loan) => loan.loan_id === loanId);
     return loan ? loan.loan : "All Files";
   };
+
+  const hasNoPermission =
+    !accessType.delete_files &&
+    !accessType.edit_files &&
+    !accessType.status_change_files &&
+    !accessType.assign_files;
+
   return (
     <>
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -1026,22 +1031,26 @@ function UserFile() {
                     }}
                   />
 
-                  {/* <Button
-                    onClick={() => history.push("/superadmin/addfile")}
-                    className="dynamicImportantStyle"
-                    colorScheme="blue"
-                    style={{
-                      paddingX: "20px",
-                      fontSize: "16px",
-                      borderRadius: "8px",
-                      backgroundColor: "#b19552",
-                      color: "white",
-                      width: "150px",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  >
-                    Add File
-                  </Button> */}
+                  {accessType.add_files && (
+                    <Button
+                      onClick={() =>
+                        history.push("/savajcapitaluser/adduserfile")
+                      }
+                      className="dynamicImportantStyle"
+                      colorScheme="blue"
+                      style={{
+                        paddingX: "20px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        backgroundColor: "#b19552",
+                        color: "white",
+                        width: "150px",
+                        transition: "all 0.3s ease-in-out",
+                      }}
+                    >
+                      Add File
+                    </Button>
+                  )}
                 </div>
               </Flex>
             </Flex>
@@ -1095,10 +1104,14 @@ function UserFile() {
                     <React.Fragment key={file.file_id}>
                       <Tr
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleRowClick(file.file_id);
+                          if (accessType.view_files) {
+                            e.stopPropagation();
+                            handleRowClick(file.file_id);
+                          }
                         }}
-                        cursor="pointer"
+                        cursor={
+                          accessType.view_files ? "pointer" : "not-allowed"
+                        }
                       >
                         <Td>{index + 1}</Td>
                         <Td style={{ fontWeight: "bold", fontSize: "14px" }}>
@@ -1262,36 +1275,45 @@ function UserFile() {
                                 open={Boolean(anchorEl)}
                                 onClose={handleClose}
                               >
-                                <MenuItem
-                                  onClick={(e) => {
-                                    handleClose();
-                                    handleDelete(selectedFileId);
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <DeleteIcon style={{ marginRight: "5px" }} />
-                                  Delete
-                                </MenuItem>
-                                <MenuItem
-                                  onClick={(e) => {
-                                    handleClose();
-                                    handleEditClick(selectedFileId);
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <EditIcon style={{ marginRight: "5px" }} />
-                                  Edit
-                                </MenuItem>
-                                <MenuItem
-                                  onClick={(e) => {
-                                    handleClose();
-                                    handleUpdate(selectedFileId);
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <AddIcon style={{ marginRight: "5px" }} />
-                                  Update
-                                </MenuItem>
+                                {accessType.delete_files && (
+                                  <MenuItem
+                                    onClick={(e) => {
+                                      handleClose();
+                                      handleDelete(selectedFileId);
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <DeleteIcon
+                                      style={{ marginRight: "5px" }}
+                                    />
+                                    Delete
+                                  </MenuItem>
+                                )}
+                                {accessType.edit_files && (
+                                  <MenuItem
+                                    onClick={(e) => {
+                                      handleClose();
+                                      handleEditClick(selectedFileId);
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <EditIcon style={{ marginRight: "5px" }} />
+                                    Edit
+                                  </MenuItem>
+                                )}
+                                {accessType.status_change_files && (
+                                  <MenuItem
+                                    onClick={(e) => {
+                                      handleClose();
+                                      handleUpdate(selectedFileId);
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <AddIcon style={{ marginRight: "5px" }} />
+                                    Update
+                                  </MenuItem>
+                                )}
+                                {/* {accessType.add_files && (
                                 <MenuItem
                                   onClick={(e) => {
                                     handleClose();
@@ -1310,24 +1332,30 @@ function UserFile() {
                                   />
                                   Branch Assign
                                 </MenuItem>
-                                <MenuItem
-                                  onClick={(e) => {
-                                    handleClose();
-                                    handleBankAssign(
-                                      selectedFileId,
-                                      selectedBankCityName,
-                                      selectedLoanId,
-                                      selectedLoanSubtypeId,
-                                      selectedUserId
-                                    );
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <ExternalLinkIcon
-                                    style={{ marginRight: "5px" }}
-                                  />
-                                  Bank Assign
-                                </MenuItem>
+                              )} */}
+                                {accessType.assign_files && (
+                                  <MenuItem
+                                    onClick={(e) => {
+                                      handleClose();
+                                      handleBankAssign(
+                                        selectedFileId,
+                                        selectedBankCityName,
+                                        selectedLoanId,
+                                        selectedLoanSubtypeId,
+                                        selectedUserId
+                                      );
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <ExternalLinkIcon
+                                      style={{ marginRight: "5px" }}
+                                    />
+                                    Bank Assign
+                                  </MenuItem>
+                                )}
+                                {hasNoPermission && (
+                                  <MenuItem disabled>No Permission</MenuItem>
+                                )}
                               </Menu>
                             </Flex>
                             <Flex style={{ paddingLeft: "10px" }}>

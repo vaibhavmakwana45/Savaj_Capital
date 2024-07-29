@@ -69,78 +69,84 @@ router.get("/", async (req, res) => {
       {
         $sort: { updatedAt: -1 },
       },
+      {
+        $lookup: {
+          from: "bank-users",
+          localField: "bank_id",
+          foreignField: "bank_id",
+          as: "bank_users",
+        },
+      },
+      {
+        $addFields: {
+          user_count: { $size: "$bank_users" },
+        },
+      },
     ]);
 
-    for (let i = 0; i < banks.length; i++) {
-      const bank_id = banks[i].bank_id;
+    const bankIds = banks.map((bank) => bank.bank_id);
+    const bankUsers = await BankUser.find({ bank_id: { $in: bankIds } }).lean();
+    const bankUserIds = bankUsers.map((user) => user.bankuser_id);
+    const bankApprovals = await BankApproval.find({ bankuser_id: { $in: bankUserIds } }).lean();
+    const fileIds = bankApprovals.map((approval) => approval.file_id);
+    const files = await File_Uplode.find({ file_id: { $in: fileIds } }).lean();
 
-      const bankUserCount = await BankUser.countDocuments({ bank_id });
-      banks[i].user_count = bankUserCount;
+    const loanStatusIds = files.map((file) => file.status);
+    const loanStatuses = await LoanStatus.find({ loanstatus_id: { $in: loanStatusIds } }).lean();
 
-      let totalFileCount = 0; // Initialize file count for each bank
+    const userIds = files.map((file) => file.user_id);
+    const users = await AddUser.find({ user_id: { $in: userIds } }).lean();
 
-      const bankUsers = await BankUser.find({ bank_id });
+    const loanIds = files.map((file) => file.loan_id);
+    const loans = await Loan.find({ loan_id: { $in: loanIds } }).lean();
 
-      for (let j = 0; j < bankUsers.length; j++) {
-        const bankuser_id = bankUsers[j].bankuser_id;
+    const loanStatusMap = new Map(loanStatuses.map((status) => [status.loanstatus_id, status]));
+    const userMap = new Map(users.map((user) => [user.user_id, user]));
+    const loanMap = new Map(loans.map((loan) => [loan.loan_id, loan]));
 
-        const assignedFiles = await BankApproval.find({ bankuser_id });
+    const fileDetailsMap = new Map(
+      files.map((file) => {
+        const statusDetails = loanStatusMap.get(file.status);
+        const userDetails = userMap.get(file.user_id);
+        const loanDetails = loanMap.get(file.loan_id);
 
-        totalFileCount += assignedFiles.length; // Increment the file count
+        return [
+          file.file_id,
+          {
+            ...file,
+            status: statusDetails ? statusDetails.loanstatus : file.status,
+            status_color: statusDetails ? statusDetails.color : undefined,
+            user_details: userDetails,
+            loan_details: loanDetails,
+          },
+        ];
+      })
+    );
 
-        for (let k = 0; k < assignedFiles.length; k++) {
-          const file_id = assignedFiles[k].file_id;
-          let fileDetails = await File_Uplode.findOne({
-            file_id: file_id,
-          }).lean();
+    const bankUserFiles = bankUsers.reduce((acc, user) => {
+      const assignedFiles = bankApprovals
+        .filter((approval) => approval.bankuser_id === user.bankuser_id)
+        .map((approval) => ({
+          ...approval,
+          file_details: fileDetailsMap.get(approval.file_id),
+        }));
+      acc[user.bank_id] = acc[user.bank_id] || [];
+      acc[user.bank_id].push({
+        ...user,
+        files: assignedFiles,
+      });
+      return acc;
+    }, {});
 
-          if (fileDetails) {
-            const loanStatusDetails = await LoanStatus.findOne({
-              loanstatus_id: fileDetails.status,
-            }).lean();
-
-            if (loanStatusDetails) {
-              fileDetails.status = loanStatusDetails.loanstatus;
-              fileDetails.status_color = loanStatusDetails.color;
-            }
-
-            const userDetails = await AddUser.findOne({
-              user_id: fileDetails.user_id,
-            }).lean();
-
-            if (userDetails) {
-              fileDetails.user_details = userDetails;
-            }
-            // Fetch loan details using loan_id
-            const loanDetails = await Loan.findOne({
-              loan_id: fileDetails.loan_id,
-            }).lean();
-
-            if (loanDetails) {
-              fileDetails.loan_details = loanDetails;
-            }
-          }
-
-          assignedFiles[k] = {
-            ...assignedFiles[k].toObject(),
-            file_details: fileDetails,
-          };
-        }
-
-        bankUsers[j] = bankUsers[j].toObject();
-        bankUsers[j].files = assignedFiles;
-      }
-
-      banks[i].users = bankUsers;
-      banks[i].file_count = totalFileCount; // Assign the file count to the bank
-    }
-
-    const count = banks.length;
+    banks.forEach((bank) => {
+      bank.users = bankUserFiles[bank.bank_id] || [];
+      bank.file_count = bank.users.reduce((count, user) => count + user.files.length, 0);
+    });
 
     res.json({
       success: true,
       data: banks,
-      count: count,
+      count: banks.length,
       message: "Read All Request",
     });
   } catch (error) {
@@ -150,6 +156,7 @@ router.get("/", async (req, res) => {
     });
   }
 });
+
 
 
 router.delete("/deletebanks/:bank_id", async (req, res) => {

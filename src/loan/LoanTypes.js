@@ -40,12 +40,11 @@ function LoanTypes() {
   const fetchLoans = async () => {
     try {
       const response = await AxiosInstance.get("/loan");
+      setLoading(false);
       setLoans(response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -89,21 +88,19 @@ function LoanTypes() {
     try {
       const response = await AxiosInstance.get("/loan_step");
       if (response.data.success) {
+        setLoading(false);
         setSteps(response.data.data);
       } else {
         alert("Please try again later...!");
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     getStepData();
   }, []);
-
   // const handleSwitchToggle = (event, stepId) => {
   //   const updatedSelectedLoanStepIds = [...selectedLoanStepIds];
   //   const index = updatedSelectedLoanStepIds.indexOf(stepId);

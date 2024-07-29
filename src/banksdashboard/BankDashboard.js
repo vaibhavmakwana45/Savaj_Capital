@@ -50,7 +50,7 @@ export default function BankDashboard() {
         const { loan_id, loantype_id } = loan;
 
         const response = await AxiosInstance.get(
-          `/file_upload/scbranchamounts/${loan_id}/${loantype_id || "none"}/${
+          `/file_upload/bankamounts/${loan_id}/${loantype_id || "none"}/${
             accessType.state
           }/${accessType.city}`
         );
@@ -94,10 +94,18 @@ export default function BankDashboard() {
             <Card
               key={loan.loan_id}
               minH="125px"
-              style={{ cursor: "pointer", border: "1px solid black" }}
+              style={{
+                cursor: "pointer",
+                border: "1px solid #b19552",
+                background: "#d4c6a5",
+              }}
               onClick={() =>
-                history.push(`/bankuser/allfiles`, {
-                  state: { loan: loan.loan, loan_id: loan.loan_id },
+                history.push(`/savajcapitaluser/userfile`, {
+                  state: {
+                    loan: loan.loan,
+                    loan_id: loan.loan_id,
+                    loantype_id: loan.loantype_id,
+                  },
                 })
               }
             >
@@ -112,7 +120,7 @@ export default function BankDashboard() {
                   <Stat me="auto">
                     <StatLabel
                       fontSize="xs"
-                      color="gray.400"
+                     
                       fontWeight="bold"
                       textTransform="uppercase"
                     >
@@ -123,11 +131,11 @@ export default function BankDashboard() {
                     <Flex>
                       <StatNumber
                         fontSize="lg"
-                        color={textColor}
+                    
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
-                        {loan.fileCount}
+                        {loan.fileCount} files
                       </StatNumber>
                     </Flex>
                     <Text as="span" color="green.400" fontWeight="bold">
@@ -142,10 +150,31 @@ export default function BankDashboard() {
                     as="box"
                     h={"45px"}
                     w={"45px"}
-                    bg={iconBlue}
+                    bg={"#212529"}
                   >
                     <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
                   </IconBox>
+                </Flex>
+
+                {/* Display counts for all statuses */}
+                <Flex mt="1px" wrap="wrap">
+                  {Object.entries(loan.statusCounts)
+                    .filter(([_, { count }]) => count > 0)
+                    .map(([status, { count, color }]) => (
+                      <Flex
+                        key={status}
+                        direction="column"
+                        align="center"
+                        mr="5px"
+                      >
+                        <Text fontSize="sm" fontWeight="bold" color={color}>
+                          {status}
+                        </Text>
+                        <Text fontSize="md">
+                          {count}
+                        </Text>
+                      </Flex>
+                    ))}
                 </Flex>
               </Flex>
             </Card>

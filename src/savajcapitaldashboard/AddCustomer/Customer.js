@@ -365,21 +365,22 @@ function Customer() {
                   transition: "all 0.3s ease-in-out",
                 }}
               />
-
-              <Button
-                onClick={() => history.push("/savajcapitaluser/addcustomer")}
-                colorScheme="blue"
-                style={{
-                  padding: "10px",
-                  fontSize: "16px",
-                  borderRadius: "8px",
-                  backgroundColor: "#b19552",
-                  color: "white",
-                  transition: "all 0.3s ease-in-out",
-                }}
-              >
-                Add Customer
-              </Button>
+              {accessType.add_customers && (
+                <Button
+                  onClick={() => history.push("/savajcapitaluser/addcustomer")}
+                  colorScheme="blue"
+                  style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    backgroundColor: "#b19552",
+                    color: "white",
+                    transition: "all 0.3s ease-in-out",
+                  }}
+                >
+                  Add Customer
+                </Button>
+              )}
             </Flex>
           </CardHeader>
           <CardBody>

@@ -458,7 +458,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
@@ -954,20 +954,17 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
   }
 });
 
-
 router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
   try {
     const { state, city, bankuser_id } = req.params;
     const currentPage = parseInt(req.query.page) || 1;
     const dataPerPage = parseInt(req.query.limit) || 10;
-
-    const searchTerm = req.query.searchTerm
-      ? req.query.searchTerm.toLowerCase()
-      : "";
+    const searchTerm = req.query.searchTerm?.toLowerCase() || "";
     const selectedLoan = req.query.selectedLoan || "";
-    const selectedStatus = req.query.selectedStatus
-      ? req.query.selectedStatus.toLowerCase()
-      : "";
+    const selectedLoanSubType = req.query.selectedSubtype || "";
+    const selectedStatus = req.query.selectedStatus?.toLowerCase() || "";
+    const selectedState = req.query.selectedState || "";
+    const selectedCity = req.query.selectedCity || "";
 
     const matchStage = {};
 
@@ -988,13 +985,16 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
       matchStage.$or.push({ user_id: { $in: filteredUserIds } });
     }
 
-    if (selectedLoan !== "all loan types" && selectedLoan !== "") {
+    if (selectedLoan && selectedLoan !== "all loan types") {
       matchStage.loan_id = selectedLoan;
     }
-
+    if (selectedLoanSubType) {
+      matchStage.loantype_id = selectedLoanSubType;
+    }
     if (selectedStatus) {
       matchStage.status = { $regex: selectedStatus, $options: "i" };
     }
+
     const matchStageStateCity = { state, city };
 
     const users = await AddUser.find(matchStageStateCity);
@@ -1015,6 +1015,74 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
       { $sort: { updatedAt: -1 } },
       { $skip: (currentPage - 1) * dataPerPage },
       { $limit: dataPerPage },
+      {
+        $lookup: {
+          from: "allusers",
+          localField: "user_id",
+          foreignField: "user_id",
+          as: "user_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loans",
+          localField: "loan_id",
+          foreignField: "loan_id",
+          as: "loan_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loan-types",
+          localField: "loantype_id",
+          foreignField: "loantype_id",
+          as: "loan_type_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "complete_steps",
+          localField: "file_id",
+          foreignField: "file_id",
+          as: "complete_steps",
+        },
+      },
+      {
+        $lookup: {
+          from: "loanstatuses",
+          localField: "status",
+          foreignField: "loanstatus_id",
+          as: "loan_status_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loan_steps",
+          localField: "loan_step_id",
+          foreignField: "loan_step_id",
+          as: "loan_steps_data",
+        },
+      },
+      {
+        $lookup: {
+          from: "loan-documents",
+          let: { loan_id: "$loan_id", loantype_id: "$loantype_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$loan_id", "$$loan_id"] },
+                    { $eq: ["$loantype_id", "$$loantype_id"] },
+                  ],
+                },
+              },
+            },
+            { $unwind: "$document_ids" },
+          ],
+          as: "loan_documents_data",
+        },
+      },
     ];
 
     if (bankuser_id) {
@@ -1025,79 +1093,99 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
 
       pipeline.splice(1, 0, { $match: { file_id: { $in: approvalFileIds } } });
 
+      // Count the documents based on the filtered files
       totalDataCount = await File_Uplode.countDocuments({
         file_id: { $in: approvalFileIds },
+        ...matchStage,
+        ...fileMatchStage,
       });
     } else {
       const stateCityMatch = { state, city };
-      totalDataCount = await AddUser.countDocuments(stateCityMatch);
+      totalDataCount = await File_Uplode.countDocuments({
+        ...stateCityMatch,
+        ...matchStage,
+        ...fileMatchStage,
+      });
     }
 
     const data = await File_Uplode.aggregate(pipeline);
 
-    const branchUserIds = data.map((item) => item.branchuser_id);
-    const loanIds = data.map((item) => item.loan_id);
-    const loanTypeIds = data.map((item) => item.loantype_id);
-    const fileIds = data.map((item) => item.file_id);
-    const statusIds = data.map((item) => item.status);
+    const userMap = new Map(
+      data.flatMap((item) => item.user_data.map((user) => [user.user_id, user]))
+    );
+    const loanMap = new Map(
+      data.flatMap((item) => item.loan_data.map((loan) => [loan.loan_id, loan]))
+    );
+    const loanTypeMap = new Map(
+      data.flatMap((item) =>
+        item.loan_type_data.map((loanType) => [loanType.loantype_id, loanType])
+      )
+    );
+    const statusMessageMap = new Map();
+    const amountMap = new Map();
+    const loanStatusMap = new Map(
+      data.flatMap((item) =>
+        item.loan_status_data.map((status) => [
+          status.loanstatus_id.toString(),
+          status,
+        ])
+      )
+    );
 
-    const [
-      branchUserData,
-      userData,
-      loanData,
-      loanTypeData,
-      statusMessages,
-      amountData,
-      documentData,
-      countData,
-      loanStatusData,
-      completeSteps,
-    ] = await Promise.all([
-      SavajCapital_User.find({ branchuser_id: { $in: branchUserIds } }).select(
-        "branchuser_id full_name"
-      ),
-      AddUser.find({ user_id: { $in: userIds } }).select(
-        "user_id username pan_card businessname state city"
-      ),
-      Loan.find({ loan_id: { $in: loanIds } }).select("loan_id loan"),
-      Loan_Type.find({ loantype_id: { $in: loanTypeIds } }).select(
-        "loantype_id loan_type"
-      ),
-      Compelete_Step.find({ file_id: { $in: fileIds } }).select(
-        "file_id statusMessage loan_step_id"
-      ),
-      Compelete_Step.find({ loan_step_id: "1715348798228" }).select(
-        "file_id inputs"
-      ),
-      Promise.all(
-        data.map(async (item) => {
-          const docs = await Loan_Documents.find(
-            item.loantype_id === ""
-              ? { loan_id: item.loan_id }
-              : { loantype_id: item.loantype_id }
-          )
-            .select("loan_document_id loan_document")
-            .limit(item.documentCount);
-          return { itemId: item._id, docs };
-        })
-      ),
-      Promise.all(
-        fileIds.map(async (file_id) => {
-          const fileData = await File_Uplode.findOne({ file_id });
-          const loanIds = fileData.documents.map((doc) => ({
-            loan_document_id: doc.loan_document_id,
-            title_id: doc.title_id,
+    data.forEach((item) => {
+      item.complete_steps.forEach((step) => {
+        if (step.statusMessage) {
+          statusMessageMap.set(step.file_id, step.statusMessage);
+        }
+        if (step.loan_step_id === "1715348798228") {
+          const dispatchAmountInput = step.inputs.find(
+            (input) => input.label === "DISPATCH AMOUNT"
+          );
+          if (dispatchAmountInput) {
+            amountMap.set(step.file_id, dispatchAmountInput.value);
+          }
+        }
+      });
+    });
+
+    const loanSteps = await Loan_Step.find({}).lean();
+    const loanStepsMap = new Map(
+      loanSteps.map((step) => [step.loan_step_id, step])
+    );
+
+    const loanDocuments = await Loan_Documents.find({}).lean();
+    const loanDocumentsMap = new Map(
+      loanDocuments.map((doc) => [doc.loan_document_id, doc])
+    );
+
+    const stepsPromises = data.map(async (item) => {
+      const file = item;
+      const loan = loanMap.get(file.loan_id);
+
+      if (!file || !loan) return;
+
+      const steps = loan.loan_step_id.map((loan_step_id) => {
+        const stepData = loanStepsMap.get(loan_step_id);
+        if (!stepData) return null;
+
+        if (loan_step_id === "1715348523661") {
+          const loanIds = file.documents.map((item) => ({
+            loan_document_id: item.loan_document_id,
+            title_id: item.title_id,
           }));
-          const data2 = await Loan_Documents.find({
-            loan_id: fileData.loan_id,
-            loantype_id: fileData.loantype_id,
-          });
-          const loanDocumentIds = data2.flatMap((doc) =>
-            doc.document_ids.map((id) => ({
-              loan_document_id: id,
-              title_id: doc.title_id,
+
+          const { loan_id, loantype_id } = file;
+          const data2 = loanDocuments.filter(
+            (doc) => doc.loan_id === loan_id && doc.loantype_id === loantype_id
+          );
+
+          const loanDocumentIds = data2.flatMap((item) =>
+            item.document_ids.map((loan_document_id) => ({
+              loan_document_id,
+              title_id: item.title_id,
             }))
           );
+
           const commonIds = loanIds.filter((id) =>
             loanDocumentIds.some(
               (docId) =>
@@ -1105,86 +1193,75 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
                 docId.title_id === id.title_id
             )
           );
-          const approvedCount = commonIds.length;
-          const totalCount = loanDocumentIds.length;
-          const documentPercentage = parseInt(
-            (approvedCount * 100) / totalCount
+
+          const differentIds = loanDocumentIds.filter(
+            (id) =>
+              !loanIds.some(
+                (docId) =>
+                  docId.loan_document_id === id.loan_document_id &&
+                  docId.title_id === id.title_id
+              )
           );
-          return {
-            file_id,
-            document_percentage: documentPercentage,
-          };
-        })
-      ),
-      LoanStatus.find({ loanstatus_id: { $in: statusIds } }).select(
-        "loanstatus_id loanstatus color"
-      ),
-    ]);
 
-    const branchUserMap = new Map(
-      branchUserData.map((user) => [user.branchuser_id, user])
-    );
-    const userMap = new Map(userData.map((user) => [user.user_id, user]));
-    const loanMap = new Map(loanData.map((loan) => [loan.loan_id, loan]));
-    const loanTypeMap = new Map(
-      loanTypeData.map((loanType) => [loanType.loantype_id, loanType])
-    );
-    const statusMessageMap = new Map(
-      statusMessages.map((status) => [status.file_id, status.statusMessage])
-    );
-    const amountMap = new Map(
-      amountData.map((step) => {
-        const dispatchAmountInput = step.inputs.find(
-          (input) => input.label === "DISPATCH AMOUNT"
-        );
-        return [step.file_id, dispatchAmountInput?.value];
-      })
-    );
-    const loanStatusMap = new Map(
-      loanStatusData.map((status) => [status.loanstatus_id.toString(), status])
-    );
-    completeSteps?.forEach((step) => {
-      if (step.statusMessage) {
-        statusMessageMap.set(step.file_id, step.statusMessage);
-      }
-      if (step.loan_step_id === "1715348798228") {
-        const dispatchAmountInput = step.inputs.find(
-          (input) => input.label === "DISPATCH AMOUNT"
-        );
-        if (dispatchAmountInput) {
-          amountMap.set(step.file_id, dispatchAmountInput.value);
-        }
-      }
-    });
+          const approvedObject = [];
+          const pendingObject = [];
 
-    const stepsPromises = data.map(async (item) => {
-      try {
-        const stepsResponse = await axios.get(
-          `http://localhost:5882/api/loan_step/get_all_steps/${item.file_id}`
-        );
-        const stepsData = stepsResponse.data.data;
+          for (const item of commonIds) {
+            const document = loanDocumentsMap.get(item.loan_document_id);
+            approvedObject.push({
+              name: document?.loan_document,
+            });
+          }
 
-        const rejectedStep = stepsData.find((step) => step.status === "reject");
-        const activeStep = stepsData.find((step) => step.status === "active");
+          for (const item of differentIds) {
+            const document = loanDocumentsMap.get(item.loan_document_id);
+            pendingObject.push({
+              name: document?.loan_document,
+            });
+          }
 
-        if (rejectedStep) {
-          item.running_step_name = rejectedStep.loan_step;
-        } else if (activeStep) {
-          item.running_step_name = activeStep.loan_step;
+          const documentStatus =
+            pendingObject.length > 0
+              ? "active"
+              : approvedObject.length === 0
+              ? "active"
+              : "complete";
+
+          return { loan_step: stepData.loan_step, status: documentStatus };
         } else {
-          const lastIndex = stepsData.length - 1;
-          item.running_step_name = stepsData[lastIndex].loan_step;
+          const completedStep = file.complete_steps.find(
+            (step) => step.loan_step_id === loan_step_id
+          );
+
+          let status = "active";
+          if (completedStep) {
+            status = completedStep.status;
+          }
+
+          return { loan_step: stepData.loan_step, status };
         }
-      } catch (error) {
-        console.error(
-          `Error fetching steps for file_id ${item.file_id}:`,
-          error.message
-        );
+      });
+
+      const filteredSteps = steps.filter((step) => step !== null);
+
+      const rejectedStep = filteredSteps.find(
+        (step) => step.status === "reject"
+      );
+      const activeStep = filteredSteps.find((step) => step.status === "active");
+
+      if (rejectedStep) {
+        item.running_step_name = rejectedStep.loan_step;
+      } else if (activeStep) {
+        item.running_step_name = activeStep.loan_step;
+      } else {
+        const lastIndex = filteredSteps.length - 1;
+        item.running_step_name = filteredSteps[lastIndex].loan_step;
       }
     });
+
+    await Promise.all(stepsPromises);
+
     for (const item of data) {
-      item.branchuser_full_name =
-        branchUserMap.get(item.branchuser_id)?.full_name || "";
       item.user_username = userMap.get(item.user_id)?.username || "";
       item.pan_card = userMap.get(item.user_id)?.pan_card || "";
       item.businessname = userMap.get(item.user_id)?.businessname || "";
@@ -1195,36 +1272,48 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
       item.status_message = statusMessageMap.get(item.file_id) || "";
       item.amount = amountMap.get(item.file_id) || "";
 
-      const loanDocs =
-        documentData.find((dd) => dd.itemId === item._id)?.docs || [];
-      item.loan_document_ids = loanDocs.map((doc) => ({
-        loan_document_id: doc.loan_document_id,
-        loan_document: doc?.loan_document,
-        is_uploaded: item.documents.some(
-          (d) => d.loan_document_id === doc.loan_document_id
-        ),
-      }));
       if (loanStatusMap.has(item.status)) {
         const loanStatus = loanStatusMap.get(item.status);
         item.status = loanStatus.loanstatus;
         item.color = loanStatus.color;
       }
 
-      const countInfo = countData.find((info) => info.file_id === item.file_id);
-      if (countInfo) {
-        item.document_percentage = countInfo.document_percentage;
-      }
+      const approvedCount = item.documents.filter((doc) =>
+        item.loan_documents_data.some(
+          (c) => c.document_ids === doc.loan_document_id
+        )
+      ).length;
+
+      const totalCount = item.loan_documents_data.length;
+      const documentPercentage = parseInt((approvedCount * 100) / totalCount);
+
+      item.document_percentage = documentPercentage;
     }
+
+    const responseData = data.map((item) => ({
+      document_percentage: item.document_percentage,
+      color: item.color,
+      amount: item.amount,
+      status_message: item.status_message,
+      loan_type: item.loan_type,
+      loan: item.loan,
+      user_username: item.user_username,
+      businessname: item.businessname,
+      running_step_name: item.running_step_name,
+      status: item.status,
+      file_id: item.file_id,
+    }));
 
     res.json({
       statusCode: 200,
-      data,
+      data: responseData,
       totalPages: Math.ceil(totalDataCount / dataPerPage),
       currentPage,
       totalCount: totalDataCount,
       message: "Read All Request",
     });
   } catch (error) {
+    console.error("Error occurred:", error);
     res.status(500).json({
       statusCode: 500,
       message: error.message,

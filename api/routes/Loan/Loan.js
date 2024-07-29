@@ -63,32 +63,41 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    var loans = await Loan.aggregate([{ $sort: { updatedAt: -1 } }]);
+    const loans = await Loan.aggregate([{ $sort: { updatedAt: -1 } }]).exec();
 
-    for (let i = 0; i < loans.length; i++) {
-      const loan_id = loans[i].loan_id;
+    const loanIds = loans.map((loan) => loan.loan_id);
 
-      const loanTypeCount = await Loan_Type.countDocuments({ loan_id });
-      loans[i].loantype_count = loanTypeCount || 0;
+    const loanTypeCounts = await Loan_Type.aggregate([
+      { $match: { loan_id: { $in: loanIds } } },
+      { $group: { _id: "$loan_id", count: { $sum: 1 } } },
+    ]).exec();
 
-      if (loans[i].loan_step_id && loans[i].loan_step_id.length) {
-        const loanSteps = await Loan_Step.find({
-          loan_step_id: { $in: loans[i].loan_step_id },
-        });
+    const loanTypeCountMap = new Map(
+      loanTypeCounts.map((doc) => [doc._id, doc.count])
+    );
 
-        const stepMap = {};
-        loanSteps.forEach((step) => {
-          stepMap[step.loan_step_id] = {
-            id: step.loan_step_id,
-            name: step.loan_step,
-          };
-        });
+    const loanStepIds = loans.flatMap((loan) => loan.loan_step_id || []);
 
-        loans[i].loan_steps = loans[i].loan_step_id.map(
-          (id) => stepMap[id] || { id, name: "Unknown" }
+    const loanSteps = await Loan_Step.find({
+      loan_step_id: { $in: loanStepIds },
+    }).exec();
+
+    const loanStepMap = new Map(
+      loanSteps.map((step) => [
+        step.loan_step_id,
+        { id: step.loan_step_id, name: step.loan_step },
+      ])
+    );
+
+    for (const loan of loans) {
+      loan.loantype_count = loanTypeCountMap.get(loan.loan_id) || 0;
+
+      if (loan.loan_step_id && loan.loan_step_id.length) {
+        loan.loan_steps = loan.loan_step_id.map(
+          (id) => loanStepMap.get(id) || { id, name: "Unknown" }
         );
       } else {
-        loans[i].loan_steps = [];
+        loan.loan_steps = [];
       }
     }
 
@@ -99,7 +108,7 @@ router.get("/", async (req, res) => {
       message: "Read All Loan",
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       statusCode: 500,
       message: error.message,
     });

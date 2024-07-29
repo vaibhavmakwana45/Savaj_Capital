@@ -190,7 +190,6 @@ function Tables() {
     }
   };
 
-
   const handleCloseTitle = () => {
     setShowUserDetails(false);
     setSelectedBankUsers([]);
@@ -442,7 +441,7 @@ function Tables() {
               <ModalHeader>Assigned Files</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Box maxHeight="600px" overflowY="auto">
+                <Box maxHeight="500px" overflowY="auto">
                   {selectedBankUsers.length > 0 ? (
                     <Table variant="simple">
                       <Thead>
@@ -474,7 +473,12 @@ function Tables() {
                 </Box>
               </ModalBody>
               <ModalFooter>
-                <Button onClick={handleCloseTitle} colorScheme="blue">
+                <Button
+                  onClick={handleCloseTitle}
+                  bg="#b19552"
+                  color="white"
+                  _hover={{ bg: "#a58447" }}
+                >
                   Close
                 </Button>
               </ModalFooter>

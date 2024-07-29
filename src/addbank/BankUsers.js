@@ -338,7 +338,7 @@ function BankUsers() {
               <ModalHeader>Assigned Files</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Box maxHeight="600px" overflowY="auto">
+                <Box maxHeight="500px" overflowY="auto">
                   {selectedBankUsers.length > 0 ? (
                     <Table variant="simple">
                       <Thead>

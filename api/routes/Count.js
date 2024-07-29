@@ -285,85 +285,138 @@ router.get(
       const { state, city, bankuser_id } = req.params;
 
       const bankApprovals = await BankApproval.find({ bankuser_id }).lean();
+      const allStatuses = await LoanStatus.find().lean();
+
+      const statusMap = allStatuses.reduce((map, status) => {
+        map[status.loanstatus_id] = status;
+        return map;
+      }, {});
+
+      const loanIds = [...new Set(bankApprovals.map((a) => a.loan_id))];
+
+      const loans = await Loan.find({ loan_id: { $in: loanIds } }).lean();
+      const loanMap = loans.reduce((map, loan) => {
+        map[loan.loan_id] = loan;
+        return map;
+      }, {});
+
+      const loanTypeIds = [...new Set(bankApprovals.map((a) => a.loantype_id))];
+
+      const loanTypes = await Loan_Type.find({
+        loantype_id: { $in: loanTypeIds },
+      }).lean();
+
+      const loanTypeMap = loanTypes.reduce((map, loanType) => {
+        map[loanType.loantype_id] = loanType;
+        return map;
+      }, {});
+
+      const allFiles = await File_Uplode.find({
+        loan_id: { $in: loanIds },
+      }).lean();
+
+      const users = await AddUser.find({
+        user_id: { $in: allFiles.map((file) => file.user_id) },
+      }).lean();
+      const userMap = users.reduce((map, user) => {
+        map[user.user_id] = user;
+        return map;
+      }, {});
 
       const enhancedLoans = [];
 
-      for (const approval of bankApprovals) {
-        const loan = await Loan.findOne({ loan_id: approval.loan_id }).lean();
+      for (const assignment of bankApprovals) {
+        const loan = loanMap[assignment.loan_id];
+        if (!loan) continue;
 
-        const loanTypes = await Loan_Type.find({
-          loan_id: loan.loan_id,
-          loantype_id: approval.loantype_id,
-        }).lean();
+        const loanType = loanTypeMap[assignment.loantype_id] || {
+          loan_type: "Unknown",
+          subtype: "Main",
+          loantype_id: "",
+        };
+
+        const filteredFiles = allFiles.filter(
+          (file) =>
+            file.loan_id === loan.loan_id &&
+            file.loantype_id === assignment.loantype_id
+        );
 
         const stateCityFiles = [];
+        const branchAssignmentFiles = [];
+        let branchAssignmentFileCount = 0;
 
-        const files = await File_Uplode.find({
-          loan_id: loan.loan_id,
-          loantype_id: approval.loantype_id,
-        }).lean();
-
-        let bankApprovalFileCount = 0;
-
-        for (const file of files) {
-          const user = await AddUser.findOne({
-            user_id: file.user_id,
-          }).lean();
-
+        for (const file of filteredFiles) {
+          const user = userMap[file.user_id];
           if (user && user.state === state && user.city === city) {
             stateCityFiles.push({
+              file_id: file.file_id,
               filename: file.filename,
               typename: file.typename,
+              status: file.status,
             });
 
-            if (approval.file_id.includes(file.file_id)) {
-              bankApprovalFileCount++;
+            if (assignment.file_id.includes(file.file_id)) {
+              branchAssignmentFiles.push(file);
+              branchAssignmentFileCount++;
             }
           }
         }
 
-        if (loanTypes.length === 0) {
-          loanTypes.push({
-            loan_type: "Unknown",
-            subtype: "Main",
-            loantype_id: "",
-          });
-        }
+        const statusCounts = branchAssignmentFiles.reduce((acc, file) => {
+          const loanStatus = statusMap[file.status];
+          if (loanStatus) {
+            if (!acc[loanStatus.loanstatus]) {
+              acc[loanStatus.loanstatus] = {
+                count: 0,
+                color: loanStatus.color,
+              };
+            }
+            acc[loanStatus.loanstatus].count++;
+          }
+          return acc;
+        }, {});
 
-        for (const loanType of loanTypes) {
-          enhancedLoans.push({
-            ...loan,
-            loanType: loanType.loan_type,
-            subtype: loanType.subtype || "Main",
-            state,
-            city,
-            files: stateCityFiles,
-            fileCount: bankApprovalFileCount,
-            loantype_id: loanType.loantype_id,
-          });
-        }
+        enhancedLoans.push({
+          ...loan,
+          loanType: loanType.loan_type,
+          subtype: loanType.subtype || "Main",
+          state,
+          city,
+          files: stateCityFiles,
+          fileCount: branchAssignmentFileCount,
+          loantype_id: loanType.loantype_id,
+          statusCounts,
+        });
       }
 
       const consolidatedLoans = [];
-      const loanMap = new Map();
+      const loanMapForConsolidation = new Map();
 
       for (const loan of enhancedLoans) {
         if (loan.loanType === "Unknown" && loan.loantype_id === "") {
-          if (loanMap.has(loan.loan_id)) {
-            const existingLoan = loanMap.get(loan.loan_id);
+          if (loanMapForConsolidation.has(loan.loan_id)) {
+            const existingLoan = loanMapForConsolidation.get(loan.loan_id);
             existingLoan.fileCount += loan.fileCount;
             existingLoan.files.push(...loan.files);
+            Object.keys(loan.statusCounts).forEach((status) => {
+              if (!existingLoan.statusCounts[status]) {
+                existingLoan.statusCounts[status] = {
+                  count: 0,
+                  color: loan.statusCounts[status].color,
+                };
+              }
+              existingLoan.statusCounts[status].count +=
+                loan.statusCounts[status].count;
+            });
           } else {
-            loanMap.set(loan.loan_id, { ...loan });
+            loanMapForConsolidation.set(loan.loan_id, { ...loan });
           }
         } else {
           consolidatedLoans.push(loan);
         }
       }
 
-      for (const loan of loanMap.values()) {
-        consolidatedLoans.push(loan);
-      }
+      consolidatedLoans.push(...loanMapForConsolidation.values());
 
       const filteredLoans = consolidatedLoans.filter(
         (loan) => loan.files.length > 0
