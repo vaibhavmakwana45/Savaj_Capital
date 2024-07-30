@@ -458,7 +458,7 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
+              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
             // Check the status returned by the /get_all_documents endpoint
