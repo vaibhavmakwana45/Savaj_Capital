@@ -370,7 +370,12 @@ function BankUsers() {
                 </Box>
               </ModalBody>
               <ModalFooter>
-                <Button onClick={handleCloseTitle} colorScheme="blue">
+                <Button
+                  onClick={handleCloseTitle}
+                  bg="#b19552"
+                  color="white"
+                  _hover={{ bg: "#a58447" }}
+                >
                   Close
                 </Button>
               </ModalFooter>

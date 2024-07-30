@@ -72,9 +72,7 @@ function Row(props) {
     <React.Fragment>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset" } }}
-        onClick={() =>
-          props.handleRow("/user/viewuserfile?id=" + id)
-        }
+        onClick={() => props.handleRow("/user/viewuserfile?id=" + id)}
         style={{ cursor: "pointer" }}
       >
         <TableCell style={{ border: "" }}>
@@ -218,14 +216,14 @@ export default function CollapsibleTable() {
     searchTerm.length === 0
       ? files
       : files.filter(
-          (user) =>
-            (user.loan &&
-              user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.file_id &&
-              user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (user.loan_type &&
-              user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
+        (user) =>
+          (user.loan &&
+            user.loan.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (user.file_id &&
+            user.file_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (user.loan_type &&
+            user.loan_type.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
 
   const history = useHistory();
 
@@ -344,7 +342,6 @@ export default function CollapsibleTable() {
               >
                 Add File
               </Button> */}
-              
             </div>
           </Flex>
         </CardHeader>

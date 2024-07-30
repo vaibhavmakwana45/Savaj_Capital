@@ -187,7 +187,10 @@ function AllBankFiles() {
                 : selectedLoan === "All Loan Types"
                 ? ""
                 : selectedLoan,
-              selectedStatus: selectedStatusSearch,
+              selectedStatus:
+                selectedStatusSearch === "All Loan Status"
+                  ? ""
+                  : selectedStatusSearch,
               selectedSubtype: loantype_id
                 ? loantype_id === "All Loan Subtypes"
                   ? ""
@@ -195,8 +198,8 @@ function AllBankFiles() {
                 : selectedLoanSubType === "All Loan Subtypes"
                 ? ""
                 : selectedLoanSubType,
-              selectedState,
-              selectedCity,
+              selectedState: selectedState === "All State" ? "" : selectedState,
+              selectedCity: selectedCity === "All City" ? "" : selectedCity,
             },
           }
         );
@@ -341,9 +344,12 @@ function AllBankFiles() {
 
       const response = await AxiosInstance.get(url, {
         params: {
-          state: selectedState,
-          city: selectedCity,
-          selectedStatusSearch: selectedStatusSearch,
+          selectedStatusSearch:
+            selectedStatusSearch === "All Loan Status"
+              ? ""
+              : selectedStatusSearch,
+          selectedState: selectedState === "All State" ? "" : selectedState,
+          selectedCity: selectedCity === "All City" ? "" : selectedCity,
         },
       });
 
@@ -907,6 +913,7 @@ function AllBankFiles() {
                       <option value="All Loan Types" disabled>
                         Select loan type
                       </option>
+                      <option value="All Loan Types">All Loan Types</option>
                       {loans.map((loan) => (
                         <option
                           key={loan.loan_id}
@@ -948,6 +955,9 @@ function AllBankFiles() {
                       <option value="" disabled>
                         Select loan subtype
                       </option>
+                      <option value="All Loan Subtypes">
+                        All Loan SubTypes
+                      </option>
                       {loanSubtypes.map((subtype) => (
                         <option
                           key={subtype.loantype_id}
@@ -965,6 +975,68 @@ function AllBankFiles() {
                       ))}
                     </select>
                   )}
+                  {/* <select
+                    className="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    value={selectedState}
+                    onChange={handleStateChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select State
+                    </option>
+                    <option value="All State">All State</option>
+                    {states.map((state) => (
+                      <option key={state.isoCode} value={state.name}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="form-select loan-type-dropdown"
+                    aria-label="Default select example"
+                    disabled={!selectedState}
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                    style={{
+                      padding: "5px",
+                      fontSize: "16px",
+                      borderRadius: "8px",
+                      border: "2px solid #b19552",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      width: "100%",
+                      maxWidth: "300px",
+                      appearance: "none",
+                      color: "#333333",
+                      outline: "none",
+                      transition: "all 0.3s ease-in-out",
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select City
+                    </option>
+
+                    <option value="All City">All City</option>
+                    {cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select> */}
                 </div>
                 <div
                   className="d-flex second-drop-section gap-2"
@@ -993,6 +1065,7 @@ function AllBankFiles() {
                     <option value="" disabled selected>
                       Select Status
                     </option>
+                    <option value="All Loan Status">All Loan Status</option>
                     {allLoanStatus?.map((loanstatus) => (
                       <option
                         key={loanstatus.loanstatus_id}

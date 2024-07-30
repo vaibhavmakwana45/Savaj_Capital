@@ -44,7 +44,7 @@ function LoanTypes() {
       setLoans(response.data.data);
     } catch (error) {
       console.error("Error fetching loans:", error);
-    } 
+    }
   };
 
   useEffect(() => {
@@ -464,6 +464,7 @@ function LoanTypes() {
           </AlertDialogOverlay>
         </AlertDialog>
       </Flex>
+
       <Toaster />
     </>
   );

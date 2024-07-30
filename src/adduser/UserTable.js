@@ -61,9 +61,9 @@ function UserTable() {
 
   const cities = selectedState
     ? City.getCitiesOfState(
-      "IN",
-      states.find((state) => state.name === selectedState)?.isoCode
-    )
+        "IN",
+        states.find((state) => state.name === selectedState)?.isoCode
+      )
     : [];
 
   const handleStateChange = (event) => {
@@ -87,8 +87,8 @@ function UserTable() {
           page: currentPage,
           limit: itemsPerPage,
           searchTerm: searchTerm,
-          selectedState,
-          selectedCity,
+          selectedState: selectedState === "All State" ? "" : selectedState,
+          selectedCity: selectedCity === "All City" ? "" : selectedCity,
         },
       });
       setUsers(response.data.data);
@@ -136,7 +136,8 @@ function UserTable() {
 
       if (response.data.success) {
         toast.success(
-          `User has been ${activate ? "activated" : "deactivated"
+          `User has been ${
+            activate ? "activated" : "deactivated"
           } successfully!`
         );
         setUsers(
@@ -250,11 +251,7 @@ function UserTable() {
                 </Text>
               </Box>
             </Flex>
-            <Flex
-              className="thead"
-              justifyContent="end"
-              alignItems="center"
-            >
+            <Flex className="thead" justifyContent="end" alignItems="center">
               <Select
                 value={selectedState}
                 onChange={handleStateChange}
@@ -274,6 +271,7 @@ function UserTable() {
                   transition: "all 0.3s ease-in-out",
                 }}
               >
+                <option value="All State">All State</option>
                 {states.map((state) => (
                   <option key={state.isoCode} value={state.name}>
                     {state.name}
@@ -301,6 +299,7 @@ function UserTable() {
                   transition: "all 0.3s ease-in-out",
                 }}
               >
+                <option value="All City">All City</option>
                 {cities.map((city) => (
                   <option key={city.name} value={city.name}>
                     {city.name}
@@ -544,7 +543,7 @@ function UserTable() {
               justifyContent="flex-end"
               alignItems="center"
               p="4"
-            // borderBottom="1px solid #ccc"
+              // borderBottom="1px solid #ccc"
             >
               <Text mr="4" fontSize="sm">
                 Total Records: {totalRecords}

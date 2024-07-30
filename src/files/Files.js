@@ -123,7 +123,9 @@ function Files() {
   }, [location?.state?.state]);
 
   const [loanSubtypes, setLoanSubtypes] = useState([]);
-  const [selectedLoanSubType, setSelectedLoanSubType] = useState("");
+  const [selectedLoanSubType, setSelectedLoanSubType] = useState(
+    "All Loan Subtypes"
+  );
 
   useEffect(() => {
     if (selectedLoan) {
@@ -173,7 +175,10 @@ function Files() {
             : selectedLoan === "All Loan Types"
             ? ""
             : selectedLoan,
-          selectedStatus: selectedStatusSearch,
+          selectedStatus:
+            selectedStatusSearch === "All Loan Status"
+              ? ""
+              : selectedStatusSearch,
           selectedSubtype: loantype_id
             ? loantype_id === "All Loan Subtypes"
               ? ""
@@ -181,8 +186,8 @@ function Files() {
             : selectedLoanSubType === "All Loan Subtypes"
             ? ""
             : selectedLoanSubType,
-          selectedState,
-          selectedCity,
+          selectedState: selectedState === "All State" ? "" : selectedState,
+          selectedCity: selectedCity === "All City" ? "" : selectedCity,
         },
       });
 
@@ -323,9 +328,12 @@ function Files() {
 
         const response = await AxiosInstance.get(url, {
           params: {
-            state: selectedState,
-            city: selectedCity,
-            selectedStatusSearch: selectedStatusSearch,
+            selectedStatusSearch:
+              selectedStatusSearch === "All Loan Status"
+                ? ""
+                : selectedStatusSearch,
+            selectedState: selectedState === "All State" ? "" : selectedState,
+            selectedCity: selectedCity === "All City" ? "" : selectedCity,
           },
         });
 
@@ -897,6 +905,7 @@ function Files() {
                       <option value="All Loan Types" disabled>
                         Select loan type
                       </option>
+                      <option value="All Loan Types">All Loan Types</option>
                       {loans.map((loan) => (
                         <option
                           key={loan.loan_id}
@@ -938,6 +947,9 @@ function Files() {
                       <option value="" disabled>
                         Select loan subtype
                       </option>
+                      <option value="All Loan Subtypes">
+                        All Loan SubTypes
+                      </option>
                       {loanSubtypes.map((subtype) => (
                         <option
                           key={subtype.loantype_id}
@@ -955,7 +967,6 @@ function Files() {
                       ))}
                     </select>
                   )}
-
                   <select
                     className="form-select loan-type-dropdown"
                     aria-label="Default select example"
@@ -979,13 +990,13 @@ function Files() {
                     <option value="" disabled>
                       Select State
                     </option>
+                    <option value="All State">All State</option>
                     {states.map((state) => (
                       <option key={state.isoCode} value={state.name}>
                         {state.name}
                       </option>
                     ))}
                   </select>
-
                   <select
                     className="form-select loan-type-dropdown"
                     aria-label="Default select example"
@@ -1010,6 +1021,8 @@ function Files() {
                     <option value="" disabled>
                       Select City
                     </option>
+
+                    <option value="All City">All City</option>
                     {cities.map((city) => (
                       <option key={city.name} value={city.name}>
                         {city.name}
@@ -1017,7 +1030,6 @@ function Files() {
                     ))}
                   </select>
                 </div>
-
                 <div
                   className="d-flex second-drop-section gap-2"
                   style={{ marginLeft: "10px" }}
@@ -1045,6 +1057,7 @@ function Files() {
                     <option value="" disabled selected>
                       Select Status
                     </option>
+                    <option value="All Loan Status">All Loan Status</option>
                     {allLoanStatus?.map((loanstatus) => (
                       <option
                         key={loanstatus.loanstatus_id}

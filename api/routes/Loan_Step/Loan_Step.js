@@ -9,7 +9,6 @@ const { default: axios } = require("axios");
 const Guarantor_Step = require("../../models/AddGuarantor/GuarantorStep");
 const Guarantor = require("../../models/AddGuarantor/AddGuarantor");
 
-// Post Loan-Step
 router.post("/", async (req, res) => {
   try {
     let findLoanStep = await Loan_Step.findOne({
@@ -47,12 +46,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get Loan-Step
 router.get("/", async (req, res) => {
   try {
     const data = await Loan_Step.find({});
     if (data.length === 0) {
-      // If no data found
       return res.status(201).json({
         statusCode: 201,
         message: "No data found",
@@ -71,12 +68,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Put Loan-Step
 router.put("/:loan_step_id", async (req, res) => {
   try {
     const { loan_step_id } = req.params;
 
-    // Ensure that updatedAt field is set
     req.body.updatedAt = moment().utcOffset(330).format("YYYY-MM-DD HH:mm:ss");
     const result = await Loan_Step.findOneAndUpdate(
       { loan_step_id: loan_step_id },
@@ -104,7 +99,6 @@ router.put("/:loan_step_id", async (req, res) => {
   }
 });
 
-// Delete Loan-Step
 router.delete("/:loan_step_id", async (req, res) => {
   try {
     const { loan_step_id } = req.params;
@@ -153,7 +147,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 
 //           steps.push({ ...res.data.data, user_id: file.user_id });
@@ -208,7 +202,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -365,7 +359,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const res = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...res.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -464,7 +458,7 @@ router.delete("/:loan_step_id", async (req, res) => {
 //       if (loan_step_id === "1715348523661") {
 //         try {
 //           const response = await axios.get(
-//             `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+//             `http://localhost:5882/api/file_upload/get_documents/${file_id}`
 //           );
 //           steps.push({ ...response.data.data, user_id: file.user_id });
 //         } catch (error) {
@@ -563,7 +557,7 @@ router.get("/get_steps/:file_id", async (req, res) => {
       if (loan_step_id === "1715348523661") {
         try {
           const response = await axios.get(
-            `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+            `http://localhost:5882/api/file_upload/get_documents/${file_id}`
           );
           steps.push({ ...response.data.data, user_id: file.user_id });
         } catch (error) {
@@ -590,7 +584,6 @@ router.get("/get_steps/:file_id", async (req, res) => {
             user_id: file.user_id,
           };
 
-          // Adjust status based on the actual status of the complete step
           if (compeleteStep.status === "reject") {
             mergedStep.status = "reject";
           } else if (compeleteStep.status === "active") {
@@ -657,7 +650,6 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
 
-    // Fetch file and loan details concurrently
     const [file, loan] = await Promise.all([
       File_Uplode.findOne({ file_id }).lean(),
       File_Uplode.findOne({ file_id }).then((file) =>
@@ -680,10 +672,9 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
         if (loan_step_id === "1715348523661") {
           try {
             const response = await axios.get(
-              `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
+              `http://localhost:5882/api/file_upload/get_documents/${file_id}`
             );
 
-            // Check the status returned by the /get_all_documents endpoint
             const documentStatus = response.data.data.status;
             return { loan_step: stepData.loan_step, status: documentStatus };
           } catch (error) {
@@ -707,17 +698,14 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
       })
     );
 
-    // Filter out null values from steps
     const filteredSteps = steps.filter((step) => step !== null);
 
-    // Send response with steps data
     res.json({
       statusCode: 200,
       data: filteredSteps,
       message: "Read All Request",
     });
   } catch (error) {
-    // Handle any errors
     console.error("Error in /get_all_steps: ", error.message);
     res.status(500).json({
       statusCode: 500,
@@ -763,8 +751,8 @@ router.post("/steps/:file_id", async (req, res) => {
         }
       });
 
-      existingStep.status = status; // Ensure status is updated
-      existingStep.statusMessage = statusMessage; // Update statusMessage
+      existingStep.status = status;
+      existingStep.statusMessage = statusMessage;
       existingStep.updatedAt = moment()
         .utcOffset(330)
         .format("YYYY-MM-DD HH:mm:ss");

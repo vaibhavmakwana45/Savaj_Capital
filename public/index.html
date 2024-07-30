@@ -1,16 +1,3 @@
-<!--
-/*!
-=========================================================
-* Argon Dashboard Chakra - v1.0.0
-=========================================================
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-chakra
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-chakra/blob/master/LICENSE.md)
-* Design and Coded by Simmmple & Creative Tim
-=========================================================
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
--->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -20,10 +7,6 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
     <meta name="theme-color" content="#000000" />
-    <!--
-          manifest.json provides metadata used when your web app is added to the
-          homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
-        -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="shortcut icon" href="%PUBLIC_URL%/small logo.svg" />
     <link
@@ -67,7 +50,6 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <!--     Fonts and icons     -->
     <link
       href="https://use.fontawesome.com/releases/v5.0.7/css/all.css"
       rel="stylesheet"
@@ -78,37 +60,54 @@
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
     />
     <link rel="stylesheet" href="./style.css" />
-
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
     <link rel="shortcut icon" type="image/x-icon" href="./favicon.png" />
-    <!--
-          Notice the use of %PUBLIC_URL% in the tags above.
-          It will be replaced with the URL of the `public` folder during the build.
-          Only files inside the `public` folder can be referenced from the HTML.
-
-          Unlike "/favicon.png" or "favicon.ico", "%PUBLIC_URL%/favicon.png" will
-          work correctly both with client-side routing and a non-root public URL.
-          Learn how to configure a non-root public URL by running `npm run build`.
-        -->
     <title>Savaj Capital</title>
+    <style>
+      /* Custom scrollbar styles */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        background: linear-gradient(180deg, #f1f1f1, #e0e0e0);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #b19552, #646868);
+        border-radius: 10px;
+        border: 3px solid #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #a1854a, #505050);
+      }
+      /* Firefox scrollbar styles */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #b19552 #f1f1f1;
+      }
+      *::-webkit-scrollbar {
+        width: 12px;
+      }
+      *::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      *::-webkit-scrollbar-thumb {
+        background-color: #b19552;
+        border-radius: 10px;
+        border: 3px solid #f1f1f1;
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background-color: #646868;
+      }
+    </style>
   </head>
   <body>
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
-    <!--
-          This HTML file is a template.
-          If you open it directly in the browser, you will see an empty page.
-
-          You can add webfonts, meta tags, or analytics to this file.
-          The build step will place the bundled scripts into the <body> tag.
-
-          To begin the development, run `npm start` or `yarn start`.
-          To create a production bundle, use `npm run build` or `yarn build`.
-        -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
