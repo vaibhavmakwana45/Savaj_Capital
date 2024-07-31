@@ -792,92 +792,145 @@ function Files() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader pb="4">
-            <Flex justifyContent="space-between" pb="4" className="mainnnn">
-              <Text fontSize="xl">
-                {loan ? (
-                  <>
-                    <Box p="2">
-                      <Text
-                        fontSize="2xl"
-                        fontWeight="bold"
-                        bgGradient="linear(to-r, #b19552, #212529)"
-                        bgClip="text"
-                        className="ttext"
-                      >
-                        {getLoanName(selectedLoan)}
-                        {selectedStatusSearch !== "1718861587262" &&
-                        selectedStatusSearch !== "1718861593296" ? (
-                          <>
-                            <span
-                              style={{ color: "black", paddingLeft: "10px" }}
-                            >
-                              ₹{" "}
-                            </span>
+            <Flex justifyContent="space-between" alignItems="center" pb="4">
+              <Box>
+                <Text fontSize="3xl" fontWeight="bold" mb="2">
+                  {loan ? (
+                    <>
+                      <Flex alignItems="center" mt="2">
+                        <Text
+                          fontSize="2xl"
+                          fontWeight="bold"
+                          bgGradient="linear(to-r, #b19552, #212529)"
+                          bgClip="text"
+                        >
+                          {getLoanName(selectedLoan)}
+                        </Text>
+                        <Text
+                          as="span"
+                          color="black"
+                          fontSize="xl"
+                          fontWeight="medium"
+                          mr="1"
+                          ml="1"
+                        >
+                          ₹
+                        </Text>
+                        <Text
+                          as="span"
+                          color="green.500"
+                          fontSize="2xl"
+                          fontWeight="bold"
+                          display="inline-flex"
+                          alignItems="center"
+                        >
+                          {totalAmount !== null ? totalAmount : "-"}
+                          <Box
+                            as="span"
+                            // ml="1"
+                            display="inline-block"
+                            bg="green.500"
+                            height="2px"
+                            width="100%"
+                          />
+                        </Text>
+                        <Text as="span" color="gray.600" ml="1" fontSize="lg">
+                          - {totalFiles} files
+                        </Text>
+                      </Flex>
+                      {statusCounts && (
+                        <Flex wrap="wrap" mt="2">
+                          {Object.keys(statusCounts).map((status) => (
                             <Text
-                              as="span"
-                              color="green.500"
-                              fontWeight="semibold"
+                              key={status}
+                              color={statusCounts[status]?.color || "gray.700"}
+                              fontSize="lg"
+                              mr="3"
+                              p="1"
+                              borderRadius="md"
+                              bg="gray.100"
+                              display="inline-block"
+                              _hover={{
+                                bg: statusCounts[status]?.color || "gray.300",
+                                color: "white",
+                              }}
                             >
-                              {totalAmount !== null ? totalAmount : "-"}
-                            </Text>{" "}
-                            <span style={{ color: "gray.700" }}>-</span>{" "}
-                            {totalFiles} files
-                            {/* Dynamic Status Counts */}
-                            {statusCounts &&
-                              Object.keys(statusCounts).map((status) => (
-                                <span
-                                  key={status}
-                                  style={{
-                                    color:
-                                      statusCounts[status]?.color || "inherit",
-                                    paddingLeft: "10px",
-                                  }}
-                                >
-                                  {statusCounts[status]?.count} {status}
-                                </span>
-                              ))}
-                          </>
-                        ) : null}
-                      </Text>
-                    </Box>
-                  </>
-                ) : (
-                  <Box p="2">
-                    <Text
-                      fontSize="2xl"
-                      fontWeight="bold"
-                      bgGradient="linear(to-r, #b19552, #212529)"
-                      bgClip="text"
-                      className="ttext"
-                    >
-                      {getLoanName(selectedLoan)}
-                      <span style={{ color: "black", paddingLeft: "10px" }}>
-                        ₹{" "}
-                      </span>
-                      <Text as="span" color="green.500" fontWeight="semibold">
-                        {totalAmount !== null ? totalAmount : "-"}
-                      </Text>{" "}
-                      <span style={{ color: "gray.700" }}>-</span> {totalFiles}{" "}
-                      files
-                      {/* Dynamic Status Counts */}
-                      {statusCounts &&
-                        Object.keys(statusCounts).map((status) => (
-                          <span
-                            key={status}
-                            style={{
-                              color: statusCounts[status]?.color || "inherit",
-                              paddingLeft: "10px",
-                            }}
-                          >
-                            {statusCounts[status]?.count} {status}
-                          </span>
-                        ))}
-                    </Text>
-                  </Box>
-                )}
-              </Text>
+                              {statusCounts[status]?.count} {status}
+                            </Text>
+                          ))}
+                        </Flex>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Flex alignItems="center" mt="2">
+                        <Text
+                          fontSize="2xl"
+                          fontWeight="bold"
+                          bgGradient="linear(to-r, #b19552, #212529)"
+                          bgClip="text"
+                        >
+                          {getLoanName(selectedLoan)}
+                        </Text>
+                        <Text
+                          as="span"
+                          color="black"
+                          fontSize="xl"
+                          fontWeight="medium"
+                          mr="1"
+                          ml="1"
+                        >
+                          ₹
+                        </Text>
+                        <Text
+                          as="span"
+                          color="green.500"
+                          fontSize="2xl"
+                          fontWeight="bold"
+                          display="inline-flex"
+                          alignItems="center"
+                        >
+                          {totalAmount !== null ? totalAmount : "-"}
+                          <Box
+                            as="span"
+                            // ml="1"
+                            display="inline-block"
+                            bg="green.500"
+                            height="2px"
+                            width="100%"
+                          />
+                        </Text>
+                        <Text as="span" color="gray.600" ml="1" fontSize="lg">
+                          - {totalFiles} files
+                        </Text>
+                      </Flex>
+                      {statusCounts && (
+                        <Flex wrap="wrap" mt="2">
+                          {Object.keys(statusCounts).map((status) => (
+                            <Text
+                              key={status}
+                              color={statusCounts[status]?.color || "gray.700"}
+                              fontSize="lg"
+                              mr="3"
+                              p="1"
+                              borderRadius="md"
+                              bg="gray.100"
+                              display="inline-block"
+                              _hover={{
+                                bg: statusCounts[status]?.color || "gray.300",
+                                color: "white",
+                              }}
+                            >
+                              {statusCounts[status]?.count} {status}
+                            </Text>
+                          ))}
+                        </Flex>
+                      )}
+                    </>
+                  )}
+                </Text>
+              </Box>
             </Flex>
-
             <Flex justifyContent="end" py="1" className="mainnnn">
               <Flex className="theaddd p-2">
                 <div className="d-flex first-drop-section gap-2">

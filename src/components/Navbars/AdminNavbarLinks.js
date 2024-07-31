@@ -203,6 +203,8 @@ export default function HeaderLinks(props) {
           boxShadow={boxShadow}
           borderColor={borderColor}
           borderRadius="md"
+          maxH="600px"
+          overflowY="auto"
         >
           <Flex flexDirection="column">
             <Text

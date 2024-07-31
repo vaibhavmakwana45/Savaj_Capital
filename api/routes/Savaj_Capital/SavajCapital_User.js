@@ -791,7 +791,7 @@ router.get("/assignedbranch_file/:branchuser_id", async (req, res) => {
               ? "active"
               : "complete";
 
-          return { loan_step: stepData.loan_step, status: documentStatus };
+          return { loan_step: stepData?.loan_step, status: documentStatus };
         } else {
           const completedStep = file.complete_steps.find(
             (step) => step.loan_step_id === loan_step_id
@@ -802,7 +802,7 @@ router.get("/assignedbranch_file/:branchuser_id", async (req, res) => {
             status = completedStep.status;
           }
 
-          return { loan_step: stepData.loan_step, status };
+          return { loan_step: stepData?.loan_step, status };
         }
       });
 
@@ -814,12 +814,12 @@ router.get("/assignedbranch_file/:branchuser_id", async (req, res) => {
       const activeStep = filteredSteps.find((step) => step.status === "active");
 
       if (rejectedStep) {
-        item.running_step_name = rejectedStep.loan_step;
+        item.running_step_name = rejectedStep?.loan_step;
       } else if (activeStep) {
-        item.running_step_name = activeStep.loan_step;
+        item.running_step_name = activeStep?.loan_step;
       } else {
         const lastIndex = filteredSteps.length - 1;
-        item.running_step_name = filteredSteps[lastIndex].loan_step;
+        item.running_step_name = filteredSteps[lastIndex]?.loan_step;
       }
     });
 
