@@ -500,22 +500,22 @@ export default function Dashboard() {
         columns={{ base: 1, sm: 1, md: 2, xl: 4 }}
         spacing="24px"
         mb="20px"
-        justifyItems="center" // Ensure items are centered horizontally
+        justifyItems="center"
       >
         {loadingLoans ? (
           <Flex
             justify="center"
             align="center"
-            height="100vh" // Ensure full viewport height
-            width="100%" // Ensure full viewport width
-            position="fixed" // Ensures it overlays everything
+            height="100vh"
+            width="100%"
+            position="fixed"
             top="0"
             left="0"
           >
             <Loader
               type="spinner-circle"
               bgColor={"#b19552"}
-              color={"black"}
+              color={"#5a5a5a"}
               size={50}
             />
           </Flex>
@@ -526,8 +526,9 @@ export default function Dashboard() {
               minH="125px"
               style={{
                 cursor: "pointer",
-                border: "1px solid #b19552",
-                background: "#7e7f81",
+                cursor: "pointer",
+                border: `1px solid ${useColorModeValue("#b19552", "#d4c6a5")}`,
+                background: useColorModeValue("#f4f1e4", "#333"),
               }}
               onClick={() =>
                 history.push(`/superadmin/filetable`, {
@@ -550,7 +551,7 @@ export default function Dashboard() {
                   <Stat me="auto">
                     <StatLabel
                       fontSize="xs"
-                      color="white"
+                      color="#5a5a5a"
                       fontWeight="bold"
                       textTransform="uppercase"
                     >
@@ -561,14 +562,14 @@ export default function Dashboard() {
                     <Flex>
                       <StatNumber
                         fontSize="lg"
-                        color="white"
+                        color={textColor}
                         fontWeight="bold"
                         style={{ paddingTop: "10px", paddingBottom: "10px" }}
                       >
                         {loan.fileCount} files
                       </StatNumber>
                     </Flex>
-                    <Text as="span" color="green.400" fontWeight="bold">
+                    <Text as="span" color="#5a5a5a" fontWeight="bold">
                       ₹
                       {totalAmounts[loan.loan_id]?.[
                         loan.loantype_id || "none"
@@ -580,7 +581,7 @@ export default function Dashboard() {
                     as="box"
                     h={"45px"}
                     w={"45px"}
-                    bg={"#212529"}
+                    bg={"#8c6d62"}
                   >
                     <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
                   </IconBox>
@@ -600,7 +601,7 @@ export default function Dashboard() {
                         <Text fontSize="sm" fontWeight="bold" color={color}>
                           {status}
                         </Text>
-                        <Text fontSize="md" color={"white"}>
+                        <Text fontSize="md" color="#5a5a5a">
                           {count}
                         </Text>
                       </Flex>

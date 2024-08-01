@@ -435,7 +435,6 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
 
-    // Fetch file and loan details concurrently
     const [file, loan] = await Promise.all([
       File_Uplode.findOne({ file_id }).lean(),
       File_Uplode.findOne({ file_id }).then((file) =>
@@ -461,7 +460,6 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
               `https://admin.savajcapital.com/api/file_upload/get_documents/${file_id}`
             );
 
-            // Check the status returned by the /get_all_documents endpoint
             const documentStatus = response.data.data.status;
             return { loan_step: stepData.loan_step, status: documentStatus };
           } catch (error) {
@@ -485,17 +483,14 @@ router.get("/get_all_steps/:file_id", async (req, res) => {
       })
     );
 
-    // Filter out null values from steps
     const filteredSteps = steps.filter((step) => step !== null);
 
-    // Send response with steps data
     res.json({
       statusCode: 200,
       data: filteredSteps,
       message: "Read All Request",
     });
   } catch (error) {
-    // Handle any errors
     console.error("Error in /get_all_steps: ", error.message);
     res.status(500).json({
       statusCode: 500,
@@ -1819,24 +1814,39 @@ router.get("/allfiles", async (req, res) => {
 router.get("/file-count/:file_id", async (req, res) => {
   try {
     const { file_id } = req.params;
-    const data = await File_Uplode.findOne({ file_id });
-    const loanIds = data.documents.map((item) => {
-      return {
-        loan_document_id: item.loan_document_id,
-        title_id: item.title_id,
-      };
-    });
+
+    const data = await File_Uplode.findOne({ file_id }).lean();
+    if (!data) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "File not found",
+      });
+    }
+
+    const loanIds = data.documents.map((item) => ({
+      loan_document_id: item.loan_document_id,
+      title_id: item.title_id,
+    }));
 
     const { loan_id, loantype_id } = data;
-    const data2 = await Loan_Documents.find({ loan_id, loantype_id });
-    const loanDocumentIds = data2.flatMap((item) => {
-      return item.document_ids.map((loan_document_id) => {
-        return {
-          loan_document_id,
-          title_id: item.title_id,
-        };
-      });
-    });
+
+    const [loanDocuments, addDocuments, titles] = await Promise.all([
+      Loan_Documents.find({ loan_id, loantype_id }).lean(),
+      AddDocuments.find({}).lean(),
+      Title.find({}).lean(),
+    ]);
+
+    const loanDocumentIds = loanDocuments.flatMap((item) =>
+      item.document_ids.map((loan_document_id) => ({
+        loan_document_id,
+        title_id: item.title_id,
+      }))
+    );
+
+    const documentMap = new Map(
+      addDocuments.map((doc) => [doc.document_id, doc])
+    );
+    const titleMap = new Map(titles.map((title) => [title.title_id, title]));
 
     const commonIds = loanIds.filter((id) =>
       loanDocumentIds.some(
@@ -1855,38 +1865,17 @@ router.get("/file-count/:file_id", async (req, res) => {
         )
     );
 
-    const approvedObject = [];
-    const pendingObject = [];
+    const approvedObject = commonIds.map((item) => ({
+      name: documentMap.get(item.loan_document_id)?.document,
+      status: "Uploaded",
+      title: titleMap.get(item.title_id)?.title,
+    }));
 
-    for (const item of commonIds) {
-      const document = await AddDocuments.findOne({
-        document_id: item.loan_document_id,
-      });
-      const title = await Title.findOne({
-        title_id: item.title_id,
-      });
-      approvedObject.push({
-        name: document.document,
-        status: "Uploaded",
-        title: title.title,
-      });
-    }
-
-    for (const item of differentIds) {
-      const document = await AddDocuments.findOne({
-        document_id: item.loan_document_id,
-      });
-
-      const title = await Title.findOne({
-        title_id: item.title_id,
-      });
-
-      pendingObject.push({
-        name: document.document,
-        status: "Pending",
-        title: title.title,
-      });
-    }
+    const pendingObject = differentIds.map((item) => ({
+      name: documentMap.get(item.loan_document_id)?.document,
+      status: "Pending",
+      title: titleMap.get(item.title_id)?.title,
+    }));
 
     const diff = (approvedObject.length * 100) / loanDocumentIds.length;
 
@@ -1896,12 +1885,12 @@ router.get("/file-count/:file_id", async (req, res) => {
         approvedData: approvedObject,
         pendingData: pendingObject,
         file_id: file_id,
-        document_percentage: parseInt(diff),
+        document_percentage: Math.round(diff),
       },
       message: "Read All Request",
     });
   } catch (error) {
-    res.json({
+    res.status(500).json({
       statusCode: 500,
       message: error.message,
     });
