@@ -130,7 +130,7 @@ function BankAssignFile() {
                 ))}
               </Select>
             </FormControl>
-    
+
             <div className="w-100 my-3">
               <FormLabel>Select Bank</FormLabel>
               <input

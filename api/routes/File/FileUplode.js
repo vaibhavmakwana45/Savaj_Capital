@@ -412,6 +412,10 @@ router.get("/", async (req, res) => {
       running_step_name: item.running_step_name,
       status: item.status,
       file_id: item.file_id,
+      city: item.city,
+      user_id: item.user_id,
+      loan_id: item.loan_id,
+      loantype_id: item.loantype_id,
     }));
 
     res.json({
@@ -930,6 +934,10 @@ router.get("/savajusers/:state/:city/:branchuser_id?", async (req, res) => {
       running_step_name: item.running_step_name,
       status: item.status,
       file_id: item.file_id,
+      city: item.city,
+      user_id: item.user_id,
+      loan_id: item.loan_id,
+      loantype_id: item.loantype_id,
     }));
 
     res.json({
@@ -1297,6 +1305,10 @@ router.get("/bankusers/:state/:city/:bankuser_id?", async (req, res) => {
       running_step_name: item.running_step_name,
       status: item.status,
       file_id: item.file_id,
+      city: item.city,
+      user_id: item.user_id,
+      loan_id: item.loan_id,
+      loantype_id: item.loantype_id,
     }));
 
     res.json({

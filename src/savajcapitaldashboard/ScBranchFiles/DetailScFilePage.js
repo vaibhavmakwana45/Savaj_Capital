@@ -19,6 +19,8 @@ import {
   Checkbox,
   Select,
   Box,
+  Tooltip,
+  Text,
 } from "@chakra-ui/react";
 import { CircularProgress } from "@material-ui/core";
 import { TiArrowMaximise, TiArrowMinimise } from "react-icons/ti";
@@ -34,13 +36,20 @@ import { Form, Table } from "reactstrap";
 import { AiOutlineClose } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Icon } from "@chakra-ui/react";
-import { FaUndo, FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import {
+  FaUndo,
+  FaWhatsapp,
+  FaEnvelope,
+  FaFolder,
+  FaInfoCircle,
+} from "react-icons/fa";
 import {
   faChevronDown,
   faChevronUp,
   faEdit,
   faTrashAlt,
   faMaximize,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "react-hook-form";
 import { jsPDF } from "jspdf";
@@ -52,32 +61,47 @@ function DetailScFilePage() {
   const searchParams = new URLSearchParams(location.search);
   const id = searchParams.get("id");
   const [fileData, setFileData] = useState(null);
+  const [loanStatus, setLoanStatus] = useState(null);
+  const [fileBankAssignData, setFileBankAssignData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [accessType, setAccessType] = useState("");
+
+  React.useEffect(() => {
+    const jwt = jwtDecode(localStorage.getItem("authToken"));
+    setAccessType(jwt._id);
+  }, []);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const {
     isOpen: isOpensGuarantor,
     onOpen: onOpensGuarantor,
     onClose: onClosesGuarantor,
   } = useDisclosure();
+
   const {
     isOpen: isOpensLogs,
     onOpen: onOpensLogs,
     onClose: onClosesLogs,
   } = useDisclosure();
+
   const [logs, setLogs] = useState([]);
   const [logMessage, setLogMessage] = useState("");
   const basePath = "https://cdn.savajcapital.com/cdn/files/";
   const [openPanelIndex, setOpenPanelIndex] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [accessType, setAccessType] = useState("");
-  React.useEffect(() => {
-    const jwt = jwtDecode(localStorage.getItem("authToken"));
-    setAccessType(jwt._id);
-  }, []);
 
   const handleAccordionClickDocument = (index) => {
     setOpenPanelIndex(index === openPanelIndex ? -1 : index);
+  };
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const handleFolderClick = (folder) => {
+    setSelectedFolder(folder);
+  };
+
+  const handleBackClick = () => {
+    setSelectedFolder(null);
   };
 
   const handleFileClick = (file) => {
@@ -104,6 +128,7 @@ function DetailScFilePage() {
       }
     }
   };
+
   const handleConvertToPdf = () => {
     if (selectedFile && !selectedFile.file_path.endsWith(".pdf")) {
       const pdf = new jsPDF();
@@ -126,10 +151,25 @@ function DetailScFilePage() {
     window.open(whatsappUrl, "_blank");
   };
 
+  // const handleShareEmail = () => {
+  //   const url = `${basePath}${selectedFile.file_path}`;
+  //   const subject = "Check out this document";
+  //   const body = `Here is the link to the document: ${url}`;
+  //   const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+  //     subject
+  //   )}&body=${encodeURIComponent(body)}`;
+  //   window.open(mailtoUrl, "_blank");
+  // };
+
   const handleShareEmail = () => {
-    const url = `${basePath}${selectedFile.file_path}`;
+    const documentUrl =
+      "https://cdn.savajcapital.com/cdn/files/20240622120000_1.PNG";
     const subject = "Check out this document";
-    const body = `Here is the link to the document: ${url}`;
+    const body = `
+      Here is the image:\n\n
+      [Shared Image](${documentUrl})\n\n
+      Click the link to view/download the image: ${documentUrl}
+    `;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
@@ -236,6 +276,8 @@ function DetailScFilePage() {
         "/file_upload/file_upload/" + id
       );
       setFileData(response.data.data.file);
+      setLoanStatus(response.data.data.loanStatus);
+      setFileBankAssignData(response.data.data.bankApproval);
       setLogs(response.data.data.file.logs || []);
     } catch (error) {
       console.error("Error fetching file data:", error);
@@ -303,13 +345,29 @@ function DetailScFilePage() {
     index: "",
     guarantors: [],
   });
+
   const [selectedGuarantor, setSelectedGuarantor] = useState();
   const [selectedGuarantorID, setSelectedGuarantorID] = useState([]);
+
+  const processStepsData = (data) => {
+    let rejected = false;
+    return data.map((item) => {
+      if (rejected) {
+        return { ...item, status: "reject" };
+      }
+      if (item.status === "reject") {
+        rejected = true;
+      }
+      return item;
+    });
+  };
 
   const fetchStepsData = async () => {
     try {
       setStepLoader(true);
       const response = await AxiosInstance.get(`/loan_step/get_steps/${id}`);
+      // const processedData = processStepsData(response.data.data);
+      // setStepData(processedData);
       setStepData(response.data.data);
       setStepLoader(false);
     } catch (error) {
@@ -321,6 +379,7 @@ function DetailScFilePage() {
   useEffect(() => {
     fetchStepsData();
   }, []);
+
   const allPreviousComplete = (stepData, currentIndex) => {
     for (let i = 0; i < currentIndex; i++) {
       if (stepData[i]?.status !== "complete") {
@@ -753,6 +812,7 @@ function DetailScFilePage() {
       });
     }
   };
+
   const isGuarantorAlreadyAdded = (guarantorId) => {
     const alreadyAddedInGuarantorSteps =
       open.data.guarantorSteps &&
@@ -826,13 +886,13 @@ function DetailScFilePage() {
       const newLog = {
         message: logMessage,
         timestamp: new Date().toISOString(),
-        role: `savajuser(${accessType.full_name})`,
-        branchuser_id: `${accessType.branchuser_id}`,
+        role: "superadmin",
+        superadmin_id: accessType.superadmin_id,
       };
 
       try {
         const response = await AxiosInstance.put(`/file_upload/logs/${id}`, {
-          logs: [newLog, ...logs], // Prepend the new log to the existing logs
+          logs: [newLog, ...logs],
         });
 
         setLogs(response.data.data.logs);
@@ -844,6 +904,7 @@ function DetailScFilePage() {
       }
     }
   };
+
   const handleDeleteLog = async (logId) => {
     try {
       const response = await AxiosInstance.delete(
@@ -882,37 +943,54 @@ function DetailScFilePage() {
               >
                 <Flex
                   justifyContent="space-between"
-                  width="100%"
+                  alignItems="center"
                   className="thead"
                 >
-                  <div className="theadd">
+                  {/* Left Section */}
+                  <Flex alignItems="center">
                     <IconButton
                       icon={<ArrowBackIcon />}
                       onClick={() => history.goBack()}
                       aria-label="Back"
                       mr="4"
                     />
-                    <b>{fileData?.loan} File Details</b>
-                  </div>
-                  <div>
+                    <div>
+                      <b>{fileData?.loan} File Details</b>
+                      <b
+                        style={{
+                          backgroundColor: loanStatus?.color,
+                          padding: "5px",
+                          borderRadius: "5px",
+                          color: "#fff",
+                          marginTop: "5px",
+                          marginLeft: "5px",
+                        }}
+                      >
+                        {" "}
+                        {loanStatus?.loanstatus}
+                      </b>
+                    </div>
+                  </Flex>
+
+                  <Flex>
                     <Button
                       colorScheme="blue"
                       style={{
                         backgroundColor: "#b19552",
-                        marginRight: "10PX",
+                        marginRight: "10px",
                       }}
                       onClick={onOpensLogs}
                     >
                       Logs
                     </Button>
-                    {/* <Button
+                    <Button
                       colorScheme="blue"
                       style={{ backgroundColor: "#b19552" }}
                       onClick={handleAddGuarantor}
                     >
                       Add Guarantor
-                    </Button> */}
-                  </div>
+                    </Button>
+                  </Flex>
                 </Flex>
               </FormLabel>
 
@@ -945,78 +1023,126 @@ function DetailScFilePage() {
                       style={{ fontSize: "14px", paddingLeft: "20px" }}
                     >
                       <div className="row">
-                        <div className="col-md-6">
-                          <div>
-                            <strong>Loan User :</strong>{" "}
-                            <span> {fileData?.user?.username || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Email :</strong>{" "}
-                            <span> {fileData?.user?.email || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Phone Number :</strong>{" "}
-                            <span> {fileData?.user?.number || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong>Cibil Score :</strong>{" "}
-                            <span> {fileData?.user?.cibil_score || "N/A"}</span>
-                          </div>
-                          <div>
-                            <strong id="gstNumber">Gst Number :</strong>{" "}
-                            <span
-                              id="gstNumberText"
-                              onClick={() => copyText("gstNumberText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.gst_number || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "5px" }}
-                              ></i>
-                            </span>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <div className="mb-3">
+                                <strong>Loan User:</strong>
+                                <span>{fileData?.user?.username || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Email:</strong>{" "}
+                                <span>{fileData?.user?.email || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Phone Number:</strong>{" "}
+                                <span>{fileData?.user?.number || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>City:</strong>{" "}
+                                {fileData?.user?.city || "N/A"}
+                              </div>
+                              <div className="mb-3">
+                                <strong>State:</strong>{" "}
+                                {fileData?.user?.state || "N/A"}
+                              </div>
+                              {/* <div>
+                                <strong>Country:</strong>{" "}
+                                {fileData?.user?.country || "N/A"}
+                              </div> */}
+                            </div>
                           </div>
                         </div>
-                        <div className="col-md-6">
-                          <div>
-                            <strong id="panCard">PAN Card :</strong>{" "}
-                            <span
-                              id="panCardText"
-                              onClick={() => copyText("panCardText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.pan_card || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "10px" }}
-                              ></i>
-                            </span>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <div className="mb-3">
+                                <strong>File Id:</strong>{" "}
+                                <span>{fileData?.file_id || "N/A"}</span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Cibil Score:</strong>{" "}
+                                <span>
+                                  {fileData?.user?.cibil_score || "N/A"}
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>GST Number:</strong>{" "}
+                                <span
+                                  id="gstNumberText"
+                                  onClick={() => copyText("gstNumberText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.gst_number || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "5px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>PAN Card:</strong>{" "}
+                                <span
+                                  id="panCardText"
+                                  onClick={() => copyText("panCardText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.pan_card || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "10px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                              <div className="mb-3">
+                                <strong>Aadhar Card:</strong>{" "}
+                                <span
+                                  id="aadharCardText"
+                                  onClick={() => copyText("aadharCardText")}
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {fileData?.user?.aadhar_card || "N/A"}{" "}
+                                  <i
+                                    className="fa-solid fa-copy"
+                                    style={{
+                                      color: "#B19552",
+                                      marginLeft: "10px",
+                                    }}
+                                  ></i>
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <strong id="aadharCard">Aadhar Card :</strong>{" "}
-                            <span
-                              id="aadharCardText"
-                              onClick={() => copyText("aadharCardText")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {fileData?.user?.aadhar_card || "N/A"}{" "}
-                              <i
-                                class="fa-solid fa-copy"
-                                style={{ color: "#B19552", marginLeft: "10px" }}
-                              ></i>
-                            </span>
-                          </div>
-                          <div>
-                            <strong>City :</strong>{" "}
-                            {fileData?.user?.city || "N/A"}
-                          </div>
-                          <div>
-                            <strong>State :</strong>{" "}
-                            {fileData?.user?.state || "N/A"}
-                          </div>
-                          <div>
-                            <strong>Country :</strong>{" "}
-                            {fileData?.user?.country || "N/A"}
+                        </div>
+                        <div className="col-md-4">
+                          <div className="card shadow-sm mb-4">
+                            <div className="card-body">
+                              <h5 className="card-title mb-3">
+                                Bank Assign Detail
+                              </h5>
+                              <div className="mb-3">
+                                <strong>Bank Name:</strong>{" "}
+                                <span>
+                                  {fileBankAssignData?.bank_name || "N/A"}{" "}
+                                  {fileBankAssignData?.bankbranch_name
+                                    ? `(${fileBankAssignData.bankbranch_name})`
+                                    : ""}
+                                </span>
+                              </div>
+                              <div>
+                                <strong>Bank User:</strong>{" "}
+                                <span>
+                                  {fileBankAssignData?.bank_user
+                                    ?.bankuser_name || "N/A"}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1204,227 +1330,262 @@ function DetailScFilePage() {
                                 ))}
                             </ul>
                           </div>
+
                           <div className="d-flex gap-3">
                             {open.is &&
                               open.data.loan_step_id !== "1715348523661" && (
-                                <Form
-                                  onSubmit={(e) => {
-                                    e.preventDefault();
-                                    submitStep();
+                                <div
+                                  className="card shadow-sm mb-4"
+                                  style={{
+                                    marginTop: "30px",
+                                    marginLeft: "40px",
                                   }}
                                 >
-                                  {open.data.status !== "reject" &&
-                                    open.data.inputs.map((input, index) => (
-                                      <FormControl
-                                        key={index}
-                                        id="step"
-                                        className="d-flex justify-content-between align-items-center mt-4"
-                                      >
-                                        {input.type === "input" ? (
-                                          <div className="col-8">
-                                            <label>{input.label}</label>
-                                            <Input
-                                              name="step"
-                                              required={input.is_required}
-                                              value={input.value}
-                                              placeholder={`Enter ${input.value}`}
-                                              onChange={(e) =>
-                                                handleChange(e, index)
-                                              }
-                                            />
-                                          </div>
-                                        ) : input.type === "checkbox" ? (
-                                          <div className="col-4">
-                                            <input
-                                              type="checkbox"
-                                              checked={input.value}
-                                              required={input.is_required}
-                                              onChange={(e) =>
-                                                handleChange(e, index)
-                                              }
-                                            />{" "}
-                                            {input.label}
-                                          </div>
-                                        ) : (
-                                          input.type === "file" && (
-                                            <div>
-                                              <label
-                                                style={{
-                                                  display: "block",
-                                                  marginBottom: "8px",
-                                                }}
-                                              >
-                                                {input.label}
-                                              </label>
-                                              <label
-                                                style={{
-                                                  display: "inline-block",
-                                                  padding: "5px 20px",
-                                                  backgroundColor:
-                                                    "rgb(65, 70, 80)",
-                                                  color: "white",
-                                                  borderRadius: "5px",
-                                                  cursor: "pointer",
-                                                }}
-                                              >
-                                                Choose File
-                                                <Input
-                                                  type="file"
-                                                  required={input.is_required}
-                                                  onChange={(e) =>
-                                                    handleChange(e, index)
-                                                  }
-                                                  style={{
-                                                    display: "none",
-                                                  }}
-                                                />
-                                              </label>
-                                              {input.value && (
-                                                <>
-                                                  {input.value.endsWith(
-                                                    ".pdf"
-                                                  ) ? (
-                                                    <div
+                                  <div className="card-body">
+                                    <Form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitStep();
+                                      }}
+                                    >
+                                      <Flex alignItems="center">
+                                        <p>
+                                          {fileData?.user?.username}{" "}
+                                          {open.data.loan_step}
+                                        </p>
+                                      </Flex>
+                                      {open.data.status !== "reject" &&
+                                        open.data.inputs.map((input, index) => (
+                                          <>
+                                            <FormControl
+                                              key={index}
+                                              id="step"
+                                              className="d-flex justify-content-between align-items-center mt-4"
+                                            >
+                                              {input.type === "input" ? (
+                                                <div className="col-8">
+                                                  <label>{input.label}</label>
+                                                  <Input
+                                                    name="step"
+                                                    required={input.is_required}
+                                                    value={input.value}
+                                                    placeholder={`Enter ${input.value}`}
+                                                    onChange={(e) =>
+                                                      handleChange(e, index)
+                                                    }
+                                                  />
+                                                </div>
+                                              ) : input.type === "checkbox" ? (
+                                                <div className="col-4">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={input.value}
+                                                    required={input.is_required}
+                                                    onChange={(e) =>
+                                                      handleChange(e, index)
+                                                    }
+                                                  />{" "}
+                                                  {input.label}
+                                                </div>
+                                              ) : (
+                                                input.type === "file" && (
+                                                  <div>
+                                                    <label
                                                       style={{
-                                                        position: "relative",
-                                                        width: "100%",
-                                                        height: "260px",
-                                                        marginTop: "10px",
+                                                        display: "block",
+                                                        marginBottom: "8px",
                                                       }}
                                                     >
-                                                      <iframe
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                        type="application/pdf"
-                                                        className="pdf-viewer"
-                                                        height="100%"
-                                                        width="100%"
-                                                        title="PDF Viewer"
-                                                      />
-                                                      <div className="pdf-overlay">
-                                                        <FontAwesomeIcon
-                                                          icon={faMaximize}
-                                                          onClick={() =>
-                                                            handleFileClick({
-                                                              file_path:
-                                                                input.value,
-                                                            })
-                                                          }
-                                                          style={{
-                                                            position:
-                                                              "absolute",
-                                                            bottom: "8px",
-                                                            right: "25px",
-                                                            color: "black",
-                                                            cursor: "pointer",
-                                                          }}
-                                                        />
-                                                      </div>
-                                                    </div>
-                                                  ) : input.value.match(
-                                                      /\.(jpeg|jpg|gif|png)$/
-                                                    ) ? (
-                                                    <img
-                                                      src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                      alt="Uploaded"
+                                                      {input.label}
+                                                    </label>
+                                                    <label
                                                       style={{
-                                                        width: "100%",
-                                                        height: "260px",
-                                                        borderRadius: "12px",
-                                                        boxShadow:
-                                                          "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                        display: "inline-block",
+                                                        padding: "5px 20px",
+                                                        backgroundColor:
+                                                          "rgb(65, 70, 80)",
+                                                        color: "white",
+                                                        borderRadius: "5px",
                                                         cursor: "pointer",
-                                                        marginTop: "10px",
                                                       }}
-                                                      className="details-image"
-                                                      onClick={() =>
-                                                        handleFileClick({
-                                                          file_path:
-                                                            input.value,
-                                                        })
-                                                      }
-                                                    />
-                                                  ) : (
-                                                    <div>
-                                                      No preview available for
-                                                      this file type
-                                                    </div>
-                                                  )}
-                                                </>
+                                                    >
+                                                      Choose File
+                                                      <Input
+                                                        type="file"
+                                                        required={
+                                                          input.is_required
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChange(e, index)
+                                                        }
+                                                        style={{
+                                                          display: "none",
+                                                        }}
+                                                      />
+                                                    </label>
+                                                    {input.value && (
+                                                      <>
+                                                        {input.value.endsWith(
+                                                          ".pdf"
+                                                        ) ? (
+                                                          <div
+                                                            style={{
+                                                              position:
+                                                                "relative",
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              marginTop: "10px",
+                                                            }}
+                                                          >
+                                                            <iframe
+                                                              src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                              type="application/pdf"
+                                                              className="pdf-viewer"
+                                                              height="100%"
+                                                              width="100%"
+                                                              title="PDF Viewer"
+                                                            />
+                                                            <div className="pdf-overlay">
+                                                              <FontAwesomeIcon
+                                                                icon={
+                                                                  faMaximize
+                                                                }
+                                                                onClick={() =>
+                                                                  handleFileClick(
+                                                                    {
+                                                                      file_path:
+                                                                        input.value,
+                                                                    }
+                                                                  )
+                                                                }
+                                                                style={{
+                                                                  position:
+                                                                    "absolute",
+                                                                  bottom: "8px",
+                                                                  right: "25px",
+                                                                  color:
+                                                                    "black",
+                                                                  cursor:
+                                                                    "pointer",
+                                                                }}
+                                                              />
+                                                            </div>
+                                                          </div>
+                                                        ) : input.value.match(
+                                                            /\.(jpeg|jpg|gif|png)$/
+                                                          ) ? (
+                                                          <img
+                                                            src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                            alt="Uploaded"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              borderRadius:
+                                                                "12px",
+                                                              boxShadow:
+                                                                "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                              cursor: "pointer",
+                                                              marginTop: "10px",
+                                                            }}
+                                                            className="details-image"
+                                                            onClick={() =>
+                                                              handleFileClick({
+                                                                file_path:
+                                                                  input.value,
+                                                              })
+                                                            }
+                                                          />
+                                                        ) : (
+                                                          <div>
+                                                            No preview available
+                                                            for this file type
+                                                          </div>
+                                                        )}
+                                                      </>
+                                                    )}
+                                                  </div>
+                                                )
                                               )}
-                                            </div>
-                                          )
-                                        )}
-                                      </FormControl>
-                                    ))}
-                                  <div className="mt-4">
-                                    <strong>Date:</strong>{" "}
-                                    {new Date(
-                                      open.data.updatedAt
-                                    ).toLocaleString()}
-                                  </div>
-                                  {open.data.status !== "reject" && (
-                                    <>
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        mr={3}
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                      <Button
-                                        colorScheme="blue"
-                                        className="buttonss mt-3"
-                                        mr={3}
-                                        style={{ backgroundColor: "#b19552" }}
-                                        onClick={() => {
-                                          onOpensGuarantor();
-                                          handleClick(open);
-                                        }}
-                                      >
-                                        Add
-                                      </Button>
-                                    </>
-                                  )}
-
-                                  {open.data.status === "reject" &&
-                                    open.data.statusMessage && (
-                                      <div
-                                        className="status-message mt-3"
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        <p style={{ marginRight: "10px" }}>
-                                          Reject Message:{" "}
-                                          <span style={{ color: "red" }}>
-                                            {open.data.statusMessage}
-                                          </span>
-                                        </p>
-                                        <IconButton
-                                          icon={<Icon as={FaUndo} />}
-                                          onClick={handleReverse}
-                                          colorScheme="blue"
-                                          className="buttonss mt-3"
-                                          style={{ backgroundColor: "#007bff" }}
-                                          aria-label="Reverse"
-                                        />
+                                            </FormControl>
+                                          </>
+                                        ))}
+                                      <div className="mt-4">
+                                        <strong>Date:</strong>{" "}
+                                        {new Date(
+                                          open.data.updatedAt
+                                        ).toLocaleString()}
                                       </div>
-                                    )}
+                                      {open.data.status !== "reject" && (
+                                        <>
+                                          <Button
+                                            colorScheme="blue"
+                                            className="mt-3"
+                                            type="submit"
+                                            mr={3}
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                          >
+                                            Submit
+                                          </Button>
+                                          <Button
+                                            colorScheme="blue"
+                                            className="buttonss mt-3"
+                                            mr={3}
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                            onClick={() => {
+                                              onOpensGuarantor();
+                                              handleClick(open);
+                                            }}
+                                          >
+                                            Add
+                                          </Button>
+                                        </>
+                                      )}
 
-                                  {open.data.status !== "reject" && (
-                                    <Button
-                                      colorScheme="red"
-                                      className="buttonss mt-3"
-                                      style={{ backgroundColor: "#FF0000" }}
-                                      onClick={handleReject}
-                                    >
-                                      Reject
-                                    </Button>
-                                  )}
-                                </Form>
+                                      {open.data.status === "reject" &&
+                                        open.data.statusMessage && (
+                                          <div
+                                            className="status-message mt-3"
+                                            style={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <p style={{ marginRight: "10px" }}>
+                                              Reject Message:{" "}
+                                              <span style={{ color: "red" }}>
+                                                {open.data.statusMessage}
+                                              </span>
+                                            </p>
+                                            <IconButton
+                                              icon={<Icon as={FaUndo} />}
+                                              onClick={handleReverse}
+                                              colorScheme="blue"
+                                              className="buttonss mt-3"
+                                              style={{
+                                                backgroundColor: "#007bff",
+                                              }}
+                                              aria-label="Reverse"
+                                            />
+                                          </div>
+                                        )}
+
+                                      {open.data.status !== "reject" && (
+                                        <Button
+                                          colorScheme="red"
+                                          className="buttonss mt-3"
+                                          style={{ backgroundColor: "#FF0000" }}
+                                          onClick={handleReject}
+                                        >
+                                          Reject
+                                        </Button>
+                                      )}
+                                    </Form>
+                                  </div>
+                                </div>
                               )}
 
                             {open.is &&
@@ -1432,92 +1593,69 @@ function DetailScFilePage() {
                               open.data.guarantorSteps &&
                               open.data.guarantorSteps.map(
                                 (guarantor, dataIndex) => (
-                                  <Form
-                                    onSubmit={(e) => {
-                                      e.preventDefault();
-                                      submitGuarantorStep();
+                                  <div
+                                    className="card shadow-sm mb-4"
+                                    style={{
+                                      marginTop: "30px",
+                                      marginLeft: "40px",
                                     }}
-                                    style={{ marginTop: "20px" }}
-                                    key={dataIndex}
                                   >
-                                    <p>
-                                      {guarantor.username} {guarantor.loan_step}
-                                    </p>
-                                    <AiOutlineClose
-                                      onClick={() =>
-                                        removeGuarantorStep(dataIndex, "open")
-                                      }
-                                      style={{
-                                        cursor: "pointer",
-                                        color: "red",
-                                        marginLeft: "10px",
-                                      }}
-                                    />
-
-                                    {guarantor.inputs?.map(
-                                      (input, inputIndex) => (
-                                        <FormControl
-                                          key={`${dataIndex}-${inputIndex}`}
-                                          id="step"
-                                          className="d-flex justify-content-between align-items-center mt-4"
-                                        >
-                                          {input.type === "input" ? (
-                                            <div>
-                                              <label>{input.label}</label>
-                                              <Input
-                                                name="step"
-                                                value={input.value}
-                                                placeholder={`Enter ${input.label}`}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    e,
-                                                    inputIndex,
-                                                    dataIndex
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          ) : input.type === "checkbox" ? (
-                                            <div>
-                                              <input
-                                                type="checkbox"
-                                                checked={input.value}
-                                                required={input.is_required}
-                                                onChange={(e) =>
-                                                  handleChange(
-                                                    e,
-                                                    inputIndex,
-                                                    dataIndex
-                                                  )
-                                                }
-                                              />{" "}
-                                              {input.label}
-                                            </div>
-                                          ) : (
-                                            input.type === "file" && (
-                                              <div>
-                                                <label
-                                                  style={{
-                                                    display: "block",
-                                                    marginBottom: "8px",
-                                                  }}
-                                                >
-                                                  {input.label}
-                                                </label>
-                                                <label
-                                                  style={{
-                                                    display: "inline-block",
-                                                    padding: "5px 20px",
-                                                    backgroundColor:
-                                                      "rgb(65, 70, 80)",
-                                                    color: "white",
-                                                    borderRadius: "5px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                >
-                                                  Choose File
+                                    <div className="card-body">
+                                      <Form
+                                        onSubmit={(e) => {
+                                          e.preventDefault();
+                                          submitGuarantorStep();
+                                        }}
+                                        // style={{ marginTop: "20px" }}
+                                        key={dataIndex}
+                                      >
+                                        <Flex alignItems="center">
+                                          <p>
+                                            {guarantor.username}{" "}
+                                            {guarantor.loan_step}
+                                          </p>
+                                          <AiOutlineClose
+                                            onClick={() =>
+                                              removeGuarantorStep(
+                                                dataIndex,
+                                                "open"
+                                              )
+                                            }
+                                            style={{
+                                              cursor: "pointer",
+                                              color: "red",
+                                              marginLeft: "10px",
+                                            }}
+                                          />
+                                        </Flex>
+                                        {guarantor.inputs?.map(
+                                          (input, inputIndex) => (
+                                            <FormControl
+                                              key={`${dataIndex}-${inputIndex}`}
+                                              id="step"
+                                              className="d-flex justify-content-between align-items-center mt-4"
+                                            >
+                                              {input.type === "input" ? (
+                                                <div>
+                                                  <label>{input.label}</label>
                                                   <Input
-                                                    type="file"
+                                                    name="step"
+                                                    value={input.value}
+                                                    placeholder={`Enter ${input.label}`}
+                                                    onChange={(e) =>
+                                                      handleChange(
+                                                        e,
+                                                        inputIndex,
+                                                        dataIndex
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              ) : input.type === "checkbox" ? (
+                                                <div>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={input.value}
                                                     required={input.is_required}
                                                     onChange={(e) =>
                                                       handleChange(
@@ -1526,107 +1664,158 @@ function DetailScFilePage() {
                                                         dataIndex
                                                       )
                                                     }
-                                                    style={{
-                                                      display: "none",
-                                                    }}
-                                                  />
-                                                </label>
-                                                {input.value && (
-                                                  <>
-                                                    {input.value.endsWith(
-                                                      ".pdf"
-                                                    ) ? (
-                                                      <div
+                                                  />{" "}
+                                                  {input.label}
+                                                </div>
+                                              ) : (
+                                                input.type === "file" && (
+                                                  <div>
+                                                    <label
+                                                      style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                      }}
+                                                    >
+                                                      {input.label}
+                                                    </label>
+                                                    <label
+                                                      style={{
+                                                        display: "inline-block",
+                                                        padding: "5px 20px",
+                                                        backgroundColor:
+                                                          "rgb(65, 70, 80)",
+                                                        color: "white",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                      }}
+                                                    >
+                                                      Choose File
+                                                      <Input
+                                                        type="file"
+                                                        required={
+                                                          input.is_required
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleChange(
+                                                            e,
+                                                            inputIndex,
+                                                            dataIndex
+                                                          )
+                                                        }
                                                         style={{
-                                                          position: "relative",
-                                                          width: "100%",
-                                                          height: "260px",
-                                                          marginTop: "10px",
+                                                          display: "none",
                                                         }}
-                                                      >
-                                                        <iframe
-                                                          src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
-                                                          type="application/pdf"
-                                                          className="pdf-viewer"
-                                                          height="100%"
-                                                          width="100%"
-                                                          title="PDF Viewer"
-                                                        />
-                                                        <div className="pdf-overlay">
-                                                          <FontAwesomeIcon
-                                                            icon={faMaximize}
+                                                      />
+                                                    </label>
+                                                    {input.value && (
+                                                      <>
+                                                        {input.value.endsWith(
+                                                          ".pdf"
+                                                        ) ? (
+                                                          <div
+                                                            style={{
+                                                              position:
+                                                                "relative",
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              marginTop: "10px",
+                                                            }}
+                                                          >
+                                                            <iframe
+                                                              src={`https://cdn.savajcapital.com/cdn/files/${input.value}#toolbar=0`}
+                                                              type="application/pdf"
+                                                              className="pdf-viewer"
+                                                              height="100%"
+                                                              width="100%"
+                                                              title="PDF Viewer"
+                                                            />
+                                                            <div className="pdf-overlay">
+                                                              <FontAwesomeIcon
+                                                                icon={
+                                                                  faMaximize
+                                                                }
+                                                                onClick={() =>
+                                                                  handleFileClick(
+                                                                    {
+                                                                      file_path:
+                                                                        input.value,
+                                                                    }
+                                                                  )
+                                                                }
+                                                                style={{
+                                                                  position:
+                                                                    "absolute",
+                                                                  bottom: "8px",
+                                                                  right: "25px",
+                                                                  color:
+                                                                    "black",
+                                                                  cursor:
+                                                                    "pointer",
+                                                                }}
+                                                              />
+                                                            </div>
+                                                          </div>
+                                                        ) : input.value.match(
+                                                            /\.(jpeg|jpg|gif|png)$/
+                                                          ) ? (
+                                                          <img
+                                                            src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
+                                                            alt="Uploaded"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "260px",
+                                                              borderRadius:
+                                                                "12px",
+                                                              boxShadow:
+                                                                "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                              cursor: "pointer",
+                                                              marginTop: "10px",
+                                                            }}
+                                                            className="details-image"
                                                             onClick={() =>
                                                               handleFileClick({
                                                                 file_path:
                                                                   input.value,
                                                               })
                                                             }
-                                                            style={{
-                                                              position:
-                                                                "absolute",
-                                                              bottom: "8px",
-                                                              right: "25px",
-                                                              color: "black",
-                                                              cursor: "pointer",
-                                                            }}
                                                           />
-                                                        </div>
-                                                      </div>
-                                                    ) : input.value.match(
-                                                        /\.(jpeg|jpg|gif|png)$/
-                                                      ) ? (
-                                                      <img
-                                                        src={`https://cdn.savajcapital.com/cdn/files/${input.value}`}
-                                                        alt="Uploaded"
-                                                        style={{
-                                                          width: "100%",
-                                                          height: "260px",
-                                                          borderRadius: "12px",
-                                                          boxShadow:
-                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                          cursor: "pointer",
-                                                          marginTop: "10px",
-                                                        }}
-                                                        className="details-image"
-                                                        onClick={() =>
-                                                          handleFileClick({
-                                                            file_path:
-                                                              input.value,
-                                                          })
-                                                        }
-                                                      />
-                                                    ) : (
-                                                      <div>
-                                                        No preview available for
-                                                        this file type
-                                                      </div>
+                                                        ) : (
+                                                          <div>
+                                                            No preview available
+                                                            for this file type
+                                                          </div>
+                                                        )}
+                                                      </>
                                                     )}
-                                                  </>
-                                                )}
-                                              </div>
-                                            )
-                                          )}
-                                        </FormControl>
-                                      )
-                                    )}
-                                    <div className="mt-4">
-                                      <strong>Date:</strong>{" "}
-                                      {new Date(
-                                        guarantor.updatedAt
-                                      ).toLocaleString()}
+                                                  </div>
+                                                )
+                                              )}
+                                            </FormControl>
+                                          )
+                                        )}
+                                        <div className="mt-4">
+                                          <strong>Date:</strong>{" "}
+                                          {new Date(
+                                            guarantor.updatedAt
+                                          ).toLocaleString()}
+                                        </div>
+                                        {dataIndex ===
+                                          open.data.guarantorSteps.length -
+                                            1 && (
+                                          <Button
+                                            colorScheme="blue"
+                                            className="mt-3"
+                                            type="submit"
+                                            style={{
+                                              backgroundColor: "#b19552",
+                                            }}
+                                          >
+                                            Submit
+                                          </Button>
+                                        )}
+                                      </Form>
                                     </div>
-                                    {dataIndex ===
-                                      open.data.guarantorSteps.length - 1 && (
-                                      <Button
-                                        colorScheme="blue"
-                                        className="mt-3"
-                                        type="submit"
-                                        style={{ backgroundColor: "#b19552" }}
-                                      >
-                                        Submit
-                                      </Button>
-                                    )}
-                                  </Form>
+                                  </div>
                                 )
                               )}
 
@@ -1735,7 +1924,7 @@ function DetailScFilePage() {
                           {open.is &&
                             open.data.loan_step_id === "1715348523661" && (
                               <div className="row">
-                                <div className="col px-5 pt-3">
+                                <div className="col px-5">
                                   {open.data?.pendingData &&
                                     open.data.pendingData.length > 0 && (
                                       <React.Fragment>
@@ -1803,203 +1992,239 @@ function DetailScFilePage() {
                                         )}
                                       </React.Fragment>
                                     )}
-                                  {fileData?.documents && (
-                                    <div className="mt-3">
-                                      <nav
-                                        aria-label="breadcrumb"
-                                        className="my-3"
-                                        style={{ overflow: "auto" }}
-                                      >
-                                        <h2
-                                          className="my-4"
-                                          style={{
-                                            fontSize: "18px",
-                                            fontWeight: 700,
-                                            color: "#333",
-                                          }}
+                                  <div>
+                                    {fileData?.documents && (
+                                      <div className="mt-3">
+                                        <nav
+                                          aria-label="breadcrumb"
+                                          className="my-3"
+                                          style={{ overflow: "auto" }}
                                         >
-                                          Uploaded Documents
-                                        </h2>
-                                        <ul className="breadcrumb">
-                                          {Object.entries(
-                                            fileData?.documents
-                                          ).map(([title, files], index) => (
-                                            <li
-                                              key={title}
-                                              className="breadcrumb-item"
-                                            >
-                                              <a
-                                                href={`#${title}`}
-                                                onClick={() =>
-                                                  handleAccordionClickDocument(
-                                                    index
-                                                  )
-                                                }
-                                                style={{ color: "#414650" }}
-                                              >
-                                                {title} documents
-                                              </a>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </nav>
-
-                                      <div>
-                                        {Object.entries(
-                                          fileData?.documents
-                                        ).map(([title, files], index) => (
-                                          <div
-                                            className="accordion my-3"
-                                            id={`accordionPanelsStayOpenExample-${index}`}
-                                            key={index}
+                                          <h2
+                                            className="my-4"
+                                            style={{
+                                              fontSize: "18px",
+                                              fontWeight: 700,
+                                              color: "#333",
+                                            }}
                                           >
-                                            <div
-                                              className={`accordion-item ${
-                                                index === openPanelIndex
-                                                  ? "show"
-                                                  : ""
-                                              }`}
-                                              key={index}
-                                            >
-                                              <h2
-                                                className="accordion-header"
-                                                id={`panelsStayOpen-heading-${index}`}
+                                            Uploaded Documents
+                                          </h2>
+                                          <ul className="breadcrumb">
+                                            {Object.entries(
+                                              fileData.documents
+                                            ).map(([title, files], index) => (
+                                              <li
+                                                key={title}
+                                                className="breadcrumb-item"
                                               >
-                                                <button
-                                                  className="accordion-button"
-                                                  type="button"
+                                                <a
+                                                  href={`#${title}`}
                                                   onClick={() =>
-                                                    handleAccordionClickDocument(
-                                                      index
-                                                    )
+                                                    handleFolderClick({
+                                                      title,
+                                                      files,
+                                                    })
                                                   }
-                                                  aria-expanded={
-                                                    index === openPanelIndex
-                                                      ? "true"
-                                                      : "false"
-                                                  }
-                                                  style={{
-                                                    color: "white",
-                                                    fontWeight: 700,
-                                                    fontSize: "14px",
-                                                    backgroundColor: "#414650",
-                                                    justifyContent:
-                                                      "space-between",
-                                                  }}
-                                                  id={title}
+                                                  style={{ color: "#414650" }}
                                                 >
                                                   {title} documents
-                                                  <FontAwesomeIcon
-                                                    icon={
-                                                      index === openPanelIndex
-                                                        ? faChevronUp
-                                                        : faChevronDown
-                                                    }
-                                                  />
-                                                </button>
-                                              </h2>
-                                              <div
-                                                id={`panelsStayOpen-collapse-${index}`}
-                                                className={`accordion-collapse collapse ${
-                                                  index === openPanelIndex
-                                                    ? "show"
-                                                    : ""
-                                                }`}
-                                                aria-labelledby={`panelsStayOpen-heading-${index}`}
-                                              >
-                                                <div
-                                                  className="accordion-body"
-                                                  style={{
-                                                    display: "flex",
-                                                    flexWrap: "wrap",
-                                                    gap: "15px",
-                                                  }}
+                                                </a>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </nav>
+
+                                        {selectedFolder ? (
+                                          <div>
+                                            <Box>
+                                              <Flex alignItems="center" mb={4}>
+                                                <IconButton
+                                                  icon={<ArrowBackIcon />}
+                                                  aria-label="Back"
+                                                  // colorScheme="teal"
+                                                  onClick={handleBackClick}
+                                                  mr={4}
+                                                />
+                                                <Text
+                                                  fontSize="24px"
+                                                  fontWeight="bold"
+                                                  color="#333"
                                                 >
-                                                  {files.map((file, idx) => (
-                                                    <div
-                                                      key={idx}
-                                                      className="image-responsive"
-                                                      style={{ width: "45%" }}
-                                                    >
-                                                      <p className="mb-3">
-                                                        {file.document_name}
-                                                      </p>
-                                                      {file.file_path.endsWith(
-                                                        ".pdf"
-                                                      ) ? (
-                                                        <div
-                                                          style={{
-                                                            position:
-                                                              "relative",
-                                                            width: "100%",
-                                                            height: "260px",
-                                                          }}
-                                                        >
-                                                          <iframe
-                                                            src={`${basePath}${file.file_path}`}
-                                                            type="application/pdf"
-                                                            className="pdf-viewer"
-                                                            height="100%"
-                                                            width="100%"
-                                                            title="PDF Viewer"
-                                                          />
-                                                          <div className="pdf-overlay">
-                                                            <FontAwesomeIcon
-                                                              icon={faMaximize}
-                                                              onClick={() =>
-                                                                handleFileClick(
-                                                                  file
-                                                                )
-                                                              }
-                                                              style={{
-                                                                position:
-                                                                  "absolute",
-                                                                bottom: "8px",
-                                                                right: "25px",
-                                                                color: "black",
-                                                                cursor:
-                                                                  "pointer",
-                                                              }}
-                                                            />
-                                                          </div>
-                                                        </div>
-                                                      ) : (
-                                                        <img
+                                                  {selectedFolder.title}{" "}
+                                                  documents
+                                                </Text>
+                                              </Flex>
+                                            </Box>
+                                            <div
+                                              className="accordion-body"
+                                              style={{
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                                gap: "15px",
+                                              }}
+                                            >
+                                              {selectedFolder.files.map(
+                                                (file, idx) => (
+                                                  <div
+                                                    key={idx}
+                                                    className="image-responsive"
+                                                    style={{ width: "45%" }}
+                                                  >
+                                                    <p className="mb-3">
+                                                      {file.document_name}
+                                                    </p>
+                                                    {file.file_path.endsWith(
+                                                      ".pdf"
+                                                    ) ? (
+                                                      <div
+                                                        style={{
+                                                          position: "relative",
+                                                          width: "100%",
+                                                          height: "260px",
+                                                        }}
+                                                      >
+                                                        <iframe
                                                           src={`${basePath}${file.file_path}`}
-                                                          alt={
-                                                            file.loan_document_id
-                                                          }
+                                                          type="application/pdf"
+                                                          className="pdf-viewer"
+                                                          height="100%"
+                                                          width="100%"
+                                                          title="PDF Viewer"
                                                           style={{
-                                                            width: "100%",
-                                                            height: "260px",
                                                             borderRadius:
                                                               "12px",
                                                             boxShadow:
                                                               "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                                                            cursor: "pointer",
                                                           }}
-                                                          className="details-image"
-                                                          onClick={() =>
-                                                            handleFileClick(
-                                                              file
-                                                            )
-                                                          }
                                                         />
-                                                      )}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
+                                                        <div className="pdf-overlay">
+                                                          <FontAwesomeIcon
+                                                            icon={faMaximize}
+                                                            onClick={() =>
+                                                              handleFileClick(
+                                                                file
+                                                              )
+                                                            }
+                                                            style={{
+                                                              position:
+                                                                "absolute",
+                                                              bottom: "8px",
+                                                              right: "25px",
+                                                              color: "black",
+                                                              cursor: "pointer",
+                                                            }}
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                    ) : (
+                                                      <img
+                                                        src={`${basePath}${file.file_path}`}
+                                                        alt={
+                                                          file.loan_document_id
+                                                        }
+                                                        style={{
+                                                          width: "100%",
+                                                          height: "260px",
+                                                          borderRadius: "12px",
+                                                          boxShadow:
+                                                            "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                          cursor: "pointer",
+                                                        }}
+                                                        className="details-image"
+                                                        onClick={() =>
+                                                          handleFileClick(file)
+                                                        }
+                                                      />
+                                                    )}
+                                                  </div>
+                                                )
+                                              )}
                                             </div>
                                           </div>
-                                        ))}
+                                        ) : (
+                                          <div
+                                            className="folder-view"
+                                            style={{
+                                              display: "flex",
+                                              flexWrap: "wrap",
+                                              gap: "20px",
+                                            }}
+                                          >
+                                            {Object.entries(
+                                              fileData.documents
+                                            ).map(([title, files], index) => (
+                                              <Box
+                                                key={index}
+                                                borderWidth="1px"
+                                                borderRadius="lg"
+                                                overflow="hidden"
+                                                p="6"
+                                                textAlign="center"
+                                                boxShadow="md"
+                                                transition="transform 0.2s"
+                                                _hover={{
+                                                  transform: "scale(1.05)",
+                                                  backgroundColor: "#f0f4f7",
+                                                }}
+                                                position="relative"
+                                                width="200px"
+                                                m="10px"
+                                                onClick={() =>
+                                                  handleFolderClick({
+                                                    title,
+                                                    files,
+                                                  })
+                                                }
+                                                cursor="pointer"
+                                              >
+                                                <Icon
+                                                  as={FaFolder}
+                                                  w={12}
+                                                  h={12}
+                                                  color="gray.400"
+                                                  mb={4}
+                                                />
+                                                <Text
+                                                  fontSize="xl"
+                                                  fontWeight="bold"
+                                                >
+                                                  {title}
+                                                </Text>
+                                                <Text
+                                                  fontSize="sm"
+                                                  color="gray.500"
+                                                >
+                                                  {files.length} files
+                                                </Text>
+                                                <Tooltip
+                                                  label="Info"
+                                                  aria-label="Info Tooltip"
+                                                >
+                                                  <Box
+                                                    position="absolute"
+                                                    top="2"
+                                                    right="2"
+                                                  >
+                                                    <Icon
+                                                      as={FaInfoCircle}
+                                                      w={5}
+                                                      h={5}
+                                                      color="gray.400"
+                                                    />
+                                                  </Box>
+                                                </Tooltip>
+                                              </Box>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  )}
-                                  {!open.data?.pendingData ||
+                                    )}
+                                  </div>
+                                  {/* {!open.data?.pendingData ||
                                     (open.data.pendingData.length === 0 && (
                                       <p>No pending documents available.</p>
-                                    ))}
+                                    ))} */}
                                 </div>
                               </div>
                             )}
@@ -2373,20 +2598,20 @@ function DetailScFilePage() {
                       border: "1px solid #ccc",
                       borderRadius: "8px",
                       backgroundColor: log.role?.startsWith("bankuser")
-                        ? "#f0f5ff" // Light red background for bankuser logs
+                        ? "#f0f5ff"
                         : log.role === "superadmin" ||
                           log.role?.startsWith("savajuser")
-                        ? "#f0f5ff" // Light blue background for other roles
-                        : "#fff", // Default white background
+                        ? "#f0f5ff"
+                        : "#fff",
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                      transition: "transform 0.2s",
+                      // transition: "transform 0.2s",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.transform = "scale(1.02)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.transform = "scale(1)")
-                    }
+                    // onMouseEnter={(e) =>
+                    //   (e.currentTarget.style.transform = "scale(1.02)")
+                    // }
+                    // onMouseLeave={(e) =>
+                    //   (e.currentTarget.style.transform = "scale(1)")
+                    // }
                   >
                     <div>
                       <strong>
@@ -2395,7 +2620,7 @@ function DetailScFilePage() {
                           : log.role?.startsWith("savajuser")
                           ? `${log.role} added this log:`
                           : log.role?.startsWith("bankuser")
-                          ? `${log.role} added this log:` // Display specific message for bankuser
+                          ? `${log.role} added this log:`
                           : ""}
                       </strong>{" "}
                       {log.message}

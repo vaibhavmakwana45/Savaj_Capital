@@ -516,9 +516,11 @@ function Files() {
           response.data.message || "Failed to update the status."
         );
       }
+      fetchData();
     } catch (error) {
       console.error("Error updating file status:", error);
-      toast.error("File status could not be updated: " + error.message);
+      // toast.error("File status could not be updated: " + error.message);
+      fetchData();
     } finally {
       setIsUpdateDialogOpen(false);
       setSelecteLoanStatusId("");
