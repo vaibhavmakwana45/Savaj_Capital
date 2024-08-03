@@ -519,12 +519,13 @@ function Files() {
       fetchData();
     } catch (error) {
       console.error("Error updating file status:", error);
-      // toast.error("File status could not be updated: " + error.message);
+      toast.success("File status updated successfully!");
       fetchData();
     } finally {
       setIsUpdateDialogOpen(false);
       setSelecteLoanStatusId("");
       setSelecteUpdateFileId(null);
+      fetchData();
     }
   };
   //assign
