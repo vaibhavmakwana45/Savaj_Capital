@@ -8,6 +8,8 @@ import {
   useColorMode,
   useColorModeValue,
   Spinner,
+  Icon,
+  Box,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import IconBox from "components/Icons/IconBox";
@@ -21,7 +23,8 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import AxiosInstance from "config/AxiosInstance";
 import Loader from "react-js-loader";
-
+import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { FiFile } from "react-icons/fi"; // Import an appropriate file icon
 export default function Dashboard() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const history = useHistory();
@@ -93,50 +96,32 @@ export default function Dashboard() {
     fetchLoans();
   }, []);
 
+  const topBgColor = useColorModeValue("#8c6d62", "#8c6d62");
+  const statusBgColor = "#ffffff";
+  const bottomBgColor = useColorModeValue("#f4f1e4", "#333");
+  const borderColor = useColorModeValue("#b19552", "#d4c6a5");
+
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
       <SimpleGrid
-        columns={{ base: 1, sm: 1, md: 2, xl: 4 }}
+        columns={{ base: 1, sm: 1, md: 2, xl: 5 }}
         spacing="24px"
         mb="20px"
       >
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#E0E9FF",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Branch (Savaj Capital)
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.savajcapitalbrnach}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -146,47 +131,45 @@ export default function Dashboard() {
               >
                 <GlobeIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold">
+                Total Branch
+              </StatLabel>
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold">
+                (Savaj Capital)
+              </StatLabel>
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.savajcapitalbrnach}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
-
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#E4FFE0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Savaj User
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.savajuser}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -196,46 +179,45 @@ export default function Dashboard() {
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold">
+                Total Savaj
+              </StatLabel>
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold">
+                Capital User
+              </StatLabel>
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.savajcapitalbrnach}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#FFE0E0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/bank")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Bank
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.banks}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -245,46 +227,43 @@ export default function Dashboard() {
               >
                 <WalletIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Bank
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.banks}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#FFFCE0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/bank")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Bank User
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.bankuser}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -294,46 +273,44 @@ export default function Dashboard() {
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Bank Users
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.bankuser}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
+
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#FFFCE0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/alluser")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Customer
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.users}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -343,46 +320,43 @@ export default function Dashboard() {
               >
                 <PersonIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Customer
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.users}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#E0E9FF",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Savaj User Assign File
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.savajuserassignfile}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -392,47 +366,43 @@ export default function Dashboard() {
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Savaj User Assign File
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.savajuserassignfile}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
-
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#E4FFE0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
-          onClick={() => history.push("/superadmin/bank")}
+          onClick={() => history.push("/superadmin/savajcapitalbranch")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Bank User Assign File
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.bankuserassignfile}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -442,47 +412,44 @@ export default function Dashboard() {
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Bank User Assign File
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.bankuserassignfile}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
 
         <Card
-          minH="125px"
+          minH="169px"
+          minW="200px"
           style={{
             cursor: "pointer",
             border: "1px solid #212529",
-            background: "#d4c6a5",
+            background: "#FFE0E0",
+            borderRadius: "16px 16px 16px 16px",
+            position: "relative",
           }}
           onClick={() => history.push("/superadmin/filetable")}
         >
-          <Flex direction="column">
-            <Flex
-              flexDirection="row"
-              align="center"
-              justify="center"
-              w="100%"
-              mb="25px"
-            >
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="xs"
-                  color="#212529"
-                  fontWeight="bold"
-                  textTransform="uppercase"
-                >
-                  Total Files
-                </StatLabel>
-                <Flex>
-                  <StatNumber
-                    fontSize="lg"
-                    color={textColor}
-                    fontWeight="bold"
-                    style={{ paddingTop: "10px" }}
-                  >
-                    {dataCount.files}
-                  </StatNumber>
-                </Flex>
-              </Stat>
+          <Flex direction="column" p="0px">
+            <Flex flexDirection="row" justify="space-between" align="center">
               <IconBox
                 borderRadius="50%"
                 as="box"
@@ -492,12 +459,32 @@ export default function Dashboard() {
               >
                 <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
+              <Box
+                borderRadius="50%"
+                border="1px solid black"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                h="24px"
+                w="24px"
+              >
+                <Icon as={ArrowForwardIcon} h={3} w={3} color="black" />
+              </Box>
             </Flex>
+            <Stat mt="10px">
+              <StatLabel fontSize="md" color="#212529" fontWeight="bold" pb="6">
+                Total Files
+              </StatLabel>
+
+              <StatNumber fontSize="2xl" color={textColor} fontWeight="bold">
+                {dataCount.files}
+              </StatNumber>
+            </Stat>
           </Flex>
         </Card>
       </SimpleGrid>
       <SimpleGrid
-        columns={{ base: 1, sm: 1, md: 2, xl: 4 }}
+        columns={{ base: 1, sm: 1, md: 2, xl: 5 }}
         spacing="24px"
         mb="20px"
         justifyItems="center"
@@ -515,23 +502,24 @@ export default function Dashboard() {
             <Loader
               type="spinner-circle"
               bgColor={"#b19552"}
-              color={"#5a5a5a"}
+              color={textColor}
               size={50}
             />
           </Flex>
         ) : (
           loans.map((loan) => (
-            <Card
+            <Box
               key={loan.loan_id}
-              minH="125px"
-              style={{
-                cursor: "pointer",
-                cursor: "pointer",
-                border: `1px solid ${useColorModeValue("#b19552", "#d4c6a5")}`,
-                background: useColorModeValue("#f4f1e4", "#333"),
-              }}
+              minH="300px"
+              maxH="300px"
+              minW="230px"
+              maxW="230px"
+              borderRadius="15px"
+              overflow="hidden"
+              border={`1px solid ${useColorModeValue("#b19552", "#d4c6a5")}`}
+              cursor="pointer"
               onClick={() =>
-                history.push(`/superadmin/filetable`, {
+                history.push("/superadmin/filetable", {
                   state: {
                     loan: loan.loan,
                     loan_id: loan.loan_id,
@@ -539,76 +527,87 @@ export default function Dashboard() {
                   },
                 })
               }
+              display="flex"
+              flexDirection="column"
+              justifyContent="space-between"
             >
-              <Flex direction="column">
-                <Flex
-                  flexDirection="row"
-                  align="center"
-                  justify="center"
-                  w="100%"
-                  mb="25px"
-                >
-                  <Stat me="auto">
-                    <StatLabel
-                      fontSize="xs"
-                      color="#5a5a5a"
-                      fontWeight="bold"
-                      textTransform="uppercase"
-                    >
+              <Box bg="#B3954F" p="15px" textAlign="center" flexShrink="0">
+                <Flex alignItems="center">
+                  <Box
+                    borderRadius="50%"
+                    bg="#fff"
+                    h="45px"
+                    w="45px"
+                    display="inline-flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    mr="10px"
+                  >
+                    <FiFile
+                      size="24px"
+                      color={useColorModeValue("#8c6d62", "#8c6d62")}
+                    />
+                  </Box>
+                  <Stat>
+                    <StatLabel fontSize="sm" color="#fff" fontWeight="bold">
                       {loan.loanType !== "Unknown"
                         ? `${loan.loan} (${loan.loanType})`
                         : loan.loan}
                     </StatLabel>
-                    <Flex>
-                      <StatNumber
-                        fontSize="lg"
-                        color={textColor}
-                        fontWeight="bold"
-                        style={{ paddingTop: "10px", paddingBottom: "10px" }}
-                      >
-                        {loan.fileCount} files
-                      </StatNumber>
-                    </Flex>
-                    <Text as="span" color="#5a5a5a" fontWeight="bold">
-                      ₹
-                      {totalAmounts[loan.loan_id]?.[
-                        loan.loantype_id || "none"
-                      ] || 0}
-                    </Text>
                   </Stat>
-                  <IconBox
-                    borderRadius="50%"
-                    as="box"
-                    h={"45px"}
-                    w={"45px"}
-                    bg={"#8c6d62"}
-                  >
-                    <DocumentIcon h={"24px"} w={"24px"} color={iconBoxInside} />
-                  </IconBox>
                 </Flex>
+              </Box>
 
-                {/* Display counts for all statuses */}
-                <Flex mt="1px" wrap="wrap">
+              <Box bg="#ffffff" p="15px" flexGrow="1" overflowY="auto">
+                <Flex direction="column" width="100%">
                   {Object.entries(loan.statusCounts)
                     .filter(([_, { count }]) => count > 0)
-                    .map(([status, { count, color }]) => (
+                    .map(([status, { count, color }], index) => (
                       <Flex
                         key={status}
-                        direction="column"
+                        direction="row"
                         align="center"
-                        mr="5px"
+                        mb="5px"
+                        width="100%"
+                        justifyContent="space-between"
                       >
-                        <Text fontSize="sm" fontWeight="bold" color={color}>
-                          {status}
-                        </Text>
-                        <Text fontSize="md" color="#5a5a5a">
+                        <Flex align="center">
+                          <Box
+                            bg={color}
+                            borderRadius="50%"
+                            h="10px"
+                            w="10px"
+                            mr="8px"
+                          />
+                          <Text
+                            fontSize="sm"
+                            fontWeight="bold"
+                            color={textColor}
+                          >
+                            {status}
+                          </Text>
+                        </Flex>
+                        <Text fontSize="sm" color={textColor}>
                           {count}
                         </Text>
                       </Flex>
                     ))}
                 </Flex>
-              </Flex>
-            </Card>
+              </Box>
+
+              <Box bg="#B3954F" p="10px" textAlign="center" flexShrink="0">
+                <Flex alignItems="center" justifyContent="space-between">
+                  <Text fontSize="sm" color="#fff" fontWeight="bold">
+                    {loan.fileCount} Files
+                  </Text>
+                  <Text fontSize="sm" color="#fff" fontWeight="bold">
+                    ₹{" "}
+                    {totalAmounts[loan.loan_id]?.[loan.loantype_id || "none"] ||
+                      0}
+                  </Text>
+                </Flex>
+              </Box>
+            </Box>
           ))
         )}
       </SimpleGrid>
