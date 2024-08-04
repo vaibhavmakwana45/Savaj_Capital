@@ -510,10 +510,6 @@ export default function Dashboard() {
           loans.map((loan) => (
             <Box
               key={loan.loan_id}
-              minH="300px"
-              maxH="300px"
-              minW="230px"
-              maxW="230px"
               borderRadius="15px"
               overflow="hidden"
               border={`1px solid ${useColorModeValue("#b19552", "#d4c6a5")}`}
@@ -530,6 +526,10 @@ export default function Dashboard() {
               display="flex"
               flexDirection="column"
               justifyContent="space-between"
+              minHeight="300px" // Set a minimum height
+              height="100%" // Ensures the box takes full height in the grid
+              width="100%" // Ensures the box takes full width in the grid
+              maxWidth="250px" // Set a maximum width
             >
               <Box bg="#B3954F" p="15px" textAlign="center" flexShrink="0">
                 <Flex alignItems="center">
@@ -558,38 +558,43 @@ export default function Dashboard() {
                 </Flex>
               </Box>
 
-              <Box bg="#ffffff" p="15px" flexGrow="1" overflowY="auto">
+              <Box
+                bg="#ffffff"
+                p="15px"
+                flexGrow="1"
+                overflowY="auto"
+                minHeight="150px" // Set a minimum height for the content area
+              >
                 <Flex direction="column" width="100%">
                   {Object.entries(loan.statusCounts)
                     .filter(([_, { count }]) => count > 0)
-                    .map(([status, { count, color }], index) => (
+                    .map(([status, { count, color }]) => (
                       <Flex
                         key={status}
                         direction="row"
                         align="center"
                         mb="5px"
                         width="100%"
-                        justifyContent="space-between"
                       >
                         <Flex align="center">
                           <Box
                             bg={color}
                             borderRadius="50%"
-                            h="10px"
-                            w="10px"
+                            h="20px"
+                            w="20px"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
                             mr="8px"
-                          />
-                          <Text
-                            fontSize="sm"
-                            fontWeight="bold"
-                            color={textColor}
                           >
+                            <Text fontSize="xs" color="#fff">
+                              {count}
+                            </Text>
+                          </Box>
+                          <Text fontSize="sm" fontWeight="bold" color={color}>
                             {status}
                           </Text>
                         </Flex>
-                        <Text fontSize="sm" color={textColor}>
-                          {count}
-                        </Text>
                       </Flex>
                     ))}
                 </Flex>
