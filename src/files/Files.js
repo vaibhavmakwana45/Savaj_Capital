@@ -848,7 +848,7 @@ function Files() {
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"
@@ -908,13 +908,13 @@ function Files() {
                         </Text>
                       </Flex>
                       {statusCounts && (
-                        <Flex wrap="wrap" mt="2">
+                        <Flex wrap="wrap" m="2">
                           {Object.keys(statusCounts).map((status) => (
                             <Text
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"

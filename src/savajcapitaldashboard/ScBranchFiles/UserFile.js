@@ -808,7 +808,7 @@ function UserFile() {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
           <CardHeader pb="4">
-          <Flex justifyContent="space-between" alignItems="center" pb="4">
+            <Flex justifyContent="space-between" alignItems="center" pb="4">
               <Box>
                 <Text fontSize="3xl" fontWeight="bold" mb="2">
                   {loan ? (
@@ -861,7 +861,7 @@ function UserFile() {
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"
@@ -927,7 +927,7 @@ function UserFile() {
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"

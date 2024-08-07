@@ -864,7 +864,7 @@ function AssignedBankUsers() {
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"
@@ -930,7 +930,7 @@ function AssignedBankUsers() {
                               key={status}
                               color={statusCounts[status]?.color || "gray.700"}
                               fontSize="lg"
-                              mr="3"
+                              m="1"
                               p="1"
                               borderRadius="md"
                               bg="gray.100"
